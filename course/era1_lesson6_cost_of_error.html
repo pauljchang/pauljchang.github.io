@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 1, Lesson 6 — The Cost of Error | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:       #0d1117;
+  --surface:  #161b27;
+  --s2:       #1a2035;
+  --border:   #1e2d40;
+  --text:     #e2e8f0;
+  --muted:    #64748b;
+  --muted2:   #334155;
+  --ac:       #f43f5e;
+  --ac-dim:   rgba(244,63,94,.10);
+  --ac-glow:  rgba(244,63,94,.30);
+  --green:    #4ade80;
+  --red:      #f87171;
+  --amber:    #f59e0b;
+  --sky:      #38bdf8;
+  --violet:   #8b5cf6;
+  --font:     'Outfit', sans-serif;
+  --mono:     'Space Mono', monospace;
+  --disp:     'Lora', serif;
+}
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 16px; line-height: 1.7; }
+
+.course-nav { position:sticky;top:0;z-index:100;background:rgba(13,17,23,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted); }
+.era-badge { background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em; }
+.wrap { max-width:960px;margin:0 auto;padding:0 32px 100px; }
+
+.hero { padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px; }
+.hero-meta { display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted); }
+.week-badge { background:var(--ac);color:#1a0008;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em; }
+.hero h1 { font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px; }
+.hero-sub { font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px; }
+.hero-timeline { display:flex;gap:36px;flex-wrap:wrap; }
+.tl-item { display:flex;flex-direction:column;gap:3px; }
+.tl-year { font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.1em; }
+.tl-label { font-size:13px;color:var(--muted); }
+
+.section { margin-bottom:68px; }
+.section-head { display:flex;align-items:center;gap:14px;margin-bottom:26px; }
+.sec-num { font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px; }
+.sec-title { font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9; }
+
+.obj-list { list-style:none;display:flex;flex-direction:column;gap:10px; }
+.obj-list li { display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8; }
+.obj-icon { font-size:18px;flex-shrink:0;margin-top:1px; }
+.obj-list li strong { color:#f1f5f9; }
+
+.prose p { font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82; }
+.prose p:last-child { margin-bottom:0; }
+.prose p strong { color:#e2e8f0; }
+.prose blockquote { border-left:3px solid var(--ac);margin:28px 0;padding:12px 20px;background:var(--ac-dim);border-radius:0 8px 8px 0;font-style:italic;color:#94a3b8;font-size:15px; }
+
+/* ── Precision / Recall tradeoff diagram ── */
+.tradeoff-visual { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px; }
+.tradeoff-card { background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px; }
+.tradeoff-card h4 { font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px; }
+.tradeoff-card p { font-size:13px;color:#94a3b8;line-height:1.65; }
+.tradeoff-card .example { font-family:var(--mono);font-size:11px;margin-top:8px;padding:6px 10px;background:#0a0d14;border-radius:5px;border:1px solid var(--border);color:var(--muted); }
+.card-recall { border-color:rgba(245,158,11,.3); }
+.card-recall h4 { color:var(--amber); }
+.card-precision { border-color:rgba(74,222,128,.3); }
+.card-precision h4 { color:var(--green); }
+
+/* ── Demo shared ── */
+.demo-wrap { background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:0; }
+.demo-topbar { padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px; }
+.demo-tag { font-family:var(--mono);font-size:11px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase; }
+.demo-hint { font-family:var(--mono);font-size:10px;color:var(--muted2); }
+input[type=range].ac-slider { -webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,#0a0d14,var(--ac)); }
+input[type=range].ac-slider::-webkit-slider-thumb { -webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #fb7185;cursor:pointer;box-shadow:0 0 6px var(--ac-glow); }
+
+/* ── Scenario demo ── */
+.scenario-btns { display:flex;flex-wrap:wrap;gap:6px;padding:14px 18px;border-bottom:1px solid var(--border); }
+.sc-btn { font-family:var(--mono);font-size:10px;padding:5px 10px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap; }
+.sc-btn:hover { border-color:var(--ac);color:var(--ac); }
+.sc-btn.active { background:var(--ac-dim);border-color:rgba(244,63,94,.45);color:#fb7185; }
+.d3-body { padding:18px;display:flex;flex-direction:column;gap:14px; }
+.sc-desc-box { background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13px;color:#94a3b8;line-height:1.65; }
+.sc-desc-box strong { color:#e2e8f0; }
+.sc-labels { display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;font-family:var(--mono);font-size:9px; }
+.sc-label-cell { padding:6px 8px;border-radius:5px;border:1px solid var(--border);line-height:1.5; }
+.sc-label-cell.tp { border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.06);color:var(--green); }
+.sc-label-cell.fp { border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.06);color:var(--red); }
+.sc-label-cell.fn { border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.06);color:var(--amber); }
+.sc-label-cell.tn { border-color:rgba(56,189,248,.2);background:rgba(56,189,248,.05);color:var(--sky); }
+.sc-label-name { font-size:8px;opacity:.7;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px; }
+.d3-main { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+.cost-bar { height:12px;border-radius:4px;overflow:hidden;display:flex;margin-top:6px; }
+.cost-fp-seg { background:rgba(248,113,113,.55);transition:flex .3s; }
+.cost-fn-seg { background:rgba(245,158,11,.55);transition:flex .3s; }
+.d2-lbl { font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em; }
+
+/* ── Confusion Matrix ── */
+.cm-wrap { display:grid;grid-template-columns:auto 1fr 1fr;grid-template-rows:auto 1fr 1fr;gap:3px;font-family:var(--mono);font-size:11px; }
+.cm-corner { background:#0a0d14;border-radius:4px;padding:8px 10px;color:var(--muted2);font-size:9px;text-align:center;display:flex;align-items:center;justify-content:center; }
+.cm-hdr-col { background:#0a0d14;border-radius:4px;padding:8px 12px;color:var(--muted);font-size:9px;text-align:center;text-transform:uppercase;letter-spacing:.06em; }
+.cm-hdr-row { background:#0a0d14;border-radius:4px;padding:8px 10px;color:var(--muted);font-size:9px;text-align:center;text-transform:uppercase;letter-spacing:.06em;writing-mode:vertical-lr;transform:rotate(180deg); }
+.cm-cell { border-radius:6px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all .15s; }
+.cm-cell-name { font-size:9px;letter-spacing:.06em;text-transform:uppercase;opacity:.7; }
+.cm-cell-num { font-size:20px;font-weight:700; }
+.cm-cell-pct { font-size:9px;opacity:.6; }
+.cm-tp { background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);color:var(--green); }
+.cm-fp { background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);color:var(--red); }
+.cm-fn { background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:var(--amber); }
+.cm-tn { background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);color:var(--sky); }
+.metrics-row { display:grid;grid-template-columns:repeat(5,1fr);gap:6px; }
+.metric-box { background:#0a0d14;border:1px solid var(--border);border-radius:7px;padding:8px 10px;display:flex;flex-direction:column;gap:2px; }
+.metric-lbl { font-family:var(--mono);font-size:8px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em; }
+.metric-val { font-family:var(--mono);font-size:15px;color:#e2e8f0;font-weight:700; }
+.roc-wrap { background:#0a0d14;border-radius:8px;padding:10px;overflow:hidden; }
+
+/* ── PR Curve ── */
+.curves-wrap { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+
+/* ── Exercise cards ── */
+.ex-card { background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px; }
+.ex-head { padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border); }
+.ex-num { font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(244,63,94,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px; }
+.ex-title { font-weight:600;font-size:16px;color:#f1f5f9; }
+.ex-desc { font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6; }
+.ex-body { padding:20px; }
+.ex-body p { font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7; }
+.ex-body p:last-child { margin-bottom:0; }
+.ex-body p strong { color:#e2e8f0; }
+
+.disc-list { list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px; }
+.disc-list li { counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72; }
+.disc-list li::before { content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(244,63,94,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px; }
+.disc-list li strong { color:#e2e8f0; }
+
+.lesson-nav { display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border); }
+.nav-btn { text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s; }
+.nav-btn:hover { border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow); }
+.nav-lbl { font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase; }
+.nav-title { font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px; }
+.nav-arrow { font-size:20px;color:var(--ac); }
+
+/* ── Demo 2: Cost Minimizer ── */
+.cm2-outer { display:grid;grid-template-columns:1fr 240px; }
+.cm2-left  { padding:16px 20px; }
+.cm2-right { padding:16px 18px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:10px; }
+.cm2-slider-row { display:flex;align-items:center;gap:8px;margin-bottom:10px; }
+.cm2-slider-lbl { font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;width:80px; }
+.cm2-stat { background:#0a0d14;border-radius:6px;padding:8px 10px; }
+.cm2-stat-lbl { font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px; }
+.cm2-stat-val { font-family:var(--mono);font-size:14px;color:#e2e8f0;font-weight:700; }
+.cm2-stat-sub { font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:2px; }
+
+/* ── Demo 3: F-Beta Explorer ── */
+.fb-outer { display:grid;grid-template-columns:1fr 240px; }
+.fb-left  { padding:16px 20px; }
+.fb-right { padding:16px 18px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:12px; }
+.fb-slider-wrap { display:flex;align-items:center;gap:10px; }
+.fb-stat { background:#0a0d14;border-radius:6px;padding:8px 10px; }
+.fb-stat-lbl { font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px; }
+.fb-stat-val { font-family:var(--mono);font-size:15px;color:#e2e8f0;font-weight:700; }
+</style>
+</head>
+<body>
+
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface);transition:color .15s" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 1: FOUNDATIONS</span>
+  <span>›</span><span>Evolution of Intelligence</span><span>›</span>
+  <span style="color:#94a3b8">Era 1, Lesson 6 — The Cost of Error</span>
+</nav>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 1 · LESSON 6</span>
+      <span>Real-World Decision Making</span><span>·</span>
+      <span>Precision, Recall &amp; Risk Tolerance</span>
+    </div>
+    <h1>The Cost of Error</h1>
+    <p class="hero-sub">Precision and recall are always in tension. The right operating point isn't a statistical optimum — it's a human judgment about which kind of mistake is more acceptable.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">Medical</span><span class="tl-label">Miss no cancers, accept false alarms</span></div>
+      <div class="tl-item"><span class="tl-year">Legal</span><span class="tl-label">Innocent until proven guilty = high precision</span></div>
+      <div class="tl-item"><span class="tl-year">Security</span><span class="tl-label">Miss no threats, accept inconvenience</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">⚖️</span><div><strong>Articulate</strong> the fundamental tension between precision and recall — and why optimizing for one always comes at the expense of the other.</div></li>
+      <li><span class="obj-icon">🎯</span><div><strong>Choose</strong> an appropriate decision threshold for a given real-world scenario based on the relative cost of false positives vs. false negatives.</div></li>
+      <li><span class="obj-icon">📉</span><div><strong>Interpret</strong> the precision-recall curve and explain why it provides a different view of model performance than the ROC curve.</div></li>
+      <li><span class="obj-icon">🌍</span><div><strong>Apply</strong> the risk tolerance framework across 10 canonical domains — from cancer screening to recommendation systems — and justify the reasoning.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">Two Ways to Be Wrong</h2></div>
+    <div class="prose">
+      <p>In Lesson 5 you learned to read the confusion matrix. Now comes the harder question: once you know your model makes both false positives and false negatives, <strong>which type of error should you work harder to avoid?</strong></p>
+      <p>The answer is never purely mathematical. It is always a value judgment about consequences. A fire alarm and a spam filter are both binary classifiers. They might even have identical confusion matrices on the same dataset. But they should be tuned to completely different operating points — because the cost of a missed fire and the cost of a missed spam email are not remotely comparable.</p>
+      <p>Precision and recall pull in opposite directions. <strong>Lower the decision threshold</strong> and more examples get flagged as positive — you catch more true positives (recall goes up) but also flag more negatives incorrectly (precision goes down). <strong>Raise the threshold</strong> and you only flag when very confident — precision rises but you miss more real positives (recall falls). You cannot maximize both simultaneously. Every operating point is a tradeoff.</p>
+      <blockquote>"The legal principle 'innocent until proven guilty' is not a statement about probability. It is a deliberate policy choice to prefer false negatives (acquitting the guilty) over false positives (convicting the innocent). The entire criminal justice system is a classifier tuned for high precision at the cost of recall."</blockquote>
+      <p>This lesson puts that tradeoff in your hands across ten real-world domains. The goal is not to find the "right" answer — it is to understand that <strong>the choice of operating point is a moral and practical decision</strong>, not a technical one, and that deploying a classifier without thinking carefully about this choice is itself a decision, usually a bad one.</p>
+    </div>
+
+    <div class="tradeoff-visual">
+      <div class="tradeoff-card card-recall">
+        <h4>🔴 Optimise for Recall (Minimize FN)</h4>
+        <p>Catch everything real, even at the cost of many false alarms. The right choice when <strong>missing a true positive is catastrophic</strong> and false alarms are merely inconvenient.</p>
+        <div class="example">Cancer screening · Smoke alarms · TSA security · Bridge cracks · COVID detection</div>
+      </div>
+      <div class="tradeoff-card card-precision">
+        <h4>🟢 Optimise for Precision (Minimize FP)</h4>
+        <p>Only flag when very confident, even at the cost of missing some real positives. The right choice when <strong>a false accusation is itself harmful</strong> and missed detections are survivable.</p>
+        <div class="example">Spam filters · Criminal facial recognition · Drug approval · Loan denial</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 DEMO -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:16px">Three demos: the Risk Tolerance scenario explorer, the Cost Minimizer (find the mathematically optimal threshold given FP/FN costs), and the F&beta; Explorer (generalising F1 to arbitrary cost weights).</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Risk Tolerance — 10 Real-World Scenarios</span>
+        <span class="demo-hint">pick scenario · drag threshold · justify your choice</span>
+      </div>
+      <div class="scenario-btns" id="d3ScBtns"></div>
+      <div class="d3-body">
+        <div class="sc-desc-box" id="d3Desc">Select a scenario above to begin.</div>
+        <div class="sc-labels" id="d3Labels"></div>
+        <div class="d3-main">
+          <div>
+            <div class="d2-lbl" style="margin-bottom:8px">Confusion Matrix</div>
+            <div class="cm-wrap" id="d3CM" style="margin-bottom:10px"></div>
+            <div class="metrics-row" id="d3Metrics" style="margin-bottom:12px"></div>
+            <div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">Decision Threshold</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input type="range" class="ac-slider" id="d3Thresh" min="0.01" max="0.99" step="0.01" value="0.5" style="flex:1" oninput="d3Update()">
+                <span style="font-family:var(--mono);font-size:11px;color:var(--ac);min-width:36px" id="d3ThreshVal">0.50</span>
+              </div>
+            </div>
+            <div style="margin-top:12px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">Error Cost Profile &nbsp;<span style="color:var(--red)" id="d3FPCostLbl"></span> FP &nbsp;vs&nbsp; <span style="color:var(--amber)" id="d3FNCostLbl"></span> FN</div>
+              <div class="cost-bar" id="d3CostBar"><div class="cost-fp-seg" style="flex:1"></div><div class="cost-fn-seg" style="flex:1"></div></div>
+            </div>
+          </div>
+          <div>
+            <div class="curves-wrap">
+              <div>
+                <div class="d2-lbl" style="margin-bottom:6px">ROC Curve</div>
+                <div class="roc-wrap">
+                  <svg id="d3ROC" viewBox="0 0 200 180" style="display:block;width:100%"></svg>
+                </div>
+              </div>
+              <div>
+                <div class="d2-lbl" style="margin-bottom:6px">PR Curve</div>
+                <div class="roc-wrap">
+                  <svg id="d3PR" viewBox="0 0 200 180" style="display:block;width:100%"></svg>
+                </div>
+              </div>
+            </div>
+            <div class="d2-lbl" style="margin-top:12px;margin-bottom:4px">Recommendation</div>
+            <div id="d3Note" style="font-size:12px;color:#94a3b8;background:#0a0d14;border:1px solid var(--border);border-radius:6px;padding:10px 12px;line-height:1.65;min-height:60px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  <!-- DEMO 2 — Cost Minimizer -->
+  <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — The Cost Minimizer.</strong> Total cost = FP_cost &times; FP(&theta;) + FN_cost &times; FN(&theta;). Drag the cost sliders and watch the optimal threshold shift. Compare against a naive &theta;&nbsp;=&nbsp;0.5 baseline.</p>
+  <div class="demo-wrap" style="margin-bottom:28px">
+    <div class="demo-topbar">
+      <span class="demo-tag">Optimal Threshold via Cost Minimization</span>
+      <span class="demo-hint">adjust error costs &middot; see optimal threshold move</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 230px">
+      <div style="padding:16px 20px">
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted);width:60px">FP cost</span>
+            <input type="range" class="ac-slider" id="cm2FP" min="1" max="200" step="1" value="5" style="flex:1" oninput="cm2Update()">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--red);min-width:28px;text-align:right" id="cm2FPVal">5</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted);width:60px">FN cost</span>
+            <input type="range" class="ac-slider" id="cm2FN" min="1" max="200" step="1" value="50" style="flex:1" oninput="cm2Update()">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--amber);min-width:28px;text-align:right" id="cm2FNVal">50</span>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Total Cost Curve</div>
+        <div style="background:#0a0d14;border-radius:8px;padding:10px">
+          <svg id="cm2Curve" viewBox="0 0 460 200" style="display:block;width:100%"></svg>
+        </div>
+      </div>
+      <div style="padding:16px 18px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:10px">
+        <div style="background:#0a0d14;border-radius:6px;padding:8px 10px">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Optimal threshold</div>
+          <div style="font-family:var(--mono);font-size:14px;color:#e2e8f0;font-weight:700" id="cm2OptT">—</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:2px" id="cm2OptCost">—</div>
+        </div>
+        <div style="background:#0a0d14;border-radius:6px;padding:8px 10px">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Naive &theta; = 0.50</div>
+          <div style="font-family:var(--mono);font-size:14px;color:#e2e8f0;font-weight:700" id="cm2NaiveT">0.500</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:2px" id="cm2NaiveCost">—</div>
+        </div>
+        <div style="background:#0a0d14;border-radius:6px;padding:8px 10px">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Cost saved</div>
+          <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)" id="cm2Saved">—</div>
+        </div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.7;background:#0a0d14;border-radius:6px;padding:8px 10px" id="cm2Formula"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMO 3 — F-Beta Explorer -->
+  <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 3 &mdash; The F&beta; Explorer.</strong> F1 assumes precision and recall are equally important. F&beta; generalises this: &beta;&nbsp;&gt;&nbsp;1 weights recall more, &beta;&nbsp;&lt;&nbsp;1 weights precision more. The amber dot shows the mathematically optimal threshold for your chosen &beta;.</p>
+  <div class="demo-wrap" style="margin-bottom:28px">
+    <div class="demo-topbar">
+      <span class="demo-tag">F&beta; &mdash; Generalised F-Score</span>
+      <span class="demo-hint">drag &beta; slider &middot; operating point moves to optimum</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 230px">
+      <div style="padding:16px 20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <span style="font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap">&beta; =</span>
+          <input type="range" class="ac-slider" id="fbBeta" min="0.1" max="4" step="0.1" value="1.0" style="flex:1" oninput="fbUpdate()">
+          <span style="font-family:var(--mono);font-size:13px;color:var(--ac);min-width:34px;font-weight:700" id="fbBetaVal">1.0</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">PR Curve &mdash; optimal operating point (&bull; amber)</div>
+        <div style="background:#0a0d14;border-radius:8px;padding:10px">
+          <svg id="fbPR" viewBox="0 0 460 240" style="display:block;width:100%"></svg>
+        </div>
+      </div>
+      <div style="padding:16px 18px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:10px">
+        <div style="background:#0a0d14;border-radius:6px;padding:8px 10px">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px" id="fbScoreLbl">F1 at optimum</div>
+          <div style="font-family:var(--mono);font-size:16px;color:#e2e8f0;font-weight:700" id="fbScore">—</div>
+        </div>
+        <div style="background:#0a0d14;border-radius:6px;padding:8px 10px">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Optimal threshold</div>
+          <div style="font-family:var(--mono);font-size:14px;color:#e2e8f0;font-weight:700" id="fbThresh">—</div>
+        </div>
+        <div style="background:#0a0d14;border-radius:6px;padding:8px 10px">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Precision at optimum</div>
+          <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)" id="fbPrec">—</div>
+        </div>
+        <div style="background:#0a0d14;border-radius:6px;padding:8px 10px">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Recall at optimum</div>
+          <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--amber)" id="fbRec">—</div>
+        </div>
+        <div style="font-size:11px;color:#94a3b8;line-height:1.7;background:#0a0d14;border-radius:6px;padding:8px 10px;font-family:var(--mono)" id="fbNote"></div>
+      </div>
+    </div>
+  </div>
+
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">⚖️ The Threshold Decision</div>
+          <div class="ex-desc">Find appropriate operating points for three scenarios with very different cost profiles.</div></div></div>
+      <div class="ex-body">
+        <p>Select <strong>Cancer Screening</strong>. Drag the threshold until recall ≥ 0.95 (catching 95%+ of cancers). What happens to precision? How many false positives occur for every true positive you catch?</p>
+        <p>→ Switch to <strong>Spam Filter</strong>. Drag until precision ≥ 0.98 (almost no legitimate email lost). What happens to recall? How much spam gets through?</p>
+        <p>→ Switch to <strong>Criminal Facial Recognition</strong>. Where should the threshold be — and why is this scenario categorically different from the medical ones? Consider: who bears the cost of a false positive? Is it the same person who benefits from a true positive?</p>
+        <p><strong>Key insight:</strong> The same model — same ROC curve, same AUC — can be appropriate or catastrophic depending entirely on where you set the threshold and who pays for each type of error.</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">📈 ROC vs. PR Curve</div>
+          <div class="ex-desc">Compare what the two curves reveal about each scenario.</div></div></div>
+      <div class="ex-body">
+        <p>Select <strong>Cancer Screening</strong> (2% prevalence) and note the shape of the PR curve. Now select <strong>Spam Filter</strong> (40% prevalence). The ROC curves may look similar, but the PR curves will look dramatically different. Why?</p>
+        <p>→ The PR curve plots Precision (y-axis) vs. Recall (x-axis). For a rare disease at 2% prevalence, even a very good model can have terrible precision at high recall — because there are so many more negatives than positives. The PR curve makes this visible in a way the ROC curve does not.</p>
+        <p><strong>Key question:</strong> When your dataset is severely imbalanced (rare disease, rare fraud), which curve is more informative — ROC or PR? Why might a model with AUC=0.97 still be practically useless?</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">🌡️ The Dynamic Threshold</div>
+          <div class="ex-desc">Use the COVID-19 scenario to explore how the right threshold shifts with context.</div></div></div>
+      <div class="ex-body">
+        <p>Select <strong>COVID-19 Rapid Test</strong>. This scenario is intentionally different: the cost of FP (unnecessary isolation, economic disruption) and FN (spreading the virus) both matter substantially — and their relative weight changes with the stage of an epidemic.</p>
+        <p>→ At <strong>peak transmission</strong> (high prevalence, high community spread): drag the threshold low to minimize FN. Accept the false isolation burden. What is the recall at your chosen threshold?</p>
+        <p>→ At <strong>low prevalence</strong> (epidemic winding down): raise the threshold significantly. At low prevalence, most "positives" would be false positives even with a good test. Read the PR curve — notice how precision collapses at high recall when prevalence is low.</p>
+        <p><strong>Key insight:</strong> The prevalence of the condition being screened is not just a property of the population — it changes the meaning of every threshold. This is why diagnostic guidelines get updated throughout an epidemic and why "one-size-fits-all" thresholds are almost always wrong.</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 04</span>
+        <div><div class="ex-title">🗺️ Scenario Mapping</div>
+          <div class="ex-desc">Open-ended: map all 10 scenarios onto the precision-recall spectrum.</div></div></div>
+      <div class="ex-body">
+        <p>Go through all 10 scenarios and for each one, note: (a) which error type is more costly, (b) what threshold you would recommend, and (c) whether the recommendation is obvious or genuinely debatable.</p>
+        <p>Which scenario has the most symmetric cost profile (FP ≈ FN in severity)? Which has the most extreme asymmetry? Which one do you find most ethically complex, and why?</p>
+        <p><strong>Challenge:</strong> For the <strong>Loan Approval</strong> scenario — is the cost asymmetry the same from the bank's perspective as from the applicant's perspective? What does this reveal about how "cost" is defined and who gets to define it?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>Who Decides the Threshold?</strong> A classifier's decision threshold is effectively a policy: it determines who gets flagged, who gets cleared, and who bears the cost of each error type. Should threshold decisions be made by the engineers who build the model, the organizations that deploy it, regulators, or the public? Does your answer change based on the domain?</li>
+      <li><strong>The Asymmetry of Harm.</strong> In criminal facial recognition, the false positive (an innocent person wrongly identified) falls on a private individual, while the benefit of a true positive (a criminal caught) accrues to the public. Is it ever ethical to impose individual harm for collective benefit? How does the magnitude of each matter?</li>
+      <li><strong>Precision vs. Recall in Hiring.</strong> An AI system screens job applications. If it's tuned for high precision (only recommend strongly qualified candidates), it may miss many qualified people from underrepresented groups whose resumes don't match historical patterns. If tuned for high recall, reviewers face a large pile of varied candidates. How would you choose the threshold — and who gets to make that call?</li>
+      <li><strong>The PR Curve and Rare Events.</strong> For detecting rare fraud (0.01% of transactions), even a model with AUC=0.999 on the ROC curve might have precision of only 1-2% at high recall — meaning 98-99 flagged transactions are innocent for every fraud caught. At what precision would you consider such a system deployable? What does that imply about customer experience?</li>
+      <li><strong>Connection Forward.</strong> In Era 5 you will study algorithmic bias — the systematic tendency of models to make different kinds of errors for different demographic groups. How does the precision/recall framework interact with bias? Could a model be "fair" on overall metrics but systematically harmful to specific groups depending on threshold placement?</li>
+    </ul>
+  </section>
+
+
+  <!-- Bottom Nav -->
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era1_lesson5_performance.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 1, Lesson 5 — The Performance Lab</div></div>
+    </a>
+    <div class="nav-btn" style="opacity:.35;cursor:default">
+      <div><div class="nav-lbl">Next Lesson →</div><div class="nav-title">Era 1, Lesson 7 — Hierarchical Databases</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+
+</div><!-- wrap -->
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════════
+   SHARED HELPERS (self-contained)
+══════════════════════════════════════════════════ */
+function seededRng(seed){var s=seed|0;return function(){s=(s*1664525+1013904223)&0xffffffff;return(s>>>0)/4294967295;};}
+function gauss(rng){return Math.sqrt(-2*Math.log(rng()+1e-9))*Math.cos(2*Math.PI*rng());}
+
+function renderCM(id,tp,fp,fn,tn){
+  var el=document.getElementById(id);if(!el)return;
+  var total=tp+fp+fn+tn||1;
+  function pct(n){return(n/total*100).toFixed(1)+'%';}
+  el.innerHTML=
+    '<div class="cm-corner">Pred→<br>Actual↓</div>'+
+    '<div class="cm-hdr-col">Predicted +</div>'+
+    '<div class="cm-hdr-col">Predicted −</div>'+
+    '<div class="cm-hdr-row">Actual +</div>'+
+    '<div class="cm-cell cm-tp"><div class="cm-cell-name">TP</div><div class="cm-cell-num">'+tp+'</div><div class="cm-cell-pct">'+pct(tp)+'</div></div>'+
+    '<div class="cm-cell cm-fn"><div class="cm-cell-name">FN</div><div class="cm-cell-num">'+fn+'</div><div class="cm-cell-pct">'+pct(fn)+'</div></div>'+
+    '<div class="cm-hdr-row">Actual −</div>'+
+    '<div class="cm-cell cm-fp"><div class="cm-cell-name">FP</div><div class="cm-cell-num">'+fp+'</div><div class="cm-cell-pct">'+pct(fp)+'</div></div>'+
+    '<div class="cm-cell cm-tn"><div class="cm-cell-name">TN</div><div class="cm-cell-num">'+tn+'</div><div class="cm-cell-pct">'+pct(tn)+'</div></div>';
+}
+
+function renderMetrics(id,tp,fp,fn,tn){
+  var el=document.getElementById(id);if(!el)return;
+  var total=tp+fp+fn+tn||1;
+  var prec=tp+fp>0?tp/(tp+fp):0,rec=tp+fn>0?tp/(tp+fn):0;
+  var spec=tn+fp>0?tn/(tn+fp):0,f1=prec+rec>0?2*prec*rec/(prec+rec):0;
+  var acc=(tp+tn)/total;
+  function fmt(v){return(v*100).toFixed(1)+'%';}
+  function box(lbl,val,col){return'<div class="metric-box"><div class="metric-lbl">'+lbl+'</div><div class="metric-val" style="color:'+col+'">'+fmt(val)+'</div></div>';}
+  el.innerHTML=box('Accuracy',acc,'#e2e8f0')+box('Precision',prec,'var(--green)')+box('Recall',rec,'var(--amber)')+box('Specificity',spec,'var(--sky)')+box('F1',f1,'var(--ac)');
+}
+
+function computeROC(scores,labels){
+  var P=labels.reduce(function(s,l){return s+(l?1:0);},0),N=labels.length-P;
+  if(P===0||N===0)return[{fpr:0,tpr:0,thresh:Infinity},{fpr:1,tpr:1,thresh:-Infinity}];
+  var pairs=scores.map(function(s,i){return{s:s,l:labels[i]};}).sort(function(a,b){return b.s-a.s;});
+  var pts=[{fpr:0,tpr:0,prec:1,thresh:Infinity}],tp=0,fp=0;
+  for(var i=0;i<pairs.length;i++){
+    if(pairs[i].l)tp++;else fp++;
+    pts.push({fpr:fp/N,tpr:tp/P,prec:tp/(tp+fp),thresh:pairs[i].s});
+  }
+  return pts;
+}
+
+function aucROC(pts){
+  var a=0;
+  for(var i=1;i<pts.length;i++)a+=(pts[i].fpr-pts[i-1].fpr)*(pts[i].tpr+pts[i-1].tpr)/2;
+  return Math.abs(a);
+}
+
+function drawROC(svgId,pts,th,W,H){
+  var svg=document.getElementById(svgId);if(!svg)return;
+  var ML=24,MR=8,MT=10,MB=24,PW=W-ML-MR,PH=H-MT-MB;
+  var sx=function(v){return ML+v*PW;},sy=function(v){return MT+PH-v*PH;};
+  var auc=aucROC(pts).toFixed(3);
+  var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+  [0.5].forEach(function(v){
+    h+='<line x1="'+sx(v)+'" y1="'+MT+'" x2="'+sx(v)+'" y2="'+(MT+PH)+'" stroke="#1a2035" stroke-width="1"/>';
+    h+='<line x1="'+ML+'" y1="'+sy(v)+'" x2="'+(ML+PW)+'" y2="'+sy(v)+'" stroke="#1a2035" stroke-width="1"/>';
+  });
+  h+='<line x1="'+ML+'" y1="'+MT+'" x2="'+ML+'" y2="'+(MT+PH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+  h+='<line x1="'+ML+'" y1="'+(MT+PH)+'" x2="'+(ML+PW)+'" y2="'+(MT+PH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+  h+='<line x1="'+sx(0)+'" y1="'+sy(0)+'" x2="'+sx(1)+'" y2="'+sy(1)+'" stroke="#334155" stroke-width="1" stroke-dasharray="4,3"/>';
+  if(pts.length>1){
+    var d='M'+sx(pts[0].fpr)+','+sy(pts[0].tpr);
+    for(var i=1;i<pts.length;i++)d+='L'+sx(pts[i].fpr).toFixed(1)+','+sy(pts[i].tpr).toFixed(1);
+    h+='<path d="'+d+'" fill="rgba(244,63,94,0.1)" stroke="var(--ac)" stroke-width="2" stroke-linejoin="round"/>';
+  }
+  // Operating point
+  var op={fpr:0,tpr:0};
+  for(var j=pts.length-1;j>=0;j--){if(pts[j].thresh>=th){op=pts[j];break;}}
+  h+='<circle cx="'+sx(op.fpr).toFixed(1)+'" cy="'+sy(op.tpr).toFixed(1)+'" r="4.5" fill="var(--amber)" stroke="#fff" stroke-width="1.5"/>';
+  h+='<text x="'+(ML+PW-3)+'" y="'+(MT+13)+'" fill="var(--ac)" font-size="8" text-anchor="end" font-family="Space Mono,monospace">AUC='+auc+'</text>';
+  h+='<text x="'+sx(0.5)+'" y="'+(MT+PH+16)+'" fill="#334155" font-size="7" text-anchor="middle" font-family="Space Mono,monospace">FPR</text>';
+  h+='<text x="'+(ML-5)+'" y="'+sy(0.5)+'" fill="#334155" font-size="7" text-anchor="middle" transform="rotate(-90,'+(ML-16)+','+sy(0.5)+')" font-family="Space Mono,monospace">TPR</text>';
+  svg.innerHTML=h;
+}
+
+function drawPR(svgId,pts,th,W,H){
+  var svg=document.getElementById(svgId);if(!svg)return;
+  var ML=24,MR=8,MT=10,MB=24,PW=W-ML-MR,PH=H-MT-MB;
+  var sx=function(v){return ML+v*PW;},sy=function(v){return MT+PH-v*PH;};
+  var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+  [0.5].forEach(function(v){
+    h+='<line x1="'+sx(v)+'" y1="'+MT+'" x2="'+sx(v)+'" y2="'+(MT+PH)+'" stroke="#1a2035" stroke-width="1"/>';
+    h+='<line x1="'+ML+'" y1="'+sy(v)+'" x2="'+(ML+PW)+'" y2="'+sy(v)+'" stroke="#1a2035" stroke-width="1"/>';
+  });
+  h+='<line x1="'+ML+'" y1="'+MT+'" x2="'+ML+'" y2="'+(MT+PH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+  h+='<line x1="'+ML+'" y1="'+(MT+PH)+'" x2="'+(ML+PW)+'" y2="'+(MT+PH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+  // PR curve (recall on x, precision on y) — skip pts with undefined prec
+  var prPts=pts.filter(function(p){return p.prec!==undefined;});
+  if(prPts.length>1){
+    var d='M'+sx(prPts[0].tpr)+','+sy(prPts[0].prec);
+    for(var i=1;i<prPts.length;i++)d+='L'+sx(prPts[i].tpr).toFixed(1)+','+sy(prPts[i].prec).toFixed(1);
+    h+='<path d="'+d+'" fill="rgba(56,189,248,0.08)" stroke="var(--sky)" stroke-width="2" stroke-linejoin="round"/>';
+  }
+  // Operating point
+  var op2={tpr:0,prec:1};
+  for(var j=prPts.length-1;j>=0;j--){if(prPts[j].thresh>=th){op2=prPts[j];break;}}
+  h+='<circle cx="'+sx(op2.tpr).toFixed(1)+'" cy="'+sy(op2.prec).toFixed(1)+'" r="4.5" fill="var(--amber)" stroke="#fff" stroke-width="1.5"/>';
+  h+='<text x="'+sx(0.5)+'" y="'+(MT+PH+16)+'" fill="#334155" font-size="7" text-anchor="middle" font-family="Space Mono,monospace">Recall</text>';
+  h+='<text x="'+(ML-5)+'" y="'+sy(0.5)+'" fill="#334155" font-size="7" text-anchor="middle" transform="rotate(-90,'+(ML-16)+','+sy(0.5)+')" font-family="Space Mono,monospace">Precision</text>';
+  svg.innerHTML=h;
+}
+
+/* ══════════════════════════════════════════════════
+   DEMO — REAL-WORLD RISK TOLERANCE
+══════════════════════════════════════════════════ */
+(function(){
+  var SCENARIOS=[
+    {id:'cancer',  name:'🏥 Cancer Screen',    prev:0.02, muP:0.78,muN:0.32,sig:0.14, fpCost:3,  fnCost:100,
+     tp:'Cancer detected correctly', fp:'Healthy patient → biopsy (anxiety/cost)', fn:'Cancer missed — potentially fatal', tn:'Healthy patient correctly cleared',
+     note:'Missing a cancer is potentially fatal. Accept a high false positive rate to ensure near-zero misses. Target recall ≥ 95% even if precision falls to 20–30%.',defT:0.28},
+    {id:'smoke',   name:'🔥 Smoke Alarm',      prev:0.001,muP:0.88,muN:0.14,sig:0.09, fpCost:1,  fnCost:1000,
+     tp:'Fire detected — alarm sounds', fp:'Toast smoke → false alarm', fn:'Real fire missed — house burns', tn:'No fire — correctly silent',
+     note:'A single missed fire is catastrophic. Smoke alarms are intentionally tuned for maximum recall. False alarms are merely annoying and quickly reset.',defT:0.12},
+    {id:'tsa',     name:'✈️ TSA Security',     prev:0.0001,muP:0.90,muN:0.20,sig:0.11,fpCost:2,  fnCost:10000,
+     tp:'Weapon detected — intercept', fp:'Innocent traveler flagged (pat-down)', fn:'Weapon passes through', tn:'Traveler correctly cleared',
+     note:'Missing a weapon risks mass casualties. TSA accepts enormous false positive rates — everyone removes shoes, liquids are confiscated. Recall must be near 100%.',defT:0.15},
+    {id:'bridge',  name:'🌉 Bridge Inspection', prev:0.01, muP:0.80,muN:0.30,sig:0.15, fpCost:5,  fnCost:500,
+     tp:'Real crack detected → repair', fp:'False alarm → costly inspection', fn:'Crack missed → failure risk', tn:'Sound structure correctly cleared',
+     note:'Missing a structural defect risks catastrophic failure and loss of life. Unnecessary inspections are expensive but recoverable. Favour high recall.',defT:0.25},
+    {id:'spam',    name:'📧 Spam Filter',      prev:0.40, muP:0.75,muN:0.35,sig:0.16, fpCost:50, fnCost:2,
+     tp:'Spam correctly blocked', fp:'Legitimate email lost to spam', fn:'Spam reaches inbox', tn:'Real email correctly delivered',
+     note:'A false positive means losing a job offer, doctor\'s appointment, or legal notice. Most users strongly prefer receiving some spam over losing real email. High threshold.',defT:0.72},
+    {id:'facerec', name:'🎭 Facial Recognition',prev:0.0001,muP:0.82,muN:0.28,sig:0.13,fpCost:1000,fnCost:20,
+     tp:'Wanted person identified', fp:'Innocent person wrongly flagged/detained', fn:'Wanted person not identified', tn:'Innocent person correctly cleared',
+     note:'A false positive means an innocent person is stopped or arrested. With millions scanned daily, even 0.01% FPR produces thousands of wrongful flaggings. Threshold must be very high.',defT:0.90},
+    {id:'drug',    name:'💊 Drug Approval',    prev:0.30, muP:0.72,muN:0.38,sig:0.16, fpCost:200,fnCost:30,
+     tp:'Safe/effective drug approved', fp:'Harmful drug approved (like thalidomide)', fn:'Useful drug wrongly rejected', tn:'Harmful drug correctly rejected',
+     note:'Regulators are historically conservative — approving a harmful drug is irreversible. Rejecting a useful drug delays treatment but is recoverable. High threshold justified.',defT:0.70},
+    {id:'loan',    name:'🏦 Loan Approval',    prev:0.15, muP:0.68,muN:0.42,sig:0.17, fpCost:30, fnCost:25,
+     tp:'Reliable borrower approved', fp:'Risky borrower approved → default', fn:'Reliable borrower denied', tn:'Risky borrower correctly denied',
+     note:'A relatively balanced tradeoff — defaulted loans cost the bank, wrongly denied loans lose revenue and harm creditworthy customers. Right threshold depends on the bank\'s risk appetite.',defT:0.50},
+    {id:'covid',   name:'🦠 COVID Test',       prev:0.05, muP:0.76,muN:0.34,sig:0.15, fpCost:15, fnCost:60,
+     tp:'Infected person correctly isolated', fp:'Healthy person unnecessarily isolates', fn:'Infected person spreads virus', tn:'Healthy person correctly freed',
+     note:'Context-dependent. At peak transmission: lower threshold, prioritise recall, accept isolation burden. At low prevalence: raise threshold — most positives would be false. Thresholds should be dynamic.',defT:0.38},
+    {id:'rec',     name:'🎬 Recommendation',   prev:0.20, muP:0.65,muN:0.45,sig:0.18, fpCost:5,  fnCost:3,
+     tp:'Relevant item recommended', fp:'Irrelevant item wastes screen space', fn:'Good item not surfaced', tn:'Irrelevant item correctly excluded',
+     note:'A mild asymmetry: irrelevant recommendations are mildly annoying; missing something the user would love is a lost engagement. Most platforms tune for moderate precision with reasonable recall.',defT:0.52}
+  ];
+
+  var currentSc=0;
+  var cache={};
+
+  function genData(sc){
+    if(cache[sc.id])return cache[sc.id];
+    var rng=seededRng(sc.id.split('').reduce(function(a,c){return a+c.charCodeAt(0);},0));
+    var n=500,data=[];
+    for(var i=0;i<n;i++){
+      var isPos=rng()<sc.prev;
+      var s=(isPos?sc.muP:sc.muN)+sc.sig*gauss(rng);
+      s=Math.max(0.02,Math.min(0.98,s));
+      data.push({label:isPos?1:0,score:s});
+    }
+    cache[sc.id]=data;
+    return data;
+  }
+
+  function applyThreshold(data,th){
+    var tp=0,fp=0,fn=0,tn=0;
+    data.forEach(function(d){
+      var pred=d.score>=th?1:0;
+      if(pred&&d.label)tp++;else if(pred&&!d.label)fp++;else if(!pred&&d.label)fn++;else tn++;
+    });
+    return{tp:tp,fp:fp,fn:fn,tn:tn};
+  }
+
+  function selectScenario(i){
+    currentSc=i;
+    document.querySelectorAll('.sc-btn').forEach(function(b,j){b.classList.toggle('active',j===i);});
+    var sc=SCENARIOS[i];
+    document.getElementById('d3Desc').innerHTML=
+      '<strong>'+sc.name.replace(/^\S+\s/,'')+'</strong> — Prevalence: '+(sc.prev*100).toFixed(2)+'%. '+
+      'FP cost: <span style="color:var(--red)">'+sc.fpCost+'×</span> &nbsp;|&nbsp; FN cost: <span style="color:var(--amber)">'+sc.fnCost+'×</span>';
+    document.getElementById('d3Labels').innerHTML=
+      '<div class="sc-label-cell tp"><div class="sc-label-name">TP</div>'+sc.tp+'</div>'+
+      '<div class="sc-label-cell fp"><div class="sc-label-name">FP (Type I)</div>'+sc.fp+'</div>'+
+      '<div class="sc-label-cell fn"><div class="sc-label-name">FN (Type II)</div>'+sc.fn+'</div>'+
+      '<div class="sc-label-cell tn"><div class="sc-label-name">TN</div>'+sc.tn+'</div>';
+    document.getElementById('d3FPCostLbl').textContent=sc.fpCost+'×';
+    document.getElementById('d3FNCostLbl').textContent=sc.fnCost+'×';
+    var tot=sc.fpCost+sc.fnCost;
+    var fpSeg=document.querySelector('#d3CostBar .cost-fp-seg');
+    var fnSeg=document.querySelector('#d3CostBar .cost-fn-seg');
+    if(fpSeg)fpSeg.style.flex=sc.fpCost/tot+'';
+    if(fnSeg)fnSeg.style.flex=sc.fnCost/tot+'';
+    document.getElementById('d3Thresh').value=sc.defT;
+    document.getElementById('d3ThreshVal').textContent=sc.defT.toFixed(2);
+    document.getElementById('d3Note').textContent=sc.note;
+    d3Draw();
+  }
+
+  function d3Draw(){
+    var sc=SCENARIOS[currentSc];
+    var data=genData(sc);
+    var th=+document.getElementById('d3Thresh').value;
+    document.getElementById('d3ThreshVal').textContent=th.toFixed(2);
+    var cm=applyThreshold(data,th);
+    renderCM('d3CM',cm.tp,cm.fp,cm.fn,cm.tn);
+    renderMetrics('d3Metrics',cm.tp,cm.fp,cm.fn,cm.tn);
+    var scores=data.map(function(d){return d.score;});
+    var labels=data.map(function(d){return d.label;});
+    var roc=computeROC(scores,labels);
+    drawROC('d3ROC',roc,th,200,180);
+    drawPR('d3PR',roc,th,200,180);
+  }
+
+  window.d3Update=d3Draw;
+
+  // Build buttons
+  var cont=document.getElementById('d3ScBtns');
+  SCENARIOS.forEach(function(sc,i){
+    var b=document.createElement('button');
+    b.className='sc-btn'; b.textContent=sc.name;
+    b.onclick=function(){selectScenario(i);};
+    cont.appendChild(b);
+  });
+
+  selectScenario(0);
+})();
+
+document.addEventListener('DOMContentLoaded', function() {
+
+/* ══════════════════════════════════════════════════
+   SHARED: generate synthetic dataset for demos 2+3
+   (same cancer-like scenario, fixed seed)
+══════════════════════════════════════════════════ */
+var _l6data=(function(){
+  function sr(seed){var s=seed|0;return function(){s=(s*1664525+1013904223)&0xffffffff;return(s>>>0)/4294967295;};}
+  function gx(r){return Math.sqrt(-2*Math.log(r()+1e-9))*Math.cos(2*Math.PI*r());}
+  var rng=sr(1234),n=500,data=[];
+  for(var i=0;i<n;i++){
+    var isP=rng()<0.12; // 12% prevalence
+    var s=(isP?0.72:0.33)+0.15*gx(rng);
+    s=Math.max(0.01,Math.min(0.99,s));
+    data.push({label:isP?1:0,score:s});
+  }
+  return data;
+})();
+
+/* ══════════════════════════════════════════════════
+   DEMO 2 — COST MINIMIZER
+══════════════════════════════════════════════════ */
+(function(){
+  var data=_l6data;
+
+  function applyT(th){
+    var tp=0,fp=0,fn=0,tn=0;
+    data.forEach(function(d){
+      var pred=d.score>=th?1:0;
+      if(pred&&d.label)tp++;else if(pred&&!d.label)fp++;
+      else if(!pred&&d.label)fn++;else tn++;
+    });
+    return{tp:tp,fp:fp,fn:fn,tn:tn};
+  }
+
+  function totalCost(th,fpc,fnc){
+    var cm=applyT(th);
+    return fpc*cm.fp+fnc*cm.fn;
+  }
+
+  function cm2Draw(){
+    var fpc=+document.getElementById('cm2FP').value;
+    var fnc=+document.getElementById('cm2FN').value;
+    document.getElementById('cm2FPVal').textContent=fpc;
+    document.getElementById('cm2FNVal').textContent=fnc;
+
+    // Sweep thresholds
+    var thresholds=data.map(function(d){return d.score;}).sort(function(a,b){return a-b;});
+    // Add extremes
+    thresholds=[0.01].concat(thresholds).concat([0.99]);
+    // Unique
+    var seen={};
+    thresholds=thresholds.filter(function(t){var k=t.toFixed(3);if(seen[k])return false;seen[k]=1;return true;});
+
+    var costs=thresholds.map(function(t){return totalCost(t,fpc,fnc);});
+    var minCost=Math.min.apply(null,costs);
+    var maxCost=Math.max.apply(null,costs)||1;
+    var optIdx=costs.indexOf(minCost);
+    var optT=thresholds[optIdx];
+    var naiveCost=totalCost(0.5,fpc,fnc);
+
+    // Draw curve
+    var svg=document.getElementById('cm2Curve');if(!svg)return;
+    var W=460,H=200,ML=44,MR=14,MT=12,MB=28,PW=W-ML-MR,PH=H-MT-MB;
+    var sx=function(t){return ML+(t-0.01)/0.98*PW;};
+    var sy=function(c){return MT+PH-Math.max(0,(c-0)*PH/maxCost);};
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    // Grid
+    [0.25,0.5,0.75].forEach(function(v){
+      h+='<line x1="'+sx(v)+'" y1="'+MT+'" x2="'+sx(v)+'" y2="'+(MT+PH)+'" stroke="#1a2035" stroke-width="1"/>';
+      h+='<text x="'+sx(v)+'" y="'+(MT+PH+14)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+v+'</text>';
+    });
+    h+='<line x1="'+ML+'" y1="'+MT+'" x2="'+ML+'" y2="'+(MT+PH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+    h+='<line x1="'+ML+'" y1="'+(MT+PH)+'" x2="'+(ML+PW)+'" y2="'+(MT+PH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+    h+='<text x="'+(ML+PW/2)+'" y="'+(MT+PH+26)+'" fill="#475569" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">Decision Threshold</text>';
+    h+='<text x="'+(ML-8)+'" y="'+(MT+PH/2)+'" fill="#475569" font-size="8" text-anchor="middle" transform="rotate(-90,'+(ML-22)+','+(MT+PH/2)+')" font-family="Space Mono,monospace">Total Cost</text>';
+
+    // Cost curve
+    var d='M'+sx(thresholds[0]).toFixed(1)+','+sy(costs[0]).toFixed(1);
+    for(var i=1;i<thresholds.length;i++) d+='L'+sx(thresholds[i]).toFixed(1)+','+sy(costs[i]).toFixed(1);
+    h+='<path d="'+d+'" fill="rgba(244,63,94,0.08)" stroke="var(--ac)" stroke-width="2" stroke-linejoin="round"/>';
+
+    // Naive line
+    var nx=sx(0.5), ncost=totalCost(0.5,fpc,fnc), ny=sy(ncost);
+    h+='<line x1="'+nx+'" y1="'+MT+'" x2="'+nx+'" y2="'+(MT+PH)+'" stroke="rgba(56,189,248,0.6)" stroke-width="1.5" stroke-dasharray="5,3"/>';
+    h+='<text x="'+(nx+4)+'" y="'+(MT+16)+'" fill="rgba(56,189,248,0.8)" font-size="8" font-family="Space Mono,monospace">naive θ=0.5</text>';
+
+    // Optimum
+    var ox=sx(optT), oy=sy(minCost);
+    h+='<line x1="'+ox+'" y1="'+MT+'" x2="'+ox+'" y2="'+(MT+PH)+'" stroke="rgba(74,222,128,0.7)" stroke-width="1.5" stroke-dasharray="5,3"/>';
+    h+='<circle cx="'+ox.toFixed(1)+'" cy="'+oy.toFixed(1)+'" r="5" fill="var(--green)" stroke="#fff" stroke-width="1.5"/>';
+    h+='<text x="'+(ox+5)+'" y="'+(oy-6)+'" fill="var(--green)" font-size="8" font-family="Space Mono,monospace">min cost</text>';
+
+    svg.innerHTML=h;
+
+    // Stats
+    document.getElementById('cm2OptT').textContent='θ = '+optT.toFixed(3);
+    document.getElementById('cm2OptCost').textContent='cost = '+minCost.toFixed(0)+' units';
+    document.getElementById('cm2NaiveT').textContent='θ = 0.500';
+    document.getElementById('cm2NaiveCost').textContent='cost = '+naiveCost.toFixed(0)+' units';
+    var saved=naiveCost-minCost;
+    document.getElementById('cm2Saved').textContent=(saved>0?'-'+saved.toFixed(0):'0')+' units ('+(naiveCost>0?(saved/naiveCost*100).toFixed(1)+'%':'0%')+')';
+    document.getElementById('cm2Saved').style.color=saved>0?'var(--green)':'var(--muted)';
+    document.getElementById('cm2Formula').innerHTML=
+      'Cost(\u03b8) = FP_cost \u00d7 FP(\u03b8) + FN_cost \u00d7 FN(\u03b8)<br>'+
+      '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= '+fpc+' \u00d7 FP + '+fnc+' \u00d7 FN';
+  }
+
+  window.cm2Update=cm2Draw;
+  cm2Draw();
+})();
+
+/* ══════════════════════════════════════════════════
+   DEMO 3 — F-BETA EXPLORER
+══════════════════════════════════════════════════ */
+(function(){
+  var data=_l6data;
+
+  // Compute ROC/PR points once
+  var P=data.reduce(function(s,d){return s+d.label;},0);
+  var N=data.length-P;
+  var sorted=data.slice().sort(function(a,b){return b.score-a.score;});
+  var prPts=[{rec:0,prec:1,thresh:Infinity}];
+  var tp=0,fp=0;
+  for(var i=0;i<sorted.length;i++){
+    if(sorted[i].label)tp++;else fp++;
+    prPts.push({rec:tp/P, prec:tp/(tp+fp), thresh:sorted[i].score});
+  }
+
+  function fbeta(p,r,b){if(p+r<1e-9)return 0;return(1+b*b)*p*r/(b*b*p+r);}
+
+  function fbDraw(){
+    var beta=+document.getElementById('fbBeta').value;
+    document.getElementById('fbBetaVal').textContent=beta.toFixed(1);
+
+    // Find optimal point on PR curve
+    var bestFb=-1, bestPt=prPts[0];
+    prPts.forEach(function(pt){
+      var fb=fbeta(pt.prec,pt.rec,beta);
+      if(fb>bestFb){bestFb=fb;bestPt=pt;}
+    });
+
+    // Draw PR curve
+    var svg=document.getElementById('fbPR'); if(!svg) return;
+    var W=460,H=240,ML=38,MR=14,MT=14,MB=28,PW=W-ML-MR,PH=H-MT-MB;
+    var sx=function(r){return ML+r*PW;}, sy=function(p){return MT+PH-p*PH;};
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    [0.2,0.4,0.6,0.8].forEach(function(v){
+      h+='<line x1="'+sx(v)+'" y1="'+MT+'" x2="'+sx(v)+'" y2="'+(MT+PH)+'" stroke="#1a2035" stroke-width="1"/>';
+      h+='<line x1="'+ML+'" y1="'+sy(v)+'" x2="'+(ML+PW)+'" y2="'+sy(v)+'" stroke="#1a2035" stroke-width="1"/>';
+      h+='<text x="'+sx(v)+'" y="'+(MT+PH+14)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+v+'</text>';
+      h+='<text x="'+(ML-5)+'" y="'+(sy(v)+3)+'" fill="#334155" font-size="8" text-anchor="end" font-family="Space Mono,monospace">'+v+'</text>';
+    });
+    h+='<line x1="'+ML+'" y1="'+MT+'" x2="'+ML+'" y2="'+(MT+PH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+    h+='<line x1="'+ML+'" y1="'+(MT+PH)+'" x2="'+(ML+PW)+'" y2="'+(MT+PH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+    h+='<text x="'+(ML+PW/2)+'" y="'+(MT+PH+26)+'" fill="#475569" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">Recall →</text>';
+    h+='<text x="'+(ML-24)+'" y="'+(MT+PH/2)+'" fill="#475569" font-size="8" text-anchor="middle" transform="rotate(-90,'+(ML-24)+','+(MT+PH/2)+')" font-family="Space Mono,monospace">Precision →</text>';
+
+    // Iso-Fbeta contour through optimal point
+    if(bestFb>0.01){
+      var cpts=[];
+      for(var ri=1;ri<100;ri++){
+        var r2=ri/100;
+        var denom=(1+beta*beta)*r2-bestFb*beta*beta;
+        if(Math.abs(denom)<1e-6)continue;
+        var p2=bestFb*r2/denom;
+        if(p2<0||p2>1.01)continue;
+        cpts.push([sx(r2),sy(Math.min(1,p2))]);
+      }
+      if(cpts.length>2){
+        var cd='M'+cpts[0].join(',');
+        for(var k=1;k<cpts.length;k++) cd+='L'+cpts[k].join(',');
+        h+='<path d="'+cd+'" fill="none" stroke="rgba(244,63,94,0.5)" stroke-width="1.5" stroke-dasharray="5,3"/>';
+        // Label the contour
+        var midPt=cpts[Math.floor(cpts.length/2)];
+        h+='<text x="'+(midPt[0]+5).toFixed(0)+'" y="'+(midPt[1]-4).toFixed(0)+'" fill="rgba(244,63,94,0.8)" font-size="8" font-family="Space Mono,monospace">F\u03b2='+bestFb.toFixed(3)+'</text>';
+      }
+    }
+
+    // PR curve
+    var d='M'+sx(prPts[0].rec)+','+sy(prPts[0].prec);
+    for(var j=1;j<prPts.length;j++) d+='L'+sx(prPts[j].rec).toFixed(1)+','+sy(prPts[j].prec).toFixed(1);
+    h+='<path d="'+d+'" fill="rgba(56,189,248,0.08)" stroke="var(--sky)" stroke-width="2" stroke-linejoin="round"/>';
+
+    // Operating point at optimal
+    var opx=sx(bestPt.rec), opy=sy(bestPt.prec);
+    h+='<circle cx="'+opx.toFixed(1)+'" cy="'+opy.toFixed(1)+'" r="8" fill="rgba(245,158,11,0.15)" stroke="var(--amber)" stroke-width="1.5"/>';
+    h+='<circle cx="'+opx.toFixed(1)+'" cy="'+opy.toFixed(1)+'" r="4" fill="var(--amber)"/>';
+
+    svg.innerHTML=h;
+
+    // Stats
+    document.getElementById('fbScoreLbl').textContent='F\u03b2 score (\u03b2='+beta.toFixed(1)+') at optimum';
+    document.getElementById('fbScore').textContent=bestFb.toFixed(4);
+    document.getElementById('fbThresh').textContent=bestPt.thresh===Infinity?'> max score':bestPt.thresh.toFixed(3);
+    document.getElementById('fbPrec').textContent=(bestPt.prec*100).toFixed(1)+'%';
+    document.getElementById('fbRec').textContent=(bestPt.rec*100).toFixed(1)+'%';
+
+    var note;
+    if(beta<0.7) note='Low \u03b2: precision dominates. Model flags only when very confident. Good for: spam filter, drug approval.';
+    else if(beta<1.3) note='\u03b2 \u2248 1: balanced (standard F1). No strong preference between FP and FN cost.';
+    else if(beta<2.2) note='High \u03b2: recall dominates. Model flags broadly to catch more positives. Good for: cancer screening.';
+    else note='Very high \u03b2: recall is paramount. Almost everything gets flagged. Appropriate for: fire detection, TSA.';
+    document.getElementById('fbNote').textContent=note;
+  }
+
+  window.fbUpdate=fbDraw;
+  fbDraw();
+})();
+
+}); // DOMContentLoaded
+
+</script>
+</body>
+</html>

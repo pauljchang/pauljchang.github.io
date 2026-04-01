@@ -203,6 +203,27 @@ input[type=range].w2::-webkit-slider-thumb { -webkit-appearance:none;width:12px;
 .nav-lbl { font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase; }
 .nav-title { font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px; }
 .nav-arrow { font-size:20px;color:var(--ac); }
+
+/* ── Demo 3: Decision Boundary Scatter ── */
+.db-outer { display:grid;grid-template-columns:1fr 260px; }
+.db-canvas { padding:16px 20px; }
+.db-right  { padding:16px 18px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:12px; }
+.db-ctrl-lbl { font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px; }
+.db-legend { display:flex;flex-direction:column;gap:5px;font-family:var(--mono);font-size:10px; }
+.db-leg-row { display:flex;align-items:center;gap:7px; }
+.db-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
+
+/* ── Demo 4: F1 Landscape ── */
+.fl-outer { display:grid;grid-template-columns:1fr 220px; }
+.fl-canvas { padding:16px 20px; }
+.fl-right  { padding:16px 18px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:14px; }
+.fl-beta-btns { display:flex;gap:6px;flex-wrap:wrap; }
+.fl-beta-btn { font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s; }
+.fl-beta-btn:hover { border-color:var(--ac);color:var(--ac); }
+.fl-beta-btn.active { background:var(--ac-dim);border-color:rgba(139,92,246,.45);color:#a78bfa; }
+.fl-stat { background:#0a0d14;border-radius:6px;padding:8px 10px; }
+.fl-stat-lbl { font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px; }
+.fl-stat-val { font-family:var(--mono);font-size:16px;color:#e2e8f0;font-weight:700; }
 </style>
 </head>
 <body>
@@ -349,89 +370,74 @@ TPR = Recall = TP / (TP + FN)                   ← y-axis of ROC curve</div>
       </div>
     </div>
 
-    <!-- DEMO 3 — Real-World Risk Tolerance -->
-    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 3 — Real-World Risk Tolerance.</strong> Choose a scenario. Drag the threshold to find an appropriate operating point. Notice that the "right" answer depends entirely on the relative cost of each error type.</p>
-    <div class="demo-wrap">
+
+    <!-- DEMO 3 — Decision Boundary Scatter -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 3 — Decision Boundary Scatter.</strong> TP, FP, FN, and TN aren't just table entries — they're <em>regions of space</em>. Drag the threshold line and watch the confusion matrix fill from the scatter. Adjust class imbalance to see how the same boundary can be adequate or disastrous.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
       <div class="demo-topbar">
-        <span class="demo-tag">Risk Tolerance — 10 Scenarios</span>
-        <span class="demo-hint">pick scenario · adjust threshold · observe tradeoff</span>
+        <span class="demo-tag">Decision Boundary — Scatter View</span>
+        <span class="demo-hint">drag the threshold line · adjust imbalance</span>
       </div>
-      <div class="scenario-btns" id="d3ScBtns"></div>
-      <div class="d3-body">
-        <div class="sc-desc-box" id="d3Desc">Select a scenario above.</div>
-        <div class="sc-labels" id="d3Labels"></div>
-        <div class="d3-main">
+      <div class="db-outer">
+        <div class="db-canvas">
+          <svg id="dbScatter" viewBox="0 0 520 280" style="display:block;width:100%;cursor:default"></svg>
+        </div>
+        <div class="db-right">
           <div>
-            <div class="d2-lbl" style="margin-bottom:8px">Confusion Matrix</div>
-            <div class="cm-wrap" id="d3CM" style="margin-bottom:10px"></div>
-            <div class="metrics-row" id="d3Metrics" style="margin-bottom:10px"></div>
-            <div>
-              <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">Decision Threshold</div>
-              <div style="display:flex;align-items:center;gap:8px">
-                <input type="range" class="ac-slider" id="d3Thresh" min="0.01" max="0.99" step="0.01" value="0.5" style="flex:1" oninput="d3Update()">
-                <span style="font-family:var(--mono);font-size:11px;color:var(--ac);min-width:36px" id="d3ThreshVal">0.50</span>
-              </div>
+            <div class="db-ctrl-lbl">Class Imbalance</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input type="range" class="ac-slider" id="dbPrev" min="5" max="60" step="1" value="20" style="flex:1" oninput="dbUpdate()">
+              <span style="font-family:var(--mono);font-size:11px;color:var(--ac);min-width:30px" id="dbPrevVal">20%</span>
             </div>
-            <div style="margin-top:10px">
-              <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">Error Cost Profile</div>
-              <div style="font-size:11px;color:#94a3b8;margin-bottom:4px">FP cost <span id="d3FPCostLbl" style="color:var(--red);font-family:var(--mono)"></span> &nbsp;|&nbsp; FN cost <span id="d3FNCostLbl" style="color:var(--amber);font-family:var(--mono)"></span></div>
-              <div class="cost-bar" id="d3CostBar" style="height:16px"></div>
-            </div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-top:3px">positive class prevalence</div>
           </div>
-          <div>
-            <div class="d2-lbl" style="margin-bottom:8px">ROC Curve</div>
-            <div class="roc-wrap">
-              <svg id="d3ROC" viewBox="0 0 320 220" style="display:block;width:100%"></svg>
-            </div>
-            <div class="d2-lbl" style="margin-top:10px;margin-bottom:4px">Recommendation</div>
-            <div id="d3Note" style="font-size:12px;color:#94a3b8;background:#0a0d14;border:1px solid var(--border);border-radius:6px;padding:10px 12px;line-height:1.65;min-height:52px"></div>
+          <div class="cm-wrap" id="dbCM"></div>
+          <div class="metrics-row" id="dbMetrics" style="grid-template-columns:repeat(3,1fr)"></div>
+          <div class="db-legend">
+            <div class="db-leg-row"><div class="db-dot" style="background:#4ade80"></div><span style="color:var(--green)">TP — correctly flagged positive</span></div>
+            <div class="db-leg-row"><div class="db-dot" style="background:#f87171"></div><span style="color:var(--red)">FP — wrongly flagged negative</span></div>
+            <div class="db-leg-row"><div class="db-dot" style="background:#f59e0b"></div><span style="color:var(--amber)">FN — missed positive</span></div>
+            <div class="db-leg-row"><div class="db-dot" style="background:#38bdf8;opacity:.5"></div><span style="color:var(--sky)">TN — correctly cleared</span></div>
           </div>
         </div>
       </div>
     </div>
-  </section>
 
-  <!-- 04 EXERCISES -->
-  <section class="section">
-    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
-
-    <div class="ex-card">
-      <div class="ex-head"><span class="ex-num">EX 01</span>
-        <div><div class="ex-title">📊 The Accuracy Lie</div>
-          <div class="ex-desc">Use Demo 1 to find the exact prevalence where the "always negative" baseline beats a model with 90% sensitivity and 90% specificity.</div></div></div>
-      <div class="ex-body">
-        <p>Set sensitivity to 90% and specificity to 90%. Slowly drag the prevalence slider down from 20%. At what prevalence does the warning appear? <em>Why does the crossover point depend on specificity, not sensitivity?</em></p>
-        <p>→ Now set prevalence to 1% and try to build a model (adjust sensitivity/specificity) that beats the baseline in accuracy AND has a recall above 50%. Is it possible? What does the confusion matrix look like?</p>
-        <p><strong>Key question:</strong> A hospital claims their AI model achieves "98.7% accuracy" on a cancer screening test. The cancer affects 1.2% of people screened. Before celebrating, what three questions should you ask about the confusion matrix?</p>
+    <!-- DEMO 4 — F1 Landscape -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 4 — The F&#946; Landscape.</strong> The F-score is a surface over precision-recall space. Drag the operating point and change &#946; to see how the optimal point shifts when recall matters more (&#946;&gt;1) or precision matters more (&#946;&lt;1).</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">F&#946; Landscape</span>
+        <span class="demo-hint">drag the dot · change &#946;</span>
       </div>
-    </div>
-
-    <div class="ex-card">
-      <div class="ex-head"><span class="ex-num">EX 02</span>
-        <div><div class="ex-title">🔬 The 512 Audit — Perfect vs. Approximate</div>
-          <div class="ex-desc">Use Demo 2 to find a threshold where the perceptron achieves TP=1, FP=0 for your chosen pattern. Then discover what you give up.</div></div></div>
-      <div class="ex-body">
-        <p>Select the <strong>Vertical Bar</strong> pattern and run the audit. With default weights, how many false positives are there? Where does the operating point sit on the ROC curve?</p>
-        <p>→ Raise the threshold until FP=0. The ROC operating point will reach the top-left corner — perfect precision. But did recall stay at 1? (It should — there's only one true positive, and if the weights are correct it should score highest of all 512 inputs.)</p>
-        <p>→ Now deliberately break the weights: set w₅ (center) to −2.0. Re-run the audit. What happens to the score for the Vertical Bar pattern? Can you still find a threshold that catches it without false positives?</p>
-        <p><strong>Key question:</strong> With only 1 true positive out of 512 inputs, the "always predict negative" classifier has 99.8% accuracy. What is its F1 score? What does that reveal about accuracy?</p>
+      <div class="fl-outer">
+        <div class="fl-canvas">
+          <svg id="flMap" viewBox="0 0 400 340" style="display:block;width:100%;cursor:crosshair"></svg>
+        </div>
+        <div class="fl-right">
+          <div>
+            <div class="db-ctrl-lbl">&#946; (beta)</div>
+            <div class="fl-beta-btns" id="flBetaBtns"></div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-top:6px" id="flBetaDesc"></div>
+          </div>
+          <div class="fl-stat">
+            <div class="fl-stat-lbl">Operating point</div>
+            <div class="fl-stat-val" id="flOpPR">—</div>
+          </div>
+          <div class="fl-stat">
+            <div class="fl-stat-lbl" id="flScoreLbl">F1 score</div>
+            <div class="fl-stat-val" id="flScore">—</div>
+          </div>
+          <div class="fl-stat">
+            <div class="fl-stat-lbl">Formula</div>
+            <div style="font-family:var(--mono);font-size:10px;color:#94a3b8;line-height:1.7" id="flFormula"></div>
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="ex-card">
       <div class="ex-head"><span class="ex-num">EX 03</span>
-        <div><div class="ex-title">⚖️ The Threshold Decision</div>
-          <div class="ex-desc">Use Demo 3 to find appropriate operating points for three scenarios with very different cost profiles.</div></div></div>
-      <div class="ex-body">
-        <p>Select <strong>Cancer Screening</strong>. Drag the threshold until recall ≥ 0.95 (you catch 95%+ of cancers). What happens to precision? How many false positives per true positive are you accepting?</p>
-        <p>→ Switch to <strong>Spam Filter</strong>. Now drag the threshold until precision ≥ 0.98 (almost no legitimate email is lost to spam). What happens to recall? How much spam gets through?</p>
-        <p>→ Switch to <strong>Criminal Facial Recognition</strong>. Where should the operating point be, and why is this scenario categorically different from the medical ones? (Hint: consider who bears the cost of a false positive.)</p>
-        <p><strong>Key insight to find:</strong> The same model — same ROC curve, same AUC — can be the right tool or the wrong tool depending entirely on where you set the threshold and who pays for each type of error.</p>
-      </div>
-    </div>
-
-    <div class="ex-card">
-      <div class="ex-head"><span class="ex-num">EX 04</span>
         <div><div class="ex-title">🧮 Build F1 by Hand</div>
           <div class="ex-desc">Understand why F1 is better than the arithmetic mean of precision and recall.</div></div></div>
       <div class="ex-body">
@@ -503,10 +509,10 @@ TPR = Recall = TP / (TP + FN)                   ← y-axis of ROC curve</div>
       <span class="nav-arrow">←</span>
       <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 1, Lesson 4 — ELIZA &amp; Pattern Matching</div></div>
     </a>
-    <div class="nav-btn" style="opacity:.35;cursor:default">
+    <a class="nav-btn" href="era1_lesson6_cost_of_error.html">
       <div><div class="nav-lbl">Next Lesson →</div><div class="nav-title">Era 1, Lesson 6 — The Cost of Error</div></div>
       <span class="nav-arrow">→</span>
-    </div>
+    </a>
   </nav>
 
 </div><!-- wrap -->
@@ -816,149 +822,261 @@ function toggleDetail(b,a){
   d2DrawEmptyROC();
 })();
 
+
 /* ══════════════════════════════════════════════════
-   DEMO 3 — REAL-WORLD RISK TOLERANCE
+   DEMO 3 — DECISION BOUNDARY SCATTER
 ══════════════════════════════════════════════════ */
 (function(){
-  var SCENARIOS=[
-    {id:'cancer',   name:'🏥 Cancer Screen',  prev:0.02, muP:0.78, muN:0.32, sig:0.14,
-     fpCost:3, fnCost:100,
-     tp:'Cancer detected correctly',fp:'Healthy patient → biopsy (anxiety/cost)',fn:'Cancer missed — potentially fatal',tn:'Healthy patient correctly cleared',
-     note:'Missing a cancer is potentially fatal. Accept a high false positive rate (unnecessary biopsies) to ensure near-zero misses. Target recall ≥ 95%.',
-     defT:0.28},
-    {id:'smoke',    name:'🔥 Smoke Alarm',    prev:0.001,muP:0.85, muN:0.15, sig:0.10,
-     fpCost:1, fnCost:1000,
-     tp:'Fire detected — alarm sounds',fp:'Toast smoke → false alarm',fn:'Fire missed — house burns',tn:'No fire — correctly silent',
-     note:'A single missed fire is catastrophic. Smoke alarms are intentionally tuned for maximum recall. False alarms are merely annoying.',
-     defT:0.15},
-    {id:'tsa',      name:'✈️ TSA Security',   prev:0.0001,muP:0.88,muN:0.22,sig:0.12,
-     fpCost:2, fnCost:10000,
-     tp:'Weapon detected — intercept',fp:'Innocent traveler flagged (pat-down)',fn:'Weapon passes through',tn:'Traveler correctly cleared',
-     note:'The asymmetry is extreme: missing a weapon risks mass casualties. TSA accepts enormous false positive rates (everyone removes shoes). Recall must be near 100%.',
-     defT:0.18},
-    {id:'bridge',   name:'🌉 Bridge Inspection',prev:0.01,muP:0.80,muN:0.30,sig:0.15,
-     fpCost:5, fnCost:500,
-     tp:'Real crack detected → repair',fp:'False alarm → unnecessary inspection',fn:'Crack missed → failure risk',tn:'Sound beam correctly cleared',
-     note:'Missing a structural defect risks catastrophic failure. Unnecessary inspections are expensive but survivable. Favour high recall.',
-     defT:0.25},
-    {id:'spam',     name:'📧 Spam Filter',    prev:0.40, muP:0.75, muN:0.35, sig:0.16,
-     fpCost:50, fnCost:2,
-     tp:'Spam correctly blocked',fp:'Legitimate email lost to spam',fn:'Spam reaches inbox',tn:'Real email correctly delivered',
-     note:'A false positive means losing a job offer, doctor\'s appointment, or legal notice. Most users strongly prefer receiving some spam over losing real email.',
-     defT:0.72},
-    {id:'facerec',  name:'🎭 Facial Recognition',prev:0.0001,muP:0.82,muN:0.28,sig:0.13,
-     fpCost:1000, fnCost:20,
-     tp:'Wanted person identified',fp:'Innocent person wrongly flagged',fn:'Wanted person not flagged',tn:'Innocent person correctly cleared',
-     note:'A false positive means an innocent person is stopped, investigated, or arrested. With millions of faces scanned daily, even a 0.01% FPR produces thousands of wrongful flaggings. Threshold must be very high.',
-     defT:0.88},
-    {id:'drug',     name:'💊 Drug Approval',  prev:0.30, muP:0.72, muN:0.38, sig:0.16,
-     fpCost:200, fnCost:30,
-     tp:'Safe/effective drug approved',fp:'Harmful drug approved (thalidomide)',fn:'Useful drug rejected',tn:'Harmful drug correctly rejected',
-     note:'Regulators are historically conservative. Approving a harmful drug (thalidomide) is an irreversible disaster. Rejecting a useful drug delays treatment — bad, but recoverable. High threshold justified.',
-     defT:0.70},
-    {id:'loan',     name:'🏦 Loan Approval',  prev:0.15, muP:0.68, muN:0.42, sig:0.17,
-     fpCost:30, fnCost:25,
-     tp:'Reliable borrower approved',fp:'Risky borrower approved → default',fn:'Reliable borrower denied',tn:'Risky borrower correctly denied',
-     note:'A relatively balanced tradeoff — defaulted loans cost the bank, but wrongly denied loans lose revenue and harm creditworthy customers. The right threshold depends on the bank\'s current risk appetite.',
-     defT:0.50},
-    {id:'covid',    name:'🦠 COVID Rapid Test',prev:0.05, muP:0.76, muN:0.34, sig:0.15,
-     fpCost:15, fnCost:60,
-     tp:'Infected person correctly isolated',fp:'Healthy person unnecessarily isolates',fn:'Infected person spreads virus',tn:'Healthy person correctly freed',
-     note:'The right threshold shifts with prevalence and transmission rates. At peak spread, minimize FN (missed infections). At low prevalence, FP cost (unnecessary isolation) becomes more significant. This scenario teaches that thresholds should be dynamic.',
-     defT:0.40},
-    {id:'rec',      name:'🎬 Recommendation', prev:0.20, muP:0.65, muN:0.45, sig:0.18,
-     fpCost:5, fnCost:3,
-     tp:'Relevant item recommended',fp:'Irrelevant item wastes screen space',fn:'Good item not surfaced',tn:'Bad item correctly excluded',
-     note:'A mild asymmetry: showing something irrelevant is mildly annoying; missing something the user would have loved is a lost engagement opportunity. Most platforms tune for moderate precision with reasonable recall.',
-     defT:0.55}
-  ];
+  var W=520, H=280, ML=44, MR=14, MT=14, MB=36, PW=W-ML-MR, PH=H-MT-MB;
+  var threshold=0.55;
+  var dragging=false;
+  var pts=[];
 
-  var currentSc=0;
-  var datasets={};
+  function seededR(seed){var s=seed|0;return function(){s=(s*1664525+1013904223)&0xffffffff;return(s>>>0)/4294967295;};}
+  function gaussR(r){return Math.sqrt(-2*Math.log(r()+1e-9))*Math.cos(2*Math.PI*r());}
 
-  function genData(sc){
-    if(datasets[sc.id]) return datasets[sc.id];
-    var rng=seededRng(sc.id.charCodeAt(0)*31+sc.id.charCodeAt(1)*7);
-    var n=400,data=[];
+  function genPoints(prev){
+    var rng=seededR(99), n=220, result=[];
     for(var i=0;i<n;i++){
-      var isPos=rng()<sc.prev;
-      var mu=isPos?sc.muP:sc.muN;
-      var s=mu+sc.sig*gauss(rng);
-      s=Math.max(0.02,Math.min(0.98,s));
-      data.push({label:isPos?1:0,score:s});
+      var isPos=rng()<prev/100;
+      var score=(isPos?0.64:0.36)+0.16*gaussR(rng);
+      score=Math.max(0.02,Math.min(0.98,score));
+      var jitter=0.1+rng()*0.8; // y spread
+      result.push({score:score, jitter:jitter, label:isPos?1:0});
     }
-    datasets[sc.id]=data;
-    return data;
+    return result;
   }
 
-  function applyThreshold(data,th){
-    var tp=0,fp=0,fn=0,tn=0;
-    data.forEach(function(d){
-      var pred=d.score>=th?1:0;
-      if(pred&&d.label) tp++;
-      else if(pred&&!d.label) fp++;
-      else if(!pred&&d.label) fn++;
-      else tn++;
+  function sx(v){return ML+v*PW;}
+  function sy(v){return MT+v*PH;}
+
+  function render(){
+    var prev=+document.getElementById('dbPrev').value;
+    document.getElementById('dbPrevVal').textContent=prev+'%';
+    pts=genPoints(prev);
+
+    var svg=document.getElementById('dbScatter'); if(!svg) return;
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+
+    // Background regions
+    var tx=sx(threshold);
+    h+='<rect x="'+ML+'" y="'+MT+'" width="'+(tx-ML)+'" height="'+PH+'" fill="rgba(248,113,113,0.04)"/>'; // FP/FN left
+    h+='<rect x="'+tx+'" y="'+MT+'" width="'+(ML+PW-tx)+'" height="'+PH+'" fill="rgba(74,222,128,0.04)"/>'; // TP/TN right
+
+    // Grid lines
+    [0.2,0.4,0.6,0.8].forEach(function(v){
+      var x=sx(v);
+      h+='<line x1="'+x+'" y1="'+MT+'" x2="'+x+'" y2="'+(MT+PH)+'" stroke="#1a2035" stroke-width="1"/>';
+      h+='<text x="'+x+'" y="'+(MT+PH+16)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+v+'</text>';
     });
-    return{tp:tp,fp:fp,fn:fn,tn:tn};
+    h+='<line x1="'+ML+'" y1="'+MT+'" x2="'+ML+'" y2="'+(MT+PH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+    h+='<line x1="'+ML+'" y1="'+(MT+PH)+'" x2="'+(ML+PW)+'" y2="'+(MT+PH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+    h+='<text x="'+sx(0.5)+'" y="'+(MT+PH+27)+'" fill="#475569" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">Model Score (threshold = '+(threshold.toFixed(2))+')</text>';
+
+    // Points
+    var tp=0,fp=0,fn=0,tn=0;
+    pts.forEach(function(p){
+      var pred=p.score>=threshold?1:0;
+      var col,r=5;
+      if(pred&&p.label){col='#4ade80';tp++;}
+      else if(pred&&!p.label){col='#f87171';fp++;}
+      else if(!pred&&p.label){col='#f59e0b';fn++;}
+      else{col='rgba(56,189,248,0.45)';tn++;}
+      var cx=sx(p.score), cy=sy(p.jitter);
+      h+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+r+'" fill="'+col+'" opacity="0.82"/>';
+    });
+
+    // Threshold line
+    h+='<line x1="'+tx+'" y1="'+MT+'" x2="'+tx+'" y2="'+(MT+PH)+'" stroke="#a78bfa" stroke-width="2.5" stroke-dasharray="6,3"/>';
+    // Drag handle
+    h+='<rect x="'+(tx-14)+'" y="'+(MT+PH/2-14)+'" width="28" height="28" rx="6" fill="#1a1b4b" stroke="#a78bfa" stroke-width="1.5" style="cursor:ew-resize" id="dbHandle"/>';
+    h+='<text x="'+tx+'" y="'+(MT+PH/2+5)+'" fill="#a78bfa" font-size="11" text-anchor="middle" font-family="Space Mono,monospace" style="pointer-events:none">⟺</text>';
+    h+='<text x="'+tx+'" y="'+(MT-4)+'" fill="#a78bfa" font-size="9" text-anchor="middle" font-family="Space Mono,monospace" style="pointer-events:none">θ='+(threshold.toFixed(2))+'</text>';
+
+    svg.innerHTML=h;
+
+    // Region labels
+    if(threshold>0.15&&threshold<0.85){
+      var leftMid=ML+(tx-ML)/2, rightMid=tx+(ML+PW-tx)/2;
+      var labY=MT+PH*0.08;
+      var tpL=svg.ownerDocument.createElementNS('http://www.w3.org/2000/svg','text');
+      // Labels added via innerHTML already, skip SVG DOM
+    }
+
+    renderCM('dbCM',tp,fp,fn,tn);
+
+    // Simplified metrics (3 columns)
+    var total=tp+fp+fn+tn||1;
+    var prec=tp+fp>0?tp/(tp+fp):0, rec=tp+fn>0?tp/(tp+fn):0, f1=prec+rec>0?2*prec*rec/(prec+rec):0;
+    var mel=document.getElementById('dbMetrics'); if(mel){
+      function fmt(v){return(v*100).toFixed(1)+'%';}
+      mel.innerHTML=
+        '<div class="metric-box"><div class="metric-lbl">Precision</div><div class="metric-val" style="color:var(--green)">'+fmt(prec)+'</div></div>'+
+        '<div class="metric-box"><div class="metric-lbl">Recall</div><div class="metric-val" style="color:var(--amber)">'+fmt(rec)+'</div></div>'+
+        '<div class="metric-box"><div class="metric-lbl">F1</div><div class="metric-val" style="color:var(--ac)">'+fmt(f1)+'</div></div>';
+    }
   }
 
-  function selectScenario(i){
-    currentSc=i;
-    document.querySelectorAll('.sc-btn').forEach(function(b,j){b.classList.toggle('active',j===i);});
-    var sc=SCENARIOS[i];
-    document.getElementById('d3Desc').innerHTML='<strong>'+sc.name.replace(/^../,'').trim()+'</strong> — '+
-      (sc.prev*100).toFixed(1)+'% prevalence. FP cost: '+sc.fpCost+'× &nbsp;|&nbsp; FN cost: '+sc.fnCost+'×';
-    document.getElementById('d3Labels').innerHTML=
-      '<div class="sc-label-cell tp"><div class="sc-label-name">TP</div>'+sc.tp+'</div>'+
-      '<div class="sc-label-cell fp"><div class="sc-label-name">FP (Type I)</div>'+sc.fp+'</div>'+
-      '<div class="sc-label-cell fn"><div class="sc-label-name">FN (Type II)</div>'+sc.fn+'</div>'+
-      '<div class="sc-label-cell tn"><div class="sc-label-name">TN</div>'+sc.tn+'</div>';
-    document.getElementById('d3FPCostLbl').textContent=sc.fpCost+'×';
-    document.getElementById('d3FNCostLbl').textContent=sc.fnCost+'×';
-    var total=sc.fpCost+sc.fnCost;
-    var fpSeg=document.querySelector('#d3CostBar .cost-fp-seg');
-    var fnSeg=document.querySelector('#d3CostBar .cost-fn-seg');
-    if(fpSeg) fpSeg.style.flex=sc.fpCost/total+'';
-    if(fnSeg) fnSeg.style.flex=sc.fnCost/total+'';
-    document.getElementById('d3Thresh').value=sc.defT;
-    document.getElementById('d3ThreshVal').textContent=sc.defT.toFixed(2);
-    document.getElementById('d3Note').textContent=sc.note;
-    d3Draw();
+  // Drag
+  var svg=document.getElementById('dbScatter');
+  if(svg){
+    svg.addEventListener('pointerdown',function(e){
+      if(e.target.id==='dbHandle'||e.target.closest&&e.target.closest('#dbHandle')){
+        dragging=true; svg.setPointerCapture(e.pointerId); e.preventDefault();
+      }
+    });
   }
-
-  function d3Draw(){
-    var sc=SCENARIOS[currentSc];
-    var data=genData(sc);
-    var th=+document.getElementById('d3Thresh').value;
-    document.getElementById('d3ThreshVal').textContent=th.toFixed(2);
-    var cm=applyThreshold(data,th);
-    renderCM('d3CM',cm.tp,cm.fp,cm.fn,cm.tn,null,null,null,null);
-    renderMetrics('d3Metrics',cm.tp,cm.fp,cm.fn,cm.tn);
-    var scores=data.map(function(d){return d.score;});
-    var labels=data.map(function(d){return d.label;});
-    var roc=computeROC(scores,labels);
-    drawROC('d3ROC',roc,th,320,220);
-  }
-
-  // Build scenario buttons
-  var btnCont=document.getElementById('d3ScBtns');
-  SCENARIOS.forEach(function(sc,i){
-    var b=document.createElement('button');
-    b.className='sc-btn';
-    b.textContent=sc.name;
-    b.onclick=function(){selectScenario(i);};
-    btnCont.appendChild(b);
+  document.addEventListener('pointermove',function(e){
+    if(!dragging)return;
+    var s=document.getElementById('dbScatter'); if(!s) return;
+    var r=s.getBoundingClientRect(),vb=s.viewBox.baseVal;
+    var cx=(e.clientX-r.left)*(vb.width/r.width);
+    threshold=Math.max(0.05,Math.min(0.95,(cx-ML)/PW));
+    render();
   });
+  document.addEventListener('pointerup',function(){dragging=false;});
 
-  // Cost bar HTML
-  document.getElementById('d3CostBar').innerHTML='<div class="cost-fp-seg" style="flex:1"></div><div class="cost-fn-seg" style="flex:1"></div>';
-
-  document.getElementById('d3Thresh').oninput=function(){d3Draw();};
-  window.d3Update=d3Draw;
-
-  selectScenario(0);
+  window.dbUpdate=render;
+  render();
 })();
+
+/* ══════════════════════════════════════════════════
+   DEMO 4 — F-BETA LANDSCAPE
+══════════════════════════════════════════════════ */
+(function(){
+  var BETAS=[
+    {val:0.5, label:'β = 0.5', desc:'Precision weighted 2× more than recall — spam filter, drug approval'},
+    {val:1.0, label:'β = 1',   desc:'Equal weight — the standard F1 score'},
+    {val:2.0, label:'β = 2',   desc:'Recall weighted 2× more than precision — cancer screening, alarms'},
+    {val:3.0, label:'β = 3',   desc:'Recall weighted 3× — critical safety applications'},
+  ];
+  var currentBeta=1.0;
+  var opR=0.7, opP=0.7; // operating point in recall-precision space
+  var dragging=false;
+
+  var W=400, H=340, ML=38, MR=14, MT=14, MB=32, PW=W-ML-MR, PH=H-MT-MB;
+  var GRID=50; // grid resolution
+
+  function fbeta(p,r,b){ if(p+r<1e-9)return 0; return(1+b*b)*p*r/(b*b*p+r); }
+
+  function colorForFb(v){
+    // v in [0,1] → color from dark to bright violet
+    var r=Math.round(20+v*119), g=Math.round(10+v*50), b=Math.round(30+v*216);
+    return'rgb('+r+','+g+','+b+')';
+  }
+
+  // Precompute grid for current beta
+  function renderHeatmap(){
+    var svg=document.getElementById('flMap'); if(!svg) return;
+    var b=currentBeta;
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    var cw=PW/GRID, ch=PH/GRID;
+    for(var ri=0;ri<GRID;ri++){
+      for(var ci=0;ci<GRID;ci++){
+        var rec=(ci+0.5)/GRID, prec=1-(ri+0.5)/GRID;
+        var fb=fbeta(prec,rec,b);
+        h+='<rect x="'+(ML+ci*cw).toFixed(1)+'" y="'+(MT+ri*ch).toFixed(1)+'" width="'+(cw+0.5).toFixed(1)+'" height="'+(ch+0.5).toFixed(1)+'" fill="'+colorForFb(fb)+'"/>';
+      }
+    }
+
+    // Iso-Fbeta contour for the current operating point's Fb value
+    var opFb=fbeta(opP,opR,b);
+    if(opFb>0.01){
+      // Trace contour: (1+b²)PR = opFb*(b²P+R) → P = opFb*R / ((1+b²)*R - opFb*b²*R... solve numerically
+      // P = opFb * R / ((1+b²)*R - opFb*b²)... let me just sample
+      var cpts=[]; 
+      for(var ri2=1;ri2<99;ri2++){
+        var r2=ri2/100;
+        // (1+b²)*p*r = opFb*(b²*p + r)
+        // p*(1+b²)*r - p*opFb*b² = opFb*r
+        // p*((1+b²)*r - opFb*b²) = opFb*r
+        var denom=(1+b*b)*r2 - opFb*b*b;
+        if(Math.abs(denom)<1e-6) continue;
+        var p2=opFb*r2/denom;
+        if(p2<0||p2>1) continue;
+        cpts.push([ML+r2*PW, MT+(1-p2)*PH]);
+      }
+      if(cpts.length>2){
+        var cd='M'+cpts[0].join(',');
+        for(var k=1;k<cpts.length;k++) cd+='L'+cpts[k].join(',');
+        h+='<path d="'+cd+'" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-dasharray="5,3"/>';
+      }
+    }
+
+    // Axes border
+    h+='<rect x="'+ML+'" y="'+MT+'" width="'+PW+'" height="'+PH+'" fill="none" stroke="#2d3748" stroke-width="1"/>';
+
+    // Grid ticks
+    [0.2,0.4,0.6,0.8,1.0].forEach(function(v){
+      var x=ML+v*PW, y=MT+(1-v)*PH;
+      h+='<text x="'+x.toFixed(0)+'" y="'+(MT+PH+14)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+v+'</text>';
+      h+='<text x="'+(ML-5)+'" y="'+(y+3).toFixed(0)+'" fill="#334155" font-size="8" text-anchor="end" font-family="Space Mono,monospace">'+v+'</text>';
+    });
+    h+='<text x="'+(ML+PW/2)+'" y="'+(MT+PH+26)+'" fill="#475569" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">Recall →</text>';
+    h+='<text x="14" y="'+(MT+PH/2)+'" fill="#475569" font-size="8" text-anchor="middle" transform="rotate(-90,14,'+(MT+PH/2)+')" font-family="Space Mono,monospace">Precision →</text>';
+
+    // Optimal point for this beta (on line p=r is optimal for symmetric F, but for fbeta max is at p=r only when b=1)
+    // Max Fbeta on the "achievable frontier" — just show gradient peak indicator
+    // Highlight operating point
+    var opx=ML+opR*PW, opy=MT+(1-opP)*PH;
+    h+='<circle cx="'+opx.toFixed(1)+'" cy="'+opy.toFixed(1)+'" r="9" fill="rgba(251,146,60,.15)" stroke="var(--amber)" stroke-width="1.5" style="cursor:move" id="flHandle"/>';
+    h+='<circle cx="'+opx.toFixed(1)+'" cy="'+opy.toFixed(1)+'" r="4" fill="var(--amber)" style="cursor:move" id="flHandle2"/>';
+
+    // F-beta value label
+    h+='<text x="'+(opx+12).toFixed(0)+'" y="'+(opy-6).toFixed(0)+'" fill="var(--amber)" font-size="9" font-family="Space Mono,monospace">F'+b+'='+opFb.toFixed(3)+'</text>';
+
+    svg.innerHTML=h;
+
+    // Update stats panel
+    document.getElementById('flOpPR').textContent='P='+opP.toFixed(2)+'  R='+opR.toFixed(2);
+    document.getElementById('flScore').textContent=opFb.toFixed(4);
+    document.getElementById('flScoreLbl').textContent='F\u03b2 score (\u03b2='+b+')';
+    document.getElementById('flFormula').innerHTML=
+      'F<sub>\u03b2</sub> = (1+\u03b2\u00b2)\u00b7P\u00b7R / (\u03b2\u00b2\u00b7P + R)<br>'+
+      '&nbsp;&nbsp;&nbsp;&nbsp;= '+(1+b*b).toFixed(2)+'\u00b7'+opP.toFixed(2)+'\u00b7'+opR.toFixed(2)+' / ('+(b*b).toFixed(2)+'\u00b7'+opP.toFixed(2)+' + '+opR.toFixed(2)+')<br>'+
+      '&nbsp;&nbsp;&nbsp;&nbsp;= '+opFb.toFixed(4);
+  }
+
+  // Build beta buttons
+  var btns=document.getElementById('flBetaBtns');
+  BETAS.forEach(function(bb){
+    var btn=document.createElement('button');
+    btn.className='fl-beta-btn'+(bb.val===1.0?' active':'');
+    btn.textContent=bb.label;
+    btn.onclick=function(){
+      currentBeta=bb.val;
+      document.querySelectorAll('.fl-beta-btn').forEach(function(b2){b2.classList.toggle('active',b2===btn);});
+      document.getElementById('flBetaDesc').textContent=bb.desc;
+      renderHeatmap();
+    };
+    btns.appendChild(btn);
+  });
+  document.getElementById('flBetaDesc').textContent=BETAS[1].desc;
+
+  // Drag operating point
+  var flSvg=document.getElementById('flMap');
+  if(flSvg){
+    flSvg.addEventListener('pointerdown',function(e){
+      if(e.target.id==='flHandle'||e.target.id==='flHandle2'){
+        dragging=true; flSvg.setPointerCapture(e.pointerId); e.preventDefault();
+      }
+    });
+  }
+  document.addEventListener('pointermove',function(e){
+    if(!dragging)return;
+    var s=document.getElementById('flMap'); if(!s) return;
+    var r=s.getBoundingClientRect(),vb=s.viewBox.baseVal;
+    var cx=(e.clientX-r.left)*(vb.width/r.width)-ML;
+    var cy=(e.clientY-r.top)*(vb.height/r.height)-MT;
+    opR=Math.max(0.02,Math.min(0.99,cx/PW));
+    opP=Math.max(0.02,Math.min(0.99,1-cy/PH));
+    renderHeatmap();
+  });
+  document.addEventListener('pointerup',function(){dragging=false;});
+
+  renderHeatmap();
+})();
+
 </script>
 </body>
 </html>
