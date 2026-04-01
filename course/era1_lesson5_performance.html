@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 1, Lesson 5 — The Performance Lab | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:      #0d1117;
+  --surface: #161b27;
+  --s2:      #1a2035;
+  --border:  #1e2d40;
+  --text:    #e2e8f0;
+  --muted:   #64748b;
+  --muted2:  #334155;
+  --ac:      #8b5cf6;
+  --ac-dim:  rgba(139,92,246,.12);
+  --ac-glow: rgba(139,92,246,.32);
+  --green:   #4ade80;
+  --red:     #f87171;
+  --amber:   #f59e0b;
+  --sky:     #38bdf8;
+  --font:    'Outfit', sans-serif;
+  --mono:    'Space Mono', monospace;
+  --disp:    'Lora', serif;
+}
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 16px; line-height: 1.7; }
+
+/* ── Nav ── */
+.course-nav { position:sticky;top:0;z-index:100;background:rgba(13,17,23,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted); }
+.era-badge { background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em; }
+.wrap { max-width:960px;margin:0 auto;padding:0 32px 100px; }
+
+/* ── Hero ── */
+.hero { padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px; }
+.hero-meta { display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted); }
+.week-badge { background:var(--ac);color:#0f0720;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em; }
+.hero h1 { font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px; }
+.hero-sub { font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px; }
+.hero-timeline { display:flex;gap:36px;flex-wrap:wrap; }
+.tl-item { display:flex;flex-direction:column;gap:3px; }
+.tl-year { font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.1em; }
+.tl-label { font-size:13px;color:var(--muted); }
+
+/* ── Sections ── */
+.section { margin-bottom:68px; }
+.section-head { display:flex;align-items:center;gap:14px;margin-bottom:26px; }
+.sec-num { font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px; }
+.sec-title { font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9; }
+
+/* ── Objectives ── */
+.obj-list { list-style:none;display:flex;flex-direction:column;gap:10px; }
+.obj-list li { display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8; }
+.obj-icon { font-size:18px;flex-shrink:0;margin-top:1px; }
+.obj-list li strong { color:#f1f5f9; }
+a.tl { color:var(--ac);text-decoration:none;border-bottom:1px dotted rgba(139,92,246,.4);transition:color .15s; }
+a.tl:hover { color:#a78bfa; }
+
+/* ── Prose ── */
+.prose p { font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82; }
+.prose p:last-child { margin-bottom:0; }
+.prose p strong { color:#e2e8f0; }
+.prose blockquote { border-left:3px solid var(--ac);margin:28px 0;padding:12px 20px;background:var(--ac-dim);border-radius:0 8px 8px 0;font-style:italic;color:#94a3b8;font-size:15px; }
+
+/* ── Detail box ── */
+.detail-box { margin-top:28px;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden; }
+.detail-head { display:flex;justify-content:space-between;align-items:center;padding:14px 18px;cursor:pointer;user-select:none;font-size:14px;font-weight:500;color:#94a3b8;transition:background .15s; }
+.detail-head:hover { background:var(--s2); }
+.detail-arrow { font-family:var(--mono);font-size:11px;color:var(--muted); }
+.detail-body { padding:20px 22px;border-top:1px solid var(--border);font-size:14.5px;color:#94a3b8;line-height:1.78;display:none; }
+.detail-body p { margin-bottom:12px; }
+.detail-body p:last-child { margin-bottom:0; }
+.detail-body strong { color:#e2e8f0; }
+.code-block { background:#0a0d14;border:1px solid var(--border);border-radius:6px;padding:12px 16px;font-family:var(--mono);font-size:12px;color:#4ade80;margin:10px 0;line-height:1.8; }
+
+/* ── Demo shared ── */
+.demo-wrap { background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:0; }
+.demo-topbar { padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px; }
+.demo-tag { font-family:var(--mono);font-size:11px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase; }
+.demo-hint { font-family:var(--mono);font-size:10px;color:var(--muted2); }
+
+/* ── Confusion Matrix ── */
+.cm-wrap { display:grid;grid-template-columns:auto 1fr 1fr;grid-template-rows:auto 1fr 1fr;gap:3px;font-family:var(--mono);font-size:11px; }
+.cm-corner { grid-column:1;grid-row:1;background:#0a0d14;border-radius:4px;padding:8px 10px;color:var(--muted2);font-size:9px;text-align:center;display:flex;align-items:center;justify-content:center; }
+.cm-hdr-col { grid-row:1;background:#0a0d14;border-radius:4px;padding:8px 12px;color:var(--muted);font-size:9px;text-align:center;text-transform:uppercase;letter-spacing:.06em; }
+.cm-hdr-row { grid-column:1;background:#0a0d14;border-radius:4px;padding:8px 10px;color:var(--muted);font-size:9px;text-align:center;text-transform:uppercase;letter-spacing:.06em;writing-mode:vertical-lr;transform:rotate(180deg); }
+.cm-cell { border-radius:6px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all .15s; }
+.cm-cell-name { font-size:9px;letter-spacing:.06em;text-transform:uppercase;opacity:.7; }
+.cm-cell-num { font-size:22px;font-weight:700; }
+.cm-cell-pct { font-size:9px;opacity:.6; }
+.cm-tp { background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);color:var(--green); }
+.cm-fp { background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);color:var(--red); }
+.cm-fn { background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);color:var(--red); }
+.cm-tn { background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);color:var(--sky); }
+
+/* ── Metrics row ── */
+.metrics-row { display:grid;grid-template-columns:repeat(5,1fr);gap:6px; }
+.metric-box { background:#0a0d14;border:1px solid var(--border);border-radius:7px;padding:9px 10px;display:flex;flex-direction:column;gap:2px; }
+.metric-lbl { font-family:var(--mono);font-size:8px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em; }
+.metric-val { font-family:var(--mono);font-size:16px;color:#e2e8f0;font-weight:700; }
+
+/* ── ROC curve SVG container ── */
+.roc-wrap { background:#0a0d14;border-radius:8px;padding:10px;overflow:hidden; }
+
+/* ── Sliders ── */
+input[type=range].ac-slider { -webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,#0a0d14,var(--ac)); }
+input[type=range].ac-slider::-webkit-slider-thumb { -webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #a78bfa;cursor:pointer;box-shadow:0 0 6px var(--ac-glow); }
+
+/* ── Demo 1 ── */
+.d1-grid { display:grid;grid-template-columns:1fr 1fr;gap:0; }
+.d1-panel { padding:20px 22px;border-right:1px solid var(--border); }
+.d1-panel:last-child { border-right:none; }
+.d1-slider-row { margin-bottom:14px; }
+.d1-slider-lbl { font-size:13px;color:#94a3b8;margin-bottom:4px; }
+.d1-slider-lbl span { font-family:var(--mono);font-size:12px;color:var(--ac); }
+.d1-baseline { background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.2);border-radius:7px;padding:10px 14px;margin-top:12px;font-size:13px;color:#94a3b8; }
+.d1-baseline strong { color:#f87171; }
+.d1-warning { background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:7px;padding:8px 12px;margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--amber);display:none; }
+
+/* ── Demo 2: 512 Audit ── */
+.d2-outer { display:grid;grid-template-columns:220px 1fr;min-height:480px; }
+.d2-left { padding:18px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:12px; }
+.d2-right { padding:18px;display:flex;flex-direction:column;gap:14px; }
+.pattern-btns { display:grid;grid-template-columns:repeat(5,1fr);gap:4px; }
+.pat-btn { font-family:var(--mono);font-size:9px;padding:5px 2px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.pat-btn:hover { border-color:var(--ac);color:var(--ac); }
+.pat-btn.active { background:var(--ac-dim);border-color:rgba(139,92,246,.5);color:#a78bfa; }
+.pat-preview { display:grid;grid-template-columns:repeat(3,1fr);gap:3px;width:72px;margin:0 auto; }
+.pat-px { width:22px;height:22px;border-radius:3px;transition:background .15s; }
+.pat-px.on { background:var(--ac);box-shadow:0 0 6px var(--ac-glow); }
+.pat-px.off { background:#131923;border:1px solid var(--border); }
+.d2-lbl { font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em; }
+.w-row2 { display:flex;align-items:center;gap:6px;margin-bottom:5px; }
+.w-lbl2 { font-family:var(--mono);font-size:9px;width:20px;color:var(--muted2); }
+.w-lbl2.active { color:var(--ac);font-weight:700; }
+input[type=range].w2 { -webkit-appearance:none;appearance:none;flex:1;height:3px;border-radius:2px;outline:none;cursor:pointer; }
+input[type=range].w2::-webkit-slider-thumb { -webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--ac);border:1.5px solid #a78bfa;cursor:pointer; }
+.w-val2 { font-family:var(--mono);font-size:9px;width:30px;text-align:right; }
+.thresh-row { display:flex;align-items:center;gap:8px;padding-top:8px;border-top:1px solid var(--border); }
+.d2-run-btn { width:100%;font-family:var(--mono);font-size:11px;padding:8px;border-radius:7px;border:1px solid var(--ac);background:var(--ac-dim);color:#a78bfa;cursor:pointer;transition:all .15s; }
+.d2-run-btn:hover { background:rgba(139,92,246,.2);box-shadow:0 0 12px var(--ac-glow); }
+.audit-summary { font-family:var(--mono);font-size:10px;color:var(--muted);background:#0a0d14;border-radius:6px;padding:8px 12px;line-height:1.8; }
+
+/* ── Demo 3: Risk Tolerance ── */
+.scenario-btns { display:flex;flex-wrap:wrap;gap:6px;padding:14px 18px;border-bottom:1px solid var(--border); }
+.sc-btn { font-family:var(--mono);font-size:10px;padding:5px 10px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap; }
+.sc-btn:hover { border-color:var(--ac);color:var(--ac); }
+.sc-btn.active { background:var(--ac-dim);border-color:rgba(139,92,246,.45);color:#a78bfa; }
+.d3-body { padding:18px;display:flex;flex-direction:column;gap:14px; }
+.sc-desc-box { background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13px;color:#94a3b8;line-height:1.65; }
+.sc-desc-box strong { color:#e2e8f0; }
+.sc-labels { display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;font-family:var(--mono);font-size:9px; }
+.sc-label-cell { padding:6px 8px;border-radius:5px;border:1px solid var(--border);line-height:1.5; }
+.sc-label-cell.tp { border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.06);color:var(--green); }
+.sc-label-cell.fp { border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.06);color:var(--red); }
+.sc-label-cell.fn { border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.06);color:var(--red); }
+.sc-label-cell.tn { border-color:rgba(56,189,248,.2);background:rgba(56,189,248,.05);color:var(--sky); }
+.sc-label-name { font-size:8px;opacity:.7;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px; }
+.d3-main { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+.cost-bar { height:12px;border-radius:4px;overflow:hidden;display:flex;margin-top:6px; }
+.cost-fp-seg { background:rgba(248,113,113,.5);transition:flex .3s; }
+.cost-fn-seg { background:rgba(245,158,11,.5);transition:flex .3s; }
+.threshold-row { display:flex;align-items:center;gap:10px;margin-top:8px; }
+.threshold-row label { font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap; }
+.insight { background:var(--ac-dim);border:1px solid rgba(139,92,246,.25);border-radius:8px;padding:12px 16px;margin-top:14px;font-size:13px;color:#94a3b8;line-height:1.7; }
+.insight strong { color:var(--ac); }
+
+/* ── Exercise cards ── */
+.ex-card { background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px; }
+.ex-head { padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border); }
+.ex-num { font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(139,92,246,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px; }
+.ex-title { font-weight:600;font-size:16px;color:#f1f5f9; }
+.ex-desc { font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6; }
+.ex-body { padding:20px; }
+.ex-body p { font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7; }
+.ex-body p:last-child { margin-bottom:0; }
+.ex-body p strong { color:#e2e8f0; }
+
+/* ── Discussion ── */
+.disc-list { list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px; }
+.disc-list li { counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72; }
+.disc-list li::before { content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(139,92,246,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px; }
+.disc-list li strong { color:#e2e8f0; }
+
+/* ── Glossary ── */
+.gloss-grid { display:flex;flex-direction:column; }
+.gloss-entry { display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);padding:18px 0; }
+.gloss-entry:last-child { border-bottom:none; }
+.gloss-term { display:flex;flex-direction:column;gap:5px;padding-right:24px;padding-top:2px; }
+.gloss-term-name { font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700; }
+.gloss-abbr { font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.05em; }
+.gloss-def { font-size:14.5px;color:#94a3b8;line-height:1.72; }
+.gloss-def strong { color:#e2e8f0; }
+.gloss-formula { font-family:var(--mono);font-size:11.5px;color:#4ade80;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:7px 12px;display:block;margin-top:8px;line-height:1.8; }
+
+/* ── Bottom nav ── */
+.lesson-nav { display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border); }
+.nav-btn { text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s; }
+.nav-btn:hover { border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow); }
+.nav-lbl { font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase; }
+.nav-title { font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px; }
+.nav-arrow { font-size:20px;color:var(--ac); }
+</style>
+</head>
+<body>
+
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface);transition:color .15s" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 1: FOUNDATIONS</span>
+  <span>›</span><span>Evolution of Intelligence</span><span>›</span>
+  <span style="color:#94a3b8">Era 1, Lesson 5 — The Performance Lab</span>
+</nav>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 1 · LESSON 5</span>
+      <span>1966 – Present</span><span>·</span>
+      <span>Confusion Matrix, ROC, and the Cost of Being Wrong</span>
+    </div>
+    <h1>The Performance Lab</h1>
+    <p class="hero-sub">Accuracy is a lie when classes are imbalanced. Learn to measure what actually matters — and why the right threshold depends entirely on what failure costs.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1966</span><span class="tl-label">Confusion matrix formalized in ML literature</span></div>
+      <div class="tl-item"><span class="tl-year">1978</span><span class="tl-label">Precision &amp; Recall defined for information retrieval</span></div>
+      <div class="tl-item"><span class="tl-year">1997</span><span class="tl-label">ROC analysis standardized for medical diagnostics</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">🎯</span><div><strong>Explain</strong> why <a class="tl" href="#g-accuracy">accuracy</a> is a misleading metric for imbalanced datasets — and construct a scenario where 99% accuracy is trivially achievable.</div></li>
+      <li><span class="obj-icon">🗂️</span><div><strong>Read</strong> a <a class="tl" href="#g-cm">confusion matrix</a> and derive <a class="tl" href="#g-precision">precision</a>, <a class="tl" href="#g-recall">recall</a>, <a class="tl" href="#g-f1">F1</a>, and specificity from the four quadrant counts.</div></li>
+      <li><span class="obj-icon">🔬</span><div><strong>Conduct</strong> the 512-pattern audit — running every possible 3×3 input through a perceptron and mapping the full confusion matrix.</div></li>
+      <li><span class="obj-icon">⚖️</span><div><strong>Argue</strong> whether false positives or false negatives are more costly in a given real-world scenario, and choose an appropriate decision threshold accordingly.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">The Accuracy Illusion</h2></div>
+    <div class="prose">
+      <p>In 2016, a well-publicized AI system achieved 99.5% accuracy detecting a rare skin condition affecting 0.4% of the population. Journalists called it superhuman. Dermatologists were impressed. There was one problem: a model that simply said "you don't have it" for every single patient would achieve 99.6% accuracy — slightly better, at zero cost, with zero intelligence.</p>
+      <p>Accuracy measures the fraction of predictions that are correct. When one class is rare, the "always predict the common class" strategy dominates — not because it's smart, but because it's never wrong about the 99% while ignoring the 1% entirely. <strong>This is the accuracy illusion</strong>, and it lurks in nearly every real-world ML deployment: fraud detection, medical diagnosis, spam filtering, equipment failure prediction.</p>
+      <p>The confusion matrix is the cure. Instead of collapsing all outcomes into one number, it separates predictions into four quadrants: things you correctly caught, things you incorrectly flagged, things you missed, and things you correctly ignored. From those four numbers, you can ask more precise questions — and those questions have very different answers depending on what failure means in your application.</p>
+      <blockquote>"A smoke alarm optimized for accuracy would never ring. It would achieve 99.99% accuracy by correctly predicting 'no fire' every moment of every day. We don't build smoke alarms that way. We shouldn't build classifiers that way either."</blockquote>
+    </div>
+    <div class="detail-box">
+      <div class="detail-head" onclick="toggleDetail('mathBox','mathArrow')">
+        <span>📐 The Mathematics — Deriving Metrics from the Four Quadrants</span>
+        <span class="detail-arrow" id="mathArrow">▼ expand</span>
+      </div>
+      <div class="detail-body" id="mathBox">
+        <p>Given a confusion matrix with counts TP, FP, FN, TN:</p>
+        <div class="code-block">                  Predicted +    Predicted −
+Actual   +  |      TP        |      FN       |   (all real positives = P = TP+FN)
+Actual   −  |      FP        |      TN       |   (all real negatives = N = FP+TN)</div>
+        <p>The derived metrics:</p>
+        <div class="code-block">Accuracy    = (TP + TN) / (TP + FP + FN + TN)   ← misleading when imbalanced
+Precision   = TP / (TP + FP)                    ← "of what I flagged, how much was real?"
+Recall      = TP / (TP + FN)                    ← "of what was real, how much did I catch?"
+Specificity = TN / (TN + FP)                    ← "of all negatives, how many did I correctly ignore?"
+F1          = 2·TP / (2·TP + FP + FN)           ← harmonic mean of precision and recall
+FPR         = FP / (FP + TN)                    ← false alarm rate (x-axis of ROC curve)
+TPR = Recall = TP / (TP + FN)                   ← y-axis of ROC curve</div>
+        <p><strong>Why harmonic mean for F1?</strong> Arithmetic mean (P+R)/2 is fooled by a model with P=1.0 and R=0.001 — it scores 0.5, implying decent performance. Harmonic mean penalizes extreme imbalance: 2·(1.0·0.001)/(1.0+0.001) ≈ 0.002. A model that never misses anything real but only ever makes one prediction is not a good model.</p>
+        <p><strong>The ROC curve</strong> plots TPR (y-axis) against FPR (x-axis) as the decision threshold sweeps from 0 to 1. AUC = Area Under the ROC Curve: 0.5 means the model is no better than random; 1.0 is perfect. A model that scores all positives higher than all negatives has AUC = 1.0 regardless of the threshold chosen.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 DEMOS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+
+    <!-- DEMO 1 — Accuracy Paradox -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — The Accuracy Paradox.</strong> Adjust disease prevalence and model performance. Watch when the dumb "always predict negative" baseline beats your model.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Accuracy Paradox</span>
+        <span class="demo-hint">adjust sliders · watch the baseline</span>
+      </div>
+      <div class="d1-grid">
+        <div class="d1-panel">
+          <div class="d1-lbl" style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">Controls (population = 10,000)</div>
+          <div class="d1-slider-row">
+            <div class="d1-slider-lbl">Disease prevalence: <span id="d1PrevVal">5%</span></div>
+            <input type="range" class="ac-slider" id="d1Prev" min="0.1" max="50" step="0.1" value="5" oninput="d1Update()">
+          </div>
+          <div class="d1-slider-row">
+            <div class="d1-slider-lbl">Model sensitivity (recall): <span id="d1SensVal">85%</span></div>
+            <input type="range" class="ac-slider" id="d1Sens" min="10" max="99" step="1" value="85" oninput="d1Update()">
+          </div>
+          <div class="d1-slider-row">
+            <div class="d1-slider-lbl">Model specificity: <span id="d1SpecVal">80%</span></div>
+            <input type="range" class="ac-slider" id="d1Spec" min="50" max="99.9" step="0.1" value="80" oninput="d1Update()">
+          </div>
+          <div class="d1-baseline" id="d1Baseline"></div>
+          <div class="d1-warning" id="d1Warning">⚠ The dumb "always negative" baseline beats your model on accuracy!</div>
+        </div>
+        <div class="d1-panel" style="border-right:none">
+          <div class="d1-lbl" style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">Results</div>
+          <div class="cm-wrap" id="d1CM" style="margin-bottom:14px"></div>
+          <div class="metrics-row" id="d1Metrics"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 2 — 512 Audit -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — The 512-Pattern Audit.</strong> Choose a target pattern. The perceptron is pre-weighted to detect it. Run all 512 possible 3×3 inputs and see the full confusion matrix and ROC curve.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">512-Pattern Audit</span>
+        <span class="demo-hint">choose pattern · adjust weights · observe ROC</span>
+      </div>
+      <div class="d2-outer">
+        <div class="d2-left">
+          <div class="d2-lbl">Target Pattern</div>
+          <div class="pattern-btns" id="d2PatBtns"></div>
+          <div style="text-align:center">
+            <div class="d2-lbl" style="margin-bottom:6px;text-align:left">Preview</div>
+            <div class="pat-preview" id="d2Preview"></div>
+          </div>
+          <div class="d2-lbl">Weights (w₁–w₉)</div>
+          <div id="d2Weights"></div>
+          <div class="thresh-row">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap">θ</span>
+            <input type="range" class="ac-slider" id="d2Thresh" min="-9" max="9" step="0.25" value="2" style="flex:1" oninput="d2Update()">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--ac);min-width:28px" id="d2ThreshVal">2.0</span>
+          </div>
+          <button class="d2-run-btn" id="d2RunBtn">▶ Run 512-Pattern Audit</button>
+          <div class="audit-summary" id="d2Summary">Select a pattern and click Run.</div>
+        </div>
+        <div class="d2-right">
+          <div class="d2-lbl">Confusion Matrix</div>
+          <div class="cm-wrap" id="d2CM" style="margin-bottom:10px"></div>
+          <div class="metrics-row" id="d2Metrics" style="margin-bottom:10px"></div>
+          <div class="d2-lbl">ROC Curve <span style="color:var(--muted2);font-size:9px">(operating point = ● current threshold)</span></div>
+          <div class="roc-wrap">
+            <svg id="d2ROC" viewBox="0 0 380 220" style="display:block;width:100%"></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 3 — Real-World Risk Tolerance -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 3 — Real-World Risk Tolerance.</strong> Choose a scenario. Drag the threshold to find an appropriate operating point. Notice that the "right" answer depends entirely on the relative cost of each error type.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Risk Tolerance — 10 Scenarios</span>
+        <span class="demo-hint">pick scenario · adjust threshold · observe tradeoff</span>
+      </div>
+      <div class="scenario-btns" id="d3ScBtns"></div>
+      <div class="d3-body">
+        <div class="sc-desc-box" id="d3Desc">Select a scenario above.</div>
+        <div class="sc-labels" id="d3Labels"></div>
+        <div class="d3-main">
+          <div>
+            <div class="d2-lbl" style="margin-bottom:8px">Confusion Matrix</div>
+            <div class="cm-wrap" id="d3CM" style="margin-bottom:10px"></div>
+            <div class="metrics-row" id="d3Metrics" style="margin-bottom:10px"></div>
+            <div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">Decision Threshold</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input type="range" class="ac-slider" id="d3Thresh" min="0.01" max="0.99" step="0.01" value="0.5" style="flex:1" oninput="d3Update()">
+                <span style="font-family:var(--mono);font-size:11px;color:var(--ac);min-width:36px" id="d3ThreshVal">0.50</span>
+              </div>
+            </div>
+            <div style="margin-top:10px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">Error Cost Profile</div>
+              <div style="font-size:11px;color:#94a3b8;margin-bottom:4px">FP cost <span id="d3FPCostLbl" style="color:var(--red);font-family:var(--mono)"></span> &nbsp;|&nbsp; FN cost <span id="d3FNCostLbl" style="color:var(--amber);font-family:var(--mono)"></span></div>
+              <div class="cost-bar" id="d3CostBar" style="height:16px"></div>
+            </div>
+          </div>
+          <div>
+            <div class="d2-lbl" style="margin-bottom:8px">ROC Curve</div>
+            <div class="roc-wrap">
+              <svg id="d3ROC" viewBox="0 0 320 220" style="display:block;width:100%"></svg>
+            </div>
+            <div class="d2-lbl" style="margin-top:10px;margin-bottom:4px">Recommendation</div>
+            <div id="d3Note" style="font-size:12px;color:#94a3b8;background:#0a0d14;border:1px solid var(--border);border-radius:6px;padding:10px 12px;line-height:1.65;min-height:52px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">📊 The Accuracy Lie</div>
+          <div class="ex-desc">Use Demo 1 to find the exact prevalence where the "always negative" baseline beats a model with 90% sensitivity and 90% specificity.</div></div></div>
+      <div class="ex-body">
+        <p>Set sensitivity to 90% and specificity to 90%. Slowly drag the prevalence slider down from 20%. At what prevalence does the warning appear? <em>Why does the crossover point depend on specificity, not sensitivity?</em></p>
+        <p>→ Now set prevalence to 1% and try to build a model (adjust sensitivity/specificity) that beats the baseline in accuracy AND has a recall above 50%. Is it possible? What does the confusion matrix look like?</p>
+        <p><strong>Key question:</strong> A hospital claims their AI model achieves "98.7% accuracy" on a cancer screening test. The cancer affects 1.2% of people screened. Before celebrating, what three questions should you ask about the confusion matrix?</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">🔬 The 512 Audit — Perfect vs. Approximate</div>
+          <div class="ex-desc">Use Demo 2 to find a threshold where the perceptron achieves TP=1, FP=0 for your chosen pattern. Then discover what you give up.</div></div></div>
+      <div class="ex-body">
+        <p>Select the <strong>Vertical Bar</strong> pattern and run the audit. With default weights, how many false positives are there? Where does the operating point sit on the ROC curve?</p>
+        <p>→ Raise the threshold until FP=0. The ROC operating point will reach the top-left corner — perfect precision. But did recall stay at 1? (It should — there's only one true positive, and if the weights are correct it should score highest of all 512 inputs.)</p>
+        <p>→ Now deliberately break the weights: set w₅ (center) to −2.0. Re-run the audit. What happens to the score for the Vertical Bar pattern? Can you still find a threshold that catches it without false positives?</p>
+        <p><strong>Key question:</strong> With only 1 true positive out of 512 inputs, the "always predict negative" classifier has 99.8% accuracy. What is its F1 score? What does that reveal about accuracy?</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">⚖️ The Threshold Decision</div>
+          <div class="ex-desc">Use Demo 3 to find appropriate operating points for three scenarios with very different cost profiles.</div></div></div>
+      <div class="ex-body">
+        <p>Select <strong>Cancer Screening</strong>. Drag the threshold until recall ≥ 0.95 (you catch 95%+ of cancers). What happens to precision? How many false positives per true positive are you accepting?</p>
+        <p>→ Switch to <strong>Spam Filter</strong>. Now drag the threshold until precision ≥ 0.98 (almost no legitimate email is lost to spam). What happens to recall? How much spam gets through?</p>
+        <p>→ Switch to <strong>Criminal Facial Recognition</strong>. Where should the operating point be, and why is this scenario categorically different from the medical ones? (Hint: consider who bears the cost of a false positive.)</p>
+        <p><strong>Key insight to find:</strong> The same model — same ROC curve, same AUC — can be the right tool or the wrong tool depending entirely on where you set the threshold and who pays for each type of error.</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 04</span>
+        <div><div class="ex-title">🧮 Build F1 by Hand</div>
+          <div class="ex-desc">Understand why F1 is better than the arithmetic mean of precision and recall.</div></div></div>
+      <div class="ex-body">
+        <p>In Demo 2, tune the weights and threshold so you get a confusion matrix with approximately TP=1, FP=0, FN=0, TN=511. Compute F1 by hand: precision = 1.0, recall = 1.0, F1 = 1.0. ✓</p>
+        <p>→ Now lower the threshold drastically to get FP ≈ 200. Precision drops to ≈ 1/201 ≈ 0.005, recall stays at 1.0. Compute both the arithmetic mean (P+R)/2 and the harmonic mean F1 = 2PR/(P+R). The arithmetic mean gives ≈ 0.5 — suggesting decent performance. F1 gives ≈ 0.01 — correctly identifying a useless model.</p>
+        <p><strong>Key question:</strong> Why does the harmonic mean penalize extreme imbalances between precision and recall, while the arithmetic mean does not? (Hint: think about what happens to H = 2ab/(a+b) when a→0 but b=1.)</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>The Legal Standard.</strong> "Innocent until proven guilty" is a deliberate policy choice to minimize false positives (wrongful convictions) at the cost of more false negatives (acquitted guilty parties). How does this compare to a medical screening policy? Should the law use different standards for different crimes?</li>
+      <li><strong>COVID-19 Context.</strong> During peak transmission, health authorities recommended low-threshold testing (flag broadly, isolate widely). At low prevalence, the same threshold causes enormous disruption for little benefit. What additional information would you need to choose the right threshold for a given moment in an epidemic?</li>
+      <li><strong>The AUC Trap.</strong> AUC is often used to compare classifiers. A model with AUC=0.95 sounds better than one with AUC=0.88. But if the second model has much better recall at the specific operating point you need, which is actually better? What does this imply about reporting AUC without specifying the operating point?</li>
+      <li><strong>Algorithmic Accountability.</strong> A city deploys facial recognition for policing with a published FPR of 0.1%. There are 1,000,000 innocent people in the city. How many innocent people are falsely flagged per year if the system runs once a day? Who should decide the acceptable FPR — the police department, elected officials, or the public?</li>
+      <li><strong>Connection Forward.</strong> In Era 3 you'll study imbalanced learning techniques: oversampling, undersampling, and class-weighted loss functions. Based on what you've learned here, why might you want to weight the loss for false negatives more heavily than false positives during training — and when would that be wrong?</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry" id="g-cm">
+        <div class="gloss-term"><span class="gloss-term-name">Confusion Matrix</span><span class="gloss-abbr">2×2 outcome table</span></div>
+        <div class="gloss-def">A table that breaks classifier predictions into four categories: <strong>TP</strong> (correctly flagged positive), <strong>FP</strong> (incorrectly flagged positive — Type I error), <strong>FN</strong> (missed positive — Type II error), <strong>TN</strong> (correctly cleared negative). The confusion matrix contains all information needed to compute every other performance metric.</div>
+      </div>
+      <div class="gloss-entry" id="g-accuracy">
+        <div class="gloss-term"><span class="gloss-term-name">Accuracy</span><span class="gloss-abbr">(TP+TN)/N</span></div>
+        <div class="gloss-def">Fraction of all predictions that are correct. <strong>Misleading when classes are imbalanced.</strong> If 99% of examples are negative, a model that always predicts "negative" achieves 99% accuracy with zero useful capability.
+          <div class="gloss-formula">Accuracy = (TP + TN) / (TP + FP + FN + TN)</div>
+        </div>
+      </div>
+      <div class="gloss-entry" id="g-precision">
+        <div class="gloss-term"><span class="gloss-term-name">Precision</span><span class="gloss-abbr">Positive Predictive Value</span></div>
+        <div class="gloss-def">"Of everything I flagged as positive, what fraction was actually positive?" Precision punishes false alarms. A spam filter optimized for precision rarely sends real email to spam — but lets lots of spam through.
+          <div class="gloss-formula">Precision = TP / (TP + FP)</div>
+        </div>
+      </div>
+      <div class="gloss-entry" id="g-recall">
+        <div class="gloss-term"><span class="gloss-term-name">Recall</span><span class="gloss-abbr">Sensitivity · TPR</span></div>
+        <div class="gloss-def">"Of everything that was actually positive, what fraction did I catch?" Recall punishes misses. A cancer screening optimized for recall catches nearly all cancers — but also flags many healthy patients for follow-up.
+          <div class="gloss-formula">Recall = TP / (TP + FN) = TPR</div>
+        </div>
+      </div>
+      <div class="gloss-entry" id="g-f1">
+        <div class="gloss-term"><span class="gloss-term-name">F1 Score</span><span class="gloss-abbr">Harmonic mean of P and R</span></div>
+        <div class="gloss-def">A single number combining precision and recall. Uses the harmonic mean so that a model with very high precision but near-zero recall (or vice versa) scores poorly — unlike the arithmetic mean, which can be fooled by extreme imbalances.
+          <div class="gloss-formula">F1 = 2 · Precision · Recall / (Precision + Recall) = 2TP / (2TP + FP + FN)</div>
+        </div>
+      </div>
+      <div class="gloss-entry" id="g-roc">
+        <div class="gloss-term"><span class="gloss-term-name">ROC Curve</span><span class="gloss-abbr">Receiver Operating Characteristic</span></div>
+        <div class="gloss-def">A curve plotting <strong>TPR (recall)</strong> on the y-axis against <strong>FPR</strong> on the x-axis as the decision threshold sweeps from 0 to 1. A diagonal line represents random performance (AUC=0.5). A curve hugging the top-left corner represents near-perfect discrimination (AUC≈1.0). The operating point is the single dot corresponding to your chosen threshold.</div>
+      </div>
+      <div class="gloss-entry" id="g-auc">
+        <div class="gloss-term"><span class="gloss-term-name">AUC</span><span class="gloss-abbr">Area Under the ROC Curve</span></div>
+        <div class="gloss-def">A threshold-independent summary of classifier quality. Equals the probability that a randomly chosen positive example scores higher than a randomly chosen negative example. AUC=0.5 → random; AUC=1.0 → perfect. <strong>Limitation:</strong> a high AUC doesn't tell you whether the model is useful at your specific operating point. Always examine the actual confusion matrix at the threshold you intend to deploy.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom Nav -->
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era1_lesson4_eliza.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 1, Lesson 4 — ELIZA &amp; Pattern Matching</div></div>
+    </a>
+    <div class="nav-btn" style="opacity:.35;cursor:default">
+      <div><div class="nav-lbl">Next Lesson →</div><div class="nav-title">Era 1, Lesson 6 — The Cost of Error</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+
+</div><!-- wrap -->
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════════
+   SHARED HELPERS
+══════════════════════════════════════════════════ */
+function seededRng(seed){var s=seed|0;return function(){s=(s*1664525+1013904223)&0xffffffff;return(s>>>0)/4294967295;};}
+function gauss(rng){return Math.sqrt(-2*Math.log(rng()+1e-9))*Math.cos(2*Math.PI*rng());}
+
+function renderCM(containerId, tp, fp, fn, tn, tpLabel, fpLabel, fnLabel, tnLabel){
+  var el=document.getElementById(containerId); if(!el) return;
+  var total=tp+fp+fn+tn||1;
+  function pct(n){return (n/total*100).toFixed(1)+'%';}
+  el.innerHTML=
+    '<div class="cm-corner">Pred→<br>Actual↓</div>'+
+    '<div class="cm-hdr-col">Predicted +</div>'+
+    '<div class="cm-hdr-col">Predicted −</div>'+
+    '<div class="cm-hdr-row">Actual +</div>'+
+    '<div class="cm-cell cm-tp"><div class="cm-cell-name">TP</div><div class="cm-cell-num">'+tp+'</div><div class="cm-cell-pct">'+(tpLabel||pct(tp))+'</div></div>'+
+    '<div class="cm-cell cm-fn"><div class="cm-cell-name">FN</div><div class="cm-cell-num">'+fn+'</div><div class="cm-cell-pct">'+(fnLabel||pct(fn))+'</div></div>'+
+    '<div class="cm-hdr-row">Actual −</div>'+
+    '<div class="cm-cell cm-fp"><div class="cm-cell-name">FP</div><div class="cm-cell-num">'+fp+'</div><div class="cm-cell-pct">'+(fpLabel||pct(fp))+'</div></div>'+
+    '<div class="cm-cell cm-tn"><div class="cm-cell-name">TN</div><div class="cm-cell-num">'+tn+'</div><div class="cm-cell-pct">'+(tnLabel||pct(tn))+'</div></div>';
+}
+
+function renderMetrics(containerId, tp, fp, fn, tn){
+  var el=document.getElementById(containerId); if(!el) return;
+  var total=tp+fp+fn+tn||1;
+  var prec=tp+fp>0?tp/(tp+fp):0;
+  var rec=tp+fn>0?tp/(tp+fn):0;
+  var spec=tn+fp>0?tn/(tn+fp):0;
+  var f1=prec+rec>0?2*prec*rec/(prec+rec):0;
+  var acc=(tp+tn)/total;
+  function fmt(v){return (v*100).toFixed(1)+'%';}
+  function box(lbl,val,col){return '<div class="metric-box"><div class="metric-lbl">'+lbl+'</div><div class="metric-val" style="color:'+col+'">'+fmt(val)+'</div></div>';}
+  el.innerHTML=
+    box('Accuracy',acc,'#e2e8f0')+
+    box('Precision',prec,'var(--green)')+
+    box('Recall',rec,'var(--amber)')+
+    box('Specificity',spec,'var(--sky)')+
+    box('F1',f1,'var(--ac)');
+}
+
+function computeROC(scores, labels){
+  var P=labels.reduce(function(s,l){return s+(l?1:0);},0);
+  var N=labels.length-P;
+  if(P===0||N===0) return [{fpr:0,tpr:0},{fpr:1,tpr:1}];
+  var pairs=scores.map(function(s,i){return{s:s,l:labels[i]};}).sort(function(a,b){return b.s-a.s;});
+  var pts=[{fpr:0,tpr:0,thresh:Infinity}]; var tp=0,fp=0;
+  for(var i=0;i<pairs.length;i++){
+    if(pairs[i].l) tp++; else fp++;
+    pts.push({fpr:fp/N,tpr:tp/P,thresh:pairs[i].s});
+  }
+  return pts;
+}
+
+function aucFromROC(pts){
+  var a=0;
+  for(var i=1;i<pts.length;i++) a+=(pts[i].fpr-pts[i-1].fpr)*(pts[i].tpr+pts[i-1].tpr)/2;
+  return Math.abs(a);
+}
+
+function drawROC(svgId, rocPts, opThresh, W, H){
+  var svg=document.getElementById(svgId); if(!svg) return;
+  var ML=32,MR=14,MT=12,MB=28,PW=W-ML-MR,PH=H-MT-MB;
+  var sx=function(v){return ML+v*PW;}, sy=function(v){return MT+PH-v*PH;};
+  var auc=aucFromROC(rocPts);
+  var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+  // Grid
+  [0.25,0.5,0.75].forEach(function(v){
+    h+='<line x1="'+sx(v)+'" y1="'+MT+'" x2="'+sx(v)+'" y2="'+(MT+PH)+'" stroke="#1a2035" stroke-width="1"/>';
+    h+='<line x1="'+ML+'" y1="'+sy(v)+'" x2="'+(ML+PW)+'" y2="'+sy(v)+'" stroke="#1a2035" stroke-width="1"/>';
+    h+='<text x="'+sx(v)+'" y="'+(MT+PH+16)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+v+'</text>';
+    h+='<text x="'+(ML-5)+'" y="'+(sy(v)+3)+'" fill="#334155" font-size="8" text-anchor="end" font-family="Space Mono,monospace">'+v+'</text>';
+  });
+  h+='<line x1="'+ML+'" y1="'+MT+'" x2="'+ML+'" y2="'+(MT+PH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+  h+='<line x1="'+ML+'" y1="'+(MT+PH)+'" x2="'+(ML+PW)+'" y2="'+(MT+PH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+  // Diagonal (random)
+  h+='<line x1="'+sx(0)+'" y1="'+sy(0)+'" x2="'+sx(1)+'" y2="'+sy(1)+'" stroke="#334155" stroke-width="1" stroke-dasharray="4,3"/>';
+  // ROC curve
+  if(rocPts.length>1){
+    var d='M'+sx(rocPts[0].fpr)+','+sy(rocPts[0].tpr);
+    for(var i=1;i<rocPts.length;i++) d+='L'+sx(rocPts[i].fpr).toFixed(1)+','+sy(rocPts[i].tpr).toFixed(1);
+    h+='<path d="'+d+'" fill="rgba(139,92,246,0.12)" stroke="var(--ac)" stroke-width="2" stroke-linejoin="round"/>';
+  }
+  // Operating point
+  if(opThresh!==null){
+    var op={fpr:0,tpr:0};
+    for(var j=0;j<rocPts.length;j++){
+      if(rocPts[j].thresh===undefined||rocPts[j].thresh>=opThresh) op=rocPts[j];
+    }
+    h+='<circle cx="'+sx(op.fpr).toFixed(1)+'" cy="'+sy(op.tpr).toFixed(1)+'" r="5" fill="var(--amber)" stroke="#fff" stroke-width="1.5"/>';
+  }
+  // Axis labels
+  h+='<text x="'+sx(0.5)+'" y="'+(MT+PH+26)+'" fill="#475569" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">FPR (False Positive Rate)</text>';
+  h+='<text x="'+(ML-22)+'" y="'+sy(0.5)+'" fill="#475569" font-size="8" text-anchor="middle" font-family="Space Mono,monospace" transform="rotate(-90,'+(ML-22)+','+sy(0.5)+')">TPR (Recall)</text>';
+  // AUC label
+  h+='<text x="'+(ML+PW-4)+'" y="'+(MT+16)+'" fill="var(--ac)" font-size="9" text-anchor="end" font-family="Space Mono,monospace">AUC = '+auc.toFixed(3)+'</text>';
+  svg.innerHTML=h;
+}
+
+function toggleDetail(b,a){
+  var bd=document.getElementById(b),ar=document.getElementById(a),open=bd.style.display==='block';
+  bd.style.display=open?'none':'block'; ar.textContent=open?'▼ expand':'▲ hide';
+}
+
+/* ══════════════════════════════════════════════════
+   DEMO 1 — ACCURACY PARADOX
+══════════════════════════════════════════════════ */
+(function(){
+  function d1Update(){
+    var prev=+document.getElementById('d1Prev').value/100;
+    var sens=+document.getElementById('d1Sens').value/100;
+    var spec=+document.getElementById('d1Spec').value/100;
+    document.getElementById('d1PrevVal').textContent=(prev*100).toFixed(1)+'%';
+    document.getElementById('d1SensVal').textContent=(sens*100).toFixed(0)+'%';
+    document.getElementById('d1SpecVal').textContent=(spec*100).toFixed(1)+'%';
+    var N=10000,P=Math.round(N*prev),Ng=N-P;
+    var tp=Math.round(P*sens),fn=P-tp;
+    var tn=Math.round(Ng*spec),fp=Ng-tn;
+    renderCM('d1CM',tp,fp,fn,tn,null,null,null,null);
+    renderMetrics('d1Metrics',tp,fp,fn,tn);
+    var modelAcc=(tp+tn)/N;
+    var baselineAcc=Ng/N;
+    var bl=document.getElementById('d1Baseline');
+    bl.innerHTML='Always-negative baseline accuracy: <strong>'+(baselineAcc*100).toFixed(2)+'%</strong><br>Your model accuracy: <strong>'+(modelAcc*100).toFixed(2)+'%</strong>';
+    var warn=document.getElementById('d1Warning');
+    warn.style.display=baselineAcc>modelAcc?'block':'none';
+  }
+  window.d1Update=d1Update;
+  d1Update();
+})();
+
+/* ══════════════════════════════════════════════════
+   DEMO 2 — 512-PATTERN AUDIT
+══════════════════════════════════════════════════ */
+(function(){
+  var PATTERNS=[
+    {name:'X',          sym:'✕', bits:[1,0,1,0,1,0,1,0,1]},
+    {name:'Vertical',   sym:'|', bits:[0,1,0,0,1,0,0,1,0]},
+    {name:'Horizontal', sym:'—', bits:[0,0,0,1,1,1,0,0,0]},
+    {name:'Square',     sym:'□', bits:[1,1,1,1,0,1,1,1,1]},
+    {name:'Diamond',    sym:'◇', bits:[0,1,0,1,0,1,0,1,0]},
+    {name:'Slash',      sym:'/', bits:[0,0,1,0,1,0,1,0,0]},
+    {name:'Backslash',  sym:'\\',bits:[1,0,0,0,1,0,0,0,1]},
+    {name:'Plus',       sym:'+', bits:[0,1,0,1,1,1,0,1,0]},
+    {name:'Corners',    sym:'⌗', bits:[1,0,1,0,0,0,1,0,1]},
+    {name:'Center Dot', sym:'·', bits:[0,0,0,0,1,0,0,0,0]}
+  ];
+
+  var currentPat=0;
+  var weights=new Array(9).fill(1);
+  var threshold=2.0;
+  var rocPts=[];
+  var lastAudit=null;
+
+  function defaultWeights(pat){
+    return pat.bits.map(function(b){return b?1:-1;});
+  }
+  function defaultThreshold(pat){
+    var k=pat.bits.reduce(function(s,b){return s+b;},0);
+    return Math.round(k*0.6*4)/4; // 60% of max positive score, snapped to 0.25
+  }
+
+  function score512(){
+    var scores=[], labels=[];
+    var target=PATTERNS[currentPat].bits;
+    for(var n=0;n<512;n++){
+      var bits=[];
+      for(var b=8;b>=0;b--) bits.push((n>>b)&1);
+      var s=bits.reduce(function(sum,x,i){return sum+weights[i]*x;},0);
+      scores.push(s);
+      var match=bits.every(function(x,i){return x===target[i];});
+      labels.push(match?1:0);
+    }
+    return{scores:scores,labels:labels};
+  }
+
+  function audit(){
+    var data=score512();
+    rocPts=computeROC(data.scores,data.labels);
+    lastAudit=data;
+    updateFromThreshold();
+  }
+
+  function updateFromThreshold(){
+    if(!lastAudit){d2DrawEmptyROC();return;}
+    var th=threshold;
+    var tp=0,fp=0,fn=0,tn=0;
+    for(var i=0;i<512;i++){
+      var pred=lastAudit.scores[i]>=th?1:0;
+      var act=lastAudit.labels[i];
+      if(pred&&act) tp++;
+      else if(pred&&!act) fp++;
+      else if(!pred&&act) fn++;
+      else tn++;
+    }
+    renderCM('d2CM',tp,fp,fn,tn,null,null,null,null);
+    renderMetrics('d2Metrics',tp,fp,fn,tn);
+    drawROC('d2ROC',rocPts,th,380,220);
+    var targetScore=lastAudit.scores[PATTERNS[currentPat].bits.reduce(function(n,b,i){return n+(b<<(8-i));},0)];
+    document.getElementById('d2Summary').innerHTML=
+      'Total inputs: 512 &nbsp;|&nbsp; True positives possible: 1 &nbsp;|&nbsp; True negatives: 511<br>'+
+      'Target pattern score: <strong style="color:var(--ac)">'+targetScore.toFixed(2)+'</strong> &nbsp;|&nbsp; Threshold: <strong>'+th.toFixed(2)+'</strong><br>'+
+      'TP='+tp+' FP='+fp+' FN='+fn+' TN='+tn+'  &nbsp;|&nbsp; AUC = '+aucFromROC(rocPts).toFixed(4);
+  }
+
+  function d2DrawEmptyROC(){
+    var svg=document.getElementById('d2ROC'); if(!svg) return;
+    var W=380,H=220,ML=32,MR=14,MT=12,MB=28,PW=W-ML-MR,PH=H-MT-MB;
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    h+='<line x1="'+ML+'" y1="'+(MT+PH)+'" x2="'+(ML+PW)+'" y2="+MT+" stroke="#2d3748" stroke-width="1.2"/>';
+    h+='<line x1="'+ML+'" y1="'+MT+'" x2="'+ML+'" y2="'+(MT+PH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+    h+='<text x="'+(ML+PW/2)+'" y="'+(MT+PH/2)+'" fill="#334155" font-size="11" text-anchor="middle" font-family="Space Mono,monospace">Run audit first</text>';
+    svg.innerHTML=h;
+  }
+
+  function selectPattern(i){
+    currentPat=i;
+    weights=defaultWeights(PATTERNS[i]);
+    threshold=defaultThreshold(PATTERNS[i]);
+    updatePatBtns();
+    updatePreview();
+    updateWeightSliders();
+    document.getElementById('d2Thresh').value=threshold;
+    document.getElementById('d2ThreshVal').textContent=threshold.toFixed(2);
+    lastAudit=null;
+    renderCM('d2CM',0,0,0,0,null,null,null,null);
+    renderMetrics('d2Metrics',0,0,0,0);
+    d2DrawEmptyROC();
+    document.getElementById('d2Summary').textContent='Pattern loaded. Click Run to audit all 512 inputs.';
+  }
+
+  function updatePatBtns(){
+    document.querySelectorAll('.pat-btn').forEach(function(b,i){
+      b.classList.toggle('active',i===currentPat);
+    });
+  }
+  function updatePreview(){
+    var prev=document.getElementById('d2Preview'); if(!prev) return;
+    prev.innerHTML=PATTERNS[currentPat].bits.map(function(b){
+      return '<div class="pat-px '+(b?'on':'off')+'"></div>';
+    }).join('');
+  }
+  function updateWeightSliders(){
+    document.querySelectorAll('.w2').forEach(function(sl,i){
+      sl.value=weights[i];
+      var lbl=document.getElementById('w2lbl'+i);
+      if(lbl) lbl.className='w-lbl2'+(PATTERNS[currentPat].bits[i]?' active':'');
+      var val=document.getElementById('w2val'+i);
+      if(val){val.textContent=(weights[i]>=0?'+':'')+weights[i].toFixed(1);val.style.color=weights[i]>0?'var(--green)':weights[i]<0?'var(--red)':'var(--muted2)';}
+      var bg='linear-gradient(to right,#0a0d14,'+(weights[i]>=0?'var(--green)':'var(--red)')+')';
+      sl.style.background=bg;
+    });
+  }
+
+  // Build UI
+  var btnCont=document.getElementById('d2PatBtns');
+  PATTERNS.forEach(function(p,i){
+    var b=document.createElement('button');
+    b.className='pat-btn';
+    b.textContent=p.name;
+    b.title=p.name;
+    b.onclick=function(){selectPattern(i);};
+    btnCont.appendChild(b);
+  });
+
+  var wCont=document.getElementById('d2Weights');
+  for(var i=0;i<9;i++){
+    (function(idx){
+      var row=document.createElement('div'); row.className='w-row2';
+      row.innerHTML=
+        '<span class="w-lbl2" id="w2lbl'+idx+'">w'+(idx+1)+'</span>'+
+        '<input type="range" class="w2" id="w2sl'+idx+'" min="-3" max="3" step="0.25" value="'+weights[idx]+'">'+
+        '<span class="w-val2" id="w2val'+idx+'">+1.0</span>';
+      row.querySelector('input').oninput=function(e){
+        weights[idx]=+e.target.value;
+        var val=document.getElementById('w2val'+idx);
+        val.textContent=(weights[idx]>=0?'+':'')+weights[idx].toFixed(1);
+        val.style.color=weights[idx]>0?'var(--green)':weights[idx]<0?'var(--red)':'var(--muted2)';
+        e.target.style.background='linear-gradient(to right,#0a0d14,'+(weights[idx]>=0?'var(--green)':'var(--red)')+')';
+        lastAudit=null;
+      };
+      wCont.appendChild(row);
+    })(i);
+  }
+
+  document.getElementById('d2Thresh').oninput=function(e){
+    threshold=+e.target.value;
+    document.getElementById('d2ThreshVal').textContent=threshold.toFixed(2);
+    if(lastAudit) updateFromThreshold();
+  };
+  document.getElementById('d2RunBtn').onclick=function(){audit();};
+
+  window.d2Update=function(){
+    threshold=+document.getElementById('d2Thresh').value;
+    document.getElementById('d2ThreshVal').textContent=threshold.toFixed(2);
+    if(lastAudit) updateFromThreshold();
+  };
+
+  selectPattern(0);
+  renderCM('d2CM',0,0,0,0,'–','–','–','–');
+  d2DrawEmptyROC();
+})();
+
+/* ══════════════════════════════════════════════════
+   DEMO 3 — REAL-WORLD RISK TOLERANCE
+══════════════════════════════════════════════════ */
+(function(){
+  var SCENARIOS=[
+    {id:'cancer',   name:'🏥 Cancer Screen',  prev:0.02, muP:0.78, muN:0.32, sig:0.14,
+     fpCost:3, fnCost:100,
+     tp:'Cancer detected correctly',fp:'Healthy patient → biopsy (anxiety/cost)',fn:'Cancer missed — potentially fatal',tn:'Healthy patient correctly cleared',
+     note:'Missing a cancer is potentially fatal. Accept a high false positive rate (unnecessary biopsies) to ensure near-zero misses. Target recall ≥ 95%.',
+     defT:0.28},
+    {id:'smoke',    name:'🔥 Smoke Alarm',    prev:0.001,muP:0.85, muN:0.15, sig:0.10,
+     fpCost:1, fnCost:1000,
+     tp:'Fire detected — alarm sounds',fp:'Toast smoke → false alarm',fn:'Fire missed — house burns',tn:'No fire — correctly silent',
+     note:'A single missed fire is catastrophic. Smoke alarms are intentionally tuned for maximum recall. False alarms are merely annoying.',
+     defT:0.15},
+    {id:'tsa',      name:'✈️ TSA Security',   prev:0.0001,muP:0.88,muN:0.22,sig:0.12,
+     fpCost:2, fnCost:10000,
+     tp:'Weapon detected — intercept',fp:'Innocent traveler flagged (pat-down)',fn:'Weapon passes through',tn:'Traveler correctly cleared',
+     note:'The asymmetry is extreme: missing a weapon risks mass casualties. TSA accepts enormous false positive rates (everyone removes shoes). Recall must be near 100%.',
+     defT:0.18},
+    {id:'bridge',   name:'🌉 Bridge Inspection',prev:0.01,muP:0.80,muN:0.30,sig:0.15,
+     fpCost:5, fnCost:500,
+     tp:'Real crack detected → repair',fp:'False alarm → unnecessary inspection',fn:'Crack missed → failure risk',tn:'Sound beam correctly cleared',
+     note:'Missing a structural defect risks catastrophic failure. Unnecessary inspections are expensive but survivable. Favour high recall.',
+     defT:0.25},
+    {id:'spam',     name:'📧 Spam Filter',    prev:0.40, muP:0.75, muN:0.35, sig:0.16,
+     fpCost:50, fnCost:2,
+     tp:'Spam correctly blocked',fp:'Legitimate email lost to spam',fn:'Spam reaches inbox',tn:'Real email correctly delivered',
+     note:'A false positive means losing a job offer, doctor\'s appointment, or legal notice. Most users strongly prefer receiving some spam over losing real email.',
+     defT:0.72},
+    {id:'facerec',  name:'🎭 Facial Recognition',prev:0.0001,muP:0.82,muN:0.28,sig:0.13,
+     fpCost:1000, fnCost:20,
+     tp:'Wanted person identified',fp:'Innocent person wrongly flagged',fn:'Wanted person not flagged',tn:'Innocent person correctly cleared',
+     note:'A false positive means an innocent person is stopped, investigated, or arrested. With millions of faces scanned daily, even a 0.01% FPR produces thousands of wrongful flaggings. Threshold must be very high.',
+     defT:0.88},
+    {id:'drug',     name:'💊 Drug Approval',  prev:0.30, muP:0.72, muN:0.38, sig:0.16,
+     fpCost:200, fnCost:30,
+     tp:'Safe/effective drug approved',fp:'Harmful drug approved (thalidomide)',fn:'Useful drug rejected',tn:'Harmful drug correctly rejected',
+     note:'Regulators are historically conservative. Approving a harmful drug (thalidomide) is an irreversible disaster. Rejecting a useful drug delays treatment — bad, but recoverable. High threshold justified.',
+     defT:0.70},
+    {id:'loan',     name:'🏦 Loan Approval',  prev:0.15, muP:0.68, muN:0.42, sig:0.17,
+     fpCost:30, fnCost:25,
+     tp:'Reliable borrower approved',fp:'Risky borrower approved → default',fn:'Reliable borrower denied',tn:'Risky borrower correctly denied',
+     note:'A relatively balanced tradeoff — defaulted loans cost the bank, but wrongly denied loans lose revenue and harm creditworthy customers. The right threshold depends on the bank\'s current risk appetite.',
+     defT:0.50},
+    {id:'covid',    name:'🦠 COVID Rapid Test',prev:0.05, muP:0.76, muN:0.34, sig:0.15,
+     fpCost:15, fnCost:60,
+     tp:'Infected person correctly isolated',fp:'Healthy person unnecessarily isolates',fn:'Infected person spreads virus',tn:'Healthy person correctly freed',
+     note:'The right threshold shifts with prevalence and transmission rates. At peak spread, minimize FN (missed infections). At low prevalence, FP cost (unnecessary isolation) becomes more significant. This scenario teaches that thresholds should be dynamic.',
+     defT:0.40},
+    {id:'rec',      name:'🎬 Recommendation', prev:0.20, muP:0.65, muN:0.45, sig:0.18,
+     fpCost:5, fnCost:3,
+     tp:'Relevant item recommended',fp:'Irrelevant item wastes screen space',fn:'Good item not surfaced',tn:'Bad item correctly excluded',
+     note:'A mild asymmetry: showing something irrelevant is mildly annoying; missing something the user would have loved is a lost engagement opportunity. Most platforms tune for moderate precision with reasonable recall.',
+     defT:0.55}
+  ];
+
+  var currentSc=0;
+  var datasets={};
+
+  function genData(sc){
+    if(datasets[sc.id]) return datasets[sc.id];
+    var rng=seededRng(sc.id.charCodeAt(0)*31+sc.id.charCodeAt(1)*7);
+    var n=400,data=[];
+    for(var i=0;i<n;i++){
+      var isPos=rng()<sc.prev;
+      var mu=isPos?sc.muP:sc.muN;
+      var s=mu+sc.sig*gauss(rng);
+      s=Math.max(0.02,Math.min(0.98,s));
+      data.push({label:isPos?1:0,score:s});
+    }
+    datasets[sc.id]=data;
+    return data;
+  }
+
+  function applyThreshold(data,th){
+    var tp=0,fp=0,fn=0,tn=0;
+    data.forEach(function(d){
+      var pred=d.score>=th?1:0;
+      if(pred&&d.label) tp++;
+      else if(pred&&!d.label) fp++;
+      else if(!pred&&d.label) fn++;
+      else tn++;
+    });
+    return{tp:tp,fp:fp,fn:fn,tn:tn};
+  }
+
+  function selectScenario(i){
+    currentSc=i;
+    document.querySelectorAll('.sc-btn').forEach(function(b,j){b.classList.toggle('active',j===i);});
+    var sc=SCENARIOS[i];
+    document.getElementById('d3Desc').innerHTML='<strong>'+sc.name.replace(/^../,'').trim()+'</strong> — '+
+      (sc.prev*100).toFixed(1)+'% prevalence. FP cost: '+sc.fpCost+'× &nbsp;|&nbsp; FN cost: '+sc.fnCost+'×';
+    document.getElementById('d3Labels').innerHTML=
+      '<div class="sc-label-cell tp"><div class="sc-label-name">TP</div>'+sc.tp+'</div>'+
+      '<div class="sc-label-cell fp"><div class="sc-label-name">FP (Type I)</div>'+sc.fp+'</div>'+
+      '<div class="sc-label-cell fn"><div class="sc-label-name">FN (Type II)</div>'+sc.fn+'</div>'+
+      '<div class="sc-label-cell tn"><div class="sc-label-name">TN</div>'+sc.tn+'</div>';
+    document.getElementById('d3FPCostLbl').textContent=sc.fpCost+'×';
+    document.getElementById('d3FNCostLbl').textContent=sc.fnCost+'×';
+    var total=sc.fpCost+sc.fnCost;
+    var fpSeg=document.querySelector('#d3CostBar .cost-fp-seg');
+    var fnSeg=document.querySelector('#d3CostBar .cost-fn-seg');
+    if(fpSeg) fpSeg.style.flex=sc.fpCost/total+'';
+    if(fnSeg) fnSeg.style.flex=sc.fnCost/total+'';
+    document.getElementById('d3Thresh').value=sc.defT;
+    document.getElementById('d3ThreshVal').textContent=sc.defT.toFixed(2);
+    document.getElementById('d3Note').textContent=sc.note;
+    d3Draw();
+  }
+
+  function d3Draw(){
+    var sc=SCENARIOS[currentSc];
+    var data=genData(sc);
+    var th=+document.getElementById('d3Thresh').value;
+    document.getElementById('d3ThreshVal').textContent=th.toFixed(2);
+    var cm=applyThreshold(data,th);
+    renderCM('d3CM',cm.tp,cm.fp,cm.fn,cm.tn,null,null,null,null);
+    renderMetrics('d3Metrics',cm.tp,cm.fp,cm.fn,cm.tn);
+    var scores=data.map(function(d){return d.score;});
+    var labels=data.map(function(d){return d.label;});
+    var roc=computeROC(scores,labels);
+    drawROC('d3ROC',roc,th,320,220);
+  }
+
+  // Build scenario buttons
+  var btnCont=document.getElementById('d3ScBtns');
+  SCENARIOS.forEach(function(sc,i){
+    var b=document.createElement('button');
+    b.className='sc-btn';
+    b.textContent=sc.name;
+    b.onclick=function(){selectScenario(i);};
+    btnCont.appendChild(b);
+  });
+
+  // Cost bar HTML
+  document.getElementById('d3CostBar').innerHTML='<div class="cost-fp-seg" style="flex:1"></div><div class="cost-fn-seg" style="flex:1"></div>';
+
+  document.getElementById('d3Thresh').oninput=function(){d3Draw();};
+  window.d3Update=d3Draw;
+
+  selectScenario(0);
+})();
+</script>
+</body>
+</html>
