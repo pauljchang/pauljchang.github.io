@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 1, Lesson 4 — ELIZA | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:         #0d1117;
+  --surface:    #161b27;
+  --surface-2:  #1a2035;
+  --border:     #1e2d40;
+  --text:       #e2e8f0;
+  --muted:      #64748b;
+  --muted-2:    #334155;
+  --teal:       #2dd4bf;
+  --teal-dim:   rgba(45,212,191,.12);
+  --teal-glow:  rgba(45,212,191,.35);
+  --amber:      #f59e0b;
+  --amber-dim:  rgba(245,158,11,.12);
+  --indigo:     #6366f1;
+  --indigo-l:   #818cf8;
+  --green:      #4ade80;
+  --red:        #f87171;
+  --font:       'Outfit', sans-serif;
+  --mono:       'Space Mono', monospace;
+  --display:    'Lora', serif;
+}
+
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 16px; line-height: 1.7; }
+
+/* ── Nav ──────────────────────────────────────────── */
+.course-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(13,17,23,.9); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 11px 40px;
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+}
+.era-badge {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+  padding: 3px 9px; color: var(--teal); font-size: 10px; letter-spacing: .1em;
+}
+
+/* ── Layout ───────────────────────────────────────── */
+.wrap { max-width: 920px; margin: 0 auto; padding: 0 32px 100px; }
+
+/* ── Hero ─────────────────────────────────────────── */
+.hero { padding: 60px 0 48px; border-bottom: 1px solid var(--border); margin-bottom: 60px; }
+.hero-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.week-badge { background: var(--teal); color: #021a18; padding: 3px 10px; border-radius: 4px; font-weight: 700; font-size: 10px; letter-spacing: .08em; }
+.hero h1 { font-family: var(--display); font-size: 54px; font-weight: 600; line-height: 1.08; letter-spacing: -.02em; color: #f1f5f9; margin-bottom: 14px; }
+.hero-sub { font-size: 17px; color: var(--muted); font-weight: 300; max-width: 580px; margin-bottom: 28px; }
+.hero-timeline { display: flex; gap: 36px; flex-wrap: wrap; }
+.tl-item { display: flex; flex-direction: column; gap: 3px; }
+.tl-year  { font-family: var(--mono); font-size: 10px; color: var(--teal); letter-spacing: .1em; }
+.tl-label { font-size: 13px; color: var(--muted); }
+
+/* ── Section ──────────────────────────────────────── */
+.section { margin-bottom: 68px; }
+.section-head { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; }
+.sec-num   { font-family: var(--mono); font-size: 11px; color: var(--muted-2); min-width: 28px; }
+.sec-title { font-family: var(--display); font-size: 26px; font-weight: 600; color: #f1f5f9; }
+
+/* ── Objectives ───────────────────────────────────── */
+.obj-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.obj-list li { display: flex; gap: 14px; align-items: flex-start; padding: 14px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; font-size: 15px; color: #94a3b8; }
+.obj-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.obj-list li strong { color: #f1f5f9; font-weight: 600; }
+
+/* ── Prose ────────────────────────────────────────── */
+.prose p { font-size: 15.5px; color: #94a3b8; margin-bottom: 18px; line-height: 1.82; }
+.prose p:last-child { margin-bottom: 0; }
+.prose p strong { color: #e2e8f0; font-weight: 600; }
+.prose blockquote { border-left: 3px solid var(--teal); margin: 28px 0; padding: 12px 20px; background: var(--teal-dim); border-radius: 0 8px 8px 0; font-style: italic; color: #94a3b8; font-size: 15px; }
+
+/* ── Math/Detail Collapsible ──────────────────────── */
+.detail-box { margin-top: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.detail-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; cursor: pointer; user-select: none; transition: background .15s; font-size: 14px; font-weight: 500; color: #94a3b8; }
+.detail-head:hover { background: var(--surface-2); }
+.detail-arrow { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.detail-body { padding: 20px 22px; border-top: 1px solid var(--border); font-size: 14.5px; color: #94a3b8; line-height: 1.78; display: none; }
+.detail-body p { margin-bottom: 12px; }
+.detail-body p:last-child { margin-bottom: 0; }
+.detail-body strong { color: #e2e8f0; }
+.code-block { background: #0a0d14; border: 1px solid var(--border); border-radius: 6px; padding: 14px 18px; font-family: var(--mono); font-size: 12px; color: #4ade80; margin: 12px 0; line-height: 1.85; }
+
+/* ═══════════════════════════════════════════════════
+   DEMO — two-panel layout
+   ═══════════════════════════════════════════════════ */
+.demo-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.demo-topbar { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.demo-tag { font-family: var(--mono); font-size: 11px; color: var(--teal); letter-spacing: .12em; text-transform: uppercase; }
+.demo-note { font-family: var(--mono); font-size: 10px; color: var(--muted-2); }
+
+.demo-panels {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  min-height: 480px;
+}
+
+/* ── Chat Panel ───────────────────────────────────── */
+.chat-panel { display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+.chat-history { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; min-height: 360px; max-height: 420px; scroll-behavior: smooth; }
+.chat-history::-webkit-scrollbar { width: 4px; }
+.chat-history::-webkit-scrollbar-track { background: transparent; }
+.chat-history::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.msg { display: flex; flex-direction: column; gap: 4px; max-width: 82%; animation: msgIn .2s ease-out; }
+@keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.msg.eliza { align-self: flex-start; }
+.msg.user  { align-self: flex-end; }
+
+.msg-label { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; color: var(--muted); padding: 0 4px; }
+.msg.eliza .msg-label { color: var(--teal); }
+.msg.user  .msg-label { text-align: right; color: var(--indigo-l); }
+
+.msg-bubble { padding: 10px 14px; border-radius: 10px; font-size: 14px; line-height: 1.6; }
+.msg.eliza .msg-bubble { background: #0f1520; border: 1px solid var(--border); color: #cbd5e1; border-radius: 4px 10px 10px 10px; }
+.msg.user  .msg-bubble { background: #1e1b4b; border: 1px solid #3730a3; color: #c7d2fe; border-radius: 10px 4px 10px 10px; }
+
+/* typing indicator */
+.typing { display: flex; gap: 5px; align-items: center; padding: 12px 14px; background: #0f1520; border: 1px solid var(--border); border-radius: 4px 10px 10px 10px; width: fit-content; }
+.typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); opacity: .4; animation: blink 1.2s infinite; }
+.typing span:nth-child(2) { animation-delay: .2s; }
+.typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%,80%,100%{opacity:.4} 40%{opacity:1} }
+
+.chat-input-row { padding: 14px 16px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+.chat-input {
+  flex: 1; background: #0a0d14; border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 14px; color: var(--text); font-family: var(--font); font-size: 14px; outline: none;
+  transition: border-color .15s;
+}
+.chat-input:focus { border-color: var(--teal); }
+.chat-input::placeholder { color: var(--muted); }
+.send-btn {
+  background: var(--teal-dim); border: 1px solid rgba(45,212,191,.35); border-radius: 8px;
+  color: var(--teal); font-family: var(--mono); font-size: 12px;
+  padding: 10px 16px; cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.send-btn:hover { background: rgba(45,212,191,.2); box-shadow: 0 0 12px var(--teal-glow); }
+
+/* ── Rule Inspector Panel ─────────────────────────── */
+.inspector-panel { padding: 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; max-height: 540px; }
+.inspector-panel::-webkit-scrollbar { width: 4px; }
+.inspector-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.insp-title { font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; }
+
+/* idle state */
+.insp-idle { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 40px 20px; text-align: center; }
+.insp-idle-arrow { font-size: 24px; color: var(--muted-2); animation: nudge 2s ease-in-out infinite; }
+@keyframes nudge { 0%,100%{transform:translateX(0)} 50%{transform:translateX(-6px)} }
+.insp-idle p { font-size: 13px; color: var(--muted-2); line-height: 1.5; }
+
+/* fired rule card */
+.rule-card { background: #0a0d14; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.rule-card.flash { animation: cardFlash .4s ease-out; }
+@keyframes cardFlash { 0%{border-color:var(--teal);box-shadow:0 0 16px var(--teal-glow)} 100%{border-color:var(--border);box-shadow:none} }
+
+.rule-card-head { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.rule-name-badge { font-family: var(--mono); font-size: 10px; color: var(--teal); background: var(--teal-dim); border: 1px solid rgba(45,212,191,.3); border-radius: 4px; padding: 3px 8px; }
+.rule-desc { font-size: 12px; color: var(--muted); }
+
+.rule-block { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.rule-block:last-child { border-bottom: none; }
+.rule-block-label { font-family: var(--mono); font-size: 9px; color: var(--muted-2); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
+
+/* pattern display */
+.pattern-code { font-family: var(--mono); font-size: 11px; color: #a78bfa; background: rgba(167,139,250,.07); border: 1px solid rgba(167,139,250,.15); border-radius: 4px; padding: 6px 10px; word-break: break-all; line-height: 1.7; }
+
+/* match visualization */
+.match-viz { font-family: var(--mono); font-size: 12px; color: #94a3b8; line-height: 1.7; padding: 6px 0; }
+mark.viz-full { background: rgba(245,158,11,.18); color: var(--amber); border-radius: 2px; padding: 0 2px; }
+mark.viz-cap  { background: rgba(45,212,191,.18); color: var(--teal); border-radius: 2px; padding: 0 2px; text-decoration: underline; text-decoration-color: rgba(45,212,191,.5); }
+
+/* captures */
+.cap-list { display: flex; flex-direction: column; gap: 6px; }
+.cap-row { display: flex; align-items: flex-start; gap: 8px; font-family: var(--mono); font-size: 11px; }
+.cap-chip { background: var(--teal-dim); border: 1px solid rgba(45,212,191,.3); border-radius: 4px; padding: 2px 8px; color: var(--teal); white-space: pre-wrap; }
+.cap-arrow { color: var(--muted-2); flex-shrink: 0; padding-top: 2px; }
+.cap-reflected { background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.25); border-radius: 4px; padding: 2px 8px; color: var(--indigo-l); white-space: pre-wrap; }
+.cap-same { color: var(--muted-2); font-style: italic; font-size: 10px; padding-top: 3px; }
+
+/* transforms */
+.transforms-list { display: flex; flex-wrap: wrap; gap: 5px; }
+.transform-chip { font-family: var(--mono); font-size: 10px; background: rgba(99,102,241,.08); border: 1px solid rgba(99,102,241,.2); border-radius: 3px; padding: 2px 7px; color: var(--indigo-l); }
+
+/* template + response */
+.template-text { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.7; }
+.template-text mark { background: rgba(245,158,11,.15); color: var(--amber); border-radius: 2px; padding: 0 2px; }
+.response-text { font-size: 13px; color: #e2e8f0; line-height: 1.65; font-style: italic; border-left: 2px solid var(--teal); padding-left: 10px; }
+
+/* ── Rules Reference (collapsible) ────────────────── */
+.rules-ref { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-top: 20px; }
+.rules-ref-head { display: flex; justify-content: space-between; align-items: center; padding: 13px 18px; cursor: pointer; user-select: none; font-size: 13px; font-weight: 500; color: #94a3b8; transition: background .15s; }
+.rules-ref-head:hover { background: var(--surface-2); }
+.rules-ref-arrow { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.rules-ref-body { display: none; overflow-x: auto; }
+.rules-tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.rules-tbl th { text-align: left; padding: 9px 14px; background: #0a0d14; color: var(--muted); border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.rules-tbl td { padding: 8px 14px; border-bottom: 1px solid #12192a; color: #94a3b8; font-size: 12px; vertical-align: top; }
+.rules-tbl tr:last-child td { border-bottom: none; }
+.rules-tbl tr:hover td { background: #0f1520; }
+.tbl-rule { font-family: var(--mono); font-size: 10px; color: var(--teal); white-space: nowrap; }
+.tbl-pat  { font-family: var(--mono); font-size: 10px; color: #a78bfa; word-break: break-all; max-width: 200px; }
+.tbl-ex   { font-style: italic; color: var(--muted); }
+
+/* ── Exercises ────────────────────────────────────── */
+.ex-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+.ex-head { padding: 16px 20px; display: flex; gap: 16px; align-items: flex-start; border-bottom: 1px solid var(--border); }
+.ex-num  { font-family: var(--mono); font-size: 11px; color: var(--teal); background: var(--teal-dim); border: 1px solid rgba(45,212,191,.3); border-radius: 4px; padding: 4px 9px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+.ex-title { font-weight: 600; font-size: 16px; color: #f1f5f9; }
+.ex-desc  { font-size: 14px; color: #94a3b8; margin-top: 4px; line-height: 1.6; }
+.ex-body  { padding: 20px; }
+.ex-body p { font-size: 14.5px; color: #94a3b8; margin-bottom: 14px; line-height: 1.7; }
+.ex-body p:last-child { margin-bottom: 0; }
+.ex-body p strong { color: #e2e8f0; }
+.ex-body p em { color: var(--teal); font-style: normal; font-weight: 500; }
+
+.try-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin: 14px 0; }
+.try-list li { display: flex; align-items: center; gap: 10px; padding: 9px 14px; background: #0a0d14; border: 1px solid var(--border); border-radius: 7px; font-family: var(--mono); font-size: 12px; cursor: pointer; color: #94a3b8; transition: all .15s; }
+.try-list li:hover { border-color: var(--teal); color: var(--teal); }
+.try-list li::before { content: '↗'; color: var(--teal); }
+.try-list li .predicted { margin-left: auto; font-size: 10px; color: var(--muted-2); font-family: var(--font); font-style: italic; }
+
+/* ── Discussion ───────────────────────────────────── */
+.disc-list { list-style: none; counter-reset: d; display: flex; flex-direction: column; gap: 12px; }
+.disc-list li { counter-increment: d; display: flex; gap: 14px; align-items: flex-start; padding: 16px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; font-size: 15px; color: #94a3b8; line-height: 1.72; }
+.disc-list li::before { content: counter(d); font-family: var(--mono); font-size: 11px; color: var(--teal); background: var(--teal-dim); border: 1px solid rgba(45,212,191,.25); border-radius: 4px; padding: 4px 9px; flex-shrink: 0; margin-top: 2px; }
+.disc-list li strong { color: #e2e8f0; }
+
+/* ── Bottom Nav ───────────────────────────────────── */
+.lesson-nav { display: flex; justify-content: space-between; margin-top: 68px; padding-top: 32px; border-top: 1px solid var(--border); }
+.nav-btn { display: flex; align-items: center; gap: 16px; padding: 14px 22px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all .15s; text-decoration: none; }
+.nav-btn:hover { border-color: var(--teal); box-shadow: 0 0 16px var(--teal-glow); }
+.nav-lbl   { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+.nav-title { font-size: 15px; font-weight: 500; color: #e2e8f0; margin-top: 3px; }
+.nav-arrow { font-size: 20px; color: var(--teal); }
+</style>
+</head>
+<body>
+
+<!-- ── Course Nav ── -->
+<nav class="course-nav">
+  <span class="era-badge">ERA 1: FOUNDATIONS</span>
+  <span>›</span>
+  <span>Evolution of Intelligence</span>
+  <span>›</span>
+  <span style="color:#94a3b8;">Era 1, Lesson 4 — ELIZA</span>
+</nav>
+
+<div class="wrap">
+
+  <!-- ── Hero ── -->
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 1 · LESSON 4</span>
+      <span>1966</span>
+      <span>·</span>
+      <span>Joseph Weizenbaum, MIT</span>
+    </div>
+    <h1>ELIZA</h1>
+    <p class="hero-sub">The chatbot that fooled the world — and taught us how easily we project understanding onto machines.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1966</span><span class="tl-label">Weizenbaum publishes ELIZA at MIT</span></div>
+      <div class="tl-item"><span class="tl-year">1966</span><span class="tl-label">Secretary asks to be left alone with it</span></div>
+      <div class="tl-item"><span class="tl-year">1976</span><span class="tl-label"><em>Computer Power and Human Reason</em> published</span></div>
+    </div>
+  </header>
+
+  <!-- ═══ 01 OBJECTIVES ═══ -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">🔍</span><div><strong>Identify</strong> how ELIZA uses regular expression pattern matching and template substitution — not understanding — to generate responses.</div></li>
+      <li><span class="obj-icon">🪞</span><div><strong>Explain</strong> pronoun reflection and why it creates the illusion of a two-way conversation.</div></li>
+      <li><span class="obj-icon">🧩</span><div><strong>Predict</strong> which rule will fire for a given input by reading the rule table.</div></li>
+      <li><span class="obj-icon">⚠️</span><div><strong>Articulate</strong> the difference between pattern-matching and genuine language understanding — and why Weizenbaum himself was disturbed by the ELIZA effect.</div></li>
+    </ul>
+  </section>
+
+  <!-- ═══ 02 THE STORY ═══ -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">The Program That Shouldn't Have Worked</h2></div>
+    <div class="prose">
+      <p>
+        In 1966, MIT computer scientist Joseph Weizenbaum published a paper describing a program he called
+        ELIZA. It was designed to simulate a Rogerian psychotherapist — the kind that reflects your words
+        back to you as questions. Weizenbaum expected his demonstration to show the <em>limits</em> of
+        computers. Instead, it demonstrated something far more unsettling about humans.
+      </p>
+      <p>
+        ELIZA contained no knowledge, no memory, no model of the world. It operated entirely through
+        <strong>pattern matching</strong>: scanning input for keywords and structures, then filling
+        response templates. If you said "I feel sad," it matched the pattern "I feel (something)" and
+        replied "Tell me more about feeling sad." If nothing matched, it said "Please go on." That was it.
+      </p>
+      <p>
+        The reaction shocked Weizenbaum. His own secretary — who knew perfectly well the program was
+        written by her boss — asked him to leave the room so she could talk to ELIZA privately. Psychiatrists
+        proposed deploying ELIZA in clinical settings. Letters addressed directly to ELIZA arrived at MIT.
+        People wept. People fell in love.
+      </p>
+      <blockquote>
+        "I had not realized that extremely short exposures to a relatively simple computer program could
+        induce powerful delusional thinking in quite normal people."
+        — Joseph Weizenbaum, 1976
+      </blockquote>
+      <p>
+        Weizenbaum spent the rest of his career writing about the danger of mistaking the appearance of
+        understanding for understanding itself. His 1976 book, <em>Computer Power and Human Reason</em>,
+        is still one of the most important critiques of AI ever written — and it came from the man who
+        accidentally created the problem.
+      </p>
+    </div>
+
+    <div class="detail-box">
+      <div class="detail-head" onclick="toggleDetail('howBox','howArrow')">
+        <span>🔧 How ELIZA Actually Works — The Mechanism</span>
+        <span class="detail-arrow" id="howArrow">▼ expand</span>
+      </div>
+      <div class="detail-body" id="howBox">
+        <p>ELIZA processes each input through three stages:</p>
+        <p><strong>1. Pattern Matching.</strong> A prioritized list of rules is checked in order.
+        Each rule contains a regular expression. The first rule whose pattern matches the input wins.
+        If no specific rule matches, a fallback rule catches everything.</p>
+        <div class="code-block">Rule: "I feel..."
+Pattern:  /i (?:feel|felt|am feeling) (.+)/i
+Input:    "I feel really anxious lately"
+Match:    ✓  Capture group 1: "really anxious lately"</div>
+        <p><strong>2. Pronoun Reflection.</strong> Captured text is "reflected" — pronouns are flipped
+        so ELIZA can speak the user's words back at them. "I" becomes "you", "my" becomes "your",
+        "am" becomes "are". This single trick is responsible for most of the uncanny feeling.</p>
+        <div class="code-block">Before: "really anxious lately"
+After:  "really anxious lately"   ← (no pronouns here)
+
+Before: "my mother doesn't understand me"
+After:  "your mother doesn't understand you"</div>
+        <p><strong>3. Template Substitution.</strong> A response template is selected (cycling through
+        several options per rule), and the reflected capture group is inserted at the <code>{1}</code>
+        placeholder.</p>
+        <div class="code-block">Template:  "Tell me more about feeling {1}."
+Capture:   "really anxious lately"
+Response:  "Tell me more about feeling really anxious lately."</div>
+        <p><strong>That's the complete algorithm.</strong> No semantic understanding. No memory between
+        turns. No model of you, your life, or your emotions. Every response is assembled mechanically
+        from the text you just typed. The intelligence is entirely in the eye of the beholder.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 03 INTERACTIVE DEMO ═══ -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demo</h2></div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:20px;">
+      Talk to ELIZA in the chat panel. The <strong style="color:#e2e8f0;">Rule Inspector</strong> on the right
+      reveals exactly which pattern fired, what was captured, how pronouns were reflected, and how the
+      response was assembled. Nothing is hidden.
+    </p>
+
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">ELIZA — Pattern Matching Chatbot, 1966</span>
+        <span class="demo-note">Press Enter or click Send</span>
+      </div>
+
+      <div class="demo-panels">
+
+        <!-- Chat -->
+        <div class="chat-panel">
+          <div class="chat-history" id="chatHistory"></div>
+          <div class="chat-input-row">
+            <input class="chat-input" id="chatInput" type="text" placeholder="Type something and press Enter…" autocomplete="off">
+            <button class="send-btn" onclick="sendMessage()">Send →</button>
+          </div>
+        </div>
+
+        <!-- Inspector -->
+        <div class="inspector-panel">
+          <div class="insp-title">Rule Inspector</div>
+          <div id="inspContent">
+            <div class="insp-idle">
+              <div class="insp-idle-arrow">←</div>
+              <p>Send a message and watch the pattern matching happen in real time.</p>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- demo-panels -->
+    </div><!-- demo-wrap -->
+
+    <!-- Rules Reference -->
+    <div class="rules-ref" style="margin-top:20px;">
+      <div class="rules-ref-head" onclick="toggleDetail('rulesBody','rulesArrow')">
+        <span>📋 All Rules — Pattern Reference (21 rules, checked in order)</span>
+        <span class="rules-ref-arrow" id="rulesArrow">▼ expand</span>
+      </div>
+      <div class="detail-body" id="rulesBody" style="padding:0;">
+        <table class="rules-tbl" id="rulesTable"></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 04 LAB EXERCISES ═══ -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:24px;">
+      Use the chat + rule inspector above for all three exercises.
+    </p>
+
+    <!-- EX 01 -->
+    <div class="ex-card">
+      <div class="ex-head">
+        <span class="ex-num">EX 01</span>
+        <div>
+          <div class="ex-title">🎭 &nbsp;The Illusion</div>
+          <div class="ex-desc">Have a genuine, open-ended conversation with ELIZA for at least 10 turns — as if you were actually talking to a therapist. Don't look at the inspector while you type. Then go back and read the full conversation.</div>
+        </div>
+      </div>
+      <div class="ex-body">
+        <p><strong>Reflection questions:</strong></p>
+        <p>Which responses felt the most "intelligent"? Now look at the inspector for those turns — what rule actually fired? Was it a specific match or the fallback?</p>
+        <p>Which responses felt hollow or mechanical? What exposed the illusion for you?</p>
+        <p><em>Key insight to find:</em> ELIZA is at its most convincing when it asks a question rather than making a statement — why might that be?</p>
+      </div>
+    </div>
+
+    <!-- EX 02 -->
+    <div class="ex-card">
+      <div class="ex-head">
+        <span class="ex-num">EX 02</span>
+        <div>
+          <div class="ex-title">🎯 &nbsp;The Prediction Game</div>
+          <div class="ex-desc">Read the Rules Reference table above, then predict which rule will fire for each input below <em>before</em> clicking to send it. Click any row to send it to ELIZA automatically.</div>
+        </div>
+      </div>
+      <div class="ex-body">
+        <ul class="try-list" id="predictionList">
+          <li onclick="sendPrediction('My mother was always so critical of me')">My mother was always so critical of me <span class="predicted">Which rule?</span></li>
+          <li onclick="sendPrediction('I dreamed I was falling last night')">I dreamed I was falling last night <span class="predicted">Which rule?</span></li>
+          <li onclick="sendPrediction('You seem very cold and robotic')">You seem very cold and robotic <span class="predicted">Which rule?</span></li>
+          <li onclick="sendPrediction('I can\'t stop thinking about it')">I can't stop thinking about it <span class="predicted">Which rule?</span></li>
+          <li onclick="sendPrediction('Because nobody ever listens to me')">Because nobody ever listens to me <span class="predicted">Which rule?</span></li>
+          <li onclick="sendPrediction('Are you actually a computer?')">Are you actually a computer? <span class="predicted">Which rule?</span></li>
+        </ul>
+        <p style="margin-top:14px;">After sending each one, check the inspector. How many did you predict correctly? Which surprised you?</p>
+      </div>
+    </div>
+
+    <!-- EX 03 -->
+    <div class="ex-card">
+      <div class="ex-head">
+        <span class="ex-num">EX 03</span>
+        <div>
+          <div class="ex-title">🧱 &nbsp;Break the Illusion</div>
+          <div class="ex-desc">Find at least three inputs that produce obviously wrong, absurd, or context-blind responses. These are the seams in the pattern-matching fabric.</div>
+        </div>
+      </div>
+      <div class="ex-body">
+        <p><strong>Things to try:</strong></p>
+        <p>• Say something that refers to the previous turn: <em>"That's not what I said"</em> or <em>"You just asked me that."</em> What happens? Why?</p>
+        <p>• Use sarcasm or negation: <em>"I feel absolutely fantastic and have no problems."</em> Does ELIZA respond appropriately?</p>
+        <p>• State a fact: <em>"My cat is named Biscuit."</em> Then later say <em>"What did I just tell you?"</em></p>
+        <p>• Ask a direct factual question: <em>"What year is it?"</em> or <em>"What's 2 + 2?"</em></p>
+        <p><em>Key insight to find:</em> Every failure you discover points to a specific capability that ELIZA lacks. What would a system need to handle each case correctly?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 05 DISCUSSION ═══ -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>The ELIZA Effect.</strong> Why do people anthropomorphize ELIZA even when they know it's a program? What does this reveal about human psychology rather than machine intelligence?</li>
+      <li><strong>The Therapist Choice.</strong> Weizenbaum chose the Rogerian therapist persona deliberately — it works better than, say, a news anchor or a math tutor. Why? What properties of that conversational role make pattern-matching more convincing?</li>
+      <li><strong>Fallback as Strategy.</strong> "Please go on" and "Tell me more about that" are powerful defaults. Why do open-ended, non-committal responses hide ignorance more effectively than specific ones?</li>
+      <li><strong>Memory and Context.</strong> ELIZA has no memory between turns. If you added only one feature to make it dramatically more convincing, what would it be? What's the minimum context a system would need?</li>
+      <li><strong>Connection Forward.</strong> Large language models (Week 5) also produce text by predicting what should come next based on patterns. What's fundamentally different about how an LLM processes "I feel sad" compared to ELIZA? What's still similar?</li>
+    </ul>
+  </section>
+
+  <!-- ── Bottom Nav ── -->
+  <nav class="lesson-nav">
+    <div class="nav-btn">
+      <span class="nav-arrow">←</span>
+      <div>
+        <div class="nav-lbl">← Previous</div>
+        <div class="nav-title">Era 1, Lesson 3 — Scaling, Normalization &amp; Quantization</div>
+      </div>
+    </div>
+    <div class="nav-btn">
+      <div>
+        <div class="nav-lbl">Next Lesson →</div>
+        <div class="nav-title">Era 1, Lesson 5 — The Performance Lab</div>
+      </div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+
+</div><!-- wrap -->
+
+<!-- ════════════════════════════════════════════════════
+     ELIZA ENGINE + UI
+     ════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ─── RULE DEFINITIONS ────────────────────────────────────────────────────────
+const RULES = [
+  {
+    id: 'how_are_you',
+    label: 'How are you?',
+    desc: 'Direct question about ELIZA\'s own state',
+    pat: /how are you\b/i,
+    responses: [
+      "I'm just a program — but I'm curious about you. How are you?",
+      "Never mind about me. How are you feeling today?",
+      "I don't experience feelings. But you do — how are you?",
+    ]
+  },
+  {
+    id: 'greeting',
+    label: 'Greeting',
+    desc: 'Hello, hi, hey, or similar opening',
+    pat: /\b(hello|hi|hey|good morning|good afternoon|good evening|howdy|greetings)\b/i,
+    responses: [
+      "Hello. How are you feeling today?",
+      "Hi. What's on your mind?",
+      "Hello. Tell me something about yourself.",
+    ]
+  },
+  {
+    id: 'computer',
+    label: 'Computer / AI',
+    desc: 'User mentions computers, machines, AI, or robots',
+    pat: /\b(computer|machine|robot|ai|artificial intelligence|program|bot|algorithm)\b/i,
+    responses: [
+      "Are you troubled by machines?",
+      "Why do you mention computers?",
+      "Do you think a computer could ever truly understand you?",
+      "What do you think about talking to a machine?",
+    ]
+  },
+  {
+    id: 'apology',
+    label: 'Apology',
+    desc: 'User says sorry or apologizes',
+    pat: /\b(sorry|apologize|apologise|excuse me|forgive me|pardon)\b/i,
+    responses: [
+      "There's no need to apologize.",
+      "Please don't apologize — tell me more.",
+      "Apologies aren't necessary here. Please continue.",
+    ]
+  },
+  {
+    id: 'are_you',
+    label: 'Are you…?',
+    desc: 'User asks ELIZA a yes/no question',
+    pat: /are you (.+?)[\?\.]*$/i,
+    responses: [
+      "Why does it matter to you whether I am {1}?",
+      "Would you prefer if I were {1}?",
+      "Perhaps you'd like to believe I am {1}.",
+      "What if I told you I was {1}?",
+    ]
+  },
+  {
+    id: 'you_are',
+    label: 'You are…',
+    desc: 'User makes a statement about ELIZA',
+    pat: /you (?:are|seem|appear|look|sound) (.+)/i,
+    responses: [
+      "What makes you think I am {1}?",
+      "Does it concern you that I might be {1}?",
+      "Why do you believe I am {1}?",
+      "Would you prefer if I were not {1}?",
+    ]
+  },
+  {
+    id: 'i_feel',
+    label: 'I feel…',
+    desc: 'User expresses an emotion or feeling',
+    pat: /i (?:feel|felt|am feeling|was feeling|have been feeling) (.+)/i,
+    responses: [
+      "Tell me more about feeling {1}.",
+      "Do you often feel {1}?",
+      "Why do you think you feel {1}?",
+      "What makes you feel {1}?",
+      "When did you start feeling {1}?",
+    ]
+  },
+  {
+    id: 'i_am',
+    label: "I am / I'm",
+    desc: "User describes themselves with 'I am' or 'I'm'",
+    pat: /i(?:'m| am) (.+)/i,
+    responses: [
+      "How long have you been {1}?",
+      "Why do you say you are {1}?",
+      "Does being {1} bother you?",
+      "How does being {1} make you feel?",
+      "What would it mean if you were not {1}?",
+    ]
+  },
+  {
+    id: 'i_want',
+    label: 'I want / I need / I wish',
+    desc: 'User expresses a desire or need',
+    pat: /i (?:want|need|wish(?:ed)?|would like|desire|crave) (.+)/i,
+    responses: [
+      "What would it mean to you if you got {1}?",
+      "Why do you want {1}?",
+      "Suppose you got {1} — then what?",
+      "What would getting {1} change for you?",
+    ]
+  },
+  {
+    id: 'i_cant',
+    label: "I can't / I won't",
+    desc: 'User expresses inability or refusal',
+    pat: /i (?:can'?t|cannot|won'?t|will not|don'?t|do not|am unable to) (.+)/i,
+    responses: [
+      "What makes you think you cannot {1}?",
+      "Have you tried to {1}?",
+      "Why is it important that you {1}?",
+      "What would happen if you could {1}?",
+    ]
+  },
+  {
+    id: 'i_think',
+    label: 'I think / I believe',
+    desc: 'User states a belief or opinion',
+    pat: /i (?:think|believe|feel like|suspect|suppose|guess) (?:that )?(.+)/i,
+    responses: [
+      "Do you really think {1}?",
+      "What makes you believe {1}?",
+      "Have you always thought {1}?",
+      "Does thinking {1} worry you?",
+    ]
+  },
+  {
+    id: 'my_state',
+    label: 'My [thing] is/was…',
+    desc: "User makes a statement about something with 'my'",
+    pat: /my (.+?) (?:is|are|was|were|has|have|feels?|seems?|makes?) (.+)/i,
+    responses: [
+      "Tell me more about your {1}.",
+      "Why do you say your {1} {2}?",
+      "How does your {1} make you feel?",
+      "Has your {1} always been like that?",
+    ]
+  },
+  {
+    id: 'my_general',
+    label: 'My [possession]',
+    desc: "User mentions anything with 'my'",
+    pat: /\bmy\b (.+)/i,
+    responses: [
+      "Tell me more about your {1}.",
+      "Why do you mention your {1}?",
+      "What does your {1} mean to you?",
+      "How do you feel about your {1}?",
+    ]
+  },
+  {
+    id: 'family',
+    label: 'Family reference',
+    desc: 'User mentions a family member or relationship',
+    pat: /\b(mother|father|mom|dad|sister|brother|family|parents?|wife|husband|partner|child(?:ren)?|son|daughter|grandm(?:other|a)|grandf(?:ather|a))\b/i,
+    responses: [
+      "Tell me more about your {1}.",
+      "How do you get along with your {1}?",
+      "What comes to mind when you think of your {1}?",
+      "How does your {1} make you feel?",
+      "Has your {1} always influenced you this way?",
+    ]
+  },
+  {
+    id: 'because',
+    label: 'Because…',
+    desc: 'User provides a reason or cause',
+    pat: /because (.+)/i,
+    responses: [
+      "Is that the real reason?",
+      "Does that reason satisfy you?",
+      "What other reasons might there be?",
+      "How long have you felt that way?",
+    ]
+  },
+  {
+    id: 'always_never',
+    label: 'Always / Never',
+    desc: "User uses an absolute: always, never, everyone, nobody",
+    pat: /\b(always|never|every(?:one|body|thing|time)|no(?:one|body|thing))\b (.+)/i,
+    responses: [
+      "Can you think of a specific example?",
+      "Really — {1}?",
+      "When did you start feeling this way?",
+      "Is that an exaggeration, do you think?",
+    ]
+  },
+  {
+    id: 'dream',
+    label: 'Dream',
+    desc: 'User mentions dreaming or a dream',
+    pat: /\bdream(?:t|ed|s|ing)?\b(.*)/i,
+    responses: [
+      "What does that dream suggest to you?",
+      "Do you often have dreams like that?",
+      "Have you ever dreamed like that before?",
+      "What feelings does that dream bring up?",
+    ]
+  },
+  {
+    id: 'yes',
+    label: 'Agreement',
+    desc: 'User agrees or affirms',
+    pat: /^(?:yes|yeah|yep|sure|absolutely|definitely|right|correct|exactly|indeed|of course|certainly)\b/i,
+    responses: [
+      "You seem quite certain. Tell me more.",
+      "I see. Please continue.",
+      "I understand. And what else comes to mind?",
+    ]
+  },
+  {
+    id: 'no',
+    label: 'Negation',
+    desc: 'User disagrees or negates',
+    pat: /^(?:no|nope|not really|no way|never mind|i don'?t think so|absolutely not)\b/i,
+    responses: [
+      "Why not?",
+      "Are you sure about that?",
+      "What makes you say no?",
+      "Tell me more about why not.",
+    ]
+  },
+  {
+    id: 'question',
+    label: 'Direct question',
+    desc: 'User asks a wh- question',
+    pat: /^(why|what|how|when|where|who|which)\b(.+)\?/i,
+    responses: [
+      "Why do you ask that?",
+      "What answer would satisfy you most?",
+      "What do you think?",
+      "Why does that question matter to you?",
+    ]
+  },
+  {
+    id: 'fallback',
+    label: 'Fallback',
+    desc: 'No specific rule matched',
+    pat: /.+/,
+    responses: [
+      "Please go on.",
+      "Tell me more about that.",
+      "I see. What else comes to mind?",
+      "Can you elaborate on that?",
+      "Interesting. How does that make you feel?",
+      "Let's explore that a bit further.",
+      "What does that bring up for you?",
+    ]
+  },
+];
+
+// ─── PRONOUN REFLECTION MAP ────────────────────────────────────────────────────
+const REFLECT_MAP = {
+  "i":         "you",      "i'm":      "you're",
+  "i've":      "you've",   "i'll":     "you'll",
+  "i'd":       "you'd",    "me":       "you",
+  "my":        "your",     "mine":     "yours",
+  "myself":    "yourself", "am":       "are",
+  "was":       "were",
+  "you":       "I",        "you're":   "I'm",
+  "you've":    "I've",     "you'll":   "I'll",
+  "you'd":     "I'd",      "your":     "my",
+  "yours":     "mine",     "yourself": "myself",
+  "are":       "am",       "were":     "was",
+};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const counters = {};
+RULES.forEach(r => { counters[r.id] = 0; });
+let typingTimer = null;
+
+// ─── ENGINE ───────────────────────────────────────────────────────────────────
+function reflect(text) {
+  const transforms = [];
+  const reflected = text.replace(/[\w'']+/g, word => {
+    const key = word.toLowerCase();
+    if (REFLECT_MAP[key]) {
+      const rep = REFLECT_MAP[key];
+      // Preserve capitalisation
+      const out = word[0] === word[0].toUpperCase()
+        ? rep.charAt(0).toUpperCase() + rep.slice(1)
+        : rep;
+      transforms.push({ from: word, to: out });
+      return out;
+    }
+    return word;
+  });
+  return { text: reflected, transforms };
+}
+
+function elizaProcess(raw) {
+  const input = raw.trim();
+  let matched = null;
+
+  for (const rule of RULES) {
+    const m = input.match(rule.pat);
+    if (m) { matched = { rule, m }; break; }
+  }
+  if (!matched) return null; // shouldn't happen; fallback always matches
+
+  const { rule, m } = matched;
+  const captures = [];
+  for (let i = 1; i < m.length; i++) {
+    if (m[i] !== undefined) captures.push(m[i].trim());
+  }
+
+  // Reflect all captures
+  const reflectedCaptures = captures.map(c => reflect(c));
+
+  // Pick response (cycling)
+  const idx = counters[rule.id] % rule.responses.length;
+  counters[rule.id]++;
+  let template = rule.responses[idx];
+
+  // Build response: replace {1}, {2} with reflected captures
+  let response = template;
+  reflectedCaptures.forEach((rc, i) => {
+    response = response.replace(`{${i + 1}}`, rc.text || '…');
+  });
+
+  // Collect all transforms across all captures
+  const allTransforms = reflectedCaptures.flatMap(rc => rc.transforms);
+
+  return {
+    rule,
+    match: m,
+    input,
+    captures,
+    reflectedCaptures,
+    allTransforms,
+    template,
+    response,
+  };
+}
+
+// ─── MATCH VISUALISATION ──────────────────────────────────────────────────────
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function buildMatchHtml(input, match) {
+  if (!match) return escHtml(input);
+  const start = match.index;
+  const end   = start + match[0].length;
+  const before = escHtml(input.slice(0, start));
+  const after  = escHtml(input.slice(end));
+
+  // Inside the match, highlight capture groups differently
+  let inside = match[0];
+  // Find and wrap captures (last to first to keep indices stable)
+  const caps = [];
+  for (let i = 1; i < match.length; i++) {
+    if (match[i] !== undefined) {
+      const ci = match[0].indexOf(match[i]);
+      if (ci !== -1) caps.push({ start: ci, end: ci + match[i].length, text: match[i] });
+    }
+  }
+  if (caps.length > 0) {
+    // Only do first capture for visual clarity
+    const cap = caps[0];
+    const pre  = escHtml(inside.slice(0, cap.start));
+    const mid  = `<mark class="viz-cap">${escHtml(cap.text)}</mark>`;
+    const post = escHtml(inside.slice(cap.end));
+    inside = `<mark class="viz-full">${pre}${mid}${post}</mark>`;
+  } else {
+    inside = `<mark class="viz-full">${escHtml(inside)}</mark>`;
+  }
+
+  return before + inside + after;
+}
+
+// ─── RULE INSPECTOR UPDATE ────────────────────────────────────────────────────
+function updateInspector(info) {
+  const { rule, match, input, captures, reflectedCaptures, allTransforms, template, response } = info;
+
+  const matchHtml = buildMatchHtml(input, match);
+
+  // Captures section
+  let capsHtml = '';
+  if (captures.length > 0) {
+    capsHtml = `
+      <div class="rule-block">
+        <div class="rule-block-label">Captured groups</div>
+        <div class="cap-list">
+          ${captures.map((c, i) => {
+            const rc = reflectedCaptures[i];
+            const same = rc.text === c;
+            return `
+              <div class="cap-row">
+                <span class="cap-chip">${escHtml(c)}</span>
+                ${same
+                  ? `<span class="cap-same">no reflection needed</span>`
+                  : `<span class="cap-arrow">→</span><span class="cap-reflected">${escHtml(rc.text)}</span>`
+                }
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }
+
+  // Transforms section
+  let transHtml = '';
+  if (allTransforms.length > 0) {
+    const unique = [...new Map(allTransforms.map(t => [t.from + t.to, t])).values()];
+    transHtml = `
+      <div class="rule-block">
+        <div class="rule-block-label">Pronoun reflections applied</div>
+        <div class="transforms-list">
+          ${unique.map(t => `<span class="transform-chip">${escHtml(t.from)} → ${escHtml(t.to)}</span>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  // Template display with {n} highlighted
+  const templateHtml = template.replace(/\{(\d+)\}/g, '<mark>{$1}</mark>');
+
+  const html = `
+    <div class="rule-card flash" id="ruleCard">
+      <div class="rule-card-head">
+        <span class="rule-name-badge">${escHtml(rule.label)}</span>
+        <span class="rule-desc">${escHtml(rule.desc)}</span>
+      </div>
+
+      <div class="rule-block">
+        <div class="rule-block-label">Pattern (regex)</div>
+        <div class="pattern-code">${escHtml(rule.pat.toString())}</div>
+      </div>
+
+      <div class="rule-block">
+        <div class="rule-block-label">Input — matched portion highlighted</div>
+        <div class="match-viz">${matchHtml}</div>
+      </div>
+
+      ${capsHtml}
+      ${transHtml}
+
+      <div class="rule-block">
+        <div class="rule-block-label">Response template</div>
+        <div class="template-text">${templateHtml}</div>
+      </div>
+
+      <div class="rule-block">
+        <div class="rule-block-label">Final response</div>
+        <div class="response-text">${escHtml(response)}</div>
+      </div>
+    </div>`;
+
+  document.getElementById('inspContent').innerHTML = html;
+
+  // Re-trigger animation
+  const card = document.getElementById('ruleCard');
+  card.classList.remove('flash');
+  void card.offsetWidth;
+  card.classList.add('flash');
+}
+
+// ─── CHAT UI ──────────────────────────────────────────────────────────────────
+function addMessage(text, who) {
+  const hist = document.getElementById('chatHistory');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ' + who;
+  wrap.innerHTML = `
+    <span class="msg-label">${who === 'eliza' ? 'ELIZA' : 'YOU'}</span>
+    <div class="msg-bubble">${escHtml(text)}</div>`;
+  hist.appendChild(wrap);
+  hist.scrollTop = hist.scrollHeight;
+}
+
+function showTyping() {
+  const hist = document.getElementById('chatHistory');
+  const t = document.createElement('div');
+  t.className = 'msg eliza'; t.id = 'typingMsg';
+  t.innerHTML = `<span class="msg-label">ELIZA</span><div class="typing"><span></span><span></span><span></span></div>`;
+  hist.appendChild(t);
+  hist.scrollTop = hist.scrollHeight;
+}
+
+function hideTyping() {
+  const t = document.getElementById('typingMsg');
+  if (t) t.remove();
+}
+
+function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const raw = input.value.trim();
+  if (!raw) return;
+  input.value = '';
+
+  addMessage(raw, 'user');
+
+  showTyping();
+  const delay = 500 + Math.random() * 500;
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(() => {
+    hideTyping();
+    const info = elizaProcess(raw);
+    if (info) {
+      addMessage(info.response, 'eliza');
+      updateInspector(info);
+    }
+  }, delay);
+}
+
+function sendPrediction(text) {
+  document.getElementById('chatInput').value = text;
+  sendMessage();
+}
+
+// Enter key
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendMessage();
+});
+
+// ─── RULES TABLE ──────────────────────────────────────────────────────────────
+function buildRulesTable() {
+  const tbl = document.getElementById('rulesTable');
+  const examples = {
+    'how_are_you':  'How are you doing?',
+    'greeting':     'Hello there!',
+    'computer':     'Are you a computer?',
+    'apology':      'Sorry for bothering you',
+    'are_you':      'Are you really listening?',
+    'you_are':      'You seem very wise',
+    'i_feel':       'I feel anxious lately',
+    'i_am':         "I'm so confused",
+    'i_want':       'I want to feel better',
+    'i_cant':       "I can't talk to anyone",
+    'i_think':      'I think no one likes me',
+    'my_state':     'My job is exhausting',
+    'my_general':   'My life is a mess',
+    'family':       'My mother never understood me',
+    'because':      'Because nobody cares',
+    'always_never': 'I always fail at everything',
+    'dream':        'I dreamed I was drowning',
+    'yes':          'Yes, exactly',
+    'no':           'No, that\'s not right',
+    'question':     'What should I do?',
+    'fallback':     '(anything else)',
+  };
+  tbl.innerHTML = `
+    <thead><tr>
+      <th>#</th><th>Rule Name</th><th>Pattern</th><th>Description</th><th>Example Input</th>
+    </tr></thead>
+    <tbody>
+      ${RULES.map((r, i) => `
+        <tr>
+          <td style="color:var(--muted-2);font-family:var(--mono);font-size:10px">${i + 1}</td>
+          <td class="tbl-rule">${escHtml(r.label)}</td>
+          <td class="tbl-pat">${escHtml(r.pat.toString())}</td>
+          <td style="font-size:12px;color:var(--muted)">${escHtml(r.desc)}</td>
+          <td class="tbl-ex">${escHtml(examples[r.id] || '')}</td>
+        </tr>`).join('')}
+    </tbody>`;
+}
+
+// ─── COLLAPSIBLE ──────────────────────────────────────────────────────────────
+function toggleDetail(bodyId, arrowId) {
+  const body  = document.getElementById(bodyId);
+  const arrow = document.getElementById(arrowId);
+  const open  = body.style.display === 'block';
+  body.style.display  = open ? 'none' : 'block';
+  arrow.textContent   = open ? '▼ expand' : '▲ hide';
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+buildRulesTable();
+// Opening message
+addMessage("Hello. I'm ELIZA — a program written by Joseph Weizenbaum at MIT in 1966. I'm playing the role of a Rogerian psychotherapist, but I understand nothing. Watch the Rule Inspector panel as we talk. Now — how are you feeling today?", 'eliza');
+</script>
+</body>
+</html>

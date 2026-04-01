@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 1, Lesson 1 — The Perceptron | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:           #0d1117;
+  --surface:      #161b27;
+  --surface-2:    #1a2035;
+  --border:       #1e2d40;
+  --text:         #e2e8f0;
+  --muted:        #64748b;
+  --muted-2:      #334155;
+  --amber:        #f59e0b;
+  --amber-l:      #fbbf24;
+  --amber-glow:   rgba(245,158,11,0.38);
+  --indigo:       #6366f1;
+  --indigo-l:     #818cf8;
+  --orange:       #f97316;
+  --green:        #4ade80;
+  --red:          #f87171;
+  --font:         'Outfit', sans-serif;
+  --mono:         'Space Mono', monospace;
+  --display:      'Lora', serif;
+}
+
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 16px; line-height: 1.7; }
+
+/* ── Sticky Nav ─────────────────────────────────────── */
+.course-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(13,17,23,0.88);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 11px 40px;
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+}
+.era-badge {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 4px; padding: 3px 9px;
+  color: var(--amber); font-size: 10px; letter-spacing: .1em;
+}
+
+/* ── Page Container ─────────────────────────────────── */
+.wrap { max-width: 880px; margin: 0 auto; padding: 0 32px 100px; }
+
+/* ── Hero ───────────────────────────────────────────── */
+.hero { padding: 60px 0 48px; border-bottom: 1px solid var(--border); margin-bottom: 60px; }
+.hero-meta {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+  font-family: var(--mono); font-size: 12px; color: var(--muted);
+}
+.week-badge {
+  background: var(--amber); color: #1a0500;
+  padding: 3px 10px; border-radius: 4px;
+  font-weight: 700; font-size: 10px; letter-spacing: .08em;
+}
+.hero h1 {
+  font-family: var(--display); font-size: 54px; font-weight: 600;
+  line-height: 1.08; letter-spacing: -.02em; color: #f1f5f9;
+  margin-bottom: 14px;
+}
+.hero-sub { font-size: 17px; color: var(--muted); font-weight: 300; max-width: 560px; margin-bottom: 28px; }
+.hero-timeline { display: flex; gap: 36px; flex-wrap: wrap; }
+.tl-item { display: flex; flex-direction: column; gap: 3px; }
+.tl-year  { font-family: var(--mono); font-size: 10px; color: var(--amber); letter-spacing: .1em; }
+.tl-label { font-size: 13px; color: var(--muted); }
+
+/* ── Section ────────────────────────────────────────── */
+.section { margin-bottom: 68px; }
+.section-head {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 26px;
+}
+.sec-num { font-family: var(--mono); font-size: 11px; color: var(--muted-2); min-width: 28px; }
+.sec-title { font-family: var(--display); font-size: 26px; font-weight: 600; color: #f1f5f9; }
+
+/* ── Objectives ─────────────────────────────────────── */
+.obj-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.obj-list li {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 14px 18px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  font-size: 15px; color: #94a3b8;
+}
+.obj-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.obj-list li strong { color: #f1f5f9; font-weight: 600; }
+
+/* ── Prose ──────────────────────────────────────────── */
+.prose p { font-size: 15.5px; color: #94a3b8; margin-bottom: 18px; line-height: 1.82; }
+.prose p:last-child { margin-bottom: 0; }
+.prose p strong { color: #e2e8f0; font-weight: 600; }
+.prose blockquote {
+  border-left: 3px solid var(--amber);
+  margin: 28px 0; padding: 12px 20px;
+  background: rgba(245,158,11,.04);
+  border-radius: 0 8px 8px 0;
+  font-style: italic; color: #94a3b8; font-size: 15px;
+}
+
+/* ── Math Collapsible ───────────────────────────────── */
+.math-box {
+  margin-top: 28px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+}
+.math-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 18px; cursor: pointer; user-select: none; transition: background .15s;
+  font-size: 14px; font-weight: 500; color: #94a3b8;
+}
+.math-head:hover { background: var(--surface-2); }
+.math-arrow { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.math-body { padding: 20px 22px; border-top: 1px solid var(--border); font-size: 14.5px; color: #94a3b8; line-height: 1.78; display: none; }
+.math-body p { margin-bottom: 12px; }
+.math-body p:last-child { margin-bottom: 0; }
+.math-body strong { color: #e2e8f0; }
+.code-block {
+  background: #0d1117; border: 1px solid var(--border); border-radius: 6px;
+  padding: 14px 18px; font-family: var(--mono); font-size: 13px;
+  color: #4ade80; margin: 12px 0; line-height: 1.85;
+}
+
+/* ── Demo Container ─────────────────────────────────── */
+.demo-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.demo-topbar {
+  padding: 18px 24px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.demo-tag { font-family: var(--mono); font-size: 11px; color: var(--amber); letter-spacing: .12em; text-transform: uppercase; }
+.reset-btn {
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+  background: none; border: 1px solid var(--border); border-radius: 5px;
+  padding: 5px 13px; cursor: pointer; transition: all .15s;
+}
+.reset-btn:hover { border-color: var(--indigo); color: var(--indigo-l); }
+
+.demo-grid {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 22px;
+  align-items: start;
+}
+
+/* ── Pixel Grid ─────────────────────────────────────── */
+.panel-lbl {
+  font-family: var(--mono); font-size: 10px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .12em; margin-bottom: 12px;
+}
+.px-grid { display: grid; grid-template-columns: repeat(3, 60px); gap: 5px; }
+.px-btn {
+  width: 60px; height: 60px; border-radius: 6px;
+  border: 2px solid var(--border); background: #131923;
+  color: var(--muted-2); font-family: var(--mono); font-size: 10px;
+  cursor: pointer; transition: all .12s;
+  position: relative; overflow: hidden;
+}
+.px-btn:hover { border-color: var(--indigo); background: #1a1f2e; }
+.px-btn.on {
+  background: #120d00; border-color: var(--amber); color: var(--amber-l);
+  box-shadow: 0 0 14px var(--amber-glow), inset 0 0 8px rgba(245,158,11,.1);
+}
+.px-count { margin-top: 10px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+/* ── Weights ────────────────────────────────────────── */
+.w-col { min-width: 250px; }
+.w-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.w-lbl {
+  font-family: var(--mono); font-size: 10px; width: 22px;
+  color: var(--muted-2); transition: color .15s;
+}
+.w-lbl.active { color: var(--amber); font-weight: 700; }
+input[type=range].w-slider {
+  -webkit-appearance: none; appearance: none;
+  flex: 1; height: 4px; border-radius: 2px; outline: none; cursor: pointer; transition: opacity .2s;
+}
+input[type=range].w-slider.dim { opacity: .22; }
+input[type=range].w-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--indigo); border: 2px solid var(--indigo-l); cursor: pointer;
+}
+input[type=range].w-slider.active::-webkit-slider-thumb {
+  background: var(--amber); border-color: var(--amber-l); transform: scale(1.3);
+}
+.w-val {
+  font-family: var(--mono); font-size: 10px; width: 36px; text-align: right;
+}
+.w-val.pos { color: var(--indigo-l); }
+.w-val.neg { color: var(--red); }
+.w-val.z   { color: var(--muted-2); }
+
+.thresh-sep { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px; }
+input[type=range].t-slider {
+  -webkit-appearance: none; appearance: none;
+  flex: 1; height: 4px; border-radius: 2px; outline: none; cursor: pointer;
+  background: linear-gradient(to right, #7c2d12, var(--orange));
+}
+input[type=range].t-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--orange); border: 2px solid #fb923c; cursor: pointer;
+  box-shadow: 0 0 8px rgba(249,115,22,.5);
+}
+.t-lbl { font-family: var(--mono); font-size: 10px; color: var(--orange); width: 22px; }
+.t-val { font-family: var(--mono); font-size: 10px; color: var(--orange); width: 36px; text-align: right; }
+.t-desc { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 5px; padding-left: 30px; }
+
+/* ── Computation ────────────────────────────────────── */
+.comp-col { min-width: 188px; }
+.term-list {
+  background: #0d1117; border-radius: 8px;
+  padding: 10px 12px; min-height: 100px; margin-bottom: 12px;
+}
+.term-row {
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 11px; color: var(--indigo-l);
+  padding: 3px 0; border-bottom: 1px solid #1a2035;
+}
+.term-row:last-child { border-bottom: none; }
+.term-empty { font-family: var(--mono); font-size: 11px; color: var(--muted-2); font-style: italic; }
+
+.bar-meta {
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+  margin-bottom: 5px; display: flex; justify-content: space-between;
+}
+.bar-track { background: #0d1117; border-radius: 4px; height: 10px; position: relative; overflow: hidden; }
+.bar-fill  { height: 100%; border-radius: 4px; transition: width .1s, background .2s; }
+.bar-mark  { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--orange); }
+.verdict   { font-family: var(--mono); font-size: 11px; font-weight: 700; margin-top: 6px; }
+
+.neuron-area { display: flex; flex-direction: column; align-items: center; padding-top: 14px; }
+.neuron {
+  width: 80px; height: 80px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 26px;
+  transition: all .2s;
+  background: #131923; border: 3px solid var(--border); color: var(--muted-2);
+}
+.neuron.on {
+  background: radial-gradient(circle, #fef08a 0%, var(--amber) 50%, #d97706 100%);
+  border-color: var(--amber-l);
+  box-shadow: 0 0 28px var(--amber-glow), 0 0 56px rgba(245,158,11,.18);
+}
+@keyframes npulse { 0%{transform:scale(1)} 40%{transform:scale(1.16)} 100%{transform:scale(1.07)} }
+.neuron-lbl { margin-top: 8px; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; }
+
+/* ── Exercise Cards ─────────────────────────────────── */
+.ex-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+.ex-head { padding: 16px 20px; display: flex; gap: 16px; align-items: flex-start; border-bottom: 1px solid var(--border); }
+.ex-num {
+  font-family: var(--mono); font-size: 11px; color: var(--amber);
+  background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3);
+  border-radius: 4px; padding: 4px 9px; white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+}
+.ex-title { font-weight: 600; font-size: 16px; color: #f1f5f9; }
+.ex-desc  { font-size: 14px; color: #94a3b8; margin-top: 4px; line-height: 1.6; }
+.ex-body  { padding: 20px; }
+
+.truth-tbl { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; margin-bottom: 16px; }
+.truth-tbl th { text-align: center; padding: 8px 12px; background: #0d1117; color: var(--muted); border-bottom: 1px solid var(--border); font-size: 11px; }
+.truth-tbl td { text-align: center; padding: 7px 12px; border-bottom: 1px solid #1a2035; color: #94a3b8; }
+.truth-tbl tr:last-child td { border-bottom: none; }
+.expect-y { color: var(--green); font-weight: 700; }
+.expect-n { color: var(--muted); }
+.r-pass    { color: var(--green); }
+.r-fail    { color: var(--red); font-weight: 700; }
+.r-pend    { color: var(--muted-2); }
+
+.test-btn {
+  font-family: var(--mono); font-size: 12px; padding: 9px 20px; border-radius: 7px;
+  border: 1px solid var(--indigo); background: rgba(99,102,241,.1); color: var(--indigo-l);
+  cursor: pointer; transition: all .15s;
+}
+.test-btn:hover { background: rgba(99,102,241,.2); box-shadow: 0 0 12px rgba(99,102,241,.2); }
+
+.feedback {
+  margin-top: 12px; padding: 10px 14px; border-radius: 7px;
+  font-size: 13px; font-family: var(--mono); display: none; line-height: 1.6;
+}
+.feedback.pass  { background: rgba(74,222,128,.07); border: 1px solid rgba(74,222,128,.3); color: var(--green); }
+.feedback.fail  { background: rgba(248,113,113,.07); border: 1px solid rgba(248,113,113,.3); color: var(--red); }
+.feedback.xor   { background: rgba(248,113,113,.05); border: 1px solid rgba(248,113,113,.22); color: #fca5a5; }
+
+.hint-toggle { margin-top: 14px; font-size: 13px; color: var(--muted); cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 6px; }
+.hint-toggle:hover { color: #94a3b8; }
+.hint-body { margin-top: 8px; padding: 10px 14px; background: rgba(99,102,241,.06); border: 1px solid rgba(99,102,241,.2); border-radius: 7px; font-size: 13px; color: #94a3b8; display: none; line-height: 1.65; }
+
+/* ── Discussion ─────────────────────────────────────── */
+.disc-list { list-style: none; counter-reset: d; display: flex; flex-direction: column; gap: 12px; }
+.disc-list li {
+  counter-increment: d;
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 16px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  font-size: 15px; color: #94a3b8; line-height: 1.72;
+}
+.disc-list li::before {
+  content: counter(d);
+  font-family: var(--mono); font-size: 11px; color: var(--amber);
+  background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.25);
+  border-radius: 4px; padding: 4px 9px; flex-shrink: 0; margin-top: 2px;
+}
+.disc-list li strong { color: #e2e8f0; }
+
+/* ── Extra Credit ───────────────────────────────────── */
+.ec-note { display:inline-flex; align-items:center; gap:7px; background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.22); border-radius:6px; padding:6px 14px; font-size:13px; color:var(--amber); font-weight:500; margin-bottom:22px; }
+.ec-demo { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
+.ec-topbar { padding:16px 22px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+.ec-tag { font-family:var(--mono); font-size:11px; color:var(--amber); letter-spacing:.12em; text-transform:uppercase; }
+.ec-panels { display:grid; grid-template-columns:auto 1fr; align-items:start; }
+.ec-left { padding:22px; border-right:1px solid var(--border); display:flex; flex-direction:column; align-items:center; gap:14px; }
+.ec-right { padding:20px 22px; }
+.seg-display-wrap { padding:10px; background:#0a0d14; border:1px solid var(--border); border-radius:10px; }
+.digit-presets { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; width:100%; }
+.digit-preset { font-family:var(--mono); font-size:13px; padding:6px 0; background:#0a0d14; border:1px solid var(--border); border-radius:6px; color:var(--muted); cursor:pointer; transition:all .15s; text-align:center; }
+.digit-preset:hover { border-color:var(--amber); color:var(--amber); }
+.digit-preset.active { background:rgba(245,158,11,.1); border-color:var(--amber); color:var(--amber-l); }
+.ec-clear-btn { width:100%; font-family:var(--mono); font-size:11px; padding:7px 0; background:none; border:1px solid var(--border); border-radius:6px; color:var(--muted-2); cursor:pointer; transition:all .15s; }
+.ec-clear-btn:hover { border-color:var(--red); color:var(--red); }
+.score-rows-title { font-family:var(--mono); font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px; }
+.score-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; cursor:pointer; padding:5px 8px; border-radius:6px; border:1px solid transparent; transition:border-color .15s,background .15s; }
+.score-row:hover { background:#0f1520; border-color:var(--border); }
+.score-row.winner { background:rgba(245,158,11,.05); border-color:rgba(245,158,11,.2); }
+.score-row.expanded { background:#0f1520; border-color:var(--border); border-bottom-left-radius:0; border-bottom-right-radius:0; }
+.score-dlbl { font-family:var(--mono); font-size:13px; width:18px; text-align:center; flex-shrink:0; color:var(--muted); }
+.score-row.winner .score-dlbl { color:var(--amber); font-weight:700; }
+.score-track { flex:1; height:14px; background:#0a0d14; border-radius:3px; position:relative; overflow:hidden; }
+.score-bar-pos { position:absolute; top:0; bottom:0; left:50%; border-radius:0 3px 3px 0; transition:width .12s,background .12s; }
+.score-bar-neg { position:absolute; top:0; bottom:0; right:50%; border-radius:3px 0 0 3px; transition:width .12s; background:rgba(248,113,113,.5); }
+.score-center-line { position:absolute; top:0; bottom:0; left:50%; width:1px; background:var(--muted-2); }
+.score-val { font-family:var(--mono); font-size:11px; width:28px; text-align:right; flex-shrink:0; transition:color .12s; }
+.score-row.winner .score-val { color:var(--amber) !important; font-weight:700; }
+.ec-winner { margin-top:12px; padding:10px 14px; background:rgba(245,158,11,.07); border:1px solid rgba(245,158,11,.2); border-radius:8px; font-family:var(--mono); font-size:12px; color:var(--muted); text-align:center; min-height:38px; display:flex; align-items:center; justify-content:center; gap:10px; }
+.ec-inspector { background:#0a0d14; border:1px solid var(--border); border-top:none; border-radius:0 0 8px 8px; overflow:hidden; }
+.insp-head { padding:10px 14px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; flex-wrap:wrap; }
+.insp-digit-chip { font-family:var(--mono); font-size:10px; color:var(--amber); background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.25); border-radius:3px; padding:2px 8px; }
+.insp-body { padding:14px; display:grid; grid-template-columns:auto auto 1fr; gap:16px; align-items:start; }
+.insp-lbl { font-family:var(--mono); font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; text-align:center; margin-bottom:6px; }
+.insp-tbl { width:100%; border-collapse:collapse; font-family:var(--mono); font-size:11px; }
+.insp-tbl th { padding:6px 10px; background:#0d1117; color:var(--muted-2); font-size:9px; text-transform:uppercase; letter-spacing:.08em; border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; }
+.insp-tbl td { padding:6px 10px; border-bottom:1px solid #12192a; }
+.insp-tbl tr:last-child td { border-bottom:none; }
+.insp-tbl tr.pr td { color:#4ade80; }
+.insp-tbl tr.nr td { color:#f87171; }
+.insp-tbl tr.tr td { color:var(--amber); font-weight:700; border-top:1px solid var(--border); }
+
+/* ── Bottom Nav ─────────────────────────────────────── */
+.lesson-nav { display: flex; justify-content: flex-end; margin-top: 68px; padding-top: 32px; border-top: 1px solid var(--border); }
+.nav-next {
+  display: flex; align-items: center; gap: 18px; padding: 16px 24px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  cursor: pointer; transition: all .15s; text-decoration: none;
+}
+.nav-next:hover { border-color: var(--amber); box-shadow: 0 0 18px rgba(245,158,11,.1); }
+.nav-lbl { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+.nav-title { font-size: 15px; font-weight: 500; color: #e2e8f0; margin-top: 3px; }
+.nav-arrow { font-size: 22px; color: var(--amber); }
+</style>
+</head>
+<body>
+
+<!-- ── Sticky Course Nav ── -->
+<nav class="course-nav">
+  <span class="era-badge">ERA 1: FOUNDATIONS</span>
+  <span>›</span>
+  <span>Evolution of Intelligence</span>
+  <span>›</span>
+  <span style="color:#94a3b8;">Era 1, Lesson 1 — The Perceptron</span>
+</nav>
+
+<div class="wrap">
+
+  <!-- ── Hero ── -->
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 1 · LESSON 1</span>
+      <span>1943 – 1969</span>
+      <span>·</span>
+      <span>McCulloch, Pitts &amp; Rosenblatt</span>
+    </div>
+    <h1>The Perceptron</h1>
+    <p class="hero-sub">
+      The neuron that started everything — a weighted sum, a threshold, and the first wall in AI history.
+    </p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1943</span><span class="tl-label">McCulloch-Pitts neuron model</span></div>
+      <div class="tl-item"><span class="tl-year">1958</span><span class="tl-label">Rosenblatt builds the Perceptron</span></div>
+      <div class="tl-item"><span class="tl-year">1969</span><span class="tl-label">Minsky &amp; Papert prove XOR fails → AI Winter</span></div>
+    </div>
+  </header>
+
+  <!-- ═══ 01 · LEARNING OBJECTIVES ═══ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="sec-num">01</span>
+      <h2 class="sec-title">Learning Objectives</h2>
+    </div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">🧠</span><div><strong>Explain</strong> how a biological neuron's fire-or-don't-fire behavior inspired the mathematical perceptron model.</div></li>
+      <li><span class="obj-icon">⚙️</span><div><strong>Compute</strong> a weighted sum by hand and apply a step function to determine when the perceptron fires.</div></li>
+      <li><span class="obj-icon">✅</span><div><strong>Demonstrate</strong> that a single perceptron can solve linearly separable problems (AND, OR) but fails at XOR — the first known wall in AI history.</div></li>
+      <li><span class="obj-icon">🎛️</span><div><strong>Predict</strong> how changing individual weights and the threshold shifts a perceptron's decision boundary.</div></li>
+    </ul>
+  </section>
+
+  <!-- ═══ 02 · THE STORY ═══ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="sec-num">02</span>
+      <h2 class="sec-title">The Neuron That Started Everything</h2>
+    </div>
+    <div class="prose">
+      <p>
+        In 1943, neurologist Warren McCulloch and mathematician Walter Pitts published a paper that changed
+        the history of computing. They asked a deceptively simple question: <strong>what is the minimum
+        thing a brain cell must do to count as "computing"?</strong>
+      </p>
+      <p>
+        Their answer was radical in its simplicity. A neuron, they argued, does exactly two things:
+        it <strong>collects</strong> incoming signals — each weighted by the strength of its connection —
+        and it <strong>decides</strong>. If the total incoming signal exceeds a threshold, it fires.
+        Otherwise, silence. No memory. No emotion. No context. Just a weighted sum and a cliff edge.
+      </p>
+      <p>
+        In 1958, psychologist Frank Rosenblatt turned this into hardware. His Perceptron machine had
+        400 photocells as inputs, analog circuits to compute the weighted sum, and a single output light
+        that switched on when the sum crossed a threshold. Crucially, it could <strong>learn</strong> —
+        it adjusted its own weights based on whether it was right or wrong, using a simple rule:
+        if I should have fired but didn't, increase the active weights; if I fired when I shouldn't have,
+        decrease them.
+      </p>
+      <blockquote>
+        "The Navy revealed the embryo of an electronic computer today that it expects will be able to
+        walk, talk, see, write, reproduce itself and be conscious of its existence."
+        — New York Times, 1958
+      </blockquote>
+      <p>
+        The hype outran the engineering. Eleven years later, Marvin Minsky and Seymour Papert published
+        <em>Perceptrons</em>, mathematically proving that a single perceptron cannot solve a problem called
+        XOR. The field lost funding for a decade. We now call this the first AI Winter. The perceptron was
+        not the end of AI — but it was the first wall. Every neuron in every neural network today is still
+        a variation on this same idea.
+      </p>
+    </div>
+
+    <div class="math-box">
+      <div class="math-head" onclick="toggleMath()">
+        <span>📐 The Formal Mathematics</span>
+        <span class="math-arrow" id="mArrow">▼ expand</span>
+      </div>
+      <div class="math-body" id="mBody">
+        <p>A perceptron computes a <strong>weighted sum</strong> of its inputs, then applies the
+        <strong>Heaviside step function</strong>:</p>
+        <div class="code-block">ŷ = 1 &nbsp; if &nbsp; Σᵢ (wᵢ · xᵢ) &nbsp;≥&nbsp; θ<br>ŷ = 0 &nbsp; otherwise</div>
+        <p>Where <strong>xᵢ</strong> are binary inputs (0 or 1), <strong>wᵢ</strong> are the learned
+        weights, and <strong>θ</strong> (theta) is the threshold.</p>
+        <p>A cleaner form absorbs θ by adding a <strong>bias neuron</strong>: an always-on input x₀ = 1
+        with weight w₀ = −θ. This gives ŷ = f(Σᵢ₌₀ⁿ wᵢxᵢ). Every modern network's "bias term"
+        is a direct descendant of this trick.</p>
+        <p>Geometrically, the decision boundary is a <strong>hyperplane</strong> — a line in 2D, a
+        plane in 3D, an (n−1)-dimensional cut in n dimensions. XOR fails because its "Yes" cases sit in
+        diagonally opposite corners: no straight cut can isolate them without scooping up a "No" too.
+        That impossibility is why multilayer networks (Week 4) had to be invented.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 03 · INTERACTIVE DEMO ═══ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="sec-num">03</span>
+      <h2 class="sec-title">Interactive Demo</h2>
+    </div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:20px;">
+      Click pixels to toggle them ON or OFF. Adjust weights and threshold with the sliders.
+      The computation panel updates in real time. Use the exercises below to guide your experiments.
+    </p>
+
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Perceptron Lab — 3 × 3 Grid</span>
+        <button class="reset-btn" onclick="resetDemo()">↺ Reset</button>
+      </div>
+      <div class="demo-grid">
+
+        <!-- Pixel Grid -->
+        <div>
+          <div class="panel-lbl">Input Grid (x₁ – x₉)</div>
+          <div class="px-grid" id="pixelGrid"></div>
+          <div class="px-count" id="pxCount">0 / 9 active</div>
+        </div>
+
+        <!-- Weights + Threshold -->
+        <div class="w-col">
+          <div class="panel-lbl">Weights (w₁ – w₉)</div>
+          <div id="wRows"></div>
+          <div class="thresh-sep">
+            <div class="w-row">
+              <span class="t-lbl">θ</span>
+              <input type="range" class="t-slider" id="tSlider" min="0" max="9" step="0.1" value="2.5" oninput="onThresh(this.value)">
+              <span class="t-val" id="tVal">2.5</span>
+            </div>
+            <div class="t-desc">Threshold — the firing cliff</div>
+          </div>
+        </div>
+
+        <!-- Computation -->
+        <div class="comp-col">
+          <div class="panel-lbl">Computation</div>
+          <div class="term-list" id="termList"><div class="term-empty">— no active pixels —</div></div>
+          <div class="bar-meta">
+            <span id="sumLbl" style="color:var(--indigo-l)">Σ = 0.000</span>
+            <span id="tLbl"   style="color:var(--orange)">θ = 2.5</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" id="barFill" style="width:0%"></div>
+            <div class="bar-mark" id="barMark" style="left:27.8%"></div>
+          </div>
+          <div class="verdict" id="verdict" style="color:var(--red)">0.000 &lt; 2.5 → SILENT</div>
+          <div class="neuron-area">
+            <div class="neuron" id="neuron">○</div>
+            <div class="neuron-lbl" id="nLbl" style="color:var(--muted-2)">NO OUTPUT</div>
+          </div>
+        </div>
+
+      </div><!-- demo-grid -->
+    </div><!-- demo-wrap -->
+  </section>
+
+  <!-- ═══ 04 · LAB EXERCISES ═══ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="sec-num">04</span>
+      <h2 class="sec-title">Lab Exercises</h2>
+    </div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:24px;">
+      Configure the perceptron in the demo above to satisfy each exercise.
+      Hit <strong style="color:#e2e8f0;">Test My Configuration</strong> to check your answer against
+      all relevant input combinations. Work through them in order — Exercise 3 is where it gets interesting.
+    </p>
+
+    <!-- EX 01 — AND Gate -->
+    <div class="ex-card">
+      <div class="ex-head">
+        <span class="ex-num">EX 01</span>
+        <div>
+          <div class="ex-title">⋀ &nbsp;The AND Gate</div>
+          <div class="ex-desc">
+            Configure the perceptron to fire <em>only</em> when both pixel <strong>x₁</strong> (top-left)
+            and pixel <strong>x₉</strong> (bottom-right) are ON. It must stay silent if only one is on,
+            if neither is on, or if only other pixels are on.
+          </div>
+        </div>
+      </div>
+      <div class="ex-body">
+        <table class="truth-tbl">
+          <thead><tr><th>x₁</th><th>x₉</th><th>All others</th><th>Expected</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td>0</td><td>OFF</td><td class="expect-n">Silent</td><td class="r-pend" id="e1r0">—</td></tr>
+            <tr><td>1</td><td>0</td><td>OFF</td><td class="expect-n">Silent</td><td class="r-pend" id="e1r1">—</td></tr>
+            <tr><td>0</td><td>1</td><td>OFF</td><td class="expect-n">Silent</td><td class="r-pend" id="e1r2">—</td></tr>
+            <tr><td>1</td><td>1</td><td>OFF</td><td class="expect-y">FIRE</td> <td class="r-pend" id="e1r3">—</td></tr>
+          </tbody>
+        </table>
+        <button class="test-btn" onclick="testEx1()">▶ &nbsp;Test My Configuration</button>
+        <div class="feedback" id="e1fb"></div>
+        <div class="hint-toggle" onclick="toggleHint('e1hint')">💡 &nbsp;Show hint</div>
+        <div class="hint-body" id="e1hint">
+          Set <strong>w₁ = 1.0</strong> and <strong>w₉ = 1.0</strong>. Set all other weights to 0.
+          Set threshold <strong>θ = 1.9</strong>.<br><br>
+          When only one pixel is on: sum = 1.0, which is &lt; 1.9 → silent. ✓<br>
+          When both are on: sum = 2.0, which is ≥ 1.9 → FIRE. ✓
+        </div>
+      </div>
+    </div>
+
+    <!-- EX 02 — OR Gate -->
+    <div class="ex-card">
+      <div class="ex-head">
+        <span class="ex-num">EX 02</span>
+        <div>
+          <div class="ex-title">⋁ &nbsp;The OR Gate</div>
+          <div class="ex-desc">
+            Configure the perceptron to fire when <em>any</em> pixel is ON.
+            It should stay silent only when all 9 pixels are OFF.
+          </div>
+        </div>
+      </div>
+      <div class="ex-body">
+        <table class="truth-tbl">
+          <thead><tr><th>Active pixels</th><th>Expected</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>None (all OFF)</td>        <td class="expect-n">Silent</td><td class="r-pend" id="e2r0">—</td></tr>
+            <tr><td>x₁ only</td>               <td class="expect-y">FIRE</td>  <td class="r-pend" id="e2r1">—</td></tr>
+            <tr><td>x₅ only (center)</td>      <td class="expect-y">FIRE</td>  <td class="r-pend" id="e2r2">—</td></tr>
+            <tr><td>x₉ only</td>               <td class="expect-y">FIRE</td>  <td class="r-pend" id="e2r3">—</td></tr>
+            <tr><td>All 9 ON</td>              <td class="expect-y">FIRE</td>  <td class="r-pend" id="e2r4">—</td></tr>
+          </tbody>
+        </table>
+        <button class="test-btn" onclick="testEx2()">▶ &nbsp;Test My Configuration</button>
+        <div class="feedback" id="e2fb"></div>
+        <div class="hint-toggle" onclick="toggleHint('e2hint')">💡 &nbsp;Show hint</div>
+        <div class="hint-body" id="e2hint">
+          Set <strong>all 9 weights to 1.0</strong>. Set threshold <strong>θ = 0.9</strong>.<br><br>
+          Any single pixel contributes 1.0, which clears the 0.9 threshold. Zero pixels contribute 0.0, which doesn't.
+        </div>
+      </div>
+    </div>
+
+    <!-- EX 03 — XOR Wall -->
+    <div class="ex-card">
+      <div class="ex-head">
+        <span class="ex-num">EX 03</span>
+        <div>
+          <div class="ex-title">⊕ &nbsp;The XOR Wall</div>
+          <div class="ex-desc">
+            Try to configure the perceptron to fire when <em>exactly one</em> of x₁ or x₉ is ON —
+            but stay silent when both are ON or neither is ON. Try any combination of weights and
+            threshold you can think of, then hit Test to see exactly <em>where</em> your configuration breaks.
+          </div>
+        </div>
+      </div>
+      <div class="ex-body">
+        <table class="truth-tbl">
+          <thead><tr><th>x₁</th><th>x₉</th><th>Others</th><th>Expected</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td>0</td><td>OFF</td><td class="expect-n">Silent</td><td class="r-pend" id="e3r0">—</td></tr>
+            <tr><td>1</td><td>0</td><td>OFF</td><td class="expect-y">FIRE</td>  <td class="r-pend" id="e3r1">—</td></tr>
+            <tr><td>0</td><td>1</td><td>OFF</td><td class="expect-y">FIRE</td>  <td class="r-pend" id="e3r2">—</td></tr>
+            <tr><td>1</td><td>1</td><td>OFF</td><td class="expect-n">Silent</td><td class="r-pend" id="e3r3">—</td></tr>
+          </tbody>
+        </table>
+        <button class="test-btn" onclick="testEx3()">▶ &nbsp;Test My Configuration</button>
+        <div class="feedback" id="e3fb"></div>
+        <div class="hint-toggle" onclick="toggleHint('e3hint')">🧱 &nbsp;Why is this impossible? (Explanation)</div>
+        <div class="hint-body" id="e3hint">
+          <strong style="color:#fca5a5">This is provably impossible for a single perceptron.</strong><br><br>
+          Imagine plotting the four input cases on a 2D graph, with x₁ on one axis and x₉ on the other:
+          <br><br>
+          &nbsp;&nbsp;(0,0) → Silent &nbsp;&nbsp;(1,0) → FIRE<br>
+          &nbsp;&nbsp;(0,1) → FIRE &nbsp;&nbsp;&nbsp;(1,1) → Silent<br><br>
+          The two "FIRE" cases sit in diagonally opposite corners. So do the two "Silent" cases.
+          A perceptron can only draw a straight line through this space. No single straight line can
+          separate the FIRE corners from the Silent corners — any line that catches one FIRE point
+          also catches one Silent point.<br><br>
+          This is the <strong>XOR problem</strong>. Minsky and Papert proved this formally in 1969,
+          triggering a decade of defunded AI research. The fix is to stack perceptrons — a hidden layer
+          can compose multiple linear cuts into a non-linear boundary. That's Week 4.
+        </div>
+      </div>
+    </div>
+
+    <!-- EX 04 — Free Exploration -->
+    <div class="ex-card">
+      <div class="ex-head">
+        <span class="ex-num">EX 04</span>
+        <div>
+          <div class="ex-title">🔬 &nbsp;Pattern Detection — Free Exploration</div>
+          <div class="ex-desc">
+            No automated check here — this is open-ended. Try one or both challenges below
+            and reflect on what you discover.
+          </div>
+        </div>
+      </div>
+      <div class="ex-body">
+        <p style="font-size:14.5px;color:#94a3b8;margin-bottom:16px;">
+          <strong style="color:#f1f5f9">Challenge A — Top Row Detector:</strong>
+          Make the perceptron fire only when the entire top row (x₁, x₂, x₃) is ON.
+          Does it stay silent if only 2 of the 3 are on? Does it still fire if the middle or
+          bottom row is also ON? What does that tell you about what the perceptron is actually "seeing"?
+        </p>
+        <p style="font-size:14.5px;color:#94a3b8;margin-bottom:16px;">
+          <strong style="color:#f1f5f9">Challenge B — Center Detector:</strong>
+          Give x₅ (center) a strong positive weight and give all surrounding pixels small
+          <em>negative</em> weights. Can you build a perceptron that fires for center-only
+          but resists firing when the surrounding pixels crowd in? Negative weights are your
+          tool for suppression.
+        </p>
+        <p style="font-size:14.5px;color:var(--amber);">
+          Reflection: What does Challenge B hint about how early visual cortex neurons might work?
+          (Look up "center-surround receptive fields" if you're curious — it's exactly this structure.)
+        </p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══ 05 · DISCUSSION ═══ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="sec-num">05</span>
+      <h2 class="sec-title">Discussion Questions</h2>
+    </div>
+    <ul class="disc-list">
+      <li>
+        <strong>The Weight Intuition.</strong> If you were building a perceptron to detect a stop sign
+        in an image, which regions of the image would you give high positive weights? Could any pixel
+        ever deserve a <em>negative</em> weight — and what would that mean semantically?
+      </li>
+      <li>
+        <strong>The Threshold as a Dial.</strong> Sliding θ up makes the neuron "harder to trigger."
+        What biological phenomena correspond to raising or lowering a real neuron's firing threshold?
+        Think about caffeine, sleep deprivation, anesthesia, or adrenaline.
+      </li>
+      <li>
+        <strong>The XOR Wall.</strong> You proved that a single perceptron can't solve XOR. But your
+        brain solves XOR trivially — "exactly one of these two things is true" is obvious to you.
+        What does this suggest about the architecture of biological neural networks versus a single neuron?
+      </li>
+      <li>
+        <strong>Historical Reflection.</strong> Minsky and Papert's 1969 proof triggered a decade of
+        defunded AI research (the first "AI Winter"). Was that a proportionate response to the finding?
+        If you were a research funding agency in 1970, what would you have done differently?
+      </li>
+      <li>
+        <strong>Connection Forward.</strong> The perceptron uses a hard step function — a cliff at θ.
+        Later (Week 4.2) we replace this with smooth functions like sigmoid and ReLU.
+        Why might a "soft" threshold be more useful for <em>learning</em> than a hard one?
+        (Hint: think about what happens if you try to compute a gradient at a cliff edge.)
+      </li>
+    </ul>
+  </section>
+
+  <!-- ═══ EXTRA CREDIT · DIGIT RECOGNIZER ═══ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="sec-num" style="color:var(--amber);font-size:16px">⭐</span>
+      <h2 class="sec-title">Extra Credit: The Digit Recognizer</h2>
+    </div>
+    <div class="ec-note">✦ Extra credit — not required, but highly recommended before moving on</div>
+    <div class="prose" style="margin-bottom:24px;">
+      <p>
+        A single perceptron recognizes one pattern. But what if you need to recognize ten?
+        The answer is beautifully simple: <strong>run ten perceptrons in parallel</strong>, one per digit.
+        Every perceptron receives the same 7 inputs and computes its own weighted sum.
+        The one with the highest score wins — a primitive form of <strong>multi-class classification</strong>.
+      </p>
+      <p>
+        The inputs are the 7 segments of a standard digital display — the same format used in
+        calculators, clocks, and scoreboards since the 1960s. Each perceptron carries pre-loaded
+        weights of <code style="color:#a78bfa;font-family:var(--mono)">+1</code> for segments its
+        digit needs and <code style="color:#f87171;font-family:var(--mono)">−1</code> for segments
+        it doesn't. Internally, inputs are encoded as <strong>+1 (ON)</strong> or <strong>−1 (OFF)</strong>
+        so that both agreement <em>and</em> disagreement contribute to the score.
+        Click any score bar to open the <strong>Weight Inspector</strong> and see the vote, segment by segment.
+      </p>
+    </div>
+
+    <div class="ec-demo">
+      <div class="ec-topbar">
+        <span class="ec-tag">10-Perceptron Digit Classifier — 7-Segment Input</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted-2)">Click segments to toggle · use presets to load a digit</span>
+      </div>
+      <div class="ec-panels">
+
+        <!-- Left: 7-segment display + presets -->
+        <div class="ec-left">
+          <div class="panel-lbl" style="align-self:flex-start;">Input Display</div>
+          <div class="seg-display-wrap">
+            <svg id="ecMainDisplay" viewBox="0 0 80 132" width="120" height="198">
+              <rect width="80" height="132" fill="#0a0d14" rx="6"/>
+              <rect data-seg="a" x="14" y="4"   width="52" height="10" rx="3" fill="#1e2d40"/><!-- top -->
+              <rect data-seg="f" x="6"  y="16"  width="10" height="44" rx="3" fill="#1e2d40"/><!-- top-left -->
+              <rect data-seg="b" x="64" y="16"  width="10" height="44" rx="3" fill="#1e2d40"/><!-- top-right -->
+              <rect data-seg="g" x="14" y="61"  width="52" height="10" rx="3" fill="#1e2d40"/><!-- middle -->
+              <rect data-seg="e" x="6"  y="73"  width="10" height="44" rx="3" fill="#1e2d40"/><!-- bot-left -->
+              <rect data-seg="c" x="64" y="73"  width="10" height="44" rx="3" fill="#1e2d40"/><!-- bot-right -->
+              <rect data-seg="d" x="14" y="118" width="52" height="10" rx="3" fill="#1e2d40"/><!-- bottom -->
+            </svg>
+          </div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted-2);text-align:center;line-height:1.8;">
+            a = top &nbsp;·&nbsp; b = top-right &nbsp;·&nbsp; c = bot-right<br>
+            d = bottom &nbsp;·&nbsp; e = bot-left &nbsp;·&nbsp; f = top-left &nbsp;·&nbsp; g = middle
+          </div>
+          <div id="ecPresets" class="digit-presets"></div>
+          <button class="ec-clear-btn" id="ecClear">↺ &nbsp;Clear Display</button>
+        </div>
+
+        <!-- Right: score bars + inspector -->
+        <div class="ec-right">
+          <div class="score-rows-title">10 Perceptron Scores &nbsp;·&nbsp; click any row to inspect weights</div>
+          <div id="ecScoreRows"></div>
+          <div class="ec-winner" id="ecWinner">— no segments active —</div>
+          <div class="ec-inspector" id="ecInspector" style="display:none;"></div>
+        </div>
+
+      </div><!-- ec-panels -->
+    </div><!-- ec-demo -->
+  </section>
+
+  <!-- ── Bottom Nav ── -->
+
+  <nav class="lesson-nav">
+    <div class="nav-next">
+      <div>
+        <div class="nav-lbl">Next Lesson →</div>
+        <div class="nav-title">Era 1, Lesson 2 — Linear Regression</div>
+      </div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+
+</div><!-- wrap -->
+
+<script>
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+const S = {
+  pixels:    Array(9).fill(0),
+  weights:   Array(9).fill(0.5),
+  threshold: 2.5,
+};
+
+// ═══════════════════════════════════════════════
+//  BUILD DOM
+// ═══════════════════════════════════════════════
+(function init() {
+  // Pixel grid
+  const grid = document.getElementById('pixelGrid');
+  for (let i = 0; i < 9; i++) {
+    const b = document.createElement('button');
+    b.className = 'px-btn'; b.id = 'px' + i;
+    b.textContent = 'x' + (i + 1);
+    b.onclick = () => togglePx(i);
+    grid.appendChild(b);
+  }
+  // Weight rows
+  const wr = document.getElementById('wRows');
+  for (let i = 0; i < 9; i++) {
+    const row = document.createElement('div');
+    row.className = 'w-row';
+    row.innerHTML =
+      `<span class="w-lbl dim" id="wl${i}">w${i+1}</span>` +
+      `<input type="range" class="w-slider dim" id="ws${i}" min="-2" max="2" step="0.1" value="0.5" oninput="onWeight(${i},this.value)">` +
+      `<span class="w-val pos" id="wv${i}">+0.5</span>`;
+    wr.appendChild(row);
+    setSliderBg(i, 0.5);
+  }
+  render();
+})();
+
+// ═══════════════════════════════════════════════
+//  INTERACTIONS
+// ═══════════════════════════════════════════════
+function togglePx(i) {
+  S.pixels[i] ^= 1;
+  document.getElementById('px' + i).classList.toggle('on', S.pixels[i] === 1);
+  refreshWeightLabels();
+  render();
+}
+
+function onWeight(i, v) {
+  S.weights[i] = +v;
+  setSliderBg(i, +v);
+  const el = document.getElementById('wv' + i);
+  el.textContent = (+v >= 0 ? '+' : '') + (+v).toFixed(1);
+  el.className = 'w-val ' + (+v > 0 ? 'pos' : +v < 0 ? 'neg' : 'z');
+  render();
+}
+
+function onThresh(v) {
+  S.threshold = +v;
+  document.getElementById('tVal').textContent = (+v).toFixed(1);
+  render();
+}
+
+function setSliderBg(i, v) {
+  const sl = document.getElementById('ws' + i);
+  const pct = ((v + 2) / 4) * 100;
+  const col = v >= 0 ? '#6366f1' : '#f87171';
+  sl.style.background = `linear-gradient(to right,#1e2d40 0%,${col} ${pct}%,#1e2d40 ${pct}%)`;
+}
+
+function refreshWeightLabels() {
+  for (let i = 0; i < 9; i++) {
+    const on = S.pixels[i] === 1;
+    document.getElementById('wl' + i).className = 'w-lbl' + (on ? ' active' : ' dim');
+    const sl = document.getElementById('ws' + i);
+    sl.classList.toggle('active', on);
+    sl.classList.toggle('dim', !on);
+  }
+}
+
+function resetDemo() {
+  S.pixels   = Array(9).fill(0);
+  S.weights  = Array(9).fill(0.5);
+  S.threshold = 2.5;
+  document.querySelectorAll('.px-btn').forEach(b => b.classList.remove('on'));
+  for (let i = 0; i < 9; i++) {
+    const sl = document.getElementById('ws' + i);
+    sl.value = 0.5;
+    onWeight(i, 0.5);
+  }
+  document.getElementById('tSlider').value = 2.5;
+  document.getElementById('tVal').textContent = '2.5';
+  S.threshold = 2.5;
+  refreshWeightLabels();
+  render();
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════
+function render() {
+  const sum    = S.pixels.reduce((acc, p, i) => acc + p * S.weights[i], 0);
+  const fires  = sum >= S.threshold;
+  const active = S.pixels.map((p, i) => ({ i, p, w: S.weights[i], prod: +(p * S.weights[i]).toFixed(3) })).filter(t => t.p === 1);
+
+  // Active count
+  document.getElementById('pxCount').textContent = S.pixels.filter(Boolean).length + ' / 9 active';
+
+  // Term list
+  const tl = document.getElementById('termList');
+  if (active.length === 0) {
+    tl.innerHTML = '<div class="term-empty">— no active pixels —</div>';
+  } else {
+    tl.innerHTML = active.map(t =>
+      `<div class="term-row">
+        <span>x${t.i+1} × ${t.w>=0?'+':''}${t.w.toFixed(1)}</span>
+        <span style="color:${t.prod>=0?'#818cf8':'#f87171'}">${t.prod>=0?'+':''}${t.prod.toFixed(2)}</span>
+      </div>`
+    ).join('');
+  }
+
+  // Bar
+  const bMax   = Math.max(Math.abs(sum), S.threshold, 0.01);
+  const sumPct = Math.min((Math.abs(sum) / bMax) * 100, 100);
+  const tPct   = Math.min((S.threshold  / bMax) * 100, 100);
+  const fill   = document.getElementById('barFill');
+  fill.style.width      = sumPct + '%';
+  fill.style.background = fires
+    ? 'linear-gradient(to right,#92400e,#f59e0b)'
+    : 'linear-gradient(to right,#1e1b4b,#6366f1)';
+  document.getElementById('barMark').style.left = tPct + '%';
+
+  // Labels + verdict
+  document.getElementById('sumLbl').textContent = 'Σ = ' + sum.toFixed(3);
+  document.getElementById('tLbl').textContent   = 'θ = ' + S.threshold.toFixed(1);
+  const vEl = document.getElementById('verdict');
+  vEl.textContent = `${sum.toFixed(2)} ${fires ? '≥' : '<'} ${S.threshold.toFixed(1)} → ${fires ? 'FIRE ⚡' : 'SILENT'}`;
+  vEl.style.color = fires ? '#fbbf24' : '#f87171';
+
+  // Neuron
+  const n = document.getElementById('neuron');
+  const wasOn = n.classList.contains('on');
+  n.className = 'neuron' + (fires ? ' on' : '');
+  if (fires && !wasOn) {
+    n.style.animation = 'none';
+    requestAnimationFrame(() => { n.style.animation = 'npulse .3s ease-out forwards'; });
+  }
+  n.textContent = fires ? '⚡' : '○';
+  const nl = document.getElementById('nLbl');
+  nl.textContent   = fires ? 'NEURON FIRES' : 'NO OUTPUT';
+  nl.style.color   = fires ? '#fbbf24' : 'var(--muted-2)';
+}
+
+// ═══════════════════════════════════════════════
+//  EXERCISE TESTING
+// ═══════════════════════════════════════════════
+function score(px) {
+  return px.reduce((s, p, i) => s + p * S.weights[i], 0) >= S.threshold ? 1 : 0;
+}
+
+function mark(id, ok) {
+  const el = document.getElementById(id);
+  el.textContent = ok ? '✓ Pass' : '✗ Fail';
+  el.className   = ok ? 'r-pass' : 'r-fail';
+}
+
+function showFB(id, cls, msg) {
+  const el = document.getElementById(id);
+  el.className      = 'feedback ' + cls;
+  el.innerHTML      = msg;
+  el.style.display  = 'block';
+}
+
+function testEx1() {
+  const cases = [
+    { px: Array(9).fill(0),          exp: 0, id: 'e1r0' },
+    { px: [1,0,0,0,0,0,0,0,0],      exp: 0, id: 'e1r1' },
+    { px: [0,0,0,0,0,0,0,0,1],      exp: 0, id: 'e1r2' },
+    { px: [1,0,0,0,0,0,0,0,1],      exp: 1, id: 'e1r3' },
+  ];
+  let pass = 0;
+  cases.forEach(c => { const ok = score(c.px) === c.exp; if (ok) pass++; mark(c.id, ok); });
+  pass === 4
+    ? showFB('e1fb', 'pass', '✓ All 4 cases pass! You\'ve built a working AND gate.')
+    : showFB('e1fb', 'fail', `✗ ${4 - pass} case(s) failed. Expand the hint if you're stuck.`);
+}
+
+function testEx2() {
+  const cases = [
+    { px: Array(9).fill(0),     exp: 0, id: 'e2r0' },
+    { px: [1,0,0,0,0,0,0,0,0], exp: 1, id: 'e2r1' },
+    { px: [0,0,0,0,1,0,0,0,0], exp: 1, id: 'e2r2' },
+    { px: [0,0,0,0,0,0,0,0,1], exp: 1, id: 'e2r3' },
+    { px: Array(9).fill(1),     exp: 1, id: 'e2r4' },
+  ];
+  let pass = 0;
+  cases.forEach(c => { const ok = score(c.px) === c.exp; if (ok) pass++; mark(c.id, ok); });
+  pass === 5
+    ? showFB('e2fb', 'pass', '✓ All 5 cases pass! Any active pixel triggers the OR gate.')
+    : showFB('e2fb', 'fail', `✗ ${5 - pass} case(s) failed.`);
+}
+
+function testEx3() {
+  const cases = [
+    { px: Array(9).fill(0),     exp: 0, id: 'e3r0' },
+    { px: [1,0,0,0,0,0,0,0,0], exp: 1, id: 'e3r1' },
+    { px: [0,0,0,0,0,0,0,0,1], exp: 1, id: 'e3r2' },
+    { px: [1,0,0,0,0,0,0,0,1], exp: 0, id: 'e3r3' },
+  ];
+  let pass = 0;
+  cases.forEach(c => { const ok = score(c.px) === c.exp; if (ok) pass++; mark(c.id, ok); });
+  const fails = 4 - pass;
+  if (fails === 0) {
+    showFB('e3fb', 'pass', '⚠ Interesting! All cases pass with your config — but this is mathematically suspect for a linear classifier. Try more edge cases.');
+  } else {
+    showFB('e3fb', 'xor',
+      `✗ ${fails} case(s) failed — and no configuration of weights and threshold can ever fix this.<br><br>` +
+      `XOR requires a non-linear decision boundary. A single perceptron can only draw a straight line. ` +
+      `Expand the explanation below to understand why — and why this discovery shut down AI research for a decade.`
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════════════════
+function toggleMath() {
+  const body  = document.getElementById('mBody');
+  const arrow = document.getElementById('mArrow');
+  const open  = body.style.display === 'block';
+  body.style.display  = open ? 'none' : 'block';
+  arrow.textContent   = open ? '▼ expand' : '▲ hide';
+}
+
+function toggleHint(id) {
+  const el = document.getElementById(id);
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+</script>
+<script>
+/* ════════════════════════════════════════════════
+   EXTRA CREDIT — Digit Recognizer (scoped IIFE)
+   ════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ── Segment definitions ──────────────────────── */
+  const SEGS      = ['a','b','c','d','e','f','g'];
+  const SEG_LABEL = { a:'top', b:'top-right', c:'bot-right', d:'bottom',
+                      e:'bot-left', f:'top-left', g:'middle' };
+
+  /* Digit templates: index = [a,b,c,d,e,f,g], 1 = segment ON */
+  const T = [
+    [1,1,1,1,1,1,0], // 0
+    [0,1,1,0,0,0,0], // 1
+    [1,1,0,1,1,0,1], // 2
+    [1,1,1,1,0,0,1], // 3
+    [0,1,1,0,0,1,1], // 4
+    [1,0,1,1,0,1,1], // 5
+    [1,0,1,1,1,1,1], // 6
+    [1,1,1,0,0,0,0], // 7
+    [1,1,1,1,1,1,1], // 8
+    [1,1,1,1,0,1,1], // 9
+  ];
+
+  /* ── State ────────────────────────────────────── */
+  let segs = [0,0,0,0,0,0,0];   // current input state
+  let expandedDigit = null;
+
+  /* ── Scoring: ±1 encoding ─────────────────────── *
+   * Inputs converted to +1 (ON) or -1 (OFF).        *
+   * Weights: +1 where template expects ON,           *
+   *          -1 where template expects OFF.          *
+   * Score range: -7 (all disagree) to +7 (perfect). */
+  function score(d) {
+    return T[d].reduce((s, t, i) =>
+      s + (t ? 1 : -1) * (segs[i] ? 1 : -1), 0);
+  }
+
+  /* ── SVG geometry (shared with main display) ──── */
+  const GEO = {
+    a:{x:14,y:4,  w:52,h:10},
+    b:{x:64,y:16, w:10,h:44},
+    c:{x:64,y:73, w:10,h:44},
+    d:{x:14,y:118,w:52,h:10},
+    e:{x:6, y:73, w:10,h:44},
+    f:{x:6, y:16, w:10,h:44},
+    g:{x:14,y:61, w:52,h:10},
+  };
+
+  /* Inline SVG string for the mini displays in the inspector */
+  function miniSVG(segState, color) {
+    const rects = SEGS.map((s, i) => {
+      const g = GEO[s], f = segState[i] ? color : '#1e2d40';
+      return `<rect x="${g.x}" y="${g.y}" width="${g.w}" height="${g.h}" rx="3" fill="${f}"/>`;
+    }).join('');
+    return `<svg viewBox="0 0 80 132" width="44" height="73" style="display:block;flex-shrink:0">
+      <rect width="80" height="132" fill="#0a0d14" rx="4"/>${rects}</svg>`;
+  }
+
+  /* ── Update main SVG + preset buttons ─────────── */
+  function updateMainDisplay() {
+    SEGS.forEach((s, i) => {
+      const el = document.querySelector(`#ecMainDisplay [data-seg="${s}"]`);
+      if (el) el.setAttribute('fill', segs[i] ? '#2dd4bf' : '#1e2d40');
+    });
+    document.querySelectorAll('.digit-preset').forEach((btn, d) => {
+      btn.classList.toggle('active', T[d].every((v, i) => v === segs[i]));
+    });
+  }
+
+  /* ── Render all 10 score bars ──────────────────── */
+  function renderBars() {
+    const scores = T.map((_, d) => score(d));
+    const max    = Math.max(...scores);
+    const allOff = segs.every(s => s === 0);
+
+    scores.forEach((sc, d) => {
+      const row    = document.getElementById(`ecRow${d}`);
+      const posBar = document.getElementById(`ecPos${d}`);
+      const negBar = document.getElementById(`ecNeg${d}`);
+      const valEl  = document.getElementById(`ecVal${d}`);
+      if (!row) return;
+
+      const isWinner = !allOff && sc === max;
+      row.classList.toggle('winner', isWinner);
+
+      const pct = Math.abs(sc) / 7 * 50; // 50% = full half of bar
+      if (sc >= 0) {
+        posBar.style.width     = pct + '%';
+        posBar.style.background = isWinner ? '#f59e0b' : '#2dd4bf';
+        negBar.style.width     = '0%';
+      } else {
+        posBar.style.width = '0%';
+        negBar.style.width = pct + '%';
+        posBar.style.background = '#2dd4bf';
+      }
+      valEl.textContent = (sc >= 0 ? '+' : '') + sc;
+      valEl.style.color = isWinner ? '#f59e0b' : (sc >= 0 ? '#2dd4bf' : '#f87171');
+    });
+
+    /* Winner badge */
+    const wEl     = document.getElementById('ecWinner');
+    if (allOff) {
+      wEl.innerHTML = '— no segments active —';
+    } else {
+      const winners = scores.reduce((a, sc, d) => sc === max ? [...a, d] : a, []);
+      if (winners.length === 1) {
+        wEl.innerHTML =
+          `Best match: &nbsp;<span style="font-size:22px;color:var(--amber);font-weight:700">${winners[0]}</span>` +
+          `&nbsp; (score <strong style="color:var(--amber)">${max >= 0 ? '+' : ''}${max}</strong> / 7)`;
+      } else {
+        wEl.innerHTML =
+          `Tie: &nbsp;<strong style="color:var(--amber)">${winners.join(', ')}</strong>` +
+          `&nbsp; (score ${max >= 0 ? '+' : ''}${max} / 7) — ambiguous at this resolution`;
+      }
+    }
+
+    if (expandedDigit !== null) renderInspector(expandedDigit);
+  }
+
+  /* ── Toggle inspector for a digit ─────────────── */
+  function toggleInspector(d) {
+    const prev = expandedDigit;
+    document.querySelectorAll('.score-row').forEach(r => r.classList.remove('expanded'));
+    if (prev === d) {
+      expandedDigit = null;
+      document.getElementById('ecInspector').style.display = 'none';
+    } else {
+      expandedDigit = d;
+      document.getElementById(`ecRow${d}`).classList.add('expanded');
+      renderInspector(d);
+    }
+  }
+
+  /* ── Render weight inspector ───────────────────── */
+  function renderInspector(d) {
+    const insp = document.getElementById('ecInspector');
+    if (d === null) { insp.style.display = 'none'; return; }
+
+    const sc = score(d);
+    let rows = '';
+
+    SEGS.forEach((s, i) => {
+      const w       = T[d][i] ? 1 : -1;
+      const xi      = segs[i];
+      const xPrime  = xi ? 1 : -1;
+      const contrib = w * xPrime;
+      const cls     = contrib > 0 ? 'pr' : 'nr';
+      const icon    = contrib > 0 ? '✓ +1' : '✗ −1';
+      const wLabel  = w > 0 ? '+1' : '−1';
+      /* Human-readable description of why this contribution is positive or negative */
+      const desc = contrib > 0
+        ? (w > 0 ? 'ON expected → is ON'  : 'OFF expected → is OFF')
+        : (w > 0 ? 'ON expected → is OFF' : 'OFF expected → is ON');
+
+      rows += `<tr class="${cls}">
+        <td><strong>${s}</strong><span style="color:var(--muted-2);font-size:10px;margin-left:5px">${SEG_LABEL[s]}</span></td>
+        <td>${wLabel}</td>
+        <td>${xi ? 'ON' : 'OFF'}</td>
+        <td style="color:var(--muted-2);font-size:10px">${desc}</td>
+        <td style="font-weight:700">${icon}</td>
+      </tr>`;
+    });
+
+    rows += `<tr class="tr">
+      <td colspan="4" style="text-align:right">Total Score</td>
+      <td>${sc >= 0 ? '+' : ''}${sc} / 7</td>
+    </tr>`;
+
+    insp.style.display = 'block';
+    insp.innerHTML = `
+      <div class="insp-head">
+        <span>Weight Inspector</span>
+        <span class="insp-digit-chip">Digit ${d}</span>
+        <span style="margin-left:auto;font-size:9px;color:var(--muted-2)">green = agreement &nbsp;·&nbsp; red = disagreement</span>
+      </div>
+      <div class="insp-body">
+        <div>
+          <div class="insp-lbl">Template</div>
+          ${miniSVG(T[d], '#f59e0b')}
+        </div>
+        <div>
+          <div class="insp-lbl">Your Input</div>
+          ${miniSVG(segs, '#2dd4bf')}
+        </div>
+        <div style="overflow-x:auto">
+          <table class="insp-tbl">
+            <thead><tr>
+              <th>Seg</th><th>Weight</th><th>Input</th>
+              <th>Reason</th><th>Vote</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  }
+
+  /* ── Build score rows in DOM ───────────────────── */
+  function buildScoreRows() {
+    const container = document.getElementById('ecScoreRows');
+    for (let d = 0; d < 10; d++) {
+      container.insertAdjacentHTML('beforeend', `
+        <div class="score-row" id="ecRow${d}">
+          <span class="score-dlbl">${d}</span>
+          <div class="score-track">
+            <div class="score-center-line"></div>
+            <div class="score-bar-pos" id="ecPos${d}" style="width:0%"></div>
+            <div class="score-bar-neg" id="ecNeg${d}" style="width:0%"></div>
+          </div>
+          <span class="score-val" id="ecVal${d}" style="color:var(--muted-2)">+0</span>
+        </div>`);
+      document.getElementById(`ecRow${d}`)
+        .addEventListener('click', () => toggleInspector(d));
+    }
+  }
+
+  /* ── Build preset digit buttons ────────────────── */
+  function buildPresets() {
+    const container = document.getElementById('ecPresets');
+    for (let d = 0; d < 10; d++) {
+      const btn = document.createElement('button');
+      btn.className   = 'digit-preset';
+      btn.textContent = d;
+      btn.addEventListener('click', () => {
+        segs = [...T[d]];
+        updateMainDisplay();
+        renderBars();
+      });
+      container.appendChild(btn);
+    }
+  }
+
+  /* ── Wire up segment clicks on main SVG ─────────── */
+  function attachSegmentClicks() {
+    SEGS.forEach((s, i) => {
+      const el = document.querySelector(`#ecMainDisplay [data-seg="${s}"]`);
+      if (!el) return;
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', () => {
+        segs[i] ^= 1;
+        updateMainDisplay();
+        renderBars();
+      });
+    });
+
+    document.getElementById('ecClear').addEventListener('click', () => {
+      segs           = [0,0,0,0,0,0,0];
+      expandedDigit  = null;
+      document.getElementById('ecInspector').style.display = 'none';
+      document.querySelectorAll('.score-row').forEach(r => r.classList.remove('expanded'));
+      updateMainDisplay();
+      renderBars();
+    });
+  }
+
+  /* ── Init ───────────────────────────────────────── */
+  buildScoreRows();
+  buildPresets();
+  attachSegmentClicks();
+  renderBars();
+})();
+</script>
+</body>
+</html>

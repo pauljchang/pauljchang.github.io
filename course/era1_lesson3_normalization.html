@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 1, Lesson 3 — Scaling, Normalization &amp; Quantization | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:       #0d1117;
+  --surface:  #161b27;
+  --s2:       #1a2035;
+  --border:   #1e2d40;
+  --text:     #e2e8f0;
+  --muted:    #64748b;
+  --muted2:   #334155;
+  --em:       #10b981;   /* emerald accent */
+  --em-dim:   rgba(16,185,129,.12);
+  --em-glow:  rgba(16,185,129,.32);
+  --amber:    #f59e0b;
+  --sky:      #38bdf8;
+  --violet:   #a78bfa;
+  --orange:   #fb923c;
+  --red:      #f87171;
+  --green:    #4ade80;
+  --font:     'Outfit', sans-serif;
+  --mono:     'Space Mono', monospace;
+  --disp:     'Lora', serif;
+}
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 16px; line-height: 1.7; }
+
+/* ── Nav ── */
+.course-nav { position:sticky;top:0;z-index:100;background:rgba(13,17,23,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted); }
+.era-badge { background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--em);font-size:10px;letter-spacing:.1em; }
+.wrap { max-width:920px;margin:0 auto;padding:0 32px 100px; }
+
+/* ── Hero ── */
+.hero { padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px; }
+.hero-meta { display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted); }
+.week-badge { background:var(--em);color:#022015;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em; }
+.hero h1 { font-family:var(--disp);font-size:48px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px; }
+.hero-sub { font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px; }
+.hero-timeline { display:flex;gap:36px;flex-wrap:wrap; }
+.tl-item { display:flex;flex-direction:column;gap:3px; }
+.tl-year  { font-family:var(--mono);font-size:10px;color:var(--em);letter-spacing:.1em; }
+.tl-label { font-size:13px;color:var(--muted); }
+
+/* ── Sections ── */
+.section { margin-bottom:68px; }
+.section-head { display:flex;align-items:center;gap:14px;margin-bottom:26px; }
+.sec-num   { font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px; }
+.sec-title { font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9; }
+
+/* ── Objectives ── */
+.obj-list { list-style:none;display:flex;flex-direction:column;gap:10px; }
+.obj-list li { display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8; }
+.obj-icon { font-size:18px;flex-shrink:0;margin-top:1px; }
+.obj-list li strong { color:#f1f5f9; }
+
+/* ── Prose ── */
+.prose p { font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82; }
+.prose p:last-child { margin-bottom:0; }
+.prose p strong { color:#e2e8f0; }
+.prose blockquote { border-left:3px solid var(--em);margin:28px 0;padding:12px 20px;background:var(--em-dim);border-radius:0 8px 8px 0;font-style:italic;color:#94a3b8;font-size:15px; }
+
+/* ── Term links ── */
+a.tl { color:var(--em);text-decoration:none;border-bottom:1px dotted rgba(16,185,129,.4);transition:all .15s;cursor:pointer; }
+a.tl:hover { color:#34d399;border-bottom-color:var(--em); }
+
+/* ── Demo shared ── */
+.demo-wrap { background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:0; }
+.demo-topbar { padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px; }
+.demo-tag { font-family:var(--mono);font-size:11px;color:var(--em);letter-spacing:.12em;text-transform:uppercase; }
+.demo-hint { font-family:var(--mono);font-size:10px;color:var(--muted2); }
+.ctrl-btn { font-family:var(--mono);font-size:11px;padding:6px 13px;border-radius:6px;cursor:pointer;transition:all .15s;border:1px solid var(--border);background:none;color:var(--muted); }
+.ctrl-btn:hover { border-color:var(--em);color:var(--em); }
+.ctrl-btn.active { background:var(--em-dim);border-color:rgba(16,185,129,.45);color:var(--em); }
+
+/* ── Exercise cards ── */
+.ex-card { background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px; }
+.ex-head { padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border); }
+.ex-num  { font-family:var(--mono);font-size:11px;color:var(--em);background:var(--em-dim);border:1px solid rgba(16,185,129,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px; }
+.ex-title { font-weight:600;font-size:16px;color:#f1f5f9; }
+.ex-desc  { font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6; }
+.ex-body  { padding:20px; }
+.ex-body p { font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7; }
+.ex-body p:last-child { margin-bottom:0; }
+.ex-body p strong { color:#e2e8f0; }
+.insight { background:var(--em-dim);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:12px 16px;margin-top:14px;font-size:13px;color:#94a3b8;line-height:1.7; }
+.insight strong { color:var(--em); }
+
+/* ── Discussion ── */
+.disc-list { list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px; }
+.disc-list li { counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72; }
+.disc-list li::before { content:counter(d);font-family:var(--mono);font-size:11px;color:var(--em);background:var(--em-dim);border:1px solid rgba(16,185,129,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px; }
+.disc-list li strong { color:#e2e8f0; }
+
+/* ── Glossary ── */
+.gloss-grid { display:flex;flex-direction:column; }
+.gloss-entry { display:grid;grid-template-columns:160px 1fr;border-bottom:1px solid var(--border);padding:18px 0; }
+.gloss-entry:last-child { border-bottom:none; }
+.gloss-term { display:flex;flex-direction:column;gap:5px;padding-right:24px;padding-top:2px; }
+.gloss-term-name { font-family:var(--mono);font-size:13px;color:var(--em);font-weight:700; }
+.gloss-abbr { font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.05em; }
+.gloss-def { font-size:14.5px;color:#94a3b8;line-height:1.72; }
+.gloss-def strong { color:#e2e8f0; }
+.gloss-formula { font-family:var(--mono);font-size:11.5px;color:#4ade80;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:7px 12px;display:block;margin-top:8px;line-height:1.8; }
+.gloss-see { font-size:12px;color:var(--muted);margin-top:5px; }
+.gloss-see a { color:var(--em);text-decoration:none;border-bottom:1px dotted rgba(16,185,129,.3); }
+
+/* ── Bottom nav ── */
+.lesson-nav { display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border); }
+.nav-btn { display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s; }
+.nav-btn:hover { border-color:var(--em);box-shadow:0 0 16px var(--em-glow); }
+.nav-lbl   { font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase; }
+.nav-title { font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px; }
+.nav-arrow { font-size:20px;color:var(--em); }
+
+/* ══════════════════════════════
+   DEMO 1 — WEIGHT DROWNING
+══════════════════════════════ */
+.wd-grid { display:grid;grid-template-columns:1fr 1fr;gap:0;min-height:340px; }
+.wd-panel { padding:22px;display:flex;flex-direction:column;gap:14px; }
+.wd-panel + .wd-panel { border-left:1px solid var(--border); }
+.wd-panel-title { font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em; }
+.wd-feature { background:#0a0d14;border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:8px; }
+.wd-feat-lbl { font-size:13px;color:#94a3b8; }
+.wd-feat-lbl strong { color:#e2e8f0; }
+.wd-val { font-family:var(--mono);font-size:22px;color:#e2e8f0; }
+.wd-range { font-family:var(--mono);font-size:10px;color:var(--muted2); }
+.wd-bar-wrap { display:flex;align-items:center;gap:10px;margin-top:4px; }
+.wd-bar-track { flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden; }
+.wd-bar-fill  { height:100%;border-radius:4px;transition:width .2s,background .2s; }
+.wd-bar-pct   { font-family:var(--mono);font-size:10px;width:36px;text-align:right;color:var(--muted); }
+.wd-gradient-section { background:#0a0d14;border-radius:8px;padding:14px;flex:1; }
+.wd-grad-title { font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px; }
+.wd-grad-row { display:flex;align-items:center;gap:10px;margin-bottom:8px; }
+.wd-grad-lbl { font-family:var(--mono);font-size:11px;color:var(--muted);width:24px; }
+.wd-grad-track { flex:1;height:18px;background:var(--border);border-radius:3px;overflow:hidden;position:relative; }
+.wd-grad-fill  { height:100%;border-radius:3px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-family:var(--mono);font-size:9px;transition:width .35s,background .35s; }
+.wd-toggle-row { padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap; }
+.wd-toggle-lbl { font-size:13px;color:#94a3b8; }
+
+/* ══════════════════════════════
+   DEMO 2 — SCALING METHODS
+══════════════════════════════ */
+.sc-inner { padding:20px; }
+.sc-method-btns { display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap; }
+.sc-btn { font-family:var(--mono);font-size:11px;padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s; }
+.sc-btn:hover { border-color:var(--em);color:var(--em); }
+.sc-btn.active { background:var(--em-dim);border-color:rgba(16,185,129,.45);color:var(--em); }
+.sc-method-desc { font-size:13px;color:#94a3b8;line-height:1.65;min-height:40px;margin-bottom:14px;padding:10px 14px;background:#0a0d14;border-radius:6px;border:1px solid var(--border); }
+.sc-method-desc strong { color:#e2e8f0; }
+.sc-method-desc .warn { color:var(--amber); }
+.sc-stats-row { display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px; }
+.sc-stat { background:#0a0d14;border-radius:6px;padding:8px 10px; }
+.sc-stat-lbl { font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px; }
+.sc-stat-val { font-family:var(--mono);font-size:14px;color:#e2e8f0; }
+.sc-hist-area { background:#0a0d14;border-radius:8px;overflow:hidden; }
+
+/* ══════════════════════════════
+   DEMO 3 — VECTOR NORMALIZATION
+══════════════════════════════ */
+.vec-panels { display:grid;grid-template-columns:1fr 200px; }
+.vec-canvas-wrap { padding:20px; }
+.vec-stats-panel { padding:18px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:12px; }
+.vec-stat-section { display:flex;flex-direction:column;gap:6px; }
+.vec-stat-title { font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em; }
+.vec-stat-row { display:flex;justify-content:space-between;align-items:baseline; }
+.vec-stat-lbl { font-size:12px;color:var(--muted); }
+.vec-stat-val { font-family:var(--mono);font-size:13px; }
+.vec-sep { border-top:1px solid var(--border); }
+.cosine-display { background:#0a0d14;border-radius:8px;padding:12px;text-align:center; }
+.cosine-big { font-family:var(--mono);font-size:28px;font-weight:700;transition:color .2s; }
+.cosine-label { font-size:11px;color:var(--muted);margin-top:3px; }
+.cosine-eq { font-family:var(--mono);font-size:10px;color:var(--muted2);margin-top:6px;line-height:1.7; }
+.normalize-note { background:var(--em-dim);border:1px solid rgba(16,185,129,.2);border-radius:6px;padding:8px 10px;font-size:11px;color:#94a3b8;line-height:1.6;display:none; }
+.normalize-note strong { color:var(--em); }
+.vec-controls { padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap; }
+
+/* ══════════════════════════════
+   DEMO 4 — QUANTIZATION
+══════════════════════════════ */
+.qt-inner { padding:22px; }
+.qt-top { display:grid;grid-template-columns:1fr 240px;gap:20px;margin-bottom:20px;align-items:start; }
+.qt-controls-col { display:flex;flex-direction:column;gap:14px; }
+.qt-control-group { display:flex;flex-direction:column;gap:6px; }
+.qt-ctrl-lbl { font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em; }
+.bits-btns { display:flex;gap:6px;flex-wrap:wrap; }
+.bits-btn { font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s; }
+.bits-btn:hover { border-color:var(--em);color:var(--em); }
+.bits-btn.active { background:var(--em-dim);border-color:rgba(16,185,129,.45);color:var(--em); }
+.qt-value-input { background:#0a0d14;border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-family:var(--mono);font-size:14px;color:#e2e8f0;width:100%;outline:none;transition:border-color .15s; }
+.qt-value-input:focus { border-color:var(--em); }
+input[type=range].qt-slider { -webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,var(--em-dim),var(--em)); }
+input[type=range].qt-slider::-webkit-slider-thumb { -webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--em);border:2px solid #34d399;cursor:pointer;box-shadow:0 0 8px var(--em-glow); }
+.qt-stats-col { display:flex;flex-direction:column;gap:8px; }
+.qt-stat { background:#0a0d14;border-radius:7px;padding:10px 12px; }
+.qt-stat-lbl { font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px; }
+.qt-stat-val { font-family:var(--mono);font-size:16px;color:#e2e8f0; }
+.qt-stat-sub { font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px; }
+.qt-stat-val.good { color:var(--green); }
+.qt-stat-val.warn { color:var(--amber); }
+.qt-stat-val.bad  { color:var(--red); }
+.qt-numberline-wrap { background:#0a0d14;border-radius:8px;padding:16px;overflow:hidden; }
+.qt-numberline-lbl { font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px; }
+.qt-precision-table { width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;margin-top:16px; }
+.qt-precision-table th { text-align:left;padding:6px 10px;background:#0a0d14;color:var(--muted2);font-size:9px;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border); }
+.qt-precision-table td { padding:7px 10px;border-bottom:1px solid #12192a;color:#94a3b8; }
+.qt-precision-table tr.current td { background:var(--em-dim);color:var(--em); }
+.qt-precision-table tr:last-child td { border-bottom:none; }
+/* ── Choose-your-normalization demo ── */
+.cn-tab { font-family:var(--mono);font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap; }
+.cn-tab:hover { border-color:var(--em);color:var(--em); }
+.cn-tab.active { background:var(--em-dim);border-color:rgba(16,185,129,.4);color:var(--em); }
+.cn-method-btn { font-family:var(--mono);font-size:12px;padding:7px 16px;border-radius:7px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s; }
+.cn-method-btn:hover { border-color:var(--em);color:var(--em); }
+.cn-pass { color:var(--green); }
+.cn-warn { color:var(--amber); }
+.cn-fail { color:var(--red); }
+
+.wd-scatter-row { border-top:1px solid var(--border); }
+.wd-scatter-lbl { font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 20px 4px; }
+
+/* ── Quantization neuron ── */
+.qt-neuron-wrap { background:#0a0d14;border-radius:8px;padding:16px;margin-top:16px;overflow:hidden; }
+.qt-neuron-lbl  { font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px; }
+</style>
+</head>
+<body>
+
+<nav class="course-nav">
+  <span class="era-badge">ERA 1: FOUNDATIONS</span>
+  <span>›</span>
+  <span>Evolution of Intelligence</span>
+  <span>›</span>
+  <span style="color:#94a3b8">Era 1, Lesson 3 — Scaling, Normalization &amp; Quantization</span>
+</nav>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 1 · LESSON 3</span>
+      <span>1795 – Present</span>
+      <span>·</span>
+      <span>Gauss, Chebyshev &amp; modern compression</span>
+    </div>
+    <h1>Scaling, Normalization<br>&amp; Quantization</h1>
+    <p class="hero-sub">Numbers don't have intrinsic scale — only relationships matter. Choosing the right representation makes your models train faster, predict better, and run on a phone.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1795</span><span class="tl-label">Gauss formalizes the normal distribution</span></div>
+      <div class="tl-item"><span class="tl-year">1960s</span><span class="tl-label">Feature scaling standard in statistical ML</span></div>
+      <div class="tl-item"><span class="tl-year">2023</span><span class="tl-label">4-bit quantization runs LLMs on laptops</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">⚖️</span><div><strong>Explain</strong> why unscaled features cause <a class="tl" href="#g-wd">weight drowning</a> — and why gradient-based learning breaks down when input ranges differ by orders of magnitude.</div></li>
+      <li><span class="obj-icon">📊</span><div><strong>Distinguish</strong> between <a class="tl" href="#g-minmax">min-max scaling</a>, <a class="tl" href="#g-zscore">z-score standardization</a>, and log scaling — and know when each method breaks.</div></li>
+      <li><span class="obj-icon">🧭</span><div><strong>Demonstrate</strong> that normalizing vectors to unit length makes cosine similarity equal to a simple dot product — the trick behind search engines, word embeddings, and attention.</div></li>
+      <li><span class="obj-icon">🔢</span><div><strong>Predict</strong> the quantization error introduced when storing a weight at 8, 4, or 2 bits — and explain why 4-bit models still work surprisingly well.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">The Same Idea, Three Times</h2></div>
+    <div class="prose">
+      <p>Imagine two features in a housing dataset: number of bedrooms (1–5) and square footage (400–6,000). Both matter for predicting price. But if you hand them to a learning algorithm raw, something quietly catastrophic happens: <strong>the large-scale feature completely drowns out the small one</strong>. The gradient signal from square footage is thousands of times larger, so the algorithm spends almost all its effort adjusting the weight for that feature while barely touching the bedroom weight. The model converges slowly, often to the wrong answer, and the small-scale feature is effectively ignored.</p>
+      <p>Feature scaling is the cure. But <em>which</em> scaling method you choose matters enormously. <strong>Min-max scaling</strong> compresses everything to [0, 1] — elegant, but one extreme outlier (a $50M mansion) crushes every other house into [0, 0.01]. <strong>Z-score standardization</strong> centers the data at zero and scales by standard deviation — robust to outliers, but assumes roughly normal distribution. <strong>Logarithmic scaling</strong> is the right choice when values span multiple orders of magnitude — income, population, word frequency — because it compresses the vast tail of large values while preserving the structure at the low end.</p>
+      <p>Then there is a subtler kind of normalization: not of data, but of vectors. <strong>Unit vector normalization</strong> strips away magnitude and keeps only direction. The payoff is elegant: if two vectors are both unit length, their cosine similarity collapses to a dot product — one of the cheapest operations in linear algebra. This is not a coincidence. It is the reason modern search engines, word embeddings, and the entire Attention mechanism in Transformers are built on dot products.</p>
+      <p>Finally, quantization — the most aggressive normalization of all — <strong>intentionally reduces numerical precision to save memory and computation</strong>. Instead of a 32-bit float, store each weight as a 4-bit integer: 16 discrete levels instead of four billion. The resulting model is 8× smaller and runs 8× faster. Remarkably, accuracy barely suffers — because most of a trained model's information lives in the pattern of relative weights, not in their exact values. We will return to quantization in Era 6 when we have millions of weights to compress, but the mechanism is simple enough to understand right here, right now.</p>
+    </div>
+  </section>
+
+  <!-- 03 DEMOS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+
+    <!-- DEMO 1 — Weight Drowning / Loss Surface -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:16px"><strong style="color:#e2e8f0">Demo 1 — Weight Drowning.</strong> Each panel shows the loss surface as a function of two model weights. Contours = equal loss. <strong style="color:#e2e8f0">Drag the learning rate slider</strong> and watch what happens to each path.</p>
+    <div class="demo-wrap" style="margin-bottom:32px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Loss Surface — Gradient Descent Paths</span>
+        <span class="demo-hint">same lr · same start · 40 steps each</span>
+      </div>
+      <div style="padding:20px 20px 14px">
+        <svg id="wdLoss" viewBox="0 0 700 300" style="display:block;width:100%"></svg>
+      </div>
+      <!-- LR slider -->
+      <div style="padding:10px 22px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap">Learning rate α</span>
+        <input type="range" id="wdLrSlider" min="0.05" max="1.95" step="0.05" value="1.0"
+          style="-webkit-appearance:none;appearance:none;flex:1;min-width:160px;height:4px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,#0a0d14,var(--em))"
+          oninput="wdLrChange(this.value)">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--em);min-width:32px" id="wdLrVal">1.0×</span>
+        <span id="wdStatus" style="font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:4px;border:1px solid var(--border);color:var(--muted)"></span>
+        <span id="wdStepInfo" style="font-family:var(--mono);font-size:10px;color:var(--muted2);margin-left:auto"></span>
+      </div>
+      <div style="padding:0 22px 12px;font-family:var(--mono);font-size:10px;color:var(--muted2)">
+        <span style="color:#a78bfa">●</span> start &nbsp;
+        <span style="color:#10b981">●</span> optimum &nbsp;
+        <span style="color:rgba(251,146,60,0.9)">——</span> GD path &nbsp;·&nbsp;
+        dots = every 3 steps
+      </div>
+    </div>
+
+    <!-- DEMO 2 — Choose Your Normalization -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:16px"><strong style="color:#e2e8f0">Demo 2 — Choose Your Normalization.</strong> Six real-world datasets. Look at the raw distribution, pick a scaling method, and get scored feedback explaining why it works or doesn't.</p>
+    <div class="demo-wrap" style="margin-bottom:32px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Normalization Challenge</span>
+        <span class="demo-hint">pick a dataset · choose a method · see your score</span>
+      </div>
+      <div style="padding:16px 20px 0">
+        <div id="cnTabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+        <div id="cnContext" style="font-size:13px;color:#94a3b8;padding:9px 14px;background:#0a0d14;border:1px solid var(--border);border-radius:6px;margin-bottom:14px;line-height:1.6"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border)">
+        <!-- Left: raw histogram -->
+        <div style="padding:16px 20px;border-right:1px solid var(--border)">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Raw Distribution</div>
+          <svg id="cnRawHist" viewBox="0 0 300 160" style="display:block;width:100%"></svg>
+        </div>
+        <!-- Right: normalized histogram -->
+        <div style="padding:16px 20px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">After Your Chosen Method</div>
+          <svg id="cnNormHist" viewBox="0 0 300 160" style="display:block;width:100%;opacity:0.3"></svg>
+        </div>
+      </div>
+      <!-- Method buttons -->
+      <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:13px;color:#94a3b8;margin-right:4px">Choose a method:</span>
+        <div id="cnMethodBtns" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+      <!-- Result panel -->
+      <div id="cnResult" style="display:none;border-top:1px solid var(--border);padding:16px 20px">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px">
+          <span id="cnGrade" style="font-size:28px;font-weight:700;font-family:var(--mono)"></span>
+          <span id="cnGradeLabel" style="font-size:14px;font-weight:600"></span>
+          <span style="flex:1"></span>
+          <span id="cnAllGrades"></span>
+        </div>
+        <div id="cnVerdict" style="font-size:14px;color:#94a3b8;line-height:1.72;background:#0a0d14;padding:12px 16px;border-radius:8px;border:1px solid var(--border)"></div>
+      </div>
+    </div>
+
+    <!-- DEMO 3 — Vector Normalization -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:16px"><strong style="color:#e2e8f0">Demo 3 — Vector Normalization &amp; Cosine Similarity.</strong> Drag the vector endpoints. See how normalizing to unit length makes cosine similarity = dot product.</p>
+    <div class="demo-wrap" style="margin-bottom:32px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Vector Normalization</span>
+        <span class="demo-hint">drag the colored dots</span>
+      </div>
+      <div class="vec-panels">
+        <div class="vec-canvas-wrap">
+          <svg id="vecCanvas" viewBox="0 0 480 320" style="display:block;width:100%;cursor:default"></svg>
+        </div>
+        <div class="vec-stats-panel">
+          <div class="vec-stat-section">
+            <div class="vec-stat-title">Vector A <span style="color:var(--sky)">●</span></div>
+            <div class="vec-stat-row"><span class="vec-stat-lbl">components</span><span class="vec-stat-val" id="vaComp" style="color:var(--sky)">—</span></div>
+            <div class="vec-stat-row"><span class="vec-stat-lbl">magnitude</span><span class="vec-stat-val" id="vaMag" style="color:var(--sky)">—</span></div>
+          </div>
+          <div class="vec-sep"></div>
+          <div class="vec-stat-section">
+            <div class="vec-stat-title">Vector B <span style="color:var(--violet)">●</span></div>
+            <div class="vec-stat-row"><span class="vec-stat-lbl">components</span><span class="vec-stat-val" id="vbComp" style="color:var(--violet)">—</span></div>
+            <div class="vec-stat-row"><span class="vec-stat-lbl">magnitude</span><span class="vec-stat-val" id="vbMag" style="color:var(--violet)">—</span></div>
+          </div>
+          <div class="vec-sep"></div>
+          <div class="cosine-display">
+            <div class="cosine-big" id="cosineVal">—</div>
+            <div class="cosine-label">cosine similarity</div>
+            <div class="cosine-eq" id="cosineEq">cos(θ) = A·B / (|A||B|)</div>
+          </div>
+          <div class="normalize-note" id="normNote">
+            <strong>After normalization:</strong><br>
+            cos(θ) = Â·B̂ = dot product only
+          </div>
+        </div>
+      </div>
+      <div class="vec-controls">
+        <span style="font-size:13px;color:#94a3b8">Normalize vectors:</span>
+        <button class="ctrl-btn active" id="vecBtnRaw"  onclick="vecSetMode('raw')">Raw</button>
+        <button class="ctrl-btn"       id="vecBtnNorm" onclick="vecSetMode('norm')">Unit Length</button>
+        <span id="vecAngleDisplay" style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:8px"></span>
+      </div>
+    </div>
+
+    <!-- DEMO 4 — Quantization -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:16px"><strong style="color:#e2e8f0">Demo 4 — Quantization.</strong> A single neuron weight stored at different precisions. Adjust the value and bit depth to see quantization error.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Quantization — Single Neuron Weight</span>
+        <span class="demo-hint">drag slider or type a value · change bit depth</span>
+      </div>
+      <div class="qt-inner">
+        <div class="qt-top">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div class="qt-control-group">
+              <div class="qt-ctrl-lbl">Bit Depth</div>
+              <div class="bits-btns">
+                <button class="bits-btn" onclick="qtSetBits(32)">32-bit float</button>
+                <button class="bits-btn" onclick="qtSetBits(16)">16-bit</button>
+                <button class="bits-btn active" onclick="qtSetBits(8)">8-bit</button>
+                <button class="bits-btn" onclick="qtSetBits(4)">4-bit</button>
+                <button class="bits-btn" onclick="qtSetBits(2)">2-bit</button>
+              </div>
+            </div>
+            <div class="qt-control-group">
+              <div class="qt-ctrl-lbl">Weight Value (range −1 to +1)</div>
+              <input type="range" class="qt-slider" min="-1" max="1" step="0.001" value="0.733" oninput="qtUpdate(+this.value)">
+            </div>
+            <div class="qt-numberline-wrap">
+              <div class="qt-numberline-lbl">Number Line — <span id="qtNLlbl">8-bit · 256 levels</span></div>
+              <svg id="qtLine" viewBox="0 0 560 90" style="display:block;width:100%"></svg>
+            </div>
+            <div class="qt-neuron-wrap">
+              <div class="qt-neuron-lbl">Single Synapse — How quantization error propagates to activation</div>
+              <svg id="qtNeuron" viewBox="0 0 580 120" style="display:block;width:100%"></svg>
+            </div>
+          </div>
+          <div class="qt-stats-col">
+            <div class="qt-stat">
+              <div class="qt-stat-lbl">Original value</div>
+              <div class="qt-stat-val" id="qtOrigVal">0.73300</div>
+            </div>
+            <div class="qt-stat">
+              <div class="qt-stat-lbl">Quantized value</div>
+              <div class="qt-stat-val" id="qtQuantVal">—</div>
+            </div>
+            <div class="qt-stat">
+              <div class="qt-stat-lbl">Quantization error</div>
+              <div class="qt-stat-val" id="qtErrVal">—</div>
+              <div class="qt-stat-sub" id="qtErrSub">—</div>
+            </div>
+            <div class="qt-stat">
+              <div class="qt-stat-lbl">Available levels</div>
+              <div class="qt-stat-val" id="qtLevels">256</div>
+            </div>
+            <div class="qt-stat">
+              <div class="qt-stat-lbl">Memory (per weight)</div>
+              <div class="qt-stat-val" id="qtMem">8 bits</div>
+            </div>
+          </div>
+        </div>
+        <table class="qt-precision-table" id="qtTable">
+          <thead><tr>
+            <th>Bit depth</th><th>Levels</th><th>Step size</th>
+            <th>Quantized value</th><th>Error</th><th>Memory savings</th>
+          </tr></thead>
+          <tbody id="qtTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+
+    <div class="ex-card">
+      <div class="ex-head">
+        <span class="ex-num">EX 01</span>
+        <div>
+          <div class="ex-title">⚖️ &nbsp;The Drowning Point</div>
+          <div class="ex-desc">Use Demo 1 to find the exact conditions where weight drowning is most severe — and where normalization matters least.</div>
+        </div>
+      </div>
+      <div class="ex-body">
+        <p>→ Set Bedrooms to its <strong>maximum (5)</strong> and square footage to its <strong>minimum (400)</strong>. What is the gradient ratio? Now reverse: Bedrooms at minimum, square footage at maximum. Which direction is worse, and why?</p>
+        <p>→ Switch to Min-Max normalization. Both sliders now produce values in [0,1]. What is the ratio now? Does it matter where the sliders are?</p>
+        <p>→ Switch to Z-Score. Move both sliders to their extreme ends. Does Z-Score equalize the gradients as well as Min-Max? Why might the answer depend on the position of the sliders?</p>
+        <div class="insight"><strong>Key insight:</strong> Min-Max normalization guarantees equal ranges but is sensitive to outliers. Z-Score normalization is more statistically meaningful but doesn't bound the output to [0,1]. Neither is universally superior — the right choice depends on your data distribution.</div>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head">
+        <span class="ex-num">EX 02</span>
+        <div>
+          <div class="ex-title">📊 &nbsp;When Min-Max Breaks</div>
+          <div class="ex-desc">Use Demo 2 to discover exactly what an outlier does to min-max normalization — and why log scaling exists.</div>
+        </div>
+      </div>
+      <div class="ex-body">
+        <p>The dataset has one extremely high earner (≈ $850K). Switch between Raw and Min-Max. What happens to the histogram bars for the 95% of people earning under $150K?</p>
+        <p>→ Now switch to Z-Score. The outlier is still visible but doesn't collapse the rest of the distribution. What does it mean for a value to be "3 standard deviations above the mean"?</p>
+        <p>→ Now try Log. Notice how the long right tail compresses into a near-normal shape. <em>Why would this be useful before training a model?</em> (Hint: think about what the model has to "learn" about the relationship between income and some output variable.)</p>
+        <div class="insight"><strong>Key insight:</strong> Log scaling is not just a visual trick — it reflects a genuine statistical property of many real-world distributions. Income, city populations, word frequencies, and earthquake magnitudes all follow approximately log-normal distributions. Modeling them on a log scale is more truthful, not just more convenient.</div>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head">
+        <span class="ex-num">EX 03</span>
+        <div>
+          <div class="ex-title">🧭 &nbsp;The Dot Product Shortcut</div>
+          <div class="ex-desc">Use Demo 3 to verify that normalizing vectors makes cosine similarity equal to a plain dot product.</div>
+        </div>
+      </div>
+      <div class="ex-body">
+        <p>→ In <strong>Raw</strong> mode, drag Vector A to a long position and Vector B to a short position pointing in roughly the same direction. They should have a high cosine similarity despite very different magnitudes. Now drag Vector A much longer — does the cosine similarity change?</p>
+        <p>→ Switch to <strong>Unit Length</strong> mode. The formula display changes from <code>A·B / (|A||B|)</code> to just <code>Â·B̂</code>. Verify that the cosine value is the same in both modes.</p>
+        <p>→ Find a position where the cosine is exactly 0. What is the geometric relationship between the two vectors? Find a position where it is −1.0. What does that mean?</p>
+        <div class="insight"><strong>Key insight:</strong> This is why modern search engines normalize all document and query vectors before storing them. The dot product is one of the fastest operations on modern hardware — it maps directly to a single CPU/GPU instruction (SIMD). Eliminating the magnitude division from cosine similarity isn't just mathematically elegant; it's a major practical speedup at billion-vector scale.</div>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head">
+        <span class="ex-num">EX 04</span>
+        <div>
+          <div class="ex-title">🔢 &nbsp;The Precision Cliff</div>
+          <div class="ex-desc">Use Demo 4 to find the bit depth at which quantization error becomes visibly large on the number line.</div>
+        </div>
+      </div>
+      <div class="ex-body">
+        <p>→ Set the weight to <strong>0.733</strong>. Step down from 32-bit to 8-bit to 4-bit to 2-bit. At which bit depth does the error become larger than 0.05? Than 0.1?</p>
+        <p>→ At 4-bit, drag the slider slowly from −1.0 to +1.0. You will see the quantized value "jump" in discrete steps. Count the jumps — how many levels are there? Verify against the table.</p>
+        <p>→ At 2-bit (4 levels), what are the only representable values? If a model's weight needs to be 0.6, what does it get rounded to? What is the error, as a percentage of the range?</p>
+        <p>→ The table shows memory savings relative to 32-bit. A model with 7 billion parameters at 32-bit needs about 28 GB of memory. How much does 4-bit quantization require? What about 2-bit?</p>
+        <div class="insight"><strong>Key insight:</strong> 4-bit quantization (16 levels) sounds catastrophically imprecise. But remember: what matters is not the absolute value of any single weight, but the <em>pattern</em> of weights across millions of neurons. The redundancy in a trained model is so high that rounding each weight to the nearest 1/16th of its range loses surprisingly little information. You will understand <em>why</em> this redundancy exists in Era 4 (gradient descent) and Era 6 (QAT). For now: trust the surprising math.</div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>The Preprocessing Gap.</strong> Feature scaling is one of the most commonly skipped steps in beginner ML pipelines. Why? What symptom would you observe in a model that was trained on unscaled features — and how would you diagnose the cause?</li>
+      <li><strong>Outliers and Trust.</strong> Min-max normalization is broken by outliers, but removing outliers is often wrong (the $850K earner is real data). What are your options? When is it legitimate to cap, remove, or transform extreme values?</li>
+      <li><strong>The Geometry of Meaning.</strong> Cosine similarity measures direction, not distance. In what situations would the direction of a vector be more meaningful than its magnitude? Can you think of a case where magnitude matters more?</li>
+      <li><strong>The Quantization Tradeoff.</strong> We showed that 4-bit quantization preserves most accuracy. Does this feel surprising? What does it imply about how "redundant" a trained neural network is — and what does that suggest about the nature of what the model has learned?</li>
+      <li><strong>Connection Forward.</strong> In Era 4 you will study Batch Normalization — a technique that normalizes the activations <em>between</em> layers during training, not just the inputs. Based on what you've learned here, why might normalizing activations mid-network improve training stability?</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry" id="g-wd">
+        <div class="gloss-term"><span class="gloss-term-name">Weight Drowning</span><span class="gloss-abbr">gradient dominance</span></div>
+        <div class="gloss-def">When input features have very different scales, the gradient for the large-scale feature dominates weight updates, effectively "drowning out" gradients from small-scale features. The result: the model trains as if the small-scale feature doesn't exist, converging slowly or to the wrong solution. <strong>Cure: scale all features to a common range before training.</strong></div>
+      </div>
+      <div class="gloss-entry" id="g-minmax">
+        <div class="gloss-term"><span class="gloss-term-name">Min-Max Scaling</span><span class="gloss-abbr">normalization to [0,1]</span></div>
+        <div class="gloss-def">Maps every value to the range [0, 1] using the dataset's minimum and maximum.
+          <div class="gloss-formula">x' = (x − min) / (max − min)</div>
+          <strong>Weakness:</strong> a single extreme outlier changes min or max, compressing all other values into a tiny range. Best used when the data has known, bounded extremes (pixel values 0–255, for example) and no pathological outliers.
+          <span class="gloss-see">→ Compare: <a href="#g-zscore">Z-Score</a> (handles outliers better)</span>
+        </div>
+      </div>
+      <div class="gloss-entry" id="g-zscore">
+        <div class="gloss-term"><span class="gloss-term-name">Z-Score</span><span class="gloss-abbr">standardization</span></div>
+        <div class="gloss-def">Centers the data at 0 and scales by standard deviation. A z-score of +2.0 means "2 standard deviations above the mean."
+          <div class="gloss-formula">x' = (x − μ) / σ</div>
+          <strong>Assumes:</strong> data is roughly normally distributed. Outliers still affect σ but are less catastrophic than with min-max. Output is unbounded (can exceed [−3, +3] for extreme values). The best default choice for most ML pipelines.
+          <span class="gloss-see">→ Requires understanding: <a href="#g-normal">Normal distribution</a></span>
+        </div>
+      </div>
+      <div class="gloss-entry" id="g-normal">
+        <div class="gloss-term"><span class="gloss-term-name">Normal Distribution</span><span class="gloss-abbr">Gaussian / bell curve</span></div>
+        <div class="gloss-def">The symmetric bell-shaped probability distribution defined by mean μ and standard deviation σ. Appears throughout statistics and ML: weight initialization, noise models, central limit theorem. The z-score is only interpretable in terms of the normal: "1σ above the mean" means a specific percentile only if the distribution is approximately Gaussian.
+          <div class="gloss-formula">f(x) = (1/σ√2π) · e^(−(x−μ)²/2σ²)</div>
+          ≈68% of data falls within ±1σ, ≈95% within ±2σ, ≈99.7% within ±3σ.
+        </div>
+      </div>
+      <div class="gloss-entry" id="g-cosine">
+        <div class="gloss-term"><span class="gloss-term-name">Cosine Similarity</span><span class="gloss-abbr">directional similarity</span></div>
+        <div class="gloss-def">Measures the cosine of the angle between two vectors — 1.0 if they point the same direction, 0 if perpendicular, −1.0 if opposite. Unlike Euclidean distance, it ignores magnitude.
+          <div class="gloss-formula">cos(θ) = A·B / (|A|·|B|)   →   Â·B̂ when both are unit vectors</div>
+          The key insight: if vectors are pre-normalized to unit length, cosine similarity is just a dot product — eliminating the expensive division. Used in: search engines, word embeddings, Transformer attention.
+        </div>
+      </div>
+      <div class="gloss-entry" id="g-quant">
+        <div class="gloss-term"><span class="gloss-term-name">Quantization</span><span class="gloss-abbr">precision reduction</span></div>
+        <div class="gloss-def">Mapping continuous floating-point values to a discrete set of integers. A 32-bit float has ~4 billion representable values. An 8-bit integer has 256. A 4-bit integer has 16. Quantization introduces <strong>quantization error</strong> — the difference between the original and the nearest representable value — but enables 8× memory compression at 4-bit precision.
+          <div class="gloss-formula">step = range / (2ⁿ − 1)   &nbsp;&nbsp;   x_q = round(x / step) · step</div>
+          Covered in depth in Era 6. Works because trained model weights are highly redundant — relative patterns matter more than exact values.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom Nav -->
+  <nav class="lesson-nav">
+    <div class="nav-btn">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 1, Lesson 2 — Linear Regression</div></div>
+    </div>
+    <div class="nav-btn">
+      <div><div class="nav-lbl">Next Lesson →</div><div class="nav-title">Era 1, Lesson 4 — ELIZA &amp; Pattern Matching</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+
+</div><!-- wrap -->
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════════
+   DEMO 1 — LOSS SURFACE (synthetic diagonal quadratic)
+   Raw:   L = ½(w₁² + κ·w₂²)  κ=1000  — elongated canyon
+   Norm:  L = ½(w₁² + 1.4·w₂²)         — near-circular
+   Learning rate slider scales a base lr; students see
+   zigzag → divergence on raw while norm stays stable.
+══════════════════════════════════════════════════ */
+(function(){
+  // Eigenvalues of each problem
+  var LS_RAW=1, LF_RAW=1000;   // condition number = 1000
+  var LS_NRM=1, LF_NRM=1.4;   // condition number = 1.4
+
+  // Base learning rates (1.0× = default, produces clear zigzag on raw)
+  // Critical lr for raw = 2/LF_RAW = 0.002; use 0.0015 as 1× so students can push past critical
+  var LR_BASE_RAW = 0.0015;
+  var LR_BASE_NRM = 0.45;
+
+  // Starting offsets from optimum (0,0)
+  var SW1=-1.2, SW2_RAW=0.04, SW2_NRM=0.9;
+
+  var STEPS=40;
+  var lrMult=1.0;
+
+  function gdPath(ls, lf, lr, sw1, sw2) {
+    var path=[{w1:sw1,w2:sw2}], w1=sw1, w2=sw2;
+    for (var i=0;i<STEPS;i++) {
+      w1 -= lr*ls*w1;
+      w2 -= lr*lf*w2;
+      path.push({w1:w1,w2:w2});
+    }
+    return path;
+  }
+
+  // Fixed display ranges derived from contour geometry
+  var C_MAX=1.8;
+  function axRange(l,scale){return scale*Math.sqrt(2*C_MAX/l);}
+  var rW1r=axRange(LS_RAW,1.5), rW2r=axRange(LF_RAW,1.5); // ~2.32, ~0.073
+  var nW1r=axRange(LS_NRM,1.5), nW2r=axRange(LF_NRM,1.5); // ~2.32, ~1.96
+
+  var W=700,H=300;
+  var LP={l:38,r:338,t:40,b:262}, RP={l:362,r:662,t:40,b:262};
+
+  function makeMap(panel,w1r,w2r){
+    return {
+      sx:function(w){return panel.l+(w+w1r)/(2*w1r)*(panel.r-panel.l);},
+      sy:function(v){return panel.b-(v+w2r)/(2*w2r)*(panel.b-panel.t);}
+    };
+  }
+  var rM=makeMap(LP,rW1r,rW2r), nM=makeMap(RP,nW1r,nW2r);
+
+  function ellipsePts(ls,lf,c,m){
+    var a1=Math.sqrt(2*c/ls),a2=Math.sqrt(2*c/lf),pts=[];
+    for(var i=0;i<=80;i++){var t=2*Math.PI*i/80;pts.push([m.sx(a1*Math.cos(t)),m.sy(a2*Math.sin(t))]);}
+    return pts;
+  }
+  function ptsPath(pts){return 'M'+pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join('L')+'Z';}
+
+  function drawPanel(panel,ls,lf,col,path,m,isDiverging){
+    var h='';
+    h+='<rect x="'+panel.l+'" y="'+panel.t+'" width="'+(panel.r-panel.l)+'" height="'+(panel.b-panel.t)+'" fill="#0f1520" rx="3"/>';
+    for(var g=1;g<5;g++){
+      var fx=panel.l+g/5*(panel.r-panel.l),fy=panel.t+g/5*(panel.b-panel.t);
+      h+='<line x1="'+fx+'" y1="'+panel.t+'" x2="'+fx+'" y2="'+panel.b+'" stroke="#131a2a" stroke-width="1"/>';
+      h+='<line x1="'+panel.l+'" y1="'+fy+'" x2="'+panel.r+'" y2="'+fy+'" stroke="#131a2a" stroke-width="1"/>';
+    }
+    var ox=m.sx(0),oy=m.sy(0);
+    h+='<line x1="'+ox+'" y1="'+panel.t+'" x2="'+ox+'" y2="'+panel.b+'" stroke="#1e2d40" stroke-width="1" stroke-dasharray="3,3"/>';
+    h+='<line x1="'+panel.l+'" y1="'+oy+'" x2="'+panel.r+'" y2="'+oy+'" stroke="#1e2d40" stroke-width="1" stroke-dasharray="3,3"/>';
+    // Contours
+    var levels=[0.04,0.12,0.3,0.7,1.3,C_MAX],alphas=[0.6,0.45,0.32,0.2,0.11,0.06];
+    for(var i=0;i<levels.length;i++){
+      var pts=ellipsePts(ls,lf,levels[i],m);
+      var inB=pts.some(function(p){return p[0]>=panel.l&&p[0]<=panel.r&&p[1]>=panel.t&&p[1]<=panel.b;});
+      if(inB) h+='<path d="'+ptsPath(pts)+'" fill="'+col+'" fill-opacity="'+alphas[i]+'" stroke="none"/>';
+    }
+    // GD path — only draw in-bounds segments
+    var pathCol=isDiverging?'rgba(248,113,113,0.85)':'rgba(251,146,60,0.85)';
+    var segs=[],seg=[];
+    path.forEach(function(pt){
+      var x=m.sx(pt.w1),y=m.sy(pt.w2);
+      if(x>=panel.l-2&&x<=panel.r+2&&y>=panel.t-2&&y<=panel.b+2){seg.push([x,y]);}
+      else if(seg.length){segs.push(seg);seg=[];}
+    });
+    if(seg.length) segs.push(seg);
+    segs.forEach(function(s){
+      if(s.length<2) return;
+      h+='<path d="M'+s.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join('L')+'" fill="none" stroke="'+pathCol+'" stroke-width="2" stroke-linecap="round"/>';
+      for(var k=0;k<s.length;k+=3)
+        h+='<circle cx="'+s[k][0].toFixed(1)+'" cy="'+s[k][1].toFixed(1)+'" r="2.5" fill="'+col+'" opacity="0.6"/>';
+    });
+    // Start marker
+    var sx0=m.sx(path[0].w1),sy0=m.sy(path[0].w2);
+    if(sx0>=panel.l&&sx0<=panel.r&&sy0>=panel.t&&sy0<=panel.b)
+      h+='<circle cx="'+sx0+'" cy="'+sy0+'" r="6" fill="#a78bfa" stroke="#fff" stroke-width="1.5"/>';
+    // End marker (only if in bounds)
+    var last=path[path.length-1],ex=m.sx(last.w1),ey=m.sy(last.w2);
+    if(ex>=panel.l&&ex<=panel.r&&ey>=panel.t&&ey<=panel.b)
+      h+='<circle cx="'+ex+'" cy="'+ey+'" r="5" fill="'+col+'" stroke="#fff" stroke-width="1.5"/>';
+    // Diverged arrow if last point off canvas
+    else if(isDiverging){
+      var ax=m.sx(path[0].w1),ay=m.sy(path[0].w2); // draw an "escaping" indicator
+      h+='<text x="'+((panel.l+panel.r)/2)+'" y="'+((panel.t+panel.b)/2)+'" fill="rgba(248,113,113,0.7)" font-size="14" font-weight="bold" text-anchor="middle" font-family="Space Mono,monospace">DIVERGING →∞</text>';
+    }
+    // Optimum dot
+    h+='<circle cx="'+ox+'" cy="'+oy+'" r="4" fill="'+col+'" stroke="#fff" stroke-width="1.2" opacity="0.7"/>';
+    h+='<rect x="'+panel.l+'" y="'+panel.t+'" width="'+(panel.r-panel.l)+'" height="'+(panel.b-panel.t)+'" fill="none" stroke="'+(isDiverging?'rgba(248,113,113,0.5)':'#1e2d40')+'" stroke-width="'+(isDiverging?2:1.2)+'" rx="3"/>';
+    return h;
+  }
+
+  function isPathDiverging(path,w1r,w2r){
+    var last=path[path.length-1];
+    return Math.abs(last.w1)>w1r*3||Math.abs(last.w2)>w2r*3;
+  }
+
+  function draw(){
+    var svg=document.getElementById('wdLoss');if(!svg)return;
+    var lrR=LR_BASE_RAW*lrMult, lrN=LR_BASE_NRM*lrMult;
+    var rPath=gdPath(LS_RAW,LF_RAW,lrR,SW1,SW2_RAW);
+    var nPath=gdPath(LS_NRM,LF_NRM,lrN,SW1,SW2_NRM);
+    var rDiv=isPathDiverging(rPath,rW1r,rW2r);
+    var nDiv=isPathDiverging(nPath,nW1r,nW2r);
+
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="8"/>';
+    h+=drawPanel(LP,LS_RAW,LF_RAW,'#f59e0b',rPath,rM,rDiv);
+    h+=drawPanel(RP,LS_NRM,LF_NRM,'#10b981',nPath,nM,nDiv);
+
+    var mL=(LP.l+LP.r)/2,mR=(RP.l+RP.r)/2;
+    h+='<text x="'+mL+'" y="22" fill="#f59e0b" font-size="11" font-weight="bold" text-anchor="middle" font-family="Space Mono,monospace">RAW FEATURES — κ = 1,000</text>';
+    h+='<text x="'+mR+'" y="22" fill="#10b981" font-size="11" font-weight="bold" text-anchor="middle" font-family="Space Mono,monospace">NORMALIZED — κ = 1.4</text>';
+    h+='<text x="'+mL+'" y="'+(LP.b+16)+'" fill="#475569" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">w₁  (slow axis — bedrooms)</text>';
+    h+='<text x="'+mR+'" y="'+(RP.b+16)+'" fill="#475569" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">w₁  (slow axis — normalized)</text>';
+    var mLy=(LP.t+LP.b)/2,mRy=(RP.t+RP.b)/2;
+    h+='<text x="'+(LP.l-5)+'" y="'+mLy+'" fill="#475569" font-size="9" text-anchor="middle" font-family="Space Mono,monospace" transform="rotate(-90,'+(LP.l-18)+','+mLy+')">w₂  (fast axis — sqft)</text>';
+    h+='<text x="'+(RP.l-5)+'" y="'+mRy+'" fill="#475569" font-size="9" text-anchor="middle" font-family="Space Mono,monospace" transform="rotate(-90,'+(RP.l-18)+','+mRy+')">w₂  (fast axis — normalized)</text>';
+    h+='<text x="'+mL+'" y="'+(LP.t+18)+'" fill="rgba(245,158,11,0.6)" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">canyon: narrow in w₂ · zigzags under high lr</text>';
+    h+='<text x="'+mR+'" y="'+(RP.t+18)+'" fill="rgba(16,185,129,0.6)" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">near-circular: tolerates same lr easily</text>';
+    // κ badges
+    h+='<rect x="'+(LP.l+3)+'" y="'+(LP.b-24)+'" width="174" height="16" rx="3" fill="rgba(248,113,113,0.1)"/>';
+    h+='<text x="'+(LP.l+90)+'" y="'+(LP.b-12)+'" fill="#f87171" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">κ = 1,000  ·  critical lr ≈ 0.002</text>';
+    h+='<rect x="'+(RP.l+3)+'" y="'+(RP.b-24)+'" width="150" height="16" rx="3" fill="rgba(16,185,129,0.08)"/>';
+    h+='<text x="'+(RP.l+78)+'" y="'+(RP.b-12)+'" fill="#10b981" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">κ = 1.4  ·  critical lr ≈ 1.43</text>';
+    svg.innerHTML=h;
+
+    // Status badge
+    var stat=document.getElementById('wdStatus');
+    if(stat){
+      if(rDiv){
+        stat.textContent='⚠ Raw DIVERGES — lr too large';
+        stat.style.color='#f87171'; stat.style.borderColor='rgba(248,113,113,0.4)'; stat.style.background='rgba(248,113,113,0.08)';
+      } else {
+        var factor=Math.abs(1-lrMult*LR_BASE_RAW*LF_RAW);
+        var desc=factor>0.8?'Raw: crawling (lr too small)':factor>0.3?'Raw: zigzagging':'Raw: converging cleanly';
+        stat.textContent=desc;
+        stat.style.color=factor>0.5?'#f59e0b':'#4ade80'; stat.style.borderColor=''; stat.style.background='';
+      }
+    }
+    // Info line
+    var rF=rPath[STEPS],nF=nPath[STEPS];
+    var si=document.getElementById('wdStepInfo');
+    if(si){
+      if(rDiv) si.textContent='raw: diverged · norm dist: '+Math.sqrt(nF.w1*nF.w1+nF.w2*nF.w2).toFixed(3);
+      else si.textContent='dist to ★ after '+STEPS+' steps — raw: '+Math.sqrt(rF.w1*rF.w1+rF.w2*rF.w2).toFixed(3)+'  norm: '+Math.sqrt(nF.w1*nF.w1+nF.w2*nF.w2).toFixed(3);
+    }
+  }
+
+  window.wdLrChange=function(v){
+    lrMult=+v;
+    document.getElementById('wdLrVal').textContent=(+v).toFixed(2)+'×';
+    draw();
+  };
+  draw();
+})();
+
+/* ══════════════════════════════════════════════════
+   DEMO 2 — CHOOSE YOUR NORMALIZATION
+   (6 datasets + 4 methods incl. Quantile Transform)
+══════════════════════════════════════════════════ */
+(function(){
+  function seededRng(seed){var s=seed|0;return function(){s=(s*1664525+1013904223)&0xffffffff;return(s>>>0)/4294967295;};}
+  function gauss(rng){return Math.sqrt(-2*Math.log(rng()+1e-9))*Math.cos(2*Math.PI*rng());}
+
+  var DATASETS=[
+    {
+      id:'salary', name:'Annual Salaries', emoji:'💼',
+      context:'HR database — employee annual salaries in $USD. Most earn $30K–$200K, but a few executives earn over $700K.',
+      gen:function(){var rng=seededRng(11),pts=[];for(var i=0;i<140;i++){var z=gauss(rng);pts.push(Math.round(Math.exp(10.8+0.55*z)));}pts.push(890000,720000,650000);return pts;},
+      best:'log',
+      grades:{minmax:'⚠',zscore:'⚠',log:'✓',quantile:'✓'},
+      verdicts:{
+        minmax:'The $890K outlier sets the maximum — 95% of employees get compressed into [0, 0.03]. The optimizer sees almost no variation in the main distribution.',
+        zscore:'Better than min-max: the main distribution is intact. But income is heavily right-skewed, so the mean is pulled high and z-scores are asymmetric. Log is more structurally honest.',
+        log:'Correct choice. Salary is log-normally distributed by nature — an extra $10K means something very different at $30K vs $300K. Log transform produces a near-Gaussian distribution, balanced z-scores, and brings outliers to heel.',
+        quantile:'Also excellent here. Quantile transform spreads all salaries uniformly across [0,1] regardless of the original skew, and handles the outliers gracefully. Log is preferred when the log-normal interpretation matters; quantile when you just want balanced gradients.'
+      }
+    },
+    {
+      id:'height', name:'Human Heights', emoji:'📏',
+      context:'Medical records — adult heights in cm. Mix of male and female adults from a general population clinic.',
+      gen:function(){var rng=seededRng(22),pts=[];for(var i=0;i<80;i++)pts.push(Math.round(168+gauss(rng)*6.5));for(var i=0;i<80;i++)pts.push(Math.round(178+gauss(rng)*7));return pts;},
+      best:'zscore',
+      grades:{minmax:'⚠',zscore:'✓',log:'✗',quantile:'⚠'},
+      verdicts:{
+        minmax:'Works fine — no outliers here. But loses the natural meaning: a z-score tells you "1.5 standard deviations above average," which is clinically meaningful. Min-max loses that.',
+        zscore:'Ideal. Heights are approximately normally distributed with a meaningful mean and spread. Z-score is symmetric, clinically interpretable, and robust. The bimodal shape (male/female) is preserved.',
+        log:'Wasteful. Heights range from ~145–200cm — not multiple orders of magnitude. Log transform barely changes the shape but adds interpretive complexity for no gain.',
+        quantile:'Flattens the bimodal distribution into a uniform one, which loses the clinically meaningful separation between the two peaks. You would no longer be able to see that there are two groups in the data.'
+      }
+    },
+    {
+      id:'pixels', name:'Image Pixel Values', emoji:'🖼️',
+      context:'Grayscale image data — pixel intensity values in [0, 255]. This is the standard format for every image in deep learning.',
+      gen:function(){var rng=seededRng(33),pts=[];var centres=[60,130,195];for(var i=0;i<160;i++){var c=centres[Math.floor(rng()*3)];pts.push(Math.min(255,Math.max(0,Math.round(c+gauss(rng)*28))));}return pts;},
+      best:'minmax',
+      grades:{minmax:'✓',zscore:'⚠',log:'✗',quantile:'⚠'},
+      verdicts:{
+        minmax:'This is the standard and correct choice. Pixel values have a fixed known range [0, 255], no outliers are possible, and [0, 1] is the natural "fraction of maximum brightness." Every deep learning framework divides by 255.',
+        zscore:'Works technically, but loses the natural bounded structure. You\'d need to recompute mean and std for every image, and the output is unbounded — a bright image and dark image get different scalings. Not standard practice.',
+        log:'Rarely used for pixel values. Log compresses bright regions and stretches dark ones, which distorts the linear relationship between pixel values. Only used in tone-mapping for HDR.',
+        quantile:'Performs histogram equalization — a well-known technique in image processing that enhances local contrast. It\'s useful for some tasks, but as general preprocessing for neural networks it\'s unusual and can remove meaningful brightness information.'
+      }
+    },
+    {
+      id:'cities', name:'City Populations', emoji:'🏙️',
+      context:'Census data — population of 150 cities worldwide. Ranges from 12,000 (small town) to 37 million (megacity).',
+      gen:function(){var rng=seededRng(44),pts=[];for(var i=0;i<146;i++){var z=gauss(rng);pts.push(Math.round(Math.exp(9.5+1.4*z)));}pts.push(37000000,26000000,19000000,14000000);return pts;},
+      best:'log',
+      grades:{minmax:'✗',zscore:'⚠',log:'✓',quantile:'✓'},
+      verdicts:{
+        minmax:'Disastrous. The range is 37 million. Every city below 1 million maps to [0, 0.03]. A model would learn almost nothing about 95% of cities.',
+        zscore:'Better than min-max, but population distributions are so heavily skewed (Zipf\'s law) that "2 standard deviations above the mean" is still tiny compared to Tokyo. The distribution after z-scoring is still strongly right-skewed.',
+        log:'The only correct choice. City sizes follow a power law — each doubling of size is equally meaningful. Log transform converts this to an approximately normal distribution, giving all cities comparable footing from villages to megacities.',
+        quantile:'Also valid. Quantile transform handles the extreme outliers well and gives each city equal representation in the [0,1] space. Log is theoretically preferred because it respects the power-law structure; quantile is a pragmatic alternative.'
+      }
+    },
+    {
+      id:'temp', name:'Temperature Anomalies', emoji:'🌡️',
+      context:'Climate sensor data — daily temperature anomaly vs. 30-year baseline, in °C. Values can be positive or negative.',
+      gen:function(){var rng=seededRng(66),pts=[];for(var i=0;i<160;i++)pts.push(+(gauss(rng)*1.4+0.3).toFixed(2));pts.push(4.1,3.8,3.6,-2.9,-2.7);return pts;},
+      best:'zscore',
+      grades:{minmax:'⚠',zscore:'✓',log:'✗',quantile:'⚠'},
+      verdicts:{
+        minmax:'Works, but maps "zero anomaly" (historical average) to 0.5, losing the physical meaning. The center of the distribution is meaningful here — z-score preserves it.',
+        zscore:'Ideal. The data is approximately Gaussian, the mean (≈0.3°C) is physically meaningful, and z-scores give "how many standard deviations from normal" — exactly the right framing for anomaly detection.',
+        log:'Fails immediately — temperature anomalies can be negative (colder than average), and log is undefined for negative numbers. This would crash your preprocessing pipeline.',
+        quantile:'Technically works since there are no negatives... wait, there are (−2.9°C). Quantile transform handles negatives unlike log. But it destroys the Gaussian shape and the meaningful zero-anomaly reference point. Z-score is clearly better here.'
+      }
+    },
+    {
+      id:'gaussian', name:'Gaussian — Clustered', emoji:'🔔',
+      context:'Sensor readings tightly clustered around a mean — most values near the centre, few far out. A natural case for quantile transform.',
+      gen:function(){var rng=seededRng(88),pts=[];for(var i=0;i<180;i++)pts.push(+(50+gauss(rng)*3).toFixed(2));return pts;},
+      best:'quantile',
+      grades:{minmax:'⚠',zscore:'⚠',log:'⚠',quantile:'✓'},
+      verdicts:{
+        minmax:'Maps to [0,1] but the distribution is still tightly bunched in the middle. A distance-based model (kNN, SVM) still sees most data points as nearly identical — the clustering problem is not solved.',
+        zscore:'Standardizes the spread but the shape is unchanged — points are still clustered around zero. For algorithms that assume uniform coverage of the feature space, this is still problematic.',
+        log:'Values near 50 are all positive, so log works numerically. But since all values span about 40–60 (less than a factor of 2), log barely changes the shape. The clustering problem persists.',
+        quantile:'This is exactly what quantile transform is for. The dense cluster in the middle gets spread out uniformly — every rank becomes equally spaced in [0,1]. The result is a flat histogram. Distance-based models, kNN, and SVMs all benefit from this uniform coverage of the feature space.'
+      }
+    }
+  ];
+
+  var currentDS=0, currentMode=null;
+
+  function transform(arr,m){
+    if(m==='minmax'){var mn=Math.min.apply(null,arr),mx=Math.max.apply(null,arr);return arr.map(function(x){return(x-mn)/(mx-mn);});}
+    if(m==='zscore'){var mu=arr.reduce(function(a,b){return a+b;},0)/arr.length;var sd=Math.sqrt(arr.reduce(function(s,x){return s+Math.pow(x-mu,2);},0)/arr.length)||1;return arr.map(function(x){return(x-mu)/sd;});}
+    if(m==='log'){return arr.map(function(x){return Math.log2(Math.abs(x)+1)*(x<0?-1:1);});}
+    if(m==='quantile'){
+      var n=arr.length;
+      var indexed=arr.map(function(x,i){return{v:x,i:i};});
+      indexed.sort(function(a,b){return a.v-b.v;});
+      var result=new Array(n);
+      indexed.forEach(function(x,rank){result[x.i]=(rank+0.5)/n;});
+      return result;
+    }
+    return arr;
+  }
+
+  function drawHist(id,arr,col){
+    var svg=document.getElementById(id);if(!svg)return;
+    var W=300,H=160,ML=10,MR=10,MT=10,MB=28,PW=W-ML-MR,PH=H-MT-MB;
+    var mn=Math.min.apply(null,arr),mx=Math.max.apply(null,arr);
+    if(mx-mn<1e-9){mx=mn+1;}
+    var BINS=30,step=(mx-mn)/BINS;
+    var counts=new Array(BINS).fill(0);
+    arr.forEach(function(v){var bi=Math.min(BINS-1,Math.floor((v-mn)/step));counts[bi]++;});
+    var maxC=Math.max.apply(null,counts)||1;
+    var bw=PW/BINS-0.5;
+    var h='<rect x="'+ML+'" y="'+MT+'" width="'+PW+'" height="'+PH+'" fill="#0a0d14" rx="3"/>';
+    // Y grid lines
+    for(var g=1;g<=3;g++){var gy=MT+PH-g/4*PH;h+='<line x1="'+ML+'" y1="'+gy+'" x2="'+(ML+PW)+'" y2="'+gy+'" stroke="#1a2035" stroke-width="1"/>';}
+    for(var i=0;i<BINS;i++){
+      if(!counts[i])continue;
+      var bh=counts[i]/maxC*PH;
+      h+='<rect x="'+(ML+i/BINS*PW+0.5)+'" y="'+(MT+PH-bh)+'" width="'+bw+'" height="'+bh+'" fill="'+col+'" opacity="0.85" rx="1"/>';
+    }
+    h+='<line x1="'+ML+'" y1="'+(MT+PH)+'" x2="'+(ML+PW)+'" y2="'+(MT+PH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+    var tFmt=function(v){if(Math.abs(v)>=1e6)return(v/1e6).toFixed(1)+'M';if(Math.abs(v)>=1000)return(v/1000).toFixed(0)+'K';return Math.abs(v)>=10?Math.round(v).toString():v.toFixed(2);};
+    for(var t=0;t<=2;t++){var tv=mn+t/2*(mx-mn),tx=ML+t/2*PW;h+='<text x="'+tx+'" y="'+(H-4)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+tFmt(tv)+'</text>';}
+    svg.innerHTML=h;
+  }
+
+  function gradeColor(g){return g==='✓'?'#4ade80':g==='⚠'?'#f59e0b':'#f87171';}
+
+  function render(){
+    var ds=DATASETS[currentDS],pts=ds.gen();
+    // Tabs
+    var tabs='';
+    DATASETS.forEach(function(d,i){tabs+='<button class="cn-tab'+(i===currentDS?' active':'')+'" onclick="cnSelectDS('+i+')">'+(i<5?d.emoji+' ':'🔔 ')+d.name+'</button>';});
+    document.getElementById('cnTabs').innerHTML=tabs;
+    document.getElementById('cnContext').textContent=ds.context;
+    drawHist('cnRawHist',pts,'#64748b');
+    // Method buttons
+    var methods=[{id:'minmax',label:'Min-Max'},{id:'zscore',label:'Z-Score'},{id:'log',label:'Log'},{id:'quantile',label:'Quantile'}];
+    var btns='';
+    methods.forEach(function(m){
+      var active=currentMode===m.id;
+      btns+='<button class="cn-method-btn'+(active?' active':'')+'" onclick="cnChoose(\''+m.id+'\')" '+(active?'style="border-color:var(--em);color:var(--em);background:var(--em-dim)"':'')+'>'+m.label+'</button>';
+    });
+    document.getElementById('cnMethodBtns').innerHTML=btns;
+    // Result
+    var rp=document.getElementById('cnResult'),normSvg=document.getElementById('cnNormHist');
+    if(currentMode){
+      var transformed=transform(pts,currentMode);
+      var col=currentMode==='minmax'?'#38bdf8':currentMode==='zscore'?'#a78bfa':currentMode==='log'?'#10b981':'#f59e0b';
+      drawHist('cnNormHist',transformed,col);
+      if(normSvg)normSvg.style.opacity='1';
+      rp.style.display='block';
+      var grade=ds.grades[currentMode];
+      document.getElementById('cnGrade').textContent=grade;
+      document.getElementById('cnGrade').style.color=gradeColor(grade);
+      document.getElementById('cnGradeLabel').textContent=grade==='✓'?'Best choice':grade==='⚠'?'Acceptable':'Poor choice';
+      document.getElementById('cnGradeLabel').style.color=gradeColor(grade);
+      document.getElementById('cnVerdict').textContent=ds.verdicts[currentMode];
+      var allg='';
+      methods.forEach(function(m){var g=ds.grades[m.id];allg+='<span style="margin-right:12px;font-family:var(--mono);font-size:11px;color:'+gradeColor(g)+'">'+m.label+': '+g+'</span>';});
+      document.getElementById('cnAllGrades').innerHTML=allg;
+    } else {
+      if(normSvg)normSvg.style.opacity='0.3';
+      rp.style.display='none';
+    }
+  }
+
+  window.cnSelectDS=function(i){currentDS=i;currentMode=null;render();};
+  window.cnChoose=function(m){currentMode=m;render();};
+  render();
+})();
+
+/* ══════════════════════════════════════════════════
+   DEMO 3 — VECTOR NORMALIZATION
+══════════════════════════════════════════════════ */
+(function(){
+  var OX=240,OY=160,SCALE=55,vecA={x:2.2,y:2.8},vecB={x:3.1,y:0.8},normMode='raw',drag=null;
+  function dot(a,b){return a.x*b.x+a.y*b.y;}
+  function mag(v){return Math.sqrt(v.x*v.x+v.y*v.y);}
+  function unit(v){var m=mag(v);return m<1e-6?{x:0,y:0}:{x:v.x/m,y:v.y/m};}
+  function cosSim(a,b){var d=dot(a,b),ma=mag(a),mb=mag(b);return(ma<1e-6||mb<1e-6)?0:d/(ma*mb);}
+  function proj(v){return{px:OX+v.x*SCALE,py:OY-v.y*SCALE};}
+  function arrowHead(px,py,ox,oy,col){
+    var ang=Math.atan2(oy-py,px-ox),s=7;
+    return '<polygon points="'+px+','+py+' '+(px+s*Math.cos(ang+2.5))+','+(py-s*Math.sin(ang+2.5))+' '+(px+s*Math.cos(ang-2.5))+','+(py-s*Math.sin(ang-2.5))+'" fill="'+col+'"/>';
+  }
+  function render(){
+    var svg=document.getElementById('vecCanvas');if(!svg)return;
+    var dA=normMode==='norm'?unit(vecA):vecA,dB=normMode==='norm'?unit(vecB):vecB;
+    var pA=proj(dA),pB=proj(dB);
+    var h='<rect width="480" height="320" fill="#0a0d14" rx="8"/>';
+    for(var g=-5;g<=5;g++){
+      var gx=OX+g*SCALE,gy=OY-g*SCALE;
+      if(gx>0&&gx<480)h+='<line x1="'+gx+'" y1="0" x2="'+gx+'" y2="320" stroke="#1a2035" stroke-width="'+(g===0?1.5:1)+'"/>';
+      if(gy>0&&gy<320)h+='<line x1="0" y1="'+gy+'" x2="480" y2="'+gy+'" stroke="#1a2035" stroke-width="'+(g===0?1.5:1)+'"/>';
+    }
+    // Arc — B CCW from A (diff>0) → sweep=0
+    var aA=Math.atan2(dA.y,dA.x),aB=Math.atan2(dB.y,dB.x),r=32;
+    var x1=OX+r*Math.cos(aA),y1=OY-r*Math.sin(aA),x2=OX+r*Math.cos(aB),y2=OY-r*Math.sin(aB);
+    var diff=aB-aA;while(diff<=-Math.PI)diff+=2*Math.PI;while(diff>Math.PI)diff-=2*Math.PI;
+    var sweep=diff>0?0:1;
+    if(mag(dA)>0.1&&mag(dB)>0.1)
+      h+='<path d="M '+OX+' '+OY+' L '+x1+' '+y1+' A '+r+' '+r+' 0 0 '+sweep+' '+x2+' '+y2+' Z" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.2)" stroke-width="1"/>';
+    if(mag(dA)>0.05){h+='<line x1="'+OX+'" y1="'+OY+'" x2="'+pA.px+'" y2="'+pA.py+'" stroke="#38bdf8" stroke-width="2.5"/>';h+=arrowHead(pA.px,pA.py,OX,OY,'#38bdf8');}
+    if(mag(dB)>0.05){h+='<line x1="'+OX+'" y1="'+OY+'" x2="'+pB.px+'" y2="'+pB.py+'" stroke="#a78bfa" stroke-width="2.5"/>';h+=arrowHead(pB.px,pB.py,OX,OY,'#a78bfa');}
+    h+='<circle cx="'+pA.px+'" cy="'+pA.py+'" r="14" fill="rgba(56,189,248,.07)" stroke="rgba(56,189,248,.28)" stroke-width="1" data-vec="a" style="cursor:grab"/>';
+    h+='<circle cx="'+pA.px+'" cy="'+pA.py+'" r="7" fill="#38bdf8" stroke="#7dd3fc" stroke-width="2" data-vec="a" style="cursor:grab"/>';
+    h+='<circle cx="'+pB.px+'" cy="'+pB.py+'" r="14" fill="rgba(167,139,250,.07)" stroke="rgba(167,139,250,.28)" stroke-width="1" data-vec="b" style="cursor:grab"/>';
+    h+='<circle cx="'+pB.px+'" cy="'+pB.py+'" r="7" fill="#a78bfa" stroke="#c4b5fd" stroke-width="2" data-vec="b" style="cursor:grab"/>';
+    h+='<circle cx="'+OX+'" cy="'+OY+'" r="4" fill="#334155"/>';
+    if(mag(dA)>0.1)h+='<text x="'+(pA.px+9)+'" y="'+(pA.py-9)+'" fill="#38bdf8" font-size="12" font-family="Space Mono,monospace">A</text>';
+    if(mag(dB)>0.1)h+='<text x="'+(pB.px+9)+'" y="'+(pB.py-9)+'" fill="#a78bfa" font-size="12" font-family="Space Mono,monospace">B</text>';
+    svg.innerHTML=h;
+    document.getElementById('vaComp').textContent='('+vecA.x.toFixed(2)+', '+vecA.y.toFixed(2)+')';
+    document.getElementById('vaMag').textContent=mag(vecA).toFixed(3);
+    document.getElementById('vbComp').textContent='('+vecB.x.toFixed(2)+', '+vecB.y.toFixed(2)+')';
+    document.getElementById('vbMag').textContent=mag(vecB).toFixed(3);
+    var cs=cosSim(vecA,vecB);
+    var cosEl=document.getElementById('cosineVal');
+    cosEl.textContent=cs.toFixed(4);
+    cosEl.style.color=cs>0.7?'#10b981':cs>0?'#38bdf8':cs>-0.5?'#f59e0b':'#f87171';
+    var dp=dot(dA,dB);
+    if(normMode==='norm'){
+      document.getElementById('cosineEq').textContent='Â·B̂ = '+dp.toFixed(4)+'  (= cos θ)';
+      document.getElementById('normNote').style.display='block';
+    } else {
+      document.getElementById('cosineEq').textContent='A·B / (|A||B|) = '+dp.toFixed(2)+' / ('+mag(vecA).toFixed(2)+'×'+mag(vecB).toFixed(2)+')';
+      document.getElementById('normNote').style.display='none';
+    }
+    var th=Math.acos(Math.max(-1,Math.min(1,cs)))*180/Math.PI;
+    document.getElementById('vecAngleDisplay').textContent='θ = '+th.toFixed(1)+'°';
+  }
+  var vecSvg=document.getElementById('vecCanvas');
+  if(vecSvg){vecSvg.addEventListener('pointerdown',function(e){var vn=e.target.getAttribute('data-vec');if(!vn)return;drag=vn;vecSvg.setPointerCapture(e.pointerId);e.preventDefault();});}
+  document.addEventListener('pointermove',function(e){
+    if(!drag)return;
+    var s=document.getElementById('vecCanvas');if(!s)return;
+    var r=s.getBoundingClientRect(),vb=s.viewBox.baseVal;
+    var cx=(e.clientX-r.left)*(vb.width/r.width),cy=(e.clientY-r.top)*(vb.height/r.height);
+    var vx=Math.max(-4,Math.min(4,(cx-OX)/SCALE)),vy=Math.max(-4,Math.min(4,(OY-cy)/SCALE));
+    if(drag==='a')vecA={x:vx,y:vy};else vecB={x:vx,y:vy};
+    render();
+  });
+  document.addEventListener('pointerup',function(){drag=null;});
+  window.vecSetMode=function(m){normMode=m;document.getElementById('vecBtnRaw').classList.toggle('active',m==='raw');document.getElementById('vecBtnNorm').classList.toggle('active',m==='norm');render();};
+  render();
+})();
+
+/* ══════════════════════════════════════════════════
+   DEMO 4 — QUANTIZATION
+══════════════════════════════════════════════════ */
+(function(){
+  var currentBits=8,currentVal=0.733,RANGE=2,ALL_BITS=[32,16,8,4,2];
+  function levels(b){return b>=32?Infinity:Math.pow(2,b);}
+  function stepSize(b){return b>=32?0:RANGE/(levels(b)-1);}
+  function quantize(v,b){if(b>=32)return v;var s=stepSize(b);return Math.round((v+1)/s)*s-1;}
+  function qError(v,b){return Math.abs(v-quantize(v,b));}
+  function sigmoid(z){return 1/(1+Math.exp(-z));}
+
+  function drawLine(val,bits){
+    var svg=document.getElementById('qtLine');if(!svg)return;
+    var W=560,H=90,ML=30,MR=30,MT=22,MB=28,PW=W-ML-MR;
+    var sx=function(v){return ML+(v+1)/2*PW;};
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    h+='<rect x="'+ML+'" y="'+(MT+16)+'" width="'+PW+'" height="4" fill="#1a2035" rx="2"/>';
+    if(bits<32){
+      var lvl=levels(bits),drawN=Math.min(lvl,64),qv=quantize(val,bits);
+      for(var i=0;i<drawN;i++){var v=-1+i/(lvl-1)*2,x=sx(v),isQ=Math.abs(v-qv)<stepSize(bits)*0.01;h+='<line x1="'+x+'" y1="'+(MT+12)+'" x2="'+x+'" y2="'+(MT+24)+'" stroke="'+(isQ?'#10b981':'#334155')+'" stroke-width="'+(isQ?2:1)+'"/>';}
+      if(Math.abs(val-qv)>1e-6){var ex1=Math.min(sx(val),sx(qv)),ex2=Math.max(sx(val),sx(qv));h+='<rect x="'+ex1+'" y="'+(MT+13)+'" width="'+(ex2-ex1)+'" height="7" fill="rgba(248,113,113,.3)" rx="1"/>';h+='<text x="'+((ex1+ex2)/2)+'" y="'+(MT+6)+'" fill="#f87171" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">error</text>';}
+      var xq=sx(qv);h+='<circle cx="'+xq+'" cy="'+(MT+18)+'" r="5" fill="#10b981" stroke="#34d399" stroke-width="1.5"/>';h+='<text x="'+xq+'" y="'+(H-MB+16)+'" fill="#10b981" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+qv.toFixed(3)+'</text>';
+    }
+    var xv=sx(val);h+='<circle cx="'+xv+'" cy="'+(MT+18)+'" r="5" fill="'+(bits>=32?'#10b981':'#f59e0b')+'" stroke="'+(bits>=32?'#34d399':'#fbbf24')+'" stroke-width="1.5"/>';h+='<text x="'+xv+'" y="'+(MT-4)+'" fill="'+(bits>=32?'#10b981':'#f59e0b')+'" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+val.toFixed(3)+'</text>';
+    h+='<text x="'+ML+'" y="'+(H-MB+17)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">−1</text>';
+    h+='<text x="'+(ML+PW/2)+'" y="'+(H-MB+17)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">0</text>';
+    h+='<text x="'+(ML+PW)+'" y="'+(H-MB+17)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">+1</text>';
+    svg.innerHTML=h;
+    document.getElementById('qtNLlbl').textContent=bits>=32?'32-bit float · ~4.3 billion levels':bits+'-bit · '+levels(bits)+' levels';
+  }
+
+  function drawNeuron(val,bits){
+    var svg=document.getElementById('qtNeuron');if(!svg)return;
+    var qv=quantize(val,bits),W=580,H=120,x_in=0.8,R=42,SOY=H/2;
+    var trueAct=sigmoid(x_in*val),quantAct=sigmoid(x_in*qv);
+    var centres=[{cx:140,col:'#f59e0b',w:val,act:trueAct,lbl:'32-bit (exact)'},{cx:440,col:'#10b981',w:qv,act:quantAct,lbl:bits>=32?'32-bit (same)':bits+'-bit quantized'}];
+    var h='<defs>';
+    centres.forEach(function(c,i){h+='<clipPath id="qnC'+i+'"><circle cx="'+c.cx+'" cy="'+SOY+'" r="'+R+'"/></clipPath>';});
+    h+='</defs><rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    centres.forEach(function(c,i){
+      var fh=c.act*2*R,fy=SOY+R-fh;
+      h+='<line x1="'+(c.cx-R-70)+'" y1="'+SOY+'" x2="'+(c.cx-R)+'" y2="'+SOY+'" stroke="'+c.col+'" stroke-width="2" opacity="0.5"/>';
+      h+='<circle cx="'+(c.cx-R-70)+'" cy="'+SOY+'" r="6" fill="#0a0d14" stroke="'+c.col+'" stroke-width="1.5"/>';
+      h+='<text x="'+(c.cx-R-70)+'" y="'+(SOY-11)+'" fill="'+c.col+'" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">x=0.8</text>';
+      h+='<text x="'+(c.cx-R-34)+'" y="'+(SOY-6)+'" fill="'+c.col+'" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">w='+c.w.toFixed(4)+'</text>';
+      h+='<rect x="'+(c.cx-R)+'" y="'+fy+'" width="'+(2*R)+'" height="'+fh+'" fill="'+c.col+'" opacity="0.22" clip-path="url(#qnC'+i+')"/>';
+      h+='<circle cx="'+c.cx+'" cy="'+SOY+'" r="'+R+'" fill="none" stroke="'+c.col+'" stroke-width="2"/>';
+      h+='<text x="'+c.cx+'" y="'+(SOY-6)+'" fill="'+c.col+'" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">σ(x·w)</text>';
+      h+='<text x="'+c.cx+'" y="'+(SOY+10)+'" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle" font-family="Space Mono,monospace">'+c.act.toFixed(4)+'</text>';
+      h+='<line x1="'+(c.cx+R)+'" y1="'+SOY+'" x2="'+(c.cx+R+50)+'" y2="'+SOY+'" stroke="'+c.col+'" stroke-width="2" opacity="0.5"/>';
+      h+='<polygon points="'+(c.cx+R+50)+','+SOY+' '+(c.cx+R+44)+','+(SOY-4)+' '+(c.cx+R+44)+','+(SOY+4)+'" fill="'+c.col+'"/>';
+      h+='<text x="'+c.cx+'" y="13" fill="'+c.col+'" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">'+c.lbl+'</text>';
+    });
+    h+='<line x1="'+W/2+'" y1="8" x2="'+W/2+'" y2="'+(H-8)+'" stroke="#1e2d40" stroke-width="1" stroke-dasharray="3,3"/>';
+    var ea=Math.abs(trueAct-quantAct),ec=ea>0.02?'#f87171':ea>0.004?'#f59e0b':'#4ade80';
+    h+='<text x="'+W/2+'" y="'+(SOY-4)+'" fill="'+ec+'" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">|Δ| = '+ea.toFixed(5)+'</text>';
+    h+='<text x="'+W/2+'" y="'+(SOY+12)+'" fill="'+ec+'" font-size="10" font-weight="bold" text-anchor="middle" font-family="Space Mono,monospace">'+(ea*100).toFixed(3)+'%</text>';
+    svg.innerHTML=h;
+  }
+
+  function buildTable(val){
+    var rows='';
+    ALL_BITS.forEach(function(b){
+      var qv=quantize(val,b),err=qError(val,b);
+      var ec=err>0.1?'bad':err>0.02?'warn':'good';
+      rows+='<tr class="'+(b===currentBits?'current':'')+'"><td>'+(b>=32?'32-bit float':b+'-bit int')+'</td><td>'+(b>=32?'~4.3B':levels(b))+'</td><td>'+(b>=32?'~0.0000005':stepSize(b).toFixed(b<=4?4:5))+'</td>';
+      rows+='<td style="font-family:var(--mono)">'+(b>=32?val.toFixed(5):qv.toFixed(4))+'</td>';
+      rows+='<td class="'+ec+'" style="font-family:var(--mono)">'+(b>=32?'0.00000':err.toFixed(5))+'</td><td>'+(b>=32?'—':Math.round((1-b/32)*100)+'% smaller')+'</td></tr>';
+    });
+    document.getElementById('qtTableBody').innerHTML=rows;
+  }
+
+  function update(){
+    var bits=currentBits,val=currentVal;
+    var qv=quantize(val,bits),err=qError(val,bits);
+    document.getElementById('qtOrigVal').textContent=val.toFixed(5);
+    document.getElementById('qtQuantVal').textContent=bits>=32?val.toFixed(5):qv.toFixed(4);
+    var eEl=document.getElementById('qtErrVal');
+    eEl.textContent=bits>=32?'0.00000':err.toFixed(5);
+    eEl.className='qt-stat-val '+(bits>=32?'good':err>0.1?'bad':err>0.02?'warn':'good');
+    document.getElementById('qtErrSub').textContent=bits>=32?'exact representation':(err/2*100).toFixed(2)+'% of full range';
+    document.getElementById('qtLevels').textContent=bits>=32?'~4.3 billion':''+levels(bits);
+    document.getElementById('qtMem').textContent=bits>=32?'32 bits (4 bytes)':bits+' bits';
+    drawLine(val,bits);
+    buildTable(val);
+    drawNeuron(val,bits);
+  }
+
+  window.qtSetBits=function(b){
+    currentBits=b;
+    document.querySelectorAll('.bits-btn').forEach(function(btn){
+      btn.classList.toggle('active',btn.textContent.indexOf(b+'-bit')>=0||(b>=32&&btn.textContent.indexOf('32')>=0));
+    });
+    update();
+  };
+  window.qtUpdate=function(v){currentVal=Math.max(-1,Math.min(1,+v));update();};
+  update();
+})();
+
+function toggleDetail(bodyId,arrowId){
+  var body=document.getElementById(bodyId),arrow=document.getElementById(arrowId);
+  var open=body.style.display==='block';
+  body.style.display=open?'none':'block';
+  arrow.textContent=open?'▼ expand':'▲ hide';
+}
+</script>
+</body>
+</html>

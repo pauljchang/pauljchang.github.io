@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 1, Lesson 2 — Linear Regression | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0d1117;
+  --surface:  #161b27;
+  --s2:       #1a2035;
+  --border:   #1e2d40;
+  --text:     #e2e8f0;
+  --muted:    #64748b;
+  --muted2:   #334155;
+  --sky:      #38bdf8;
+  --sky-dim:  rgba(56,189,248,.12);
+  --sky-glow: rgba(56,189,248,.35);
+  --amber:    #f59e0b;
+  --orange:   #fb923c;
+  --green:    #4ade80;
+  --red:      #f87171;
+  --font:     'Outfit', sans-serif;
+  --mono:     'Space Mono', monospace;
+  --disp:     'Lora', serif;
+}
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 16px; line-height: 1.7; }
+
+/* ── Nav ── */
+.course-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(13,17,23,.92); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 11px 40px; display: flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+}
+.era-badge { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 3px 9px; color: var(--sky); font-size: 10px; letter-spacing: .1em; }
+.wrap { max-width: 920px; margin: 0 auto; padding: 0 32px 100px; }
+
+/* ── Hero ── */
+.hero { padding: 60px 0 48px; border-bottom: 1px solid var(--border); margin-bottom: 60px; }
+.hero-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.week-badge { background: var(--sky); color: #021a2a; padding: 3px 10px; border-radius: 4px; font-weight: 700; font-size: 10px; letter-spacing: .08em; }
+.hero h1 { font-family: var(--disp); font-size: 54px; font-weight: 600; line-height: 1.08; letter-spacing: -.02em; color: #f1f5f9; margin-bottom: 14px; }
+.hero-sub { font-size: 17px; color: var(--muted); font-weight: 300; max-width: 580px; margin-bottom: 28px; }
+.hero-timeline { display: flex; gap: 36px; flex-wrap: wrap; }
+.tl-item { display: flex; flex-direction: column; gap: 3px; }
+.tl-year  { font-family: var(--mono); font-size: 10px; color: var(--sky); letter-spacing: .1em; }
+.tl-label { font-size: 13px; color: var(--muted); }
+
+/* ── Sections ── */
+.section { margin-bottom: 68px; }
+.section-head { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; }
+.sec-num   { font-family: var(--mono); font-size: 11px; color: var(--muted2); min-width: 28px; }
+.sec-title { font-family: var(--disp); font-size: 26px; font-weight: 600; color: #f1f5f9; }
+
+/* ── Objectives ── */
+.obj-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.obj-list li { display: flex; gap: 14px; align-items: flex-start; padding: 14px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; font-size: 15px; color: #94a3b8; }
+.obj-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.obj-list li strong { color: #f1f5f9; }
+
+/* ── Prose ── */
+.prose p { font-size: 15.5px; color: #94a3b8; margin-bottom: 18px; line-height: 1.82; }
+.prose p:last-child { margin-bottom: 0; }
+.prose p strong { color: #e2e8f0; }
+.prose blockquote { border-left: 3px solid var(--sky); margin: 28px 0; padding: 12px 20px; background: var(--sky-dim); border-radius: 0 8px 8px 0; font-style: italic; color: #94a3b8; font-size: 15px; }
+
+/* ── Collapsible ── */
+.detail-box { margin-top: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.detail-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; cursor: pointer; user-select: none; font-size: 14px; font-weight: 500; color: #94a3b8; transition: background .15s; }
+.detail-head:hover { background: var(--s2); }
+.detail-arrow { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.detail-body { padding: 20px 22px; border-top: 1px solid var(--border); font-size: 14.5px; color: #94a3b8; line-height: 1.78; display: none; }
+.detail-body p { margin-bottom: 12px; }
+.detail-body p:last-child { margin-bottom: 0; }
+.detail-body strong { color: #e2e8f0; }
+.code-block { background: #0a0d14; border: 1px solid var(--border); border-radius: 6px; padding: 14px 18px; font-family: var(--mono); font-size: 12px; color: #4ade80; margin: 12px 0; line-height: 1.85; }
+
+/* ── Demo wrap ── */
+.demo-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.demo-topbar { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.demo-tag { font-family: var(--mono); font-size: 11px; color: var(--sky); letter-spacing: .12em; text-transform: uppercase; }
+
+/* Main demo grid */
+.main-demo-grid { display: grid; grid-template-columns: 1fr 180px; }
+.scatter-panel { overflow: hidden; }
+.scatter-svg { display: block; width: 100%; cursor: default; }
+
+/* Stats panel */
+.stats-panel { padding: 18px; border-left: 1px solid var(--border); display: flex; flex-direction: column; gap: 11px; }
+.stats-title { font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+.stat-row { display: flex; flex-direction: column; gap: 2px; }
+.stat-lbl { font-family: var(--mono); font-size: 9px; color: var(--muted2); text-transform: uppercase; letter-spacing: .07em; }
+.stat-val { font-family: var(--mono); font-size: 15px; color: #e2e8f0; }
+.stat-val.good { color: var(--green); }
+.stat-val.sky  { color: var(--sky); }
+.stat-val.bad  { color: var(--red); }
+.stat-sep { border-top: 1px solid var(--border); }
+.stat-compare { background: #0a0d14; border-radius: 6px; padding: 8px 10px; font-family: var(--mono); font-size: 10px; color: var(--muted); line-height: 1.75; display: none; }
+.stat-compare strong { color: var(--green); }
+.stat-compare .worse { color: var(--red); }
+
+/* Controls */
+.demo-controls { padding: 11px 18px; border-top: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; }
+.ctrl-btn { font-family: var(--mono); font-size: 11px; padding: 6px 13px; border-radius: 6px; cursor: pointer; transition: all .15s; border: 1px solid var(--border); background: none; color: var(--muted); }
+.ctrl-btn:hover { border-color: var(--sky); color: var(--sky); }
+.ctrl-btn.active { background: var(--sky-dim); border-color: rgba(56,189,248,.4); color: var(--sky); }
+.ctrl-btn.ols  { border-color: rgba(74,222,128,.25); }
+.ctrl-btn.ols:hover  { border-color: var(--green); color: var(--green); }
+.ctrl-btn.ols.active { background: rgba(74,222,128,.08); border-color: rgba(74,222,128,.45); color: var(--green); }
+.ctrl-btn.dim  { color: var(--muted2); font-size: 10px; }
+
+/* ── Exercise cards ── */
+.ex-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+.ex-head { padding: 16px 20px; display: flex; gap: 16px; align-items: flex-start; border-bottom: 1px solid var(--border); }
+.ex-num  { font-family: var(--mono); font-size: 11px; color: var(--sky); background: var(--sky-dim); border: 1px solid rgba(56,189,248,.3); border-radius: 4px; padding: 4px 9px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+.ex-title { font-weight: 600; font-size: 16px; color: #f1f5f9; }
+.ex-desc  { font-size: 14px; color: #94a3b8; margin-top: 4px; line-height: 1.6; }
+.ex-body  { padding: 20px; }
+.ex-body p { font-size: 14.5px; color: #94a3b8; margin-bottom: 14px; line-height: 1.7; }
+.ex-body p:last-child { margin-bottom: 0; }
+.ex-body p strong { color: #e2e8f0; }
+.ex-body p em { color: var(--sky); font-style: normal; font-weight: 500; }
+.insight { background: rgba(56,189,248,.05); border: 1px solid rgba(56,189,248,.2); border-radius: 8px; padding: 12px 16px; margin-top: 14px; font-size: 13px; color: #94a3b8; line-height: 1.7; }
+.insight strong { color: var(--sky); }
+.sub-demo { background: var(--s2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+
+/* Anscombe */
+.anscombe-btns { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.ans-btn { font-family: var(--mono); font-size: 11px; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: none; color: var(--muted); cursor: pointer; transition: all .15s; }
+.ans-btn:hover { border-color: var(--sky); color: var(--sky); }
+.ans-btn.active { background: var(--sky-dim); border-color: rgba(56,189,248,.4); color: var(--sky); }
+.anscombe-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+.a-stat { background: #0a0d14; border-radius: 6px; padding: 8px 10px; }
+.a-stat-lbl { font-family: var(--mono); font-size: 9px; color: var(--muted2); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 3px; }
+.a-stat-val { font-family: var(--mono); font-size: 15px; color: #e2e8f0; }
+.ans-note { font-size: 13px; color: var(--muted); font-style: italic; margin-bottom: 12px; min-height: 18px; }
+
+/* ── Discussion ── */
+.disc-list { list-style: none; counter-reset: d; display: flex; flex-direction: column; gap: 12px; }
+.disc-list li { counter-increment: d; display: flex; gap: 14px; align-items: flex-start; padding: 16px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; font-size: 15px; color: #94a3b8; line-height: 1.72; }
+.disc-list li::before { content: counter(d); font-family: var(--mono); font-size: 11px; color: var(--sky); background: var(--sky-dim); border: 1px solid rgba(56,189,248,.25); border-radius: 4px; padding: 4px 9px; flex-shrink: 0; margin-top: 2px; }
+.disc-list li strong { color: #e2e8f0; }
+
+/* ── Term links ── */
+a.tl { color: var(--sky); text-decoration: none; border-bottom: 1px dotted rgba(56,189,248,.45); transition: border-color .15s, color .15s; cursor: pointer; }
+a.tl:hover { border-bottom-color: var(--sky); color: #7dd3fc; }
+/* Overline-safe notation for x-bar / y-bar */
+.xb { text-decoration: overline; }
+
+/* ── Glossary ── */
+.gloss-grid { display: flex; flex-direction: column; }
+.gloss-entry { display: grid; grid-template-columns: 160px 1fr; border-bottom: 1px solid var(--border); padding: 18px 0; }
+.gloss-entry:last-child { border-bottom: none; }
+.gloss-term { display: flex; flex-direction: column; gap: 5px; padding-right: 24px; padding-top: 2px; }
+.gloss-term-name { font-family: var(--mono); font-size: 13px; color: var(--sky); font-weight: 700; }
+.gloss-abbr { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .05em; }
+.gloss-def { font-size: 14.5px; color: #94a3b8; line-height: 1.72; }
+.gloss-def strong { color: #e2e8f0; }
+.gloss-formula { font-family: var(--mono); font-size: 11.5px; color: #4ade80; background: #0a0d14; border: 1px solid var(--border); border-radius: 5px; padding: 7px 12px; display: block; margin-top: 8px; line-height: 1.8; }
+.gloss-see { font-size: 12px; color: var(--muted); margin-top: 5px; }
+.gloss-see a { color: var(--sky); text-decoration: none; border-bottom: 1px dotted rgba(56,189,248,.3); }
+
+/* ── Bottom nav ── */
+.lesson-nav { display: flex; justify-content: space-between; margin-top: 68px; padding-top: 32px; border-top: 1px solid var(--border); }
+.nav-btn { display: flex; align-items: center; gap: 16px; padding: 14px 22px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; transition: all .15s; cursor: default; }
+.nav-btn.live:hover { border-color: var(--sky); box-shadow: 0 0 16px var(--sky-glow); }
+.nav-lbl   { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+.nav-title { font-size: 15px; font-weight: 500; color: #e2e8f0; margin-top: 3px; }
+.nav-arrow { font-size: 20px; color: var(--sky); }
+</style>
+</head>
+<body>
+
+<nav class="course-nav">
+  <span class="era-badge">ERA 1: FOUNDATIONS</span>
+  <span>›</span>
+  <span>Evolution of Intelligence</span>
+  <span>›</span>
+  <span style="color:#94a3b8">Era 1, Lesson 2 — Linear Regression</span>
+</nav>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 1 · LESSON 2</span>
+      <span>1805 – 1885</span>
+      <span>·</span>
+      <span>Legendre, Gauss &amp; Galton</span>
+    </div>
+    <h1>Linear Regression</h1>
+    <p class="hero-sub">Fitting a line to noisy data — the simplest model, the deepest intuitions, and a lesson the entire field keeps re-learning.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1805</span><span class="tl-label">Legendre publishes Least Squares</span></div>
+      <div class="tl-item"><span class="tl-year">1809</span><span class="tl-label">Gauss derives it from probability</span></div>
+      <div class="tl-item"><span class="tl-year">1885</span><span class="tl-label">Galton coins "regression to the mean"</span></div>
+    </div>
+  </header>
+
+  <!-- 01 Objectives -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">📏</span><div><strong>Explain</strong> why we minimize the <em>sum of squared errors</em> rather than the sum of absolute errors, and what that choice costs us.</div></li>
+      <li><span class="obj-icon">🎯</span><div><strong>Demonstrate</strong> that the OLS line always passes through the <a class="tl" href="#g-centroid">centroid</a> (<span class="xb">x</span>, <span class="xb">y</span>) and that slope and intercept are uniquely determined by the data.</div></li>
+      <li><span class="obj-icon">🦎</span><div><strong>Show</strong> how a single outlier can hijack the regression line — and what this implies about data quality in any ML pipeline.</div></li>
+      <li><span class="obj-icon">👁️</span><div><strong>Recognize</strong> Anscombe's Quartet: four datasets with identical summary statistics but radically different shapes — proving that visualization is not optional.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 Story -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">The Line That Explains the World</h2></div>
+    <div class="prose">
+      <p>In 1805, French mathematician Adrien-Marie Legendre published a paper on predicting comet orbits. Buried in the appendix was a method he called <em>moindres carrés</em> — the method of least squares. Given a set of noisy observations, find the line that minimizes the total <a class="tl" href="#g-sse">squared distance</a> from each point to the line. Four years later, Carl Friedrich Gauss claimed he had been using the same method privately since 1795, and derived it from first principles using probability theory. The priority dispute was acrimonious and unresolved. The method itself was unambiguously revolutionary.</p>
+      <p>The word "regression" came from a strange discovery by Francis Galton in 1885. He was studying the heights of fathers and sons, and noticed something counterintuitive: <strong>exceptionally tall fathers tended to have sons who were tall, but not as tall as the father</strong>. The population seemed to "regress" toward the mean across generations. The name stuck — even though what we now call linear regression has nothing to do with Galton's original observation about heights. Naming conventions in statistics are rarely logical.</p>
+      <p>Linear regression is the foundation of supervised machine learning. Every neural network you will build in this course is, in a certain sense, a very complicated nonlinear regression. Understanding why and how a line is fit to noisy data — what "best" means, what can go wrong, and how to detect it — is the first act of becoming a practitioner.</p>
+    </div>
+    <div class="detail-box">
+      <div class="detail-head" onclick="toggleDetail('mathBody','mathArrow')">
+        <span>📐 The Mathematics of Least Squares</span>
+        <span class="detail-arrow" id="mathArrow">▼ expand</span>
+      </div>
+      <div class="detail-body" id="mathBody">
+        <p>Given n data points (x₁,y₁)…(xₙ,yₙ), we fit a line ŷ = β₁x + β₀ by minimizing the <strong><a class="tl" href="#g-sse">Sum of Squared Errors (SSE)</a></strong>:</p>
+        <div class="code-block">SSE = Σᵢ (yᵢ − ŷᵢ)² = Σᵢ (yᵢ − β₁xᵢ − β₀)²</div>
+        <p>Taking partial derivatives with respect to β₀ and β₁ and setting them to zero gives the <strong><a class="tl" href="#g-ols">Ordinary Least Squares (OLS)</a></strong> closed-form solution:</p>
+        <div class="code-block">β₁ = Σ(xᵢ − <span class="xb">x</span>)(yᵢ − <span class="xb">y</span>) / Σ(xᵢ − <span class="xb">x</span>)²
+β₀ = <span class="xb">y</span> − β₁ · <span class="xb">x</span></div>
+        <p>Notice β₀ is defined in terms of the means <span class="xb">x</span> and <span class="xb">y</span> — this means <strong>the OLS line always passes through the <a class="tl" href="#g-centroid">centroid</a> (<span class="xb">x</span>,&thinsp;<span class="xb">y</span>)</strong> of the dataset. You can verify this in the demo using the crosshair marker.</p>
+        <p>Model quality is measured by <strong><a class="tl" href="#g-r2">R²</a></strong> (coefficient of determination):</p>
+        <div class="code-block">R² = 1 − SSE / SST &nbsp;&nbsp; where &nbsp;&nbsp; SST = Σᵢ (yᵢ − <span class="xb">y</span>)²</div>
+        <p>R² = 1 means perfect fit. R² = 0 means your model is no better than predicting <span class="xb">y</span> for every input. R² can go negative if your line is actively worse than that flat baseline.</p>
+        <p><strong>Why squared, not absolute?</strong> Three reasons: (1) squaring is differentiable everywhere, making calculus tractable; (2) it penalizes large errors disproportionately; (3) the OLS solution is unique and expressible in closed form. Absolute-error regression (L1) is harder to solve but more robust to outliers — a tradeoff you will revisit in Era 3 (Regularization).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 Demo -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demo</h2></div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:20px;">
+      <strong style="color:#e2e8f0">Drag the two orange handles</strong> to position your line and minimize the <a class="tl" href="#g-sse">SSE</a>. The white crosshair marks the <a class="tl" href="#g-centroid">centroid</a> (<span class="xb">x</span>,&thinsp;<span class="xb">y</span>). Use the controls below to reveal <a class="tl" href="#g-residual">residuals</a>, squared-error boxes, and the <a class="tl" href="#g-ols">OLS</a> solution.
+    </p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Line Fitting Lab</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted2)">drag handles · minimize SSE</span>
+      </div>
+      <div class="main-demo-grid">
+        <div class="scatter-panel">
+          <svg id="mainScatter" class="scatter-svg" viewBox="0 0 540 360"></svg>
+        </div>
+        <div class="stats-panel">
+          <div class="stats-title">Stats</div>
+          <div class="stat-row"><span class="stat-lbl">Your SSE</span><span class="stat-val" id="sSSE">—</span></div>
+          <div class="stat-row"><span class="stat-lbl">Your R²</span><span class="stat-val" id="sR2">—</span></div>
+          <div class="stat-row"><span class="stat-lbl">Slope β₁</span><span class="stat-val sky" id="sSlope">—</span></div>
+          <div class="stat-row"><span class="stat-lbl">Intercept β₀</span><span class="stat-val sky" id="sIntercept">—</span></div>
+          <div class="stat-sep"></div>
+          <div class="stat-compare" id="sCompare"></div>
+        </div>
+      </div>
+      <div class="demo-controls">
+        <button class="ctrl-btn" onclick="newPoints()">↺ &nbsp;New Points</button>
+        <button class="ctrl-btn" id="btnResid"   onclick="toggleFlag('resid')">Show Residuals</button>
+        <button class="ctrl-btn" id="btnSquares" onclick="toggleFlag('squares')">Show Squares</button>
+        <button class="ctrl-btn ols" id="btnOLS" onclick="toggleFlag('ols')">Show OLS Line</button>
+        <button class="ctrl-btn dim" onclick="resetLine()">Reset Line</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 Exercises -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+
+    <!-- Ex 01 -->
+    <div class="ex-card">
+      <div class="ex-head">
+        <span class="ex-num">EX 01</span>
+        <div>
+          <div class="ex-title">📐 &nbsp;The Residual Curtain</div>
+          <div class="ex-desc">Use the demo above — toggle <strong>Show Residuals</strong>, then <strong>Show Squares</strong>. Move the line around while both are visible.</div>
+        </div>
+      </div>
+      <div class="ex-body">
+        <p>Each vertical red line is a <strong>residual</strong> — the gap between the actual y and your prediction ŷ. Each colored box has side length equal to that residual — so its <em>area</em> equals the squared error. The SSE counter in the panel is literally the total area of all those boxes combined.</p>
+        <p>→ Move the line to pass through the middle of the cloud. Watch how large outlying boxes shrink while nearby boxes barely change. <em>Why does squaring give outliers so much more influence than nearby points?</em></p>
+        <p>→ Now click <strong>Show OLS Line</strong>. Does the OLS arrangement of squares surprise you? Are they all equal, or does the optimal line still leave some large ones?</p>
+        <div class="insight"><strong>Key insight:</strong> "Least squares" is not "fewest big errors" — it's a global balance. A line that nails 14 points but catastrophically misses one can have a higher SSE than a line that misses every point moderately. This is why outliers disproportionately distort OLS models.</div>
+      </div>
+    </div>
+
+    <!-- Ex 02 -->
+    <div class="ex-card">
+      <div class="ex-head">
+        <span class="ex-num">EX 02</span>
+        <div>
+          <div class="ex-title">🦎 &nbsp;The Outlier Effect</div>
+          <div class="ex-desc">Drag the <strong style="color:var(--amber)">amber point</strong> and watch the regression line chase it in real time.</div>
+        </div>
+      </div>
+      <div class="ex-body">
+        <div class="sub-demo">
+          <svg id="outlierScatter" viewBox="0 0 540 300" style="display:block;width:100%"></svg>
+        </div>
+        <p>The blue points are fixed. Only the amber point moves. The <strong style="color:var(--green)">green dashed line</strong> shows the regression without the outlier; the <strong style="color:var(--orange)">orange line</strong> shows it with the outlier included.</p>
+        <p>→ Drag the amber point to an extreme corner. How many standard deviations does the slope shift? Can you reverse the slope direction entirely with one point?</p>
+        <p>→ In a real dataset with 10,000 rows, a single data-entry error can do the same thing. <em>What's the first thing you should do after fitting a regression in production?</em></p>
+        <div class="insight"><strong>Key insight:</strong> OLS is not robust. A point 3× further from the line contributes 9× more to SSE — the squaring gives extreme values enormous leverage. This motivates robust regression, data cleaning (Lesson 3), and L1/L2 regularization (Era 3).</div>
+      </div>
+    </div>
+
+    <!-- Ex 03 -->
+    <div class="ex-card">
+      <div class="ex-head">
+        <span class="ex-num">EX 03</span>
+        <div>
+          <div class="ex-title">👁️ &nbsp;Anscombe's Quartet</div>
+          <div class="ex-desc">Four datasets. Nearly identical regression statistics. The most important 11 data points in the history of data science.</div>
+        </div>
+      </div>
+      <div class="ex-body">
+        <p>Switch between datasets. The statistics panel barely changes. The scatter plots could not be more different.</p>
+        <div class="anscombe-btns">
+          <button class="ans-btn active" onclick="loadAnscombe(0)">Dataset I</button>
+          <button class="ans-btn" onclick="loadAnscombe(1)">Dataset II</button>
+          <button class="ans-btn" onclick="loadAnscombe(2)">Dataset III</button>
+          <button class="ans-btn" onclick="loadAnscombe(3)">Dataset IV</button>
+        </div>
+        <div class="anscombe-stats">
+          <div class="a-stat"><div class="a-stat-lbl">Mean X</div><div class="a-stat-val" id="aMX">—</div></div>
+          <div class="a-stat"><div class="a-stat-lbl">Mean Y</div><div class="a-stat-val" id="aMY">—</div></div>
+          <div class="a-stat"><div class="a-stat-lbl">Slope</div><div class="a-stat-val" id="aSlope">—</div></div>
+          <div class="a-stat"><div class="a-stat-lbl">R²</div><div class="a-stat-val" id="aR2">—</div></div>
+        </div>
+        <div class="ans-note" id="ansNote"></div>
+        <div class="sub-demo">
+          <svg id="anscombeScatter" viewBox="0 0 540 300" style="display:block;width:100%"></svg>
+        </div>
+        <p>Dataset II is a perfect parabola — the linear model is structurally wrong, but R² doesn't flag it. Dataset III has a near-perfect trend demolished by one point. Dataset IV has all x values identical except one, so the slope is determined almost entirely by that single leverage point.</p>
+        <div class="insight"><strong>Key insight:</strong> Frank Anscombe published this quartet in 1973 specifically to argue that statistical computing packages were giving people false confidence. His advice: <em>"a computer should make both calculations and graphs."</em> That was before neural networks — the warning is only more relevant today.</div>
+      </div>
+    </div>
+
+    <!-- Ex 04 -->
+    <div class="ex-card">
+      <div class="ex-head">
+        <span class="ex-num">EX 04</span>
+        <div>
+          <div class="ex-title">🔬 &nbsp;Free Exploration</div>
+          <div class="ex-desc">Open-ended challenges using the main demo.</div>
+        </div>
+      </div>
+      <div class="ex-body">
+        <p><strong>Challenge A — The Centroid:</strong> The <a class="tl" href="#g-ols">OLS</a> line always passes through (<span class="xb">x</span>,&thinsp;<span class="xb">y</span>), marked by the white crosshair. Click "New Points" several times. Can you position your line through the crosshair and then rotate it around that point? What is the minimum <a class="tl" href="#g-sse">SSE</a> you can achieve with a line anchored to the <a class="tl" href="#g-centroid">centroid</a>?</p>
+        <p><strong>Challenge B — Negative <a class="tl" href="#g-r2">R²</a>:</strong> Try to position your line so the R² panel goes negative. (Hint: try a steep negative slope on data with a positive correlation.) What does R² &lt; 0 mean? How far below zero can you push it?</p>
+        <p><strong>Challenge C — Squared vs. Absolute:</strong> By eye, find a position that minimizes the total length of the <a class="tl" href="#g-residual">residual</a> lines (as if you were minimizing absolute error, not squared error). Now click "Show OLS." Are the two optima in the same place? Which one has a larger maximum residual?</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- 05 Discussion -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>Why Squared?</strong> We minimize squared errors rather than absolute errors. Name at least two practical consequences of this choice — one that is a feature and one that is a bug.</li>
+      <li><strong>The Gauss-Legendre Dispute.</strong> Both men claimed to have invented least squares. Does priority of publication matter in science? What about in software? Consider: who "invented" the Transformer architecture?</li>
+      <li><strong>Regression to the Mean.</strong> Galton found that very tall fathers have shorter sons on average. Is this a genetic force, or a statistical inevitability? If you scored 98/100 on a test, what would you expect on a second attempt — and why?</li>
+      <li><strong>Anscombe Forward.</strong> In the deep learning era, we fit extraordinarily complex models. Does Anscombe's lesson still apply? Can a neural network "lie" to you the same way a linear regression can?</li>
+      <li><strong>OLS Assumptions.</strong> OLS assumes errors are normally distributed, have constant variance (homoscedasticity), and are uncorrelated. For each assumption, think of a real-world scenario where it would be violated. What would that do to the fitted line and to R²?</li>
+    </ul>
+  </section>
+
+  <!-- 06 Glossary -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:24px;">Key terms used in this lesson. Underlined <a class="tl" href="#g-sse">links</a> in the text above jump directly here.</p>
+    <div class="gloss-grid">
+
+      <div class="gloss-entry" id="g-residual">
+        <div class="gloss-term">
+          <span class="gloss-term-name">Residual</span>
+          <span class="gloss-abbr">also: error, εᵢ</span>
+        </div>
+        <div class="gloss-def">
+          The vertical distance between an actual data point and the line's prediction at that x value: <strong>εᵢ = yᵢ − ŷᵢ</strong>. Positive residuals sit above the line; negative ones below. A good fit has residuals that are small, symmetric around zero, and show no obvious pattern.
+          <span class="gloss-see">→ Used in: <a href="#g-sse">SSE</a>, <a href="#g-r2">R²</a></span>
+        </div>
+      </div>
+
+      <div class="gloss-entry" id="g-sse">
+        <div class="gloss-term">
+          <span class="gloss-term-name">SSE</span>
+          <span class="gloss-abbr">Sum of Squared Errors</span>
+        </div>
+        <div class="gloss-def">
+          The total of every <a href="#g-residual">residual</a> squared. Squaring serves two purposes: it makes all errors positive (so they can't cancel), and it penalizes large errors far more harshly than small ones — a point 3× further from the line contributes 9× more to SSE.
+          <div class="gloss-formula">SSE = Σᵢ (yᵢ − ŷᵢ)²</div>
+          <span class="gloss-see">→ See also: <a href="#g-ols">OLS</a> (minimizes SSE), <a href="#g-r2">R²</a> (normalizes SSE)</span>
+        </div>
+      </div>
+
+      <div class="gloss-entry" id="g-ols">
+        <div class="gloss-term">
+          <span class="gloss-term-name">OLS</span>
+          <span class="gloss-abbr">Ordinary Least Squares</span>
+        </div>
+        <div class="gloss-def">
+          The closed-form solution that finds the slope (β₁) and intercept (β₀) that minimize <a href="#g-sse">SSE</a> exactly — no iteration required. Because it's a calculus solution (set derivatives to zero), it always finds the global optimum. The OLS line has two elegant geometric properties: it always passes through the <a href="#g-centroid">centroid</a>, and its <a href="#g-residual">residuals</a> always sum to exactly zero.
+          <div class="gloss-formula">β₁ = Σ(xᵢ−<span class="xb">x</span>)(yᵢ−<span class="xb">y</span>) / Σ(xᵢ−<span class="xb">x</span>)² &nbsp;&nbsp; β₀ = <span class="xb">y</span> − β₁·<span class="xb">x</span></div>
+          <span class="gloss-see">→ Contrast with: gradient descent (Era 4), which iterates toward the same answer</span>
+        </div>
+      </div>
+
+      <div class="gloss-entry" id="g-r2">
+        <div class="gloss-term">
+          <span class="gloss-term-name">R²</span>
+          <span class="gloss-abbr">Coefficient of Determination</span>
+        </div>
+        <div class="gloss-def">
+          A score from −∞ to 1.0 measuring how much of the variance in y your line actually explains. R² = 1.0 is a perfect fit. R² = 0 means your model does no better than always predicting the mean <span class="xb">y</span>. R² &lt; 0 means your line is actively worse than that flat baseline — a sign something has gone seriously wrong.
+          <div class="gloss-formula">R² = 1 − SSE / SST &nbsp;&nbsp; where &nbsp;&nbsp; SST = Σ(yᵢ − <span class="xb">y</span>)²</div>
+          <strong>Warning:</strong> Anscombe's Quartet (Ex 03) shows that identical R² values can describe completely different data shapes. R² is a necessary check, not a sufficient one.
+        </div>
+      </div>
+
+      <div class="gloss-entry" id="g-centroid">
+        <div class="gloss-term">
+          <span class="gloss-term-name">Centroid</span>
+          <span class="gloss-abbr">(<span class="xb">x</span>,&thinsp;<span class="xb">y</span>) — the means</span>
+        </div>
+        <div class="gloss-def">
+          The "center of gravity" of the dataset — the point (<span class="xb">x</span>,&thinsp;<span class="xb">y</span>) formed by the mean of all x values and the mean of all y values. <strong>Every OLS regression line passes exactly through the centroid</strong>, regardless of slope. This is a mathematical consequence of the OLS derivation, not a coincidence — it's why the crosshair in the demo always sits on the green line.
+          <span class="gloss-see">→ Used to derive: <a href="#g-ols">OLS intercept</a> β₀ = <span class="xb">y</span> − β₁·<span class="xb">x</span></span>
+        </div>
+      </div>
+
+      <div class="gloss-entry" id="g-sst">
+        <div class="gloss-term">
+          <span class="gloss-term-name">SST</span>
+          <span class="gloss-abbr">Sum of Squares Total</span>
+        </div>
+        <div class="gloss-def">
+          The total variance in y before any model is fit — the <a href="#g-sse">SSE</a> you would have if your model were just a flat line at <span class="xb">y</span>. SST is the denominator in the <a href="#g-r2">R²</a> formula: it sets the baseline for what "100% of the variance" means. SST never changes for a given dataset; only SSE changes as you move the line.
+          <div class="gloss-formula">SST = Σ(yᵢ − <span class="xb">y</span>)²</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Bottom Nav -->
+  <nav class="lesson-nav">
+    <div class="nav-btn live">
+      <span class="nav-arrow">←</span>
+      <div>
+        <div class="nav-lbl">← Previous</div>
+        <div class="nav-title">Era 1, Lesson 1 — The Perceptron</div>
+      </div>
+    </div>
+    <div class="nav-btn live">
+      <div>
+        <div class="nav-lbl">Next Lesson →</div>
+        <div class="nav-title">Era 1, Lesson 3 — Scaling, Normalization &amp; Quantization</div>
+      </div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+
+</div><!-- wrap -->
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════════════
+   SHARED UTILITIES
+══════════════════════════════════════════════════════ */
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k,v] of Object.entries(attrs||{})) e.setAttribute(k,v);
+  return e;
+}
+function txt(s, attrs) { const t=el('text',attrs); t.textContent=s; return t; }
+
+function olsFit(pts) {
+  const n=pts.length;
+  const mx=pts.reduce((s,p)=>s+p.x,0)/n;
+  const my=pts.reduce((s,p)=>s+p.y,0)/n;
+  const cov=pts.reduce((s,p)=>s+(p.x-mx)*(p.y-my),0);
+  const vx =pts.reduce((s,p)=>s+(p.x-mx)**2,0);
+  const b1=vx>1e-10?cov/vx:0;
+  return {b1, b0:my-b1*mx, mx, my};
+}
+function calcSSE(pts,b1,b0){ return pts.reduce((s,p)=>{const r=p.y-(b1*p.x+b0);return s+r*r;},0); }
+function calcR2(pts,b1,b0){
+  const my=pts.reduce((s,p)=>s+p.y,0)/pts.length;
+  const sst=pts.reduce((s,p)=>s+(p.y-my)**2,0);
+  return sst<1e-10?1:1-calcSSE(pts,b1,b0)/sst;
+}
+
+function mkRng(seed){ let s=seed|0; return ()=>{s=(s*1664525+1013904223)&0xffffffff;return (s>>>0)/4294967295;}; }
+function gauss(rng){ return Math.sqrt(-2*Math.log(rng()+1e-9))*Math.cos(2*Math.PI*rng()); }
+function genPts(n,seed){
+  const rng=mkRng(seed);
+  return Array.from({length:n},()=>{
+    const x=1+rng()*9.5;
+    const y=Math.max(0.4,Math.min(11.6,1.0+0.85*x+gauss(rng)*1.4));
+    return {x,y};
+  });
+}
+
+function clientToVB(e,svgEl){
+  const r=svgEl.getBoundingClientRect(),vb=svgEl.viewBox.baseVal;
+  return {x:(e.clientX-r.left)*(vb.width/r.width), y:(e.clientY-r.top)*(vb.height/r.height)};
+}
+
+/* ══════════════════════════════════════════════════════
+   MAIN DEMO — "Draw the Line"
+══════════════════════════════════════════════════════ */
+// Plot config: 540×360, margins l=50 r=25 t=22 b=44, data [0,12]²
+const M={l:50,r:25,t:22,b:44};
+const VW=540,VH=360,PW=VW-M.l-M.r,PH=VH-M.t-M.b;
+const DX={n:0,x:12},DY={n:0,x:12};
+const msx=x=>M.l+(x-DX.n)/(DX.x-DX.n)*PW;
+const msy=y=>VH-M.b-(y-DY.n)/(DY.x-DY.n)*PH;
+const mdy=sy=>DY.n+(VH-M.b-sy)/PH*(DY.x-DY.n);
+
+let mPts=genPts(15,42), mSeed=42;
+const HX=[2,10]; // fixed handle x positions
+let hy=[5,6];    // handle y positions (data space)
+let flags={resid:false,squares:false,ols:false};
+let dragH=null;
+
+function mLine(){ const b1=(hy[1]-hy[0])/(HX[1]-HX[0]); return {b1,b0:hy[0]-b1*HX[0]}; }
+
+function drawGrid(svg,sx,sy,vw,vh,ml,mr,mt,mb,xn,xx,yn,yx,step){
+  // Clip path for plot area
+  const clipId='pc'+Math.random().toString(36).slice(2);
+  const defs=el('defs',{});
+  const cp=el('clipPath',{id:clipId});
+  cp.appendChild(el('rect',{x:ml,y:mt,width:vw-ml-mr,height:vh-mt-mb}));
+  defs.appendChild(cp); svg.appendChild(defs);
+
+  svg.appendChild(el('rect',{x:ml,y:mt,width:vw-ml-mr,height:vh-mt-mb,fill:'#0a0d14',rx:4}));
+  for(let v=xn;v<=xx;v+=step){
+    svg.appendChild(el('line',{x1:sx(v),y1:mt,x2:sx(v),y2:vh-mb,stroke:'#1a2035','stroke-width':1}));
+    svg.appendChild(txt(v,{x:sx(v),y:vh-mb+14,fill:'#334155','font-size':10,'text-anchor':'middle','font-family':'Space Mono,monospace'}));
+  }
+  for(let v=yn;v<=yx;v+=step){
+    if(v===0) continue;
+    svg.appendChild(el('line',{x1:ml,y1:sy(v),x2:vw-mr,y2:sy(v),stroke:'#1a2035','stroke-width':1}));
+    svg.appendChild(txt(v,{x:ml-8,y:sy(v)+4,fill:'#334155','font-size':10,'text-anchor':'end','font-family':'Space Mono,monospace'}));
+  }
+  svg.appendChild(el('line',{x1:ml,y1:vh-mb,x2:vw-mr,y2:vh-mb,stroke:'#2d3748','stroke-width':1.5}));
+  svg.appendChild(el('line',{x1:ml,y1:mt,x2:ml,y2:vh-mb,stroke:'#2d3748','stroke-width':1.5}));
+  return clipId;
+}
+
+function renderMain(){
+  const svg=document.getElementById('mainScatter');
+  svg.innerHTML='';
+  const clipId=drawGrid(svg,msx,msy,VW,VH,M.l,M.r,M.t,M.b,DX.n,DX.x,DY.n,DY.x,2);
+  const clip=`url(#${clipId})`;
+
+  const {b1:ub1,b0:ub0}=mLine();
+  const fit=olsFit(mPts);
+
+  // Content group (clipped)
+  const g=el('g',{'clip-path':clip});
+
+  // Centroid crosshair
+  const cx=msx(fit.mx),cy=msy(fit.my);
+  g.appendChild(el('line',{x1:cx-9,y1:cy,x2:cx+9,y2:cy,stroke:'rgba(255,255,255,.28)','stroke-width':1.5}));
+  g.appendChild(el('line',{x1:cx,y1:cy-9,x2:cx,y2:cy+9,stroke:'rgba(255,255,255,.28)','stroke-width':1.5}));
+
+  // Squares (drawn first, under everything)
+  if(flags.squares){
+    mPts.forEach(pt=>{
+      const yh=ub1*pt.x+ub0, side=Math.abs(msy(yh)-msy(pt.y));
+      if(side<1)return;
+      g.appendChild(el('rect',{x:msx(pt.x)-side/2,y:Math.min(msy(pt.y),msy(yh)),width:side,height:side,fill:'rgba(248,113,113,.12)',stroke:'rgba(248,113,113,.4)','stroke-width':1}));
+    });
+  }
+
+  // Residual lines
+  if(flags.resid){
+    mPts.forEach(pt=>{
+      const yh=ub1*pt.x+ub0;
+      g.appendChild(el('line',{x1:msx(pt.x),y1:msy(pt.y),x2:msx(pt.x),y2:msy(yh),stroke:'rgba(248,113,113,.75)','stroke-width':1.5,'stroke-dasharray':'3,2'}));
+    });
+  }
+
+  // OLS line (dashed green)
+  if(flags.ols){
+    g.appendChild(el('line',{x1:msx(DX.n),y1:msy(fit.b1*DX.n+fit.b0),x2:msx(DX.x),y2:msy(fit.b1*DX.x+fit.b0),stroke:'#4ade80','stroke-width':2.5,'stroke-dasharray':'8,5'}));
+  }
+
+  // User's line (orange solid)
+  g.appendChild(el('line',{x1:msx(DX.n),y1:msy(ub1*DX.n+ub0),x2:msx(DX.x),y2:msy(ub1*DX.x+ub0),stroke:'#fb923c','stroke-width':2.5}));
+
+  // Data points
+  mPts.forEach(pt=>{
+    g.appendChild(el('circle',{cx:msx(pt.x),cy:msy(pt.y),r:5,fill:'#38bdf8',stroke:'#0e7490','stroke-width':1.5}));
+  });
+
+  svg.appendChild(g);
+
+  // Handles (outside clip so handles are always fully visible)
+  HX.forEach((hx,i)=>{
+    const hg=el('g',{'data-handle':i,style:'cursor:grab'});
+    hg.appendChild(el('circle',{cx:msx(hx),cy:msy(hy[i]),r:18,fill:'rgba(251,146,60,.08)',stroke:'rgba(251,146,60,.25)','stroke-width':1}));
+    hg.appendChild(el('circle',{cx:msx(hx),cy:msy(hy[i]),r:9, fill:'#fb923c',stroke:'#fdba74','stroke-width':2}));
+    svg.appendChild(hg);
+  });
+
+  // Centroid label (outside clip)
+  svg.appendChild(txt('centroid',{x:msx(fit.mx)+10,y:msy(fit.my)-7,fill:'rgba(255,255,255,.25)','font-size':9,'font-family':'Space Mono,monospace'}));
+
+  // OLS label
+  if(flags.ols){
+    const lx=msx(DX.x)-6, ly=Math.max(M.t+14,Math.min(VH-M.b-4,msy(fit.b1*DX.x+fit.b0)-8));
+    svg.appendChild(txt('OLS',{x:lx,y:ly,fill:'#4ade80','font-size':10,'text-anchor':'end','font-family':'Space Mono,monospace'}));
+  }
+
+  updateStats(ub1,ub0,fit);
+}
+
+function updateStats(ub1,ub0,fit){
+  const uSSE=calcSSE(mPts,ub1,ub0);
+  const uR2 =calcR2(mPts,ub1,ub0);
+  const oSSE=calcSSE(mPts,fit.b1,fit.b0);
+  const oR2 =calcR2(mPts,fit.b1,fit.b0);
+
+  document.getElementById('sSSE').textContent=uSSE.toFixed(2);
+  document.getElementById('sSSE').className='stat-val '+(uSSE<=oSSE*1.05?'good':uSSE>oSSE*2?'bad':'');
+  document.getElementById('sR2').textContent=uR2.toFixed(3);
+  document.getElementById('sR2').className='stat-val '+(uR2>=oR2*0.95?'good':uR2<0?'bad':'');
+  document.getElementById('sSlope').textContent=ub1.toFixed(3);
+  document.getElementById('sIntercept').textContent=ub0.toFixed(3);
+
+  const cmp=document.getElementById('sCompare');
+  if(flags.ols){
+    const pct=((uSSE/oSSE-1)*100);
+    const tag=pct<1?'≈ optimal 🎉':'<span class="worse">+'+pct.toFixed(1)+'% worse</span>';
+    cmp.style.display='block';
+    cmp.innerHTML=`OLS SSE: <strong>${oSSE.toFixed(2)}</strong><br>OLS R²: <strong>${oR2.toFixed(3)}</strong><br>Yours: ${tag}`;
+  } else {
+    cmp.style.display='none';
+  }
+}
+
+// Drag
+const mainSVG=document.getElementById('mainScatter');
+mainSVG.addEventListener('pointerdown',e=>{
+  const h=e.target.closest('[data-handle]'); if(!h)return;
+  dragH=+h.getAttribute('data-handle');
+  mainSVG.setPointerCapture(e.pointerId);
+  e.preventDefault();
+});
+document.addEventListener('pointermove',e=>{
+  if(dragH===null)return;
+  const {y:vy}=clientToVB(e,mainSVG);
+  hy[dragH]=Math.max(DY.n+.1,Math.min(DY.x-.1,mdy(vy)));
+  renderMain();
+});
+document.addEventListener('pointerup',()=>{dragH=null;});
+
+function toggleFlag(k){
+  flags[k]=!flags[k];
+  const ids={resid:'btnResid',squares:'btnSquares',ols:'btnOLS'};
+  document.getElementById(ids[k]).classList.toggle('active',flags[k]);
+  renderMain();
+}
+function newPoints(){
+  mSeed+=17; mPts=genPts(15,mSeed);
+  const my=mPts.reduce((s,p)=>s+p.y,0)/mPts.length;
+  hy=[my,my]; renderMain();
+}
+function resetLine(){
+  const my=mPts.reduce((s,p)=>s+p.y,0)/mPts.length;
+  hy=[my,my]; renderMain();
+}
+
+/* ══════════════════════════════════════════════════════
+   OUTLIER DEMO
+══════════════════════════════════════════════════════ */
+const OM={l:50,r:25,t:15,b:38};
+const OVW=540,OVH=300,OPW=OVW-OM.l-OM.r,OPH=OVH-OM.t-OM.b;
+const osx=x=>OM.l+x/12*OPW, osy=y=>OVH-OM.b-y/12*OPH;
+const odx=sx=>(sx-OM.l)/OPW*12, ody=sy=>(OVH-OM.b-sy)/OPH*12;
+
+const BASE=[
+  {x:1.2,y:2.0},{x:2.0,y:2.8},{x:2.8,y:3.3},{x:3.5,y:4.0},
+  {x:4.3,y:4.6},{x:5.1,y:5.2},{x:5.9,y:5.8},{x:6.6,y:6.3},
+  {x:7.4,y:7.0},{x:8.2,y:7.7},{x:9.0,y:8.3},{x:9.8,y:8.9},
+  {x:10.6,y:9.4}
+];
+let oPt={x:5.5,y:9.5};
+let oDrag=false;
+
+function renderOutlier(){
+  const svg=document.getElementById('outlierScatter');
+  svg.innerHTML='';
+
+  // Background + grid (inline, no shared grid fn for simplicity)
+  svg.appendChild(el('rect',{x:OM.l,y:OM.t,width:OPW,height:OPH,fill:'#0a0d14',rx:4}));
+  for(let v=2;v<=10;v+=2){
+    svg.appendChild(el('line',{x1:osx(v),y1:OM.t,x2:osx(v),y2:OVH-OM.b,stroke:'#1a2035','stroke-width':1}));
+    svg.appendChild(el('line',{x1:OM.l,y1:osy(v),x2:OVW-OM.r,y2:osy(v),stroke:'#1a2035','stroke-width':1}));
+  }
+  svg.appendChild(el('line',{x1:OM.l,y1:OVH-OM.b,x2:OVW-OM.r,y2:OVH-OM.b,stroke:'#2d3748','stroke-width':1.5}));
+  svg.appendChild(el('line',{x1:OM.l,y1:OM.t,x2:OM.l,y2:OVH-OM.b,stroke:'#2d3748','stroke-width':1.5}));
+
+  const allPts=[...BASE,oPt];
+  const baseF=olsFit(BASE), allF=olsFit(allPts);
+
+  const cg=el('g',{});
+  // Without-outlier line (green dashed)
+  cg.appendChild(el('line',{x1:osx(0),y1:osy(baseF.b1*0+baseF.b0),x2:osx(12),y2:osy(baseF.b1*12+baseF.b0),stroke:'#4ade80','stroke-width':1.8,'stroke-dasharray':'7,4',opacity:.8}));
+  // With-outlier line (orange)
+  cg.appendChild(el('line',{x1:osx(0),y1:osy(allF.b1*0+allF.b0),x2:osx(12),y2:osy(allF.b1*12+allF.b0),stroke:'#fb923c','stroke-width':2.5}));
+
+  // Base points
+  BASE.forEach(pt=>{
+    cg.appendChild(el('circle',{cx:osx(pt.x),cy:osy(pt.y),r:5,fill:'#38bdf8',stroke:'#0e7490','stroke-width':1.5}));
+  });
+  svg.appendChild(cg);
+
+  // Outlier (draggable)
+  const og=el('g',{'data-outlier':'1',style:'cursor:grab'});
+  og.appendChild(el('circle',{cx:osx(oPt.x),cy:osy(oPt.y),r:20,fill:'rgba(245,158,11,.08)',stroke:'rgba(245,158,11,.28)','stroke-width':1}));
+  og.appendChild(el('circle',{cx:osx(oPt.x),cy:osy(oPt.y),r:8, fill:'#f59e0b',stroke:'#fbbf24','stroke-width':2}));
+  svg.appendChild(og);
+
+  // Labels
+  const lx=OVW-OM.r-6;
+  svg.appendChild(txt('without outlier',{x:lx,y:Math.max(OM.t+12,osy(baseF.b1*12+baseF.b0)-8),fill:'#4ade80','font-size':9,'text-anchor':'end','font-family':'Space Mono,monospace',opacity:.9}));
+  svg.appendChild(txt('with outlier',{x:lx,y:Math.min(OVH-OM.b-4,osy(allF.b1*12+allF.b0)+14),fill:'#fb923c','font-size':9,'text-anchor':'end','font-family':'Space Mono,monospace'}));
+
+  const sΔ=Math.abs(allF.b1-baseF.b1).toFixed(3);
+  svg.appendChild(txt(`Slope shift Δ = ${sΔ}`,{x:OM.l+8,y:OM.t+16,fill:'#64748b','font-size':10,'font-family':'Space Mono,monospace'}));
+}
+
+const outlierSVG=document.getElementById('outlierScatter');
+outlierSVG.addEventListener('pointerdown',e=>{
+  if(!e.target.closest('[data-outlier]'))return;
+  oDrag=true; outlierSVG.setPointerCapture(e.pointerId); e.preventDefault();
+});
+document.addEventListener('pointermove',e=>{
+  if(!oDrag)return;
+  const {x:vx,y:vy}=clientToVB(e,outlierSVG);
+  oPt={x:Math.max(.2,Math.min(11.8,odx(vx))),y:Math.max(.2,Math.min(11.8,ody(vy)))};
+  renderOutlier();
+});
+document.addEventListener('pointerup',()=>{oDrag=false;});
+
+/* ══════════════════════════════════════════════════════
+   ANSCOMBE'S QUARTET
+══════════════════════════════════════════════════════ */
+const ANSCOMBE=[
+  { label:'Dataset I — Linear with scatter. The textbook case.',
+    pts:[{x:10,y:8.04},{x:8,y:6.95},{x:13,y:7.58},{x:9,y:8.81},{x:11,y:8.33},{x:14,y:9.96},{x:6,y:7.24},{x:4,y:4.26},{x:12,y:10.84},{x:7,y:4.82},{x:5,y:5.68}]},
+  { label:'Dataset II — A perfect parabola. The linear model is structurally wrong, but R² doesn\'t know that.',
+    pts:[{x:10,y:9.14},{x:8,y:8.14},{x:13,y:8.74},{x:9,y:8.77},{x:11,y:9.26},{x:14,y:8.10},{x:6,y:6.13},{x:4,y:3.10},{x:12,y:9.13},{x:7,y:7.26},{x:5,y:4.74}]},
+  { label:'Dataset III — A near-perfect line destroyed by one outlier at x=13. Remove it mentally and see what\'s left.',
+    pts:[{x:10,y:7.46},{x:8,y:6.77},{x:13,y:12.74},{x:9,y:7.11},{x:11,y:7.81},{x:14,y:8.84},{x:6,y:6.08},{x:4,y:5.39},{x:12,y:8.15},{x:7,y:6.42},{x:5,y:5.73}]},
+  { label:'Dataset IV — All x=8 except one leverage point at x=19. That single point determines the entire slope.',
+    pts:[{x:8,y:6.58},{x:8,y:5.76},{x:8,y:7.71},{x:8,y:8.84},{x:8,y:8.47},{x:8,y:7.04},{x:8,y:5.25},{x:19,y:12.50},{x:8,y:5.56},{x:8,y:7.91},{x:8,y:6.89}]}
+];
+let ansIdx=0;
+
+const AM={l:50,r:25,t:15,b:38};
+const AVW=540,AVH=300,APW=AVW-AM.l-AM.r,APH=AVH-AM.t-AM.b;
+const AXN=1,AXX=21,AYN=1.5,AYX=14;
+const asx=x=>AM.l+(x-AXN)/(AXX-AXN)*APW;
+const asy=y=>AVH-AM.b-(y-AYN)/(AYX-AYN)*APH;
+
+const ANS_COLORS=['#38bdf8','#a78bfa','#fb923c','#4ade80'];
+
+function renderAnscombe(){
+  const svg=document.getElementById('anscombeScatter');
+  svg.innerHTML='';
+  const {pts,label}=ANSCOMBE[ansIdx];
+  const fit=olsFit(pts);
+  const sr2=calcR2(pts,fit.b1,fit.b0);
+
+  svg.appendChild(el('rect',{x:AM.l,y:AM.t,width:APW,height:APH,fill:'#0a0d14',rx:4}));
+  for(let v=AXN;v<=AXX;v+=4){
+    svg.appendChild(el('line',{x1:asx(v),y1:AM.t,x2:asx(v),y2:AVH-AM.b,stroke:'#1a2035','stroke-width':1}));
+    svg.appendChild(txt(v,{x:asx(v),y:AVH-AM.b+14,fill:'#334155','font-size':9,'text-anchor':'middle','font-family':'Space Mono,monospace'}));
+  }
+  for(let v=2;v<=AYX;v+=2){
+    svg.appendChild(el('line',{x1:AM.l,y1:asy(v),x2:AVW-AM.r,y2:asy(v),stroke:'#1a2035','stroke-width':1}));
+    svg.appendChild(txt(v,{x:AM.l-7,y:asy(v)+4,fill:'#334155','font-size':9,'text-anchor':'end','font-family':'Space Mono,monospace'}));
+  }
+  svg.appendChild(el('line',{x1:AM.l,y1:AVH-AM.b,x2:AVW-AM.r,y2:AVH-AM.b,stroke:'#2d3748','stroke-width':1.5}));
+  svg.appendChild(el('line',{x1:AM.l,y1:AM.t,x2:AM.l,y2:AVH-AM.b,stroke:'#2d3748','stroke-width':1.5}));
+
+  // Regression line (always shown)
+  svg.appendChild(el('line',{x1:asx(AXN),y1:asy(fit.b1*AXN+fit.b0),x2:asx(AXX),y2:asy(fit.b1*AXX+fit.b0),stroke:'#4ade80','stroke-width':2}));
+
+  // Points
+  pts.forEach(pt=>{
+    svg.appendChild(el('circle',{cx:asx(pt.x),cy:asy(pt.y),r:6,fill:ANS_COLORS[ansIdx],stroke:'rgba(0,0,0,.3)','stroke-width':1}));
+  });
+
+  // Update stats
+  document.getElementById('aMX').textContent   = fit.mx.toFixed(2);
+  document.getElementById('aMY').textContent   = fit.my.toFixed(2);
+  document.getElementById('aSlope').textContent= fit.b1.toFixed(3);
+  document.getElementById('aR2').textContent   = sr2.toFixed(3);
+  document.getElementById('ansNote').textContent= label;
+}
+
+function loadAnscombe(i){
+  ansIdx=i;
+  document.querySelectorAll('.ans-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
+  renderAnscombe();
+}
+
+/* ══════════════════════════════════════════════════════
+   COLLAPSIBLE HELPER
+══════════════════════════════════════════════════════ */
+function toggleDetail(bodyId,arrowId){
+  const body=document.getElementById(bodyId),arrow=document.getElementById(arrowId);
+  const open=body.style.display==='block';
+  body.style.display=open?'none':'block';
+  arrow.textContent=open?'▼ expand':'▲ hide';
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+// Set initial handle positions to the dataset mean
+const initFit=olsFit(mPts);
+hy=[initFit.b1*HX[0]+initFit.b0+1.5, initFit.b1*HX[1]+initFit.b0-1.2]; // slightly off for learning
+
+renderMain();
+renderOutlier();
+renderAnscombe();
+</script>
+</body>
+</html>

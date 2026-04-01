@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evolution of Intelligence — An Interactive AI/ML Course</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #0d1117;
+  --surface: #161b27;
+  --s2:      #1a2035;
+  --border:  #1e2d40;
+  --text:    #e2e8f0;
+  --muted:   #64748b;
+  --muted2:  #334155;
+  --font:    'Outfit', sans-serif;
+  --mono:    'Space Mono', monospace;
+  --disp:    'Lora', serif;
+  /* Era accent colours */
+  --e1: #f59e0b;  --e1d: rgba(245,158,11,.12);
+  --e2: #a78bfa;  --e2d: rgba(167,139,250,.12);
+  --e3: #38bdf8;  --e3d: rgba(56,189,248,.12);
+  --e4: #10b981;  --e4d: rgba(16,185,129,.12);
+  --e5: #f97316;  --e5d: rgba(249,115,22,.12);
+  --e6: #f43f5e;  --e6d: rgba(244,63,94,.12);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ── HERO ───────────────────────────────────────── */
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 100px 40px 80px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+/* Subtle radial glow behind title */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; left: 50%;
+  transform: translateX(-50%);
+  width: 800px; height: 500px;
+  background: radial-gradient(ellipse at center, rgba(245,158,11,.07) 0%, transparent 65%);
+  pointer-events: none;
+}
+/* Faint grid overlay */
+.hero::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.hero-eyebrow span {
+  display: inline-block;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+}
+.hero h1 {
+  font-family: var(--disp);
+  font-size: clamp(38px, 6vw, 64px);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -.025em;
+  color: #f1f5f9;
+  margin-bottom: 20px;
+}
+.hero h1 em {
+  font-style: italic;
+  color: var(--e1);
+}
+.hero-sub {
+  font-size: 18px;
+  color: var(--muted);
+  font-weight: 300;
+  max-width: 620px;
+  margin: 0 auto 40px;
+  line-height: 1.72;
+}
+.hero-stats {
+  display: inline-flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.hero-stat {
+  padding: 14px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-right: 1px solid var(--border);
+}
+.hero-stat:last-child { border-right: none; }
+.hs-num {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+.hs-lbl {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+/* ── ERA TIMELINE ───────────────────────────────── */
+.timeline-bar {
+  display: flex;
+  height: 5px;
+  overflow: hidden;
+}
+.tl-seg { flex: 1; }
+
+/* ── MAIN ───────────────────────────────────────── */
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 32px 100px; }
+
+.section-intro {
+  padding: 60px 0 36px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+.section-intro h2 {
+  font-family: var(--disp);
+  font-size: 28px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+.section-intro p {
+  font-size: 14px;
+  color: var(--muted);
+  max-width: 460px;
+  text-align: right;
+}
+
+/* ── ERA CARDS ──────────────────────────────────── */
+.eras-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.era-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.era-card:hover { border-color: var(--era-col, var(--border)); }
+
+.era-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: 20px;
+  padding: 24px 26px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.era-num-badge {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.era-title-block {}
+.era-num-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.era-title {
+  font-family: var(--disp);
+  font-size: 22px;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin-bottom: 5px;
+}
+.era-desc {
+  font-size: 14px;
+  color: #94a3b8;
+  line-height: 1.65;
+  max-width: 600px;
+}
+.era-dates {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted2);
+  text-align: right;
+  white-space: nowrap;
+  padding-top: 4px;
+}
+
+/* ── LESSON LIST ────────────────────────────────── */
+.lessons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0;
+}
+.lesson-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  transition: background .12s;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+}
+.lesson-item:nth-child(even) { }
+.lesson-item.available:hover {
+  background: var(--s2);
+  cursor: pointer;
+}
+.lesson-item.locked {
+  opacity: .45;
+  cursor: default;
+}
+
+.lesson-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted2);
+  flex-shrink: 0;
+  padding-top: 2px;
+  min-width: 24px;
+}
+.lesson-name {
+  font-size: 14px;
+  color: #94a3b8;
+  line-height: 1.55;
+  flex: 1;
+}
+.lesson-item.available .lesson-name { color: #cbd5e1; }
+.lesson-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  letter-spacing: .06em;
+}
+.badge-live {
+  background: rgba(74,222,128,.1);
+  border: 1px solid rgba(74,222,128,.3);
+  color: #4ade80;
+}
+.badge-soon {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  color: var(--muted2);
+}
+/* Arrow on hover for available lessons */
+.lesson-item.available::after {
+  content: '→';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%) translateX(4px);
+  opacity: 0;
+  font-size: 14px;
+  transition: all .15s;
+}
+.lesson-item.available:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* ── ABOUT / FOOTER ─────────────────────────────── */
+.about-section {
+  margin-top: 72px;
+  padding-top: 40px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+.about-block h3 {
+  font-family: var(--disp);
+  font-size: 18px;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin-bottom: 12px;
+}
+.about-block p {
+  font-size: 14px;
+  color: #94a3b8;
+  line-height: 1.75;
+}
+.about-block p + p { margin-top: 10px; }
+.about-block a {
+  color: var(--e1);
+  text-decoration: none;
+  border-bottom: 1px dotted rgba(245,158,11,.4);
+}
+.tech-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+.tech-chip {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.footer {
+  margin-top: 60px;
+  padding: 24px 0;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted2);
+}
+.footer a { color: var(--muted); text-decoration: none; }
+.footer a:hover { color: var(--e1); }
+
+/* ── ERA COLOUR UTILITIES ───────────────────────── */
+.e1 { --era-col: var(--e1); }
+.e2 { --era-col: var(--e2); }
+.e3 { --era-col: var(--e3); }
+.e4 { --era-col: var(--e4); }
+.e5 { --era-col: var(--e5); }
+.e6 { --era-col: var(--e6); }
+
+.era-card.e1 .era-num-badge { background: var(--e1d); color: var(--e1); border: 1px solid rgba(245,158,11,.3); }
+.era-card.e2 .era-num-badge { background: var(--e2d); color: var(--e2); border: 1px solid rgba(167,139,250,.3); }
+.era-card.e3 .era-num-badge { background: var(--e3d); color: var(--e3); border: 1px solid rgba(56,189,248,.3); }
+.era-card.e4 .era-num-badge { background: var(--e4d); color: var(--e4); border: 1px solid rgba(16,185,129,.3); }
+.era-card.e5 .era-num-badge { background: var(--e5d); color: var(--e5); border: 1px solid rgba(249,115,22,.3); }
+.era-card.e6 .era-num-badge { background: var(--e6d); color: var(--e6); border: 1px solid rgba(244,63,94,.3); }
+
+.era-card.e1 .era-num-label { color: var(--e1); }
+.era-card.e2 .era-num-label { color: var(--e2); }
+.era-card.e3 .era-num-label { color: var(--e3); }
+.era-card.e4 .era-num-label { color: var(--e4); }
+.era-card.e5 .era-num-label { color: var(--e5); }
+.era-card.e6 .era-num-label { color: var(--e6); }
+
+.era-card.e1 .lesson-item.available .lesson-num { color: var(--e1); }
+.era-card.e2 .lesson-item.available .lesson-num { color: var(--e2); }
+.era-card.e3 .lesson-item.available .lesson-num { color: var(--e3); }
+.era-card.e4 .lesson-item.available .lesson-num { color: var(--e4); }
+.era-card.e5 .lesson-item.available .lesson-num { color: var(--e5); }
+.era-card.e6 .lesson-item.available .lesson-num { color: var(--e6); }
+
+@media (max-width: 700px) {
+  .hero { padding: 60px 24px 48px; }
+  .hero-stats { flex-direction: column; border-radius: 10px; }
+  .hero-stat { border-right: none; border-bottom: 1px solid var(--border); }
+  .hero-stat:last-child { border-bottom: none; }
+  .section-intro { flex-direction: column; gap: 6px; }
+  .section-intro p { text-align: left; }
+  .about-section { grid-template-columns: 1fr; gap: 32px; }
+  .wrap { padding: 0 18px 80px; }
+  .era-head { grid-template-columns: auto 1fr; }
+  .era-dates { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HERO ══════════════════════════════════════════ -->
+<div class="timeline-bar">
+  <div class="tl-seg" style="background:var(--e1)"></div>
+  <div class="tl-seg" style="background:var(--e2)"></div>
+  <div class="tl-seg" style="background:var(--e3)"></div>
+  <div class="tl-seg" style="background:var(--e4)"></div>
+  <div class="tl-seg" style="background:var(--e5)"></div>
+  <div class="tl-seg" style="background:var(--e6)"></div>
+</div>
+
+<header class="hero">
+  <div class="hero-eyebrow"><span>An Interactive Self-Paced Course</span></div>
+  <h1>Evolution of<br><em>Intelligence</em></h1>
+  <p class="hero-sub">
+    A chronological journey through the history of artificial intelligence and machine learning —
+    from the first mathematical neuron to autonomous agents and model compression.
+    Every lesson is a live, interactive web page. No installs, no accounts, just open and learn.
+  </p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <span class="hs-num">6</span>
+      <span class="hs-lbl">Eras</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hs-num">48</span>
+      <span class="hs-lbl">Lessons</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hs-num">18</span>
+      <span class="hs-lbl">Weeks</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hs-num">1940s</span>
+      <span class="hs-lbl">Start</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hs-num">Future</span>
+      <span class="hs-lbl">End</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="section-intro">
+    <h2>The Curriculum</h2>
+    <p>Lessons marked <span style="color:#4ade80;font-family:var(--mono);font-size:11px">● LIVE</span> are available now. The rest are in progress.</p>
+  </div>
+
+  <div class="eras-grid">
+
+    <!-- ══ ERA 1 ══ -->
+    <div class="era-card e1">
+      <div class="era-head">
+        <div class="era-num-badge">E1</div>
+        <div class="era-title-block">
+          <div class="era-num-label">Era 1 · Weeks 1–3</div>
+          <div class="era-title">The Foundations</div>
+          <div class="era-desc">Binary logic, biological metaphors, and the birth of data hierarchy. The first neural models, the first chatbot, and the first wall — the XOR problem that triggered a decade of defunded research.</div>
+        </div>
+        <div class="era-dates">1940s – 1960s</div>
+      </div>
+      <div class="lessons-grid">
+        <a class="lesson-item available" href="era1_lesson1_perceptron.html">
+          <span class="lesson-num">1.1</span>
+          <span class="lesson-name">The Perceptron — weights, thresholds &amp; the XOR wall</span>
+          <span class="lesson-badge badge-live">LIVE</span>
+        </a>
+        <a class="lesson-item available" href="era1_lesson2_linreg.html">
+          <span class="lesson-num">1.2</span>
+          <span class="lesson-name">Linear Regression — least squares &amp; Anscombe's Quartet</span>
+          <span class="lesson-badge badge-live">LIVE</span>
+        </a>
+        <a class="lesson-item available" href="era1_lesson3_normalization.html">
+          <span class="lesson-num">1.3</span>
+          <span class="lesson-name">Scaling, Normalization &amp; Quantization</span>
+          <span class="lesson-badge badge-live">LIVE</span>
+        </a>
+        <a class="lesson-item available" href="era1_lesson4_eliza.html">
+          <span class="lesson-num">1.4</span>
+          <span class="lesson-name">ELIZA &amp; Pattern Matching — the illusion of understanding</span>
+          <span class="lesson-badge badge-live">LIVE</span>
+        </a>
+        <div class="lesson-item locked">
+          <span class="lesson-num">1.5</span>
+          <span class="lesson-name">The Performance Lab — 512-pattern audit &amp; Confusion Matrix</span>
+          <span class="lesson-badge badge-soon">SOON</span>
+        </div>
+        <div class="lesson-item locked">
+          <span class="lesson-num">1.6</span>
+          <span class="lesson-name">The Cost of Error — Precision, Recall &amp; Risk Tolerance</span>
+          <span class="lesson-badge badge-soon">SOON</span>
+        </div>
+        <div class="lesson-item locked">
+          <span class="lesson-num">1.7</span>
+          <span class="lesson-name">Hierarchical Databases — navigating rigid tree structures (IBM IMS)</span>
+          <span class="lesson-badge badge-soon">SOON</span>
+        </div>
+        <div class="lesson-item locked">
+          <span class="lesson-num">1.8</span>
+          <span class="lesson-name">The XOR Wall — a geometric proof of why single neurons fail</span>
+          <span class="lesson-badge badge-soon">SOON</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ERA 2 ══ -->
+    <div class="era-card e2">
+      <div class="era-head">
+        <div class="era-num-badge">E2</div>
+        <div class="era-title-block">
+          <div class="era-num-label">Era 2 · Weeks 4–6</div>
+          <div class="era-title">Symbolic AI &amp; Structured Data</div>
+          <div class="era-desc">Human expertise encoded into rules. Relational tables that let AI cross-reference knowledge. The peak of logic-based AI — and the moment the field started to crack.</div>
+        </div>
+        <div class="era-dates">1970s – 1980s</div>
+      </div>
+      <div class="lessons-grid">
+        <div class="lesson-item locked"><span class="lesson-num">2.1</span><span class="lesson-name">Expert Systems — mapping human knowledge into If-Then rule bases</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">2.2</span><span class="lesson-name">Relational Databases &amp; SQL — tables, joins &amp; cross-referencing data</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">2.3</span><span class="lesson-name">Data Cleaning — NULL values, duplicates &amp; the Data Janitor workflow</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">2.4</span><span class="lesson-name">One-Hot Encoding — converting categories into bit arrays</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">2.5</span><span class="lesson-name">Fuzzy Logic — shades of gray beyond binary true/false</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">2.6</span><span class="lesson-name">Decision Trees — learning rules from data with Entropy &amp; Information Gain</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">2.7</span><span class="lesson-name">The Connectionist Debate — the first AI Winter &amp; the fight over symbolic logic</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">2.8</span><span class="lesson-name">Probabilistic Logic — the transition from rules to likelihoods</span><span class="lesson-badge badge-soon">SOON</span></div>
+      </div>
+    </div>
+
+    <!-- ══ ERA 3 ══ -->
+    <div class="era-card e3">
+      <div class="era-head">
+        <div class="era-num-badge">E3</div>
+        <div class="era-title-block">
+          <div class="era-num-label">Era 3 · Weeks 7–9</div>
+          <div class="era-title">Statistical Learning &amp; Ensembles</div>
+          <div class="era-desc">Probabilistic voting, messy real-world data, and the Big Data explosion. The era that introduced the bias-variance tradeoff, regularization, and the first genuinely robust models.</div>
+        </div>
+        <div class="era-dates">1990s – 2000s</div>
+      </div>
+      <div class="lessons-grid">
+        <div class="lesson-item locked"><span class="lesson-num">3.1</span><span class="lesson-name">Random Forests — wisdom of the crowd, why many trees beat one</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">3.2</span><span class="lesson-name">Bagging &amp; Boosting — how models learn from their own mistakes</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">3.3</span><span class="lesson-name">Support Vector Machines — the Kernel Trick &amp; warping dimensions</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">3.4</span><span class="lesson-name">NoSQL &amp; Document Stores — JSON, MongoDB &amp; unstructured data</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">3.5</span><span class="lesson-name">Time Series Analysis — rolling windows, averages &amp; trend forecasting</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">3.6</span><span class="lesson-name">The Bias-Variance Tradeoff — balancing underfitting and overfitting</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">3.7</span><span class="lesson-name">Regularization — Lasso &amp; Ridge to keep models simple and robust</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">3.8</span><span class="lesson-name">Feature Engineering — creating new insights from raw data</span><span class="lesson-badge badge-soon">SOON</span></div>
+      </div>
+    </div>
+
+    <!-- ══ ERA 4 ══ -->
+    <div class="era-card e4">
+      <div class="era-head">
+        <div class="era-num-badge">E4</div>
+        <div class="era-title-block">
+          <div class="era-num-label">Era 4 · Weeks 10–12</div>
+          <div class="era-title">Deep Learning &amp; Sensory Perception</div>
+          <div class="era-desc">Multi-layer brains, sensory perception, and the calculus of learning. The era that finally cracked image recognition, speech, and the geometry of meaning.</div>
+        </div>
+        <div class="era-dates">2010s</div>
+      </div>
+      <div class="lessons-grid">
+        <div class="lesson-item locked"><span class="lesson-num">4.1</span><span class="lesson-name">Multi-Layer Perceptrons — stacking neurons in hidden layers to solve XOR</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">4.2</span><span class="lesson-name">Activation Functions — Sigmoid, Tanh &amp; ReLU</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">4.3</span><span class="lesson-name">Gradient Descent — the Learning Rate &amp; the Valley Ball lab</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">4.4</span><span class="lesson-name">Backpropagation — the Chain Rule &amp; blaming neurons for errors</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">4.5</span><span class="lesson-name">CNNs — giving machines eyes via pixel filters (MNIST microscope)</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">4.6</span><span class="lesson-name">RNNs &amp; LSTMs — temporal memory for speech &amp; time-series data</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">4.7</span><span class="lesson-name">Unsupervised Discovery — K-Means Clustering without labels</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">4.8</span><span class="lesson-name">Semantic Vectors — turning meaning into geometry (King − Man + Woman)</span><span class="lesson-badge badge-soon">SOON</span></div>
+      </div>
+    </div>
+
+    <!-- ══ ERA 5 ══ -->
+    <div class="era-card e5">
+      <div class="era-head">
+        <div class="era-num-badge">E5</div>
+        <div class="era-title-block">
+          <div class="era-num-label">Era 5 · Weeks 13–15</div>
+          <div class="era-title">Generative AI &amp; Transformers</div>
+          <div class="era-desc">Attention, scale, and the synthesis of retrieval and generation. The architecture that killed the RNN. The era that made AI talk, reason, and generate.</div>
+        </div>
+        <div class="era-dates">2017 – Present</div>
+      </div>
+      <div class="lessons-grid">
+        <div class="lesson-item locked"><span class="lesson-num">5.1</span><span class="lesson-name">The Attention Mechanism — learning to focus on specific words in context</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">5.2</span><span class="lesson-name">The Transformer — parallel processing &amp; the architecture that won</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">5.3</span><span class="lesson-name">Scaling Laws &amp; Emergence — why adding parameters creates reasoning</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">5.4</span><span class="lesson-name">Tokenization — how AI breaks language into mathematical fragments</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">5.5</span><span class="lesson-name">Algorithmic Bias — garbage in, garbage out; prejudice in training data</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">5.6</span><span class="lesson-name">Vector Databases — long-term memory for high-dimensional meaning</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">5.7</span><span class="lesson-name">RAG — connecting LLMs to live libraries of facts</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">5.8</span><span class="lesson-name">Multi-modal AI — training models to see, hear, and read together</span><span class="lesson-badge badge-soon">SOON</span></div>
+      </div>
+    </div>
+
+    <!-- ══ ERA 6 ══ -->
+    <div class="era-card e6">
+      <div class="era-head">
+        <div class="era-num-badge">E6</div>
+        <div class="era-title-block">
+          <div class="era-num-label">Era 6 · Weeks 16–18</div>
+          <div class="era-title">The Frontier &amp; Efficiency</div>
+          <div class="era-desc">Hardware-software synergy, model compression, and autonomous agency. Running billion-parameter models on a phone. Teaching AI to use tools. The open questions that remain.</div>
+        </div>
+        <div class="era-dates">2025 – Future</div>
+      </div>
+      <div class="lessons-grid">
+        <div class="lesson-item locked"><span class="lesson-num">6.1</span><span class="lesson-name">Discrete Quantization — squeezing 32-bit floats into 4-bit integers</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">6.2</span><span class="lesson-name">Knowledge Distillation — Teacher models training tiny Student models</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">6.3</span><span class="lesson-name">Neuromorphic Computing — Spiking Neural Networks &amp; energy-efficient hardware</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">6.4</span><span class="lesson-name">State Space Models — linear-time sequence modeling (Mamba vs Transformers)</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">6.5</span><span class="lesson-name">Reinforcement Learning — learning through rewards (PPO, Q-Learning, Robotics)</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">6.6</span><span class="lesson-name">AI Agents &amp; Tool Use — teaching AI to use browsers, calculators &amp; code</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">6.7</span><span class="lesson-name">Multi-modal Fusion — processing real-time video and audio streams</span><span class="lesson-badge badge-soon">SOON</span></div>
+        <div class="lesson-item locked"><span class="lesson-num">6.8</span><span class="lesson-name">Alignment &amp; Superintelligence — the math of AI safety &amp; human-centric values</span><span class="lesson-badge badge-soon">SOON</span></div>
+      </div>
+    </div>
+
+  </div><!-- eras-grid -->
+
+  <!-- ══ ABOUT ══ -->
+  <div class="about-section">
+    <div class="about-block">
+      <h3>About This Course</h3>
+      <p>
+        <em>Evolution of Intelligence</em> is a self-paced, browser-native AI/ML curriculum.
+        Every lesson is a single self-contained HTML file — no install, no login, no build step.
+        Open a file and start learning.
+      </p>
+      <p>
+        The course covers the full arc of AI history: from the first perceptron in 1958 through
+        expert systems, statistical learning, deep learning, large language models, and the
+        open frontier of autonomous agents and efficient inference.
+      </p>
+      <p>
+        Each lesson includes a conceptual explainer, an interactive demo, graded lab exercises,
+        a terminology glossary, and discussion questions.
+      </p>
+    </div>
+    <div class="about-block">
+      <h3>How It Was Made</h3>
+      <p>
+        The curriculum design, lesson sequencing, pedagogical choices, interactive concepts,
+        and overall vision for this course are the work of its human author.
+      </p>
+      <p>
+        The lesson pages themselves were generated with
+        <a href="https://claude.ai" target="_blank">Claude Sonnet 4.6</a> by Anthropic —
+        an AI assistant that wrote the HTML, CSS, JavaScript, SVG graphics, demo mechanics,
+        and exercise content from detailed specifications and iterative feedback.
+      </p>
+      <p>
+        Think of it this way: the ideas, steering, and judgment are human.
+        The implementation is a collaboration between human and AI.
+      </p>
+      <div class="tech-chips">
+        <span class="tech-chip">HTML / CSS / JS</span>
+        <span class="tech-chip">SVG graphics</span>
+        <span class="tech-chip">No frameworks</span>
+        <span class="tech-chip">No build step</span>
+        <span class="tech-chip">Claude Sonnet 4.6</span>
+        <span class="tech-chip">claude.ai</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Evolution of Intelligence &nbsp;·&nbsp; 48 lessons across 6 eras</span>
+    <span>
+      Generated with <a href="https://claude.ai" target="_blank">Claude Sonnet 4.6</a>
+      &nbsp;·&nbsp;
+      Human ideas &amp; steering throughout
+    </span>
+  </div>
+
+</div><!-- wrap -->
+
+</body>
+</html>
