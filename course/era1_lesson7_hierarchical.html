@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 1, Lesson 7 — Hierarchical Databases | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--surface:#161b27;--s2:#1a2035;--border:#1e2d40;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#334155;
+  --ac:#6366f1;--ac-dim:rgba(99,102,241,.12);--ac-glow:rgba(99,102,241,.3);
+  --green:#4ade80;--red:#f87171;--amber:#f59e0b;--sky:#38bdf8;--rose:#f43f5e;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;--disp:'Lora',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+.course-nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.era-badge{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em;}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 100px;}
+.hero{padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px;}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.week-badge{background:var(--ac);color:#0a0b1e;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em;}
+.hero h1{font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px;}
+.hero-sub{font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px;}
+.hero-timeline{display:flex;gap:36px;flex-wrap:wrap;}
+.tl-item{display:flex;flex-direction:column;gap:3px;}
+.tl-year{font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.1em;}
+.tl-label{font-size:13px;color:var(--muted);}
+.section{margin-bottom:68px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px;}
+.sec-title{font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.obj-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;}
+.obj-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.obj-list li strong{color:#f1f5f9;}
+.prose p{font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82;}
+.prose p:last-child{margin-bottom:0;}
+.prose p strong{color:#e2e8f0;}
+.prose blockquote{border-left:3px solid var(--ac);margin:28px 0;padding:12px 20px;background:var(--ac-dim);border-radius:0 8px 8px 0;font-style:italic;color:#94a3b8;font-size:15px;}
+.prose code{font-family:var(--mono);font-size:12px;background:#0a0d14;padding:2px 6px;border-radius:3px;border:1px solid var(--border);color:#a5b4fc;}
+.pullquote{background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(99,102,241,.03));border:1px solid rgba(99,102,241,.2);border-radius:12px;padding:24px 28px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:18px;font-style:italic;color:#c7d2fe;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;}
+/* ── Demo shared ── */
+.demo-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.demo-topbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.demo-tag{font-family:var(--mono);font-size:11px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase;}
+.demo-hint{font-family:var(--mono);font-size:10px;color:var(--muted2);}
+input[type=range].ac-slider{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,#0a0d14,var(--ac));}
+input[type=range].ac-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #a5b4fc;cursor:pointer;}
+/* ── Scenario tabs ── */
+.sc-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:14px 18px;border-bottom:1px solid var(--border);}
+.sc-tab{font-family:var(--mono);font-size:10px;padding:5px 11px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;}
+.sc-tab:hover{border-color:var(--ac);color:var(--ac);}
+.sc-tab.good{border-color:rgba(74,222,128,.3);color:var(--green);}
+.sc-tab.good.active{background:rgba(74,222,128,.1);}
+.sc-tab.bad{border-color:rgba(248,113,113,.3);color:var(--red);}
+.sc-tab.bad.active{background:rgba(248,113,113,.08);}
+.sc-tab.active{opacity:1;}
+/* ── Tree builder ── */
+.tree-outer{display:grid;grid-template-columns:1fr 260px;}
+.tree-canvas{padding:16px;border-right:1px solid var(--border);}
+.tree-side{padding:16px 18px;display:flex;flex-direction:column;gap:12px;}
+.entity-pool{display:flex;flex-direction:column;gap:6px;}
+.entity-chip{font-family:var(--mono);font-size:11px;padding:7px 12px;border-radius:6px;border:1px solid var(--border);background:#0a0d14;color:#94a3b8;cursor:pointer;transition:all .15s;user-select:none;display:flex;align-items:center;gap:8px;}
+.entity-chip:hover{border-color:var(--ac);color:var(--ac);}
+.entity-chip.selected{border-color:var(--ac);color:#a5b4fc;background:var(--ac-dim);}
+.entity-chip.placed{opacity:.4;cursor:default;}
+.entity-chip .chip-icon{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.tree-hint{font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.6;}
+.tree-verdict{border-radius:8px;padding:10px 14px;font-size:13px;line-height:1.65;}
+.verdict-good{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.3);color:#86efac;}
+.verdict-warn{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);color:#fca5a5;}
+/* ── Conflict modal ── */
+.conflict-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;align-items:center;justify-content:center;}
+.conflict-modal.open{display:flex;}
+.conflict-box{background:#161b27;border:1px solid var(--border);border-radius:14px;padding:28px 32px;max-width:520px;width:90%;}
+.conflict-box h3{font-family:var(--disp);font-size:20px;color:#f87171;margin-bottom:12px;}
+.conflict-box p{font-size:14px;color:#94a3b8;margin-bottom:18px;line-height:1.7;}
+.conflict-btns{display:flex;gap:10px;}
+.conflict-btn{flex:1;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:none;color:#94a3b8;cursor:pointer;font-family:var(--mono);font-size:11px;text-align:center;transition:all .15s;line-height:1.5;}
+.conflict-btn:hover{border-color:var(--amber);color:var(--amber);}
+.conflict-btn-ok{border-color:rgba(99,102,241,.4);color:#a5b4fc;}
+.conflict-btn-ok:hover{border-color:var(--ac);color:var(--ac);background:var(--ac-dim);}
+/* ── Consequence panel ── */
+.consequence{border-radius:8px;padding:12px 16px;font-size:13px;color:#94a3b8;line-height:1.7;border:1px solid var(--border);background:#0a0d14;}
+.consequence strong{color:#e2e8f0;}
+/* ── Demo 2 Query Lab ── */
+.ql-outer{display:flex;flex-direction:column;gap:0;}
+.schema-toggle{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;}
+.schema-btn{font-family:var(--mono);font-size:10px;padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;}
+.schema-btn:hover{border-color:var(--ac);color:var(--ac);}
+.schema-btn.active{background:var(--ac-dim);border-color:rgba(99,102,241,.4);color:#a5b4fc;}
+.schema-panel{padding:14px 18px;border-bottom:1px solid var(--border);background:#0a0d14;font-family:var(--mono);font-size:11px;line-height:1.9;color:#94a3b8;display:none;}
+.schema-panel.visible{display:block;}
+.schema-panel .tree-line{color:#4ade80;}
+.schema-panel .table-name{color:#a5b4fc;}
+.schema-panel .col-name{color:#38bdf8;}
+.schema-panel .col-type{color:var(--muted);}
+.schema-panel .pk{color:#f59e0b;}
+.schema-panel .fk{color:#f87171;}
+.ql-body{display:grid;grid-template-columns:220px 1fr;}
+.query-list{border-right:1px solid var(--border);padding:12px;}
+.q-btn{width:100%;text-align:left;font-family:var(--mono);font-size:10px;padding:9px 12px;border-radius:6px;border:1px solid transparent;background:none;color:var(--muted);cursor:pointer;margin-bottom:4px;transition:all .15s;line-height:1.5;}
+.q-btn:hover{border-color:var(--border);color:#94a3b8;background:#0a0d14;}
+.q-btn.active{border-color:rgba(99,102,241,.4);color:#a5b4fc;background:var(--ac-dim);}
+.q-btn .q-num{color:var(--ac);font-weight:700;display:block;margin-bottom:2px;}
+.query-detail{padding:16px 20px;display:flex;flex-direction:column;gap:14px;}
+.q-english{background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:8px;padding:12px 16px;font-size:14px;color:#c7d2fe;line-height:1.65;}
+.q-english strong{color:#e2e8f0;}
+.q-code-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.q-code-block{background:#0a0d14;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.q-code-hdr{padding:7px 12px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;gap:6px;}
+.q-code-hdr .lang-ims{color:#f59e0b;}
+.q-code-hdr .lang-sql{color:#38bdf8;}
+.q-code-body{padding:12px;font-family:var(--mono);font-size:11px;color:#94a3b8;line-height:1.9;white-space:pre;}
+.q-results{background:#0a0d14;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.q-results-hdr{padding:7px 12px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.1em;}
+.q-results-body{padding:12px;font-family:var(--mono);font-size:11px;color:#94a3b8;line-height:1.9;}
+.q-verdict{font-size:13px;color:#94a3b8;padding:10px 14px;border-radius:6px;border:1px solid var(--border);background:#0a0d14;line-height:1.7;}
+.q-verdict strong{color:#e2e8f0;}
+.q-verdict .good{color:var(--green);}
+.q-verdict .bad{color:var(--red);}
+/* ── Exercises / Discussion ── */
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.ex-head{padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border);}
+.ex-num{font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(99,102,241,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.ex-title{font-weight:600;font-size:16px;color:#f1f5f9;}
+.ex-desc{font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6;}
+.ex-body{padding:20px;}
+.ex-body p{font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7;}
+.ex-body p:last-child{margin-bottom:0;}
+.ex-body p strong{color:#e2e8f0;}
+.disc-list{list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px;}
+.disc-list li{counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72;}
+.disc-list li::before{content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(99,102,241,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px;}
+.disc-list li strong{color:#e2e8f0;}
+.gloss-grid{display:flex;flex-direction:column;}
+.gloss-entry{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);padding:18px 0;}
+.gloss-entry:last-child{border-bottom:none;}
+.gloss-term{display:flex;flex-direction:column;gap:5px;padding-right:24px;padding-top:2px;}
+.gloss-term-name{font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700;}
+.gloss-abbr{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.gloss-def{font-size:14.5px;color:#94a3b8;line-height:1.72;}
+.gloss-def strong{color:#e2e8f0;}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border);}
+.nav-btn{text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s;}
+.nav-btn:hover{border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow);}
+.nav-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.nav-title{font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px;}
+.nav-arrow{font-size:20px;color:var(--ac);}
+/* reset button to clear tree */
+.reset-btn{font-family:var(--mono);font-size:10px;padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;}
+.reset-btn:hover{border-color:var(--red);color:var(--red);}
+</style>
+</head>
+<body>
+
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface);transition:color .15s" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 1: FOUNDATIONS</span>
+  <span>›</span><span>Evolution of Intelligence</span><span>›</span>
+  <span style="color:#94a3b8">Era 1, Lesson 7 — Hierarchical Databases</span>
+</nav>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 1 · LESSON 7</span>
+      <span>1966 – Present</span><span>·</span>
+      <span>IBM IMS, Apollo, and the Limits of Trees</span>
+    </div>
+    <h1>To the Moon<br>and Back</h1>
+    <p class="hero-sub">The first serious database was built to track three million parts on the Saturn V rocket. It worked brilliantly — until the data stopped fitting in a tree.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1966</span><span class="tl-label">IBM begins developing IMS for NASA/Rockwell</span></div>
+      <div class="tl-item"><span class="tl-year">1968</span><span class="tl-label">IMS ships — one year before the moon landing</span></div>
+      <div class="tl-item"><span class="tl-year">1970</span><span class="tl-label">Codd publishes the relational model at IBM</span></div>
+      <div class="tl-item"><span class="tl-year">Today</span><span class="tl-label">IMS still processes billions of transactions daily</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">🚀</span><div><strong>Explain</strong> why NASA and IBM needed a new kind of database in 1966 — and how the Saturn V's bill of materials shaped the hierarchical model.</div></li>
+      <li><span class="obj-icon">🌲</span><div><strong>Identify</strong> the structural properties of a hierarchical database: each record has exactly one parent, navigation is top-down, and DL/I queries traverse known paths.</div></li>
+      <li><span class="obj-icon">⚠️</span><div><strong>Demonstrate</strong> why many-to-many relationships cannot be cleanly represented in a tree — and what compromises (duplication, logical pointers) are forced as a result.</div></li>
+      <li><span class="obj-icon">⚖️</span><div><strong>Compare</strong> DL/I and SQL queries on the same dataset, identifying which query types favor each system and why Codd's relational model addressed IMS's fundamental limitation.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">The Apollo Problem</h2></div>
+    <div class="prose">
+      <p>In 1966, North American Rockwell faced a data problem unlike any the world had seen. They had been contracted to build the Saturn V — the rocket that would carry humans to the Moon — and it had a bill of materials comprising approximately <strong>three million individual parts</strong>. Each part had a part number, a specification, a supplier, a delivery schedule, and a precise location within the vehicle. Many had sub-components. Sub-components had their own sub-components. The whole thing was a tree of physical containment, and it went six or seven levels deep.</p>
+      <p>At the time, there was no good way to store this structure in a computer. Files were flat. You could store a list of parts, but the relationships between them — which engine assembly a particular turbopump belonged to, which stage that engine belonged to — were implicit, hand-maintained, and fragile. Rockwell's engineers were tracking dependencies in paper ledgers. For a mission where a single misplaced decimal could kill three astronauts, this was unacceptable.</p>
+      <p>Rockwell brought in IBM. Working also with Caterpillar Tractor, who had similar hierarchical inventory problems, IBM's team spent two years designing a solution. They called it <strong>IMS — Information Management System</strong>. It shipped in 1968. Twelve months later, Neil Armstrong walked on the Moon.</p>
+    </div>
+
+    <div class="pullquote">
+      <p>"The idea was simple: if the physical structure of the rocket is a tree, store it as a tree. Navigate it the same way an engineer would — start at the vehicle, descend to the stage, descend to the engine, descend to the assembly, find your part."</p>
+      <cite>— IBM IMS Design Philosophy, 1967</cite>
+    </div>
+
+    <div class="prose">
+      <p>IMS organized data into <strong>segments</strong> arranged in a strict parent-child hierarchy. The query language, called <strong>DL/I (Data Language One)</strong>, worked by specifying a path through the tree. To find the oxidizer turbopump, you told DL/I: get the ROCKET segment named "Saturn V", then get its STAGE child named "S-IC", then get its ENGINE child where position = 1, then get the ASSEMBLY child named "Turbopump", then get its PART where name = "Oxidizer". The path was the query.</p>
+      <p>For its intended purpose, this was not just adequate — it was elegant. Physical containment is genuinely hierarchical. A turbopump does belong to exactly one engine. An engine belongs to exactly one stage. The tree structure matched reality, and IMS exploited this to store records in physical proximity on disk, making reads along known paths extraordinarily fast on the hardware of 1968.</p>
+      <p>IMS never went away. Today, some of the largest banks in the world — institutions processing tens of millions of transactions per day — still run IMS on IBM mainframes. Migration is simply too risky and too expensive. Estimates suggest IMS handles <strong>over 50 billion transactions per day</strong> globally. The database built for the Apollo program remains critical infrastructure for the global financial system. That is not a coincidence: both problems, at their core, involve hierarchical structures — accounts within branches within regions within banks — that IMS handles with extreme reliability and speed.</p>
+    </div>
+
+    <div class="prose">
+      <p>The wall appeared when data stopped being truly hierarchical. A single <strong>bolt — part number P/N-4521</strong> — might be used in twelve different assemblies across three engine types. In a tree, a node can have only one parent. The bolt cannot belong to the thrust chamber assembly <em>and</em> the turbopump assembly <em>and</em> the gas generator assembly simultaneously. Rockwell's engineers had two choices: store twelve copies of the bolt record (risking inconsistency when the spec changed) or use IMS's "logical child" pointers — a mechanism that grafted a pointer from one tree onto another. The pointer hack worked, but it was inelegant, fragile, and invisible to the query language. IMS was smuggling relational structure in through the back door.</p>
+      <p>In 1970, a researcher named <strong>Edgar F. Codd</strong> — working at IBM's San Jose Research Laboratory, the same company selling IMS — published a paper titled "A Relational Model of Data for Large Shared Data Banks." It proposed organizing all data as flat tables linked by shared keys, with a mathematical foundation in set theory and relational algebra. Instead of navigating a tree, you described <em>what</em> you wanted and let the system figure out <em>how</em> to retrieve it. The paper made IMS's fundamental limitation explicit and proposed an architecture that would eventually displace it everywhere except where IMS was already too deeply embedded to remove.</p>
+    </div>
+  </section>
+
+  <!-- 03 DEMOS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+
+    <!-- DEMO 1: Tree Builder -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — When Trees Work (and When They Don't).</strong> Select a scenario. Click an entity in the right panel to select it, then click another entity to make it a child. Green scenarios fit naturally into a tree. Red scenarios will hit the wall — you'll be forced to choose between duplication and logical pointers.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Hierarchical Tree Builder</span>
+        <span class="demo-hint">click entity → click parent · watch for conflicts</span>
+      </div>
+      <div class="sc-tabs" id="d1Tabs"></div>
+      <div class="tree-outer">
+        <div class="tree-canvas">
+          <svg id="d1SVG" viewBox="0 0 620 340" style="display:block;width:100%;cursor:default"></svg>
+        </div>
+        <div class="tree-side">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Entities</div>
+            <button class="reset-btn" onclick="d1Reset()">↺ Reset</button>
+          </div>
+          <div class="entity-pool" id="d1Pool"></div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.65;margin-top:4px" id="d1Hint">Click an entity to select it, then click another to set it as the parent.</div>
+          <div id="d1Verdict" style="display:none"></div>
+        </div>
+      </div>
+      <div style="padding:12px 18px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted2)" id="d1ScDesc"></div>
+    </div>
+
+    <!-- Conflict modal -->
+    <div class="conflict-modal" id="conflictModal">
+      <div class="conflict-box">
+        <h3>⚠ Hierarchical Conflict</h3>
+        <p id="conflictDesc"></p>
+        <div class="conflict-btns">
+          <button class="conflict-btn" onclick="d1ResolveConflict('duplicate')">📋 Duplicate the record<br><span style="font-size:9px;opacity:.7">Store a copy under each parent</span></button>
+          <button class="conflict-btn" onclick="d1ResolveConflict('pointer')">🔗 Use a logical pointer<br><span style="font-size:9px;opacity:.7">Link across tree boundaries</span></button>
+          <button class="conflict-btn conflict-btn-ok" onclick="d1ResolveConflict('cancel')">✕ Cancel</button>
+        </div>
+        <div class="consequence" id="conflictConsequence" style="display:none;margin-top:14px"></div>
+      </div>
+    </div>
+
+    <!-- DEMO 2: Query Lab -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — The Query Lab.</strong> Toggle between the IMS hierarchical schema and the relational schema. Select a query to see it expressed in both DL/I path notation and SQL, then run it against the Saturn V dataset.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Query Lab — Saturn V Dataset</span>
+        <span class="demo-hint">toggle schema · choose query · compare DL/I vs SQL</span>
+      </div>
+      <div class="ql-outer">
+        <div class="schema-toggle">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-right:4px">Schema:</span>
+          <button class="schema-btn active" id="schIMS" onclick="qlShowSchema('ims')">IMS Hierarchical</button>
+          <button class="schema-btn" id="schSQL" onclick="qlShowSchema('sql')">Relational (SQL)</button>
+        </div>
+        <div class="schema-panel visible" id="schemaPanelIMS">
+<span style="color:var(--muted)">// IMS Segment Hierarchy (DL/I)</span>
+<span class="table-name">ROCKET</span>        <span class="col-name">rocket_id</span><span class="col-type">(CHAR 8)</span>  <span class="col-name">name</span><span class="col-type">(CHAR 32)</span>
+  └── <span class="table-name">STAGE</span>      <span class="col-name">stage_id</span><span class="col-type">(CHAR 4)</span>   <span class="col-name">name</span><span class="col-type">(CHAR 16)</span>  <span class="col-name">stage_num</span><span class="col-type">(INT)</span>
+        └── <span class="table-name">ENGINE</span>   <span class="col-name">engine_id</span><span class="col-type">(CHAR 4)</span>  <span class="col-name">name</span><span class="col-type">(CHAR 16)</span>  <span class="col-name">position</span><span class="col-type">(INT)</span>  <span class="col-name">supplier</span><span class="col-type">(CHAR 24)</span>
+              └── <span class="table-name">ASSEMBLY</span> <span class="col-name">asm_id</span><span class="col-type">(CHAR 4)</span>    <span class="col-name">name</span><span class="col-type">(CHAR 24)</span>
+                    └── <span class="table-name">PART</span>     <span class="col-name">part_num</span><span class="col-type">(CHAR 8)</span>  <span class="col-name">name</span><span class="col-type">(CHAR 32)</span>  <span class="col-name">qty</span><span class="col-type">(INT)</span>  <span class="col-name">supplier</span><span class="col-type">(CHAR 24)</span>
+
+<span style="color:var(--muted)">// Note: Bolt P/N-4521 appears under MULTIPLE assemblies.</span>
+<span style="color:var(--muted)">// IMS stores a DUPLICATE SEGMENT under each parent.</span>
+<span style="color:var(--red)">// If the spec changes, ALL copies must be updated manually.</span></div>
+        <div class="schema-panel" id="schemaPanelSQL">
+<span style="color:var(--muted)">-- Relational Schema (SQL)</span>
+<span class="table-name">rockets</span>   (<span class="pk">id</span>, name)
+<span class="table-name">stages</span>    (<span class="pk">id</span>, <span class="fk">rocket_id</span>, name, stage_num)
+<span class="table-name">engines</span>   (<span class="pk">id</span>, <span class="fk">stage_id</span>, name, position, supplier)
+<span class="table-name">assemblies</span>(<span class="pk">id</span>, <span class="fk">engine_id</span>, name)
+<span class="table-name">parts</span>     (<span class="pk">part_number</span>, name, supplier, unit_weight_g)
+<span class="table-name">asm_parts</span> (<span class="fk">assembly_id</span>, <span class="fk">part_number</span>, quantity)   <span style="color:var(--green)">← junction table</span>
+
+<span style="color:var(--muted)">-- Bolt P/N-4521 appears ONCE in parts.</span>
+<span style="color:var(--green)">-- asm_parts has one row per (assembly, part) pair.</span>
+<span style="color:var(--green)">-- Change the spec once → propagates everywhere.</span></div>
+        <div class="ql-body">
+          <div class="query-list" id="qlQueryList"></div>
+          <div class="query-detail" id="qlDetail">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--muted2);padding:20px 0;text-align:center">← Select a query to begin</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">🌲 Finding the Wall</div>
+        <div class="ex-desc">Use Demo 1 to identify exactly when and why the hierarchical model breaks down.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Work through all six scenarios in Demo 1 in order. For each "green" scenario, describe in one sentence <em>why</em> the data is naturally hierarchical (what makes one parent per node the right model). For each "red" scenario, describe the relationship that breaks the tree and what you were forced to do about it.</p>
+        <p>→ In the University Enrollment scenario, suppose you choose "Duplicate" for every conflict. If a student transfers to a new section, how many records need updating? What happens if one is missed?</p>
+        <p><strong>Key question:</strong> The Saturn V bolt was a genuine problem for IMS. Why was it less catastrophic for a rocket BOM than it would be for a hospital patient record system? (Think about how often the data changes, and what the consequence of inconsistency is.)</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">🔍 Query Asymmetry</div>
+        <div class="ex-desc">Use Demo 2 to identify which query style suits each system better.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Run all five queries in Demo 2. For each one, decide: does IMS or SQL handle it more naturally? What is the structural reason?</p>
+        <p>→ Notice that Query 1 (path lookup) is almost easier to read in DL/I than SQL — the DL/I notation directly maps to how an engineer thinks about the problem ("go to Stage 1, Engine 2, Turbopump"). Under what circumstances might DL/I's navigational style be an advantage even today?</p>
+        <p><strong>Key question:</strong> Query 3 asks "which assemblies use Bolt P/N-4521?" This is a bottom-up query in a top-down system. In the IMS schema, why is this query fundamentally harder than in SQL, and what does this reveal about the difference between <em>navigational</em> and <em>declarative</em> query models?</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">🧠 Codd's Insight</div>
+        <div class="ex-desc">Think through what made the relational model a genuine breakthrough rather than just a refinement.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In the relational schema, the <code>asm_parts</code> junction table stores one row per (assembly, part) combination. This seems simple — almost too simple. Explain why this one table eliminates all three problems that IMS faced with the bolt: duplication, inconsistency risk, and the difficulty of bottom-up queries.</p>
+        <p>→ Codd worked at IBM while IMS was IBM's flagship product. His 1970 paper implicitly argued that IMS was architecturally flawed. Why do you think IBM initially resisted commercializing the relational model? (Consider: IBM had thousands of IMS customers and a large consulting business built around it.)</p>
+        <p><strong>Key question:</strong> IMS still runs billions of transactions per day in 2025. Does this mean the hierarchical model was "good enough," or does it mean something different — about the economics of replacing working infrastructure? What would it cost a large bank to migrate from IMS to a modern relational system?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>The Right Tool.</strong> IMS was purpose-built for a specific problem — hierarchical inventory tracking — and it excelled at it. Modern developers often reach for general-purpose relational databases by default. Can you think of current problems where a hierarchical store (like a filesystem, an XML database, or a modern document store like MongoDB) might be the more natural choice than a relational database?</li>
+      <li><strong>Path Dependence.</strong> The fact that IMS is still running in 2025 — nearly 60 years after its design — is an example of technological path dependence: early choices constrain future options even when better alternatives exist. What other examples of path dependence can you identify in computing? (Consider keyboard layouts, IP addressing, or file formats.)</li>
+      <li><strong>The Codd Paradox.</strong> Codd published his relational model paper while working for IBM, whose main database product (IMS) it implicitly criticized. His paper was initially suppressed internally and only published after persistence. What does this suggest about how genuinely disruptive ideas travel through large organizations? How does this dynamic show up in modern tech companies?</li>
+      <li><strong>From Trees to Graphs.</strong> A hierarchical database is a tree (each node has one parent). A relational database is, conceptually, a set of flat tables. Modern graph databases (like Neo4j) allow any node to connect to any other node. For what kinds of problems is a graph the most natural structure? Think about social networks, knowledge graphs, or route planning.</li>
+      <li><strong>Connection Forward.</strong> In Era 2 you will study relational databases and SQL in depth. The junction table (<code>asm_parts</code>) that solves the bolt problem is the foundation of the entire relational model. What happens to this approach when a database has billions of rows and thousands of simultaneous queries? This is the scalability question that drove the NoSQL movement in the 2000s — which you'll reach in Era 3.</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">IMS</span><span class="gloss-abbr">Information Management System</span></div>
+        <div class="gloss-def">IBM's hierarchical database system, developed 1966–68 for the Apollo/Saturn V program. Organizes data as a tree of <strong>segments</strong> (records), where each segment has exactly one parent. Still in production use at major banks and airlines. Query language: DL/I.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">DL/I</span><span class="gloss-abbr">Data Language One</span></div>
+        <div class="gloss-def">IMS's navigational query language. Queries specify an explicit path through the tree hierarchy. Efficient for known top-down traversals; struggles with bottom-up or cross-branch queries. Contrast with SQL, which is <strong>declarative</strong> (you describe what you want, not how to get it).</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Hierarchical DB</span><span class="gloss-abbr">Tree-structured data store</span></div>
+        <div class="gloss-def">A database where every record has <strong>exactly one parent</strong> (except the root). Naturally models containment hierarchies: org charts, file systems, bills of materials. Cannot represent many-to-many relationships without duplication or pointer hacks.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Logical Child</span><span class="gloss-abbr">IMS pointer mechanism</span></div>
+        <div class="gloss-def">IMS's workaround for many-to-many relationships. A segment can have a <strong>logical parent</strong> in a second tree, accessed via pointer. Functional but fragile: the relationship is invisible to standard queries and requires manual maintenance. Essentially smuggles relational structure into a hierarchical system.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Bill of Materials</span><span class="gloss-abbr">BOM</span></div>
+        <div class="gloss-def">A hierarchical list of components, sub-components, and raw materials needed to manufacture a product. The Saturn V BOM had ~3 million entries across 6–7 levels. BOMs are one of the canonical cases where a hierarchical data model genuinely fits the problem.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Relational Model</span><span class="gloss-abbr">Codd, 1970</span></div>
+        <div class="gloss-def">Edgar Codd's proposal to organize all data as flat tables linked by shared keys, with queries expressed in relational algebra. Addresses the hierarchical model's many-to-many problem via <strong>junction tables</strong>. Foundation for SQL and every major database system used today.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Junction Table</span><span class="gloss-abbr">Bridge / associative table</span></div>
+        <div class="gloss-def">A table in a relational database that stores many-to-many relationships by holding foreign keys to both related tables. Example: <code>asm_parts(assembly_id, part_number, quantity)</code> connects assemblies to parts without duplication. Each part exists exactly once; each assembly-part relationship gets one row.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era1_lesson6_cost_of_error.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 1, Lesson 6 — The Cost of Error</div></div>
+    </a>
+    <div class="nav-btn" style="opacity:.35;cursor:default">
+      <div><div class="nav-lbl">Next Lesson →</div><div class="nav-title">Era 1, Lesson 8 — The XOR Wall</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+
+</div><!-- wrap -->
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════════
+   DEMO 1 — HIERARCHICAL TREE BUILDER
+═══════════════════════════════════════════════════════ */
+(function(){
+
+var SCENARIOS = [
+  /* ── GREEN: naturally hierarchical ── */
+  {
+    id:'saturn', type:'good', label:'🚀 Saturn V BOM',
+    desc:'Physical containment — each part belongs to exactly one assembly, each assembly to one engine, each engine to one stage. A tree is the right model.',
+    entities:[
+      {id:'rocket', label:'Saturn V', icon:'🚀', color:'#6366f1'},
+      {id:'s1',     label:'Stage 1 (S-IC)',  icon:'🔴', color:'#f59e0b'},
+      {id:'s2',     label:'Stage 2 (S-II)',  icon:'🟠', color:'#f97316'},
+      {id:'s3',     label:'Stage 3 (S-IVB)', icon:'🟡', color:'#eab308'},
+      {id:'e1',     label:'F-1 Engine #1',   icon:'⚙️',  color:'#38bdf8'},
+      {id:'e2',     label:'F-1 Engine #2',   icon:'⚙️',  color:'#38bdf8'},
+      {id:'tc1',    label:'Thrust Chamber',  icon:'🔩',  color:'#4ade80'},
+      {id:'tp1',    label:'Turbopump Asm.',  icon:'🔩',  color:'#4ade80'},
+    ],
+    // Pre-wire a partial tree for guidance
+    preset:[['s1','rocket'],['s2','rocket'],['s3','rocket'],['e1','s1'],['e2','s1'],['tc1','e1'],['tp1','e1']],
+    manyToMany: false,
+    verdict:'✓ Perfect tree. Every entity has exactly one physical parent. IMS handles this flawlessly.'
+  },
+  {
+    id:'org', type:'good', label:'🏢 Org Chart',
+    desc:'Each employee reports to exactly one manager. Classic single-parent hierarchy — IMS was widely used for corporate org charts.',
+    entities:[
+      {id:'ceo',  label:'CEO',         icon:'👤', color:'#6366f1'},
+      {id:'cto',  label:'CTO',         icon:'👤', color:'#a78bfa'},
+      {id:'cfo',  label:'CFO',         icon:'👤', color:'#a78bfa'},
+      {id:'vpe',  label:'VP Eng',      icon:'👤', color:'#38bdf8'},
+      {id:'vpr',  label:'VP Research', icon:'👤', color:'#38bdf8'},
+      {id:'swe1', label:'Sr. Engineer',icon:'👤', color:'#4ade80'},
+      {id:'swe2', label:'Jr. Engineer',icon:'👤', color:'#4ade80'},
+    ],
+    preset:[['cto','ceo'],['cfo','ceo'],['vpe','cto'],['vpr','cto'],['swe1','vpe'],['swe2','vpe']],
+    manyToMany: false,
+    verdict:'✓ Every employee has one manager. The org chart is a tree by definition — IMS is natural here.'
+  },
+  {
+    id:'files', type:'good', label:'📁 File System',
+    desc:'Each file or folder has exactly one parent directory. Filesystem hierarchies are the canonical example of tree-structured data.',
+    entities:[
+      {id:'root', label:'/ (root)',    icon:'💾', color:'#6366f1'},
+      {id:'home', label:'/home',       icon:'📁', color:'#a78bfa'},
+      {id:'usr',  label:'/usr',        icon:'📁', color:'#a78bfa'},
+      {id:'paul', label:'/home/paul',  icon:'📁', color:'#38bdf8'},
+      {id:'docs', label:'documents/',  icon:'📁', color:'#4ade80'},
+      {id:'f1',   label:'report.pdf',  icon:'📄', color:'#94a3b8'},
+      {id:'f2',   label:'notes.txt',   icon:'📄', color:'#94a3b8'},
+    ],
+    preset:[['home','root'],['usr','root'],['paul','home'],['docs','paul'],['f1','docs'],['f2','docs']],
+    manyToMany: false,
+    verdict:'✓ Every file has one parent directory. Filesystems are literally trees — the analogy is direct and exact.'
+  },
+  /* ── RED: many-to-many breaks the tree ── */
+  {
+    id:'bolt', type:'bad', label:'🔩 The Bolt Problem',
+    desc:'Bolt P/N-4521 is used in multiple Saturn V assemblies. It cannot have two parents in IMS. You must choose: duplicate the record, or use a logical pointer.',
+    entities:[
+      {id:'tc',   label:'Thrust Chamber Asm.', icon:'⚙️', color:'#38bdf8'},
+      {id:'tp',   label:'Turbopump Asm.',      icon:'⚙️', color:'#38bdf8'},
+      {id:'gg',   label:'Gas Generator Asm.',  icon:'⚙️', color:'#38bdf8'},
+      {id:'bolt', label:'Bolt P/N-4521',       icon:'🔩', color:'#f87171'},
+    ],
+    preset:[],
+    manyToMany: true,
+    conflictNode: 'bolt',
+    conflictParents: ['tc','tp','gg'],
+    verdict:'⚠ Bolt P/N-4521 belongs to three assemblies. IMS cannot represent this without compromise.'
+  },
+  {
+    id:'enroll', type:'bad', label:'🎓 University Enrollment',
+    desc:'Students enroll in multiple courses; courses have multiple students. A pure many-to-many relationship — the tree collapses immediately.',
+    entities:[
+      {id:'alice', label:'Alice (student)',   icon:'👤', color:'#a78bfa'},
+      {id:'bob',   label:'Bob (student)',     icon:'👤', color:'#a78bfa'},
+      {id:'calc',  label:'Calculus',          icon:'📚', color:'#38bdf8'},
+      {id:'hist',  label:'History',           icon:'📚', color:'#38bdf8'},
+      {id:'phys',  label:'Physics',           icon:'📚', color:'#38bdf8'},
+    ],
+    preset:[],
+    manyToMany: true,
+    conflictNode: 'alice',
+    conflictParents: ['calc','hist','phys'],
+    verdict:'⚠ Alice is enrolled in three courses. Bob is enrolled in two. No direction works cleanly — tree or student under course, course under student: both require duplicates.'
+  },
+  {
+    id:'hospital', type:'bad', label:'🏥 Hospital Records',
+    desc:'Patients see multiple doctors; doctors have multiple patients. Medical records were one of the first domains where IMS\'s limitations caused real-world harm from data inconsistency.',
+    entities:[
+      {id:'pat1', label:'Patient: Chen',      icon:'👤', color:'#a78bfa'},
+      {id:'pat2', label:'Patient: Okafor',    icon:'👤', color:'#a78bfa'},
+      {id:'dr1',  label:'Dr. Reyes (Cardio)', icon:'🩺', color:'#38bdf8'},
+      {id:'dr2',  label:'Dr. Singh (Neuro)',  icon:'🩺', color:'#38bdf8'},
+      {id:'dr3',  label:'Dr. Park (General)', icon:'🩺', color:'#38bdf8'},
+    ],
+    preset:[],
+    manyToMany: true,
+    conflictNode: 'pat1',
+    conflictParents: ['dr1','dr2','dr3'],
+    verdict:'⚠ Patient Chen sees three specialists. Duplicating medical records across doctor subtrees is dangerous — an update to one copy that misses another could lead to incorrect treatment.'
+  }
+];
+
+var currentSc = 0;
+var nodeParent = {};   // child → parent
+var selected = null;
+var conflictPending = null;
+
+/* ── layout ── */
+function layoutTree(entities, parentOf) {
+  // Assign depth and position
+  var root = entities.filter(function(e){ return !parentOf[e.id]; });
+  var pos = {};
+  function place(id, depth, left, right) {
+    var children = entities.filter(function(e){ return parentOf[e.id] === id; });
+    var mid = (left + right) / 2;
+    pos[id] = {x: mid, y: 40 + depth * 72};
+    if (children.length === 0) return;
+    var w = (right - left) / children.length;
+    children.forEach(function(c, i) { place(c.id, depth+1, left + i*w, left + (i+1)*w); });
+  }
+  var W = 620;
+  if (root.length === 0) {
+    entities.forEach(function(e, i){ pos[e.id] = {x: 60 + i * (W-80)/(entities.length||1), y: 80}; });
+  } else if (root.length === 1) {
+    place(root[0].id, 0, 0, W);
+  } else {
+    var w = W / root.length;
+    root.forEach(function(r, i){ place(r.id, 0, i*w, (i+1)*w); });
+  }
+  return pos;
+}
+
+function render() {
+  var sc = SCENARIOS[currentSc];
+  var entities = sc.entities;
+  var svg = document.getElementById('d1SVG');
+  if (!svg) return;
+
+  var pos = layoutTree(entities, nodeParent);
+
+  var h = '<rect width="620" height="340" fill="#0a0d14" rx="6"/>';
+
+  // Draw edges
+  entities.forEach(function(e) {
+    var p = nodeParent[e.id];
+    if (!p || !pos[p] || !pos[e.id]) return;
+    var x1=pos[p].x, y1=pos[p].y, x2=pos[e.id].x, y2=pos[e.id].y;
+    h += '<line x1="'+x1.toFixed(0)+'" y1="'+y1.toFixed(0)+'" x2="'+x2.toFixed(0)+'" y2="'+y2.toFixed(0)+'" stroke="'+e.color+'" stroke-width="2" opacity="0.4"/>';
+  });
+
+  // Draw nodes
+  entities.forEach(function(e) {
+    if (!pos[e.id]) return;
+    var x = pos[e.id].x, y = pos[e.id].y;
+    var isSel = selected === e.id;
+    var hasParent = !!nodeParent[e.id];
+    h += '<circle cx="'+x.toFixed(0)+'" cy="'+y.toFixed(0)+'" r="26" fill="'+e.color+'" opacity="'+(isSel?0.35:0.12)+'" stroke="'+e.color+'" stroke-width="'+(isSel?2.5:1.5)+'"/>';
+    h += '<text x="'+x.toFixed(0)+'" y="'+(y-5).toFixed(0)+'" fill="'+e.color+'" font-size="11" text-anchor="middle" font-family="Space Mono,monospace" style="pointer-events:none">'+escHtml(e.label.split(' ')[0])+'</text>';
+    if (e.label.split(' ').length > 1) {
+      h += '<text x="'+x.toFixed(0)+'" y="'+(y+8).toFixed(0)+'" fill="'+e.color+'" font-size="9" text-anchor="middle" font-family="Space Mono,monospace" opacity="0.7" style="pointer-events:none">'+escHtml(e.label.split(' ').slice(1).join(' '))+'</text>';
+    }
+    // Invisible click target
+    h += '<circle cx="'+x.toFixed(0)+'" cy="'+y.toFixed(0)+'" r="28" fill="transparent" data-id="'+e.id+'" style="cursor:pointer"/>';
+  });
+
+  // Empty hint
+  var placed = Object.keys(nodeParent).length;
+  if (placed === 0 && !sc.preset.length) {
+    h += '<text x="310" y="170" fill="#334155" font-size="12" text-anchor="middle" font-family="Space Mono,monospace">Click an entity on the right, then click another to connect</text>';
+  }
+
+  svg.innerHTML = h;
+  svg.querySelectorAll('[data-id]').forEach(function(el){
+    el.addEventListener('click', function(){ d1NodeClick(el.getAttribute('data-id')); });
+  });
+
+  // Pool
+  var pool = document.getElementById('d1Pool');
+  pool.innerHTML = sc.entities.map(function(e){
+    var isSel = selected === e.id;
+    var hasP = !!nodeParent[e.id];
+    return '<div class="entity-chip'+(isSel?' selected':'')+(hasP?' placed':'')+'" onclick="d1ChipClick(\''+e.id+'\')" style="border-color:'+(isSel?e.color:hasP?'rgba(99,102,241,.2)':'')+'"><div class="chip-icon" style="background:'+e.color+'"></div>'+escHtml(e.label)+'</div>';
+  }).join('');
+
+  // Verdict
+  var allConnected = sc.entities.every(function(e){ return !!nodeParent[e.id] || !sc.entities.find(function(f){ return nodeParent[f.id] === undefined && f.id !== e.id; }); });
+  // Show verdict if tree is fully built (for presets)
+  var roots = sc.entities.filter(function(e){ return !nodeParent[e.id]; });
+  var connected = sc.entities.filter(function(e){ return !!nodeParent[e.id]; });
+  var vEl = document.getElementById('d1Verdict');
+  if (vEl && sc.preset.length && connected.length === sc.preset.length) {
+    vEl.style.display = 'block';
+    vEl.className = 'tree-verdict ' + (sc.type === 'good' ? 'verdict-good' : 'verdict-warn');
+    vEl.innerHTML = sc.verdict;
+  } else {
+    if(vEl) vEl.style.display = 'none';
+  }
+}
+
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function d1NodeClick(id) {
+  if (!selected) { selected = id; render(); return; }
+  if (selected === id) { selected = null; render(); return; }
+  // Make 'selected' a child of 'id'
+  d1Connect(selected, id);
+}
+window.d1ChipClick = function(id) { d1NodeClick(id); };
+
+function d1Connect(childId, parentId) {
+  var sc = SCENARIOS[currentSc];
+  // Check if child already has a parent
+  if (nodeParent[childId]) {
+    // Conflict!
+    conflictPending = {child: childId, newParent: parentId};
+    var cName = sc.entities.find(function(e){return e.id===childId;}).label;
+    var pName = sc.entities.find(function(e){return e.id===parentId;}).label;
+    document.getElementById('conflictDesc').textContent =
+      '"'+cName+'" already has a parent. In a hierarchical database, each record can only have one parent. How would you resolve this?';
+    document.getElementById('conflictConsequence').style.display = 'none';
+    document.getElementById('conflictModal').classList.add('open');
+    return;
+  }
+  // Cycle check
+  var seen = {}, cur = parentId;
+  while (cur) { if (seen[cur] || cur === childId) { selected = null; render(); return; } seen[cur]=1; cur = nodeParent[cur]; }
+  nodeParent[childId] = parentId;
+  selected = null;
+  render();
+  checkVerdictForBad();
+}
+
+function checkVerdictForBad() {
+  var sc = SCENARIOS[currentSc];
+  if (sc.type !== 'bad') return;
+  var vEl = document.getElementById('d1Verdict');
+  if (!vEl) return;
+  // Show verdict once any connection is made
+  if (Object.keys(nodeParent).length > 0) {
+    vEl.style.display = 'block';
+    vEl.className = 'tree-verdict verdict-warn';
+    vEl.innerHTML = sc.verdict;
+  }
+}
+
+window.d1ResolveConflict = function(choice) {
+  var sc = SCENARIOS[currentSc];
+  var consequenceEl = document.getElementById('conflictConsequence');
+  if (choice === 'cancel') {
+    conflictPending = null;
+    selected = null;
+    document.getElementById('conflictModal').classList.remove('open');
+    return;
+  }
+  if (choice === 'duplicate') {
+    consequenceEl.style.display = 'block';
+    consequenceEl.innerHTML = '<strong>Duplication chosen.</strong> A second copy of "'+sc.entities.find(function(e){return e.id===conflictPending.child;}).label+'" will be stored under the new parent. <span style="color:#f87171">Risk: if the spec changes, all copies must be updated manually. Miss one and the data is inconsistent.</span>';
+  } else {
+    consequenceEl.style.display = 'block';
+    consequenceEl.innerHTML = '<strong>Logical pointer chosen.</strong> IMS will store a pointer from the new parent to the existing record. <span style="color:#f59e0b">Limitation: this pointer is invisible to standard DL/I queries and must be managed separately. IMS is now smuggling relational structure inside a hierarchical system.</span>';
+  }
+  // Close after a moment - let user read
+  setTimeout(function(){
+    document.getElementById('conflictModal').classList.remove('open');
+    conflictPending = null;
+    selected = null;
+    render();
+    checkVerdictForBad();
+  }, 3200);
+};
+
+function d1LoadScenario(i) {
+  currentSc = i;
+  nodeParent = {};
+  selected = null;
+  var sc = SCENARIOS[i];
+  // Apply presets
+  sc.preset.forEach(function(pair){ nodeParent[pair[0]] = pair[1]; });
+  document.getElementById('d1ScDesc').textContent = sc.desc;
+  var vEl = document.getElementById('d1Verdict');
+  if (vEl) vEl.style.display = 'none';
+  render();
+  // Update tabs
+  document.querySelectorAll('.sc-tab').forEach(function(t,j){
+    t.classList.toggle('active', j===i);
+  });
+}
+
+window.d1Reset = function() {
+  var sc = SCENARIOS[currentSc];
+  nodeParent = {};
+  selected = null;
+  sc.preset.forEach(function(pair){ nodeParent[pair[0]] = pair[1]; });
+  var vEl = document.getElementById('d1Verdict');
+  if (vEl) vEl.style.display = 'none';
+  render();
+};
+
+// Build tabs
+var tabs = document.getElementById('d1Tabs');
+SCENARIOS.forEach(function(sc, i){
+  var b = document.createElement('button');
+  b.className = 'sc-tab ' + sc.type + (i===0?' active':'');
+  b.innerHTML = sc.label;
+  b.onclick = function(){ d1LoadScenario(i); };
+  tabs.appendChild(b);
+});
+
+d1LoadScenario(0);
+
+})();
+
+/* ═══════════════════════════════════════════════════════
+   DEMO 2 — QUERY LAB
+═══════════════════════════════════════════════════════ */
+(function(){
+
+/* ── Saturn V synthetic dataset ── */
+var STAGES = [
+  {id:'s1', name:'S-IC (Stage 1)', num:1},
+  {id:'s2', name:'S-II (Stage 2)', num:2},
+  {id:'s3', name:'S-IVB (Stage 3)', num:3},
+];
+var ENGINES = [
+  {id:'e1', stage:'s1', name:'F-1 Engine', pos:1, supplier:'Rocketdyne'},
+  {id:'e2', stage:'s1', name:'F-1 Engine', pos:2, supplier:'Rocketdyne'},
+  {id:'e3', stage:'s1', name:'F-1 Engine', pos:3, supplier:'Rocketdyne'},
+  {id:'e4', stage:'s1', name:'F-1 Engine', pos:4, supplier:'Rocketdyne'},
+  {id:'e5', stage:'s1', name:'F-1 Engine', pos:5, supplier:'Rocketdyne'},
+  {id:'e6', stage:'s2', name:'J-2 Engine', pos:1, supplier:'Rocketdyne'},
+  {id:'e7', stage:'s2', name:'J-2 Engine', pos:2, supplier:'Rocketdyne'},
+  {id:'e8', stage:'s2', name:'J-2 Engine', pos:3, supplier:'Rocketdyne'},
+  {id:'e9', stage:'s2', name:'J-2 Engine', pos:4, supplier:'Rocketdyne'},
+  {id:'e10',stage:'s2', name:'J-2 Engine', pos:5, supplier:'Rocketdyne'},
+  {id:'e11',stage:'s3', name:'J-2 Engine', pos:1, supplier:'Rocketdyne'},
+];
+var ASSEMBLIES = [
+  {id:'a1',  engine:'e1', name:'Thrust Chamber'},
+  {id:'a2',  engine:'e1', name:'Turbopump Assembly'},
+  {id:'a3',  engine:'e1', name:'Gas Generator'},
+  {id:'a4',  engine:'e2', name:'Thrust Chamber'},
+  {id:'a5',  engine:'e2', name:'Turbopump Assembly'},
+  {id:'a6',  engine:'e3', name:'Thrust Chamber'},
+  {id:'a7',  engine:'e3', name:'Turbopump Assembly'},
+];
+var PARTS = [
+  {pn:'PN-4521', name:'Hex Bolt M12',        supplier:'Standard Industries', weight:48},
+  {pn:'PN-1102', name:'High-Temp Seal',       supplier:'Parker Hannifin',    weight:12},
+  {pn:'PN-3301', name:'Nozzle Extension',     supplier:'Rocketdyne',         weight:8400},
+  {pn:'PN-2205', name:'Angular Contact Bearing',supplier:'Timken',           weight:220},
+  {pn:'PN-5501', name:'Centrifugal Impeller', supplier:'Rocketdyne',         weight:3100},
+  {pn:'PN-6601', name:'Oxidizer Control Valve',supplier:'Parker Hannifin',   weight:890},
+];
+// asm_parts: assembly_id, part_number, qty
+var ASM_PARTS = [
+  {asm:'a1', pn:'PN-4521', qty:24}, {asm:'a1', pn:'PN-1102', qty:8}, {asm:'a1', pn:'PN-3301', qty:1},
+  {asm:'a2', pn:'PN-4521', qty:16}, {asm:'a2', pn:'PN-2205', qty:4}, {asm:'a2', pn:'PN-5501', qty:2},
+  {asm:'a3', pn:'PN-4521', qty:8},  {asm:'a3', pn:'PN-1102', qty:4}, {asm:'a3', pn:'PN-6601', qty:2},
+  {asm:'a4', pn:'PN-4521', qty:24}, {asm:'a4', pn:'PN-1102', qty:8}, {asm:'a4', pn:'PN-3301', qty:1},
+  {asm:'a5', pn:'PN-4521', qty:16}, {asm:'a5', pn:'PN-2205', qty:4}, {asm:'a5', pn:'PN-5501', qty:2},
+  {asm:'a6', pn:'PN-4521', qty:24}, {asm:'a6', pn:'PN-1102', qty:8}, {asm:'a6', pn:'PN-3301', qty:1},
+  {asm:'a7', pn:'PN-4521', qty:16}, {asm:'a7', pn:'PN-2205', qty:4}, {asm:'a7', pn:'PN-5501', qty:2},
+];
+
+/* ── Queries ── */
+var QUERIES = [
+  {
+    id:'q1', short:'Q1', title:'Path lookup: Stage 1, Engine 2, Turbopump',
+    english:'Find the name and supplier of all parts in the Turbopump Assembly of Engine 2, Stage 1.',
+    dli:
+`GU  ROCKET (ROCKET-ID = 'SV-001')
+ GNP STAGE  (STAGE-NUM = 1)
+ GNP ENGINE (POSITION  = 2)
+ GNP ASSEMBLY (NAME = 'Turbopump Assembly')
+GNP PART   *
+
+// Navigate path explicitly, top to bottom.
+// 4 hops to reach the target.`,
+    sql:
+`SELECT p.name, p.supplier, ap.quantity
+FROM   rockets r
+JOIN   stages    st ON st.rocket_id = r.id
+JOIN   engines   e  ON e.stage_id   = st.id
+JOIN   assemblies a  ON a.engine_id  = e.id
+JOIN   asm_parts ap  ON ap.assembly_id = a.id
+JOIN   parts     p   ON p.part_number  = ap.part_number
+WHERE  st.stage_num = 1
+  AND  e.position   = 2
+  AND  a.name = 'Turbopump Assembly';`,
+    runQuery: function() {
+      var e = ENGINES.find(function(x){return x.stage==='s1'&&x.pos===2;});
+      var a = ASSEMBLIES.find(function(x){return x.engine===e.id&&x.name==='Turbopump Assembly';});
+      var rows = ASM_PARTS.filter(function(x){return x.asm===a.id;}).map(function(x){
+        var p=PARTS.find(function(pt){return pt.pn===x.pn;});
+        return [p.name, p.supplier, x.qty];
+      });
+      return {cols:['Part Name','Supplier','Qty'], rows:rows};
+    },
+    verdict:'Both systems handle this equally well. <span class="good">IMS is arguably more readable here</span> — the DL/I path mirrors exactly how an engineer thinks about the problem. This is where IMS shines: predictable, known top-down traversals.'
+  },
+  {
+    id:'q2', short:'Q2', title:'Aggregate: total bolts in Stage 1',
+    english:'How many Bolt P/N-4521 are needed across all engines and assemblies in Stage 1?',
+    dli:
+`// No native aggregation in DL/I.
+// Must loop in application code:
+total = 0
+GU  ROCKET (ROCKET-ID = 'SV-001')
+GNP STAGE  (STAGE-NUM = 1)
+LOOP:
+  GNP ENGINE  *        // get each engine
+  LOOP:
+    GNP ASSEMBLY *     // get each assembly
+    LOOP:
+      GNP PART (PART-NUM = 'PN-4521')
+      total += PART.QTY
+    END LOOP
+  END LOOP
+END LOOP
+RETURN total`,
+    sql:
+`SELECT SUM(ap.quantity) AS total_bolts
+FROM   stages    st
+JOIN   engines   e  ON e.stage_id    = st.id
+JOIN   assemblies a  ON a.engine_id   = e.id
+JOIN   asm_parts  ap ON ap.assembly_id = a.id
+WHERE  st.stage_num = 1
+  AND  ap.part_number = 'PN-4521';`,
+    runQuery: function() {
+      var s1engines = ENGINES.filter(function(e){return e.stage==='s1';}).map(function(e){return e.id;});
+      var asms = ASSEMBLIES.filter(function(a){return s1engines.indexOf(a.engine)>=0;}).map(function(a){return a.id;});
+      var total = ASM_PARTS.filter(function(x){return asms.indexOf(x.asm)>=0&&x.pn==='PN-4521';}).reduce(function(s,x){return s+x.qty;},0);
+      return {cols:['Total Bolt PN-4521 (Stage 1)'], rows:[[total]]};
+    },
+    verdict:'<span class="bad">IMS has no aggregate functions.</span> DL/I requires looping through every engine → every assembly → every part in application code. SQL answers this in a single declarative statement. This gap grows dramatically as the dataset grows.'
+  },
+  {
+    id:'q3', short:'Q3', title:'Bottom-up: which assemblies use Bolt P/N-4521?',
+    english:'Find the name of every assembly that contains Bolt P/N-4521, and how many bolts it uses.',
+    dli:
+`// IMS is top-down only. There is no
+// "start from a PART and find its parents."
+// Must scan the ENTIRE tree:
+
+GU  ROCKET (ROCKET-ID = 'SV-001')
+LOOP over STAGE:
+  LOOP over ENGINE:
+    LOOP over ASSEMBLY:
+      GNP PART (PART-NUM = 'PN-4521')
+      IF found: PRINT ASSEMBLY.NAME, PART.QTY
+    END LOOP
+  END LOOP
+END LOOP
+
+// O(n) full tree traversal for every lookup.`,
+    sql:
+`SELECT a.name        AS assembly,
+       ap.quantity   AS bolts_needed
+FROM   asm_parts ap
+JOIN   assemblies a ON a.id = ap.assembly_id
+WHERE  ap.part_number = 'PN-4521'
+ORDER  BY a.name;`,
+    runQuery: function() {
+      var rows = ASM_PARTS.filter(function(x){return x.pn==='PN-4521';}).map(function(x){
+        var a=ASSEMBLIES.find(function(aa){return aa.id===x.asm;});
+        return [a.name, x.qty];
+      });
+      return {cols:['Assembly','Bolts Needed'], rows:rows};
+    },
+    verdict:'<span class="bad">This is IMS\'s hardest query type.</span> Navigation is one-directional: top → down. A bottom-up lookup (part → assembly) requires scanning every branch of the tree. SQL solves it in two lines. This asymmetry motivated Codd\'s relational model — data should be queryable from any direction.'
+  },
+  {
+    id:'q4', short:'Q4', title:'Cross-entity: all parts from Parker Hannifin',
+    english:'List every part supplied by Parker Hannifin, across the entire Saturn V.',
+    dli:
+`// Supplier lives on the PART segment.
+// To find ALL parts from one supplier,
+// must visit EVERY PART segment in the tree.
+
+GU  ROCKET (ROCKET-ID = 'SV-001')
+LOOP over STAGE → ENGINE → ASSEMBLY:
+  GNP PART (SUPPLIER = 'Parker Hannifin')
+  PRINT PART.NAME, PART.PART-NUM, PART.QTY
+
+// In IMS: supplier data CANNOT be in a
+// separate table. It is duplicated on every
+// PART segment that uses it.`,
+    sql:
+`SELECT DISTINCT p.part_number,
+                p.name,
+                p.supplier
+FROM   parts p
+WHERE  p.supplier = 'Parker Hannifin';
+
+-- Supplier stored ONCE in parts table.
+-- No duplication. No full-tree scan.`,
+    runQuery: function() {
+      var rows = PARTS.filter(function(p){return p.supplier==='Parker Hannifin';}).map(function(p){return [p.pn, p.name, p.supplier];});
+      return {cols:['Part #','Name','Supplier'], rows:rows};
+    },
+    verdict:'<span class="bad">IMS cannot join across unrelated segments.</span> Supplier information must be stored redundantly on every PART segment. The relational model stores supplier data once in a separate table and joins on demand. This is the difference that drove the creation of SQL.'
+  },
+  {
+    id:'q5', short:'Q5', title:'Inventory: total part count for Stage 2',
+    english:'What is the total number of individual parts (all types, all quantities) required for Stage 2?',
+    dli:
+`total = 0
+GU  ROCKET (ROCKET-ID = 'SV-001')
+GNP STAGE  (STAGE-NUM = 2)
+LOOP over ENGINE → ASSEMBLY → PART:
+  total += PART.QTY
+END LOOP
+RETURN total
+
+// 5 nested engines × 3 assemblies each
+// × N parts each = many segment reads.
+// Application must manage the loop logic.`,
+    sql:
+`SELECT SUM(ap.quantity) AS total_parts
+FROM   stages     st
+JOIN   engines    e   ON e.stage_id    = st.id
+JOIN   assemblies a   ON a.engine_id   = e.id
+JOIN   asm_parts  ap  ON ap.assembly_id = a.id
+WHERE  st.stage_num = 2;`,
+    runQuery: function() {
+      var s2eng = ENGINES.filter(function(e){return e.stage==='s2';}).map(function(e){return e.id;});
+      var asms  = ASSEMBLIES.filter(function(a){return s2eng.indexOf(a.engine)>=0;}).map(function(a){return a.id;});
+      var total = ASM_PARTS.filter(function(x){return asms.indexOf(x.asm)>=0;}).reduce(function(s,x){return s+x.qty;},0);
+      return {cols:['Total Parts (Stage 2)'], rows:[[total]]};
+    },
+    verdict:'Both systems require traversing the full Stage 2 subtree. <span class="good">SQL expresses this more concisely</span> and the database engine can optimize the join order. IMS requires the application to manage the nested loops manually — pushing business logic into the client code rather than the database.'
+  }
+];
+
+/* ── Schema toggle ── */
+window.qlShowSchema = function(mode) {
+  document.getElementById('schemaPanelIMS').classList.toggle('visible', mode==='ims');
+  document.getElementById('schemaPanelSQL').classList.toggle('visible', mode==='sql');
+  document.getElementById('schIMS').classList.toggle('active', mode==='ims');
+  document.getElementById('schSQL').classList.toggle('active', mode==='sql');
+};
+
+/* ── Build query list ── */
+var qList = document.getElementById('qlQueryList');
+QUERIES.forEach(function(q, i){
+  var b = document.createElement('button');
+  b.className = 'q-btn';
+  b.innerHTML = '<span class="q-num">'+q.short+'</span>'+q.title;
+  b.onclick = function(){ qlSelectQuery(i); };
+  b.id = 'qbtn'+i;
+  qList.appendChild(b);
+});
+
+function qlSelectQuery(i) {
+  document.querySelectorAll('.q-btn').forEach(function(b,j){ b.classList.toggle('active', j===i); });
+  var q = QUERIES[i];
+  var res = q.runQuery();
+  var rowsHtml = res.rows.map(function(r){
+    return r.join('  |  ');
+  }).join('\n');
+  var colsHdr = res.cols.join('  |  ');
+  var sep = res.cols.map(function(c){return '─'.repeat(c.length+2);}).join('┼');
+
+  document.getElementById('qlDetail').innerHTML =
+    '<div class="q-english"><strong>Question:</strong> '+q.english+'</div>'+
+    '<div class="q-code-pair">'+
+      '<div class="q-code-block">'+
+        '<div class="q-code-hdr"><span>⚙</span><span class="lang-ims">DL/I — IMS Path Navigation</span></div>'+
+        '<div class="q-code-body">'+escHtml(q.dli)+'</div>'+
+      '</div>'+
+      '<div class="q-code-block">'+
+        '<div class="q-code-hdr"><span>🔷</span><span class="lang-sql">SQL — Relational</span></div>'+
+        '<div class="q-code-body">'+escHtml(q.sql)+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="q-results">'+
+      '<div class="q-results-hdr">▶ Results — Saturn V Dataset</div>'+
+      '<div class="q-results-body">'+escHtml(colsHdr)+'\n'+escHtml(sep)+'\n'+escHtml(rowsHtml)+'</div>'+
+    '</div>'+
+    '<div class="q-verdict">'+q.verdict+'</div>';
+}
+
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+})();
+</script>
+</body>
+</html>
