@@ -89,7 +89,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 /* Main demo grid */
 .main-demo-grid { display: grid; grid-template-columns: 1fr 180px; }
 .scatter-panel { overflow: hidden; }
-.scatter-svg { display: block; width: 100%; cursor: default; }
+.scatter-svg { display: block; width: 100%; cursor: pointer; }
 
 /* Stats panel */
 .stats-panel { padding: 18px; border-left: 1px solid var(--border); display: flex; flex-direction: column; gap: 11px; }
@@ -168,7 +168,7 @@ a.tl:hover { border-bottom-color: var(--sky); color: #7dd3fc; }
 
 /* ── Bottom nav ── */
 .lesson-nav { display: flex; justify-content: space-between; margin-top: 68px; padding-top: 32px; border-top: 1px solid var(--border); }
-.nav-btn { display: flex; align-items: center; gap: 16px; padding: 14px 22px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; transition: all .15s; cursor: default; }
+.nav-btn { text-decoration:none; color:inherit; display: flex; align-items: center; gap: 16px; padding: 14px 22px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; transition: all .15s; cursor: pointer; }
 .nav-btn.live:hover { border-color: var(--sky); box-shadow: 0 0 16px var(--sky-glow); }
 .nav-lbl   { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
 .nav-title { font-size: 15px; font-weight: 500; color: #e2e8f0; margin-top: 3px; }
@@ -460,20 +460,20 @@ a.tl:hover { border-bottom-color: var(--sky); color: #7dd3fc; }
 
   <!-- Bottom Nav -->
   <nav class="lesson-nav">
-    <div class="nav-btn live">
+    <a class="nav-btn live" href="era1_lesson1_perceptron.html">
       <span class="nav-arrow">←</span>
       <div>
         <div class="nav-lbl">← Previous</div>
         <div class="nav-title">Era 1, Lesson 1 — The Perceptron</div>
       </div>
-    </div>
-    <div class="nav-btn live">
+    </a>
+    <a class="nav-btn live" href="era1_lesson3_normalization.html">
       <div>
         <div class="nav-lbl">Next Lesson →</div>
         <div class="nav-title">Era 1, Lesson 3 — Scaling, Normalization &amp; Quantization</div>
       </div>
       <span class="nav-arrow">→</span>
-    </div>
+    </a>
   </nav>
 
 </div><!-- wrap -->

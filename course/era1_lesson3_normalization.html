@@ -112,7 +112,7 @@ a.tl:hover { color:#34d399;border-bottom-color:var(--em); }
 
 /* ── Bottom nav ── */
 .lesson-nav { display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border); }
-.nav-btn { display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s; }
+.nav-btn { text-decoration:none; color:inherit; display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s; }
 .nav-btn:hover { border-color:var(--em);box-shadow:0 0 16px var(--em-glow); }
 .nav-lbl   { font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase; }
 .nav-title { font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px; }
@@ -595,14 +595,14 @@ input[type=range].qt-slider::-webkit-slider-thumb { -webkit-appearance:none;widt
 
   <!-- Bottom Nav -->
   <nav class="lesson-nav">
-    <div class="nav-btn">
+    <a class="nav-btn" href="era1_lesson2_linreg.html">
       <span class="nav-arrow">←</span>
       <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 1, Lesson 2 — Linear Regression</div></div>
-    </div>
-    <div class="nav-btn">
+    </a>
+    <a class="nav-btn" href="era1_lesson4_eliza.html">
       <div><div class="nav-lbl">Next Lesson →</div><div class="nav-title">Era 1, Lesson 4 — ELIZA &amp; Pattern Matching</div></div>
       <span class="nav-arrow">→</span>
-    </div>
+    </a>
   </nav>
 
 </div><!-- wrap -->
