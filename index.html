@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pauljchang — Published Work</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:      #0d1117;
+  --surface: #161b27;
+  --border:  #1e2d40;
+  --muted:   #64748b;
+  --muted2:  #334155;
+  --amber:   #f59e0b;
+  --font:    'Outfit', sans-serif;
+  --mono:    'Space Mono', monospace;
+  --disp:    'Lora', serif;
+}
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: #e2e8f0;
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.7;
+  display: flex;
+  flex-direction: column;
+}
+.top-stripe {
+  height: 3px;
+  background: linear-gradient(to right, #f59e0b, #f97316, #a78bfa, #38bdf8, #10b981, #f43f5e);
+}
+.wrap {
+  flex: 1;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 80px 32px 60px;
+  width: 100%;
+}
+.site-header { margin-bottom: 64px; }
+.handle {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.handle::before {
+  content: '';
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+}
+.site-header h1 {
+  font-family: var(--disp);
+  font-size: clamp(30px, 5vw, 46px);
+  font-weight: 600;
+  color: #f1f5f9;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+  margin-bottom: 16px;
+}
+.site-header p {
+  font-size: 16px;
+  color: #94a3b8;
+  max-width: 520px;
+  line-height: 1.75;
+}
+.section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  margin-bottom: 16px;
+}
+.projects { display: flex; flex-direction: column; gap: 14px; }
+.project-card {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color .15s, box-shadow .15s;
+  background: var(--surface);
+}
+.project-card:hover {
+  border-color: var(--amber);
+  box-shadow: 0 0 24px rgba(245,158,11,.1);
+}
+.project-accent { width: 4px; flex-shrink: 0; }
+.project-body { flex: 1; padding: 20px 22px; }
+.project-type {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: 6px;
+}
+.project-title {
+  font-family: var(--disp);
+  font-size: 20px;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.project-desc { font-size: 14px; color: #94a3b8; line-height: 1.65; }
+.project-arrow {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  font-size: 20px;
+  color: var(--amber);
+  opacity: 0;
+  transition: opacity .15s, transform .15s;
+  flex-shrink: 0;
+}
+.project-card:hover .project-arrow { opacity: 1; transform: translateX(3px); }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 32px;
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted2);
+}
+footer a { color: var(--muted); text-decoration: none; }
+footer a:hover { color: var(--amber); }
+@media (max-width: 500px) {
+  .wrap { padding: 48px 20px 40px; }
+  footer { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-stripe"></div>
+
+<div class="wrap">
+  <header class="site-header">
+    <div class="handle">pauljchang &middot; github.io</div>
+    <h1>Published Work</h1>
+    <p>
+      A public home for projects and writing by <strong style="color:#e2e8f0">pauljchang</strong> &mdash;
+      interactive experiments, educational resources, and other things
+      worth putting somewhere permanent on the internet.
+    </p>
+  </header>
+
+  <div class="section-label">Projects</div>
+
+  <div class="projects">
+    <a class="project-card" href="course/evolution-of-intelligence.html">
+      <div class="project-accent" style="background:linear-gradient(to bottom,#f59e0b,#10b981)"></div>
+      <div class="project-body">
+        <div class="project-type">Interactive Course &nbsp;&middot;&nbsp; 6 Eras &middot; 48 Lessons</div>
+        <div class="project-title">Evolution of Intelligence</div>
+        <div class="project-desc">
+          A self-paced, browser-native journey through the history of AI and machine learning &mdash;
+          from the first mathematical neuron (1958) to autonomous agents and model compression.
+          Every lesson is a live, interactive web page. No installs, no accounts.
+        </div>
+      </div>
+      <div class="project-arrow">&rarr;</div>
+    </a>
+  </div>
+</div>
+
+<footer>
+  <span>pauljchang.github.io</span>
+  <span><a href="https://github.com/pauljchang" target="_blank">github.com/pauljchang</a></span>
+</footer>
+
+</body>
+</html>
