@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 2, Lesson 2 — Prolog &amp; Lisp | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--surface:#161b27;--s2:#1a2035;--border:#1e2d40;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#334155;
+  --ac:#a78bfa;--ac-dim:rgba(167,139,250,.11);--ac-glow:rgba(167,139,250,.28);
+  --green:#4ade80;--red:#f87171;--amber:#f59e0b;--sky:#38bdf8;
+  --prolog:#38bdf8;--lisp:#f59e0b;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;--disp:'Lora',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+.course-nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.era-badge{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em;}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 100px;}
+.hero{padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px;}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.week-badge{background:var(--ac);color:#120a2e;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em;}
+.hero h1{font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px;}
+.hero-sub{font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px;}
+.hero-timeline{display:flex;gap:36px;flex-wrap:wrap;}
+.tl-item{display:flex;flex-direction:column;gap:3px;}
+.tl-year{font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.1em;}
+.tl-label{font-size:13px;color:var(--muted);}
+.section{margin-bottom:68px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px;}
+.sec-title{font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.obj-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;}
+.obj-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.obj-list li strong{color:#f1f5f9;}
+.prose p{font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82;}
+.prose p:last-child{margin-bottom:0;}
+.prose p strong{color:#e2e8f0;}
+.prose code{font-family:var(--mono);font-size:12px;background:#0a0d14;padding:2px 6px;border-radius:3px;border:1px solid var(--border);color:#c4b5fd;}
+.pullquote{background:linear-gradient(135deg,rgba(167,139,250,.07),rgba(167,139,250,.02));border:1px solid rgba(167,139,250,.2);border-radius:12px;padding:22px 26px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:17px;font-style:italic;color:#c4b5fd;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+.lang-compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:24px 0;}
+.lang-card{border-radius:10px;padding:18px 20px;}
+.lang-card.prolog{background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.25);}
+.lang-card.lisp{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);}
+.lang-card h4{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+.lang-card.prolog h4{color:var(--prolog);}
+.lang-card.lisp h4{color:var(--lisp);}
+.lang-card p{font-size:13px;color:#94a3b8;line-height:1.65;margin-bottom:8px;}
+.lang-card p:last-child{margin-bottom:0;}
+.lang-card code{font-family:var(--mono);font-size:11px;color:var(--ac);}
+/* Demo shared */
+.demo-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.demo-topbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.demo-tag{font-family:var(--mono);font-size:11px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase;}
+.demo-hint{font-family:var(--mono);font-size:10px;color:var(--muted2);}
+.sc-tabs{display:flex;gap:6px;padding:12px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.sc-tab{font-family:var(--mono);font-size:10px;padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;}
+.sc-tab:hover{border-color:var(--ac);color:var(--ac);}
+.sc-tab.active{background:var(--ac-dim);border-color:rgba(167,139,250,.4);color:#c4b5fd;}
+.ctrl-btn{font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ctrl-btn:hover{border-color:var(--ac);color:var(--ac);}
+.ctrl-btn.go{border-color:rgba(74,222,128,.3);color:var(--green);}
+.ctrl-btn.go:hover{background:rgba(74,222,128,.08);}
+.ctrl-btn.active{background:var(--ac-dim);border-color:rgba(167,139,250,.4);color:#c4b5fd;}
+/* Demo 1 — Prolog Console */
+.d1-body{display:grid;grid-template-columns:1fr 1fr;min-height:380px;}
+.d1-left{border-right:1px solid var(--border);display:flex;flex-direction:column;}
+.d1-kb-head{padding:8px 14px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;display:flex;justify-content:space-between;align-items:center;}
+.d1-kb{width:100%;flex:1;background:#0a0d14;border:none;outline:none;resize:none;font-family:var(--mono);font-size:11px;color:#94a3b8;padding:12px 14px;line-height:1.85;}
+.d1-right{display:flex;flex-direction:column;}
+.d1-query-row{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;}
+.d1-query-row input{flex:1;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:6px 10px;font-family:var(--mono);font-size:11px;color:#94a3b8;outline:none;}
+.d1-query-row input:focus{border-color:var(--ac);}
+.d1-query-row input::placeholder{color:var(--muted2);}
+.d1-results{flex:1;overflow-y:auto;padding:10px 14px;}
+.d1-solution{padding:6px 10px;border-radius:5px;background:#0a0d14;border:1px solid var(--border);margin-bottom:4px;font-family:var(--mono);font-size:11px;color:#94a3b8;line-height:1.6;}
+.d1-solution.success{border-color:rgba(74,222,128,.3);color:var(--green);}
+.d1-solution.fail{border-color:rgba(248,113,113,.3);color:var(--red);}
+.d1-solution.error{border-color:rgba(245,158,11,.3);color:var(--amber);}
+.d1-trace{border-top:1px solid var(--border);}
+.d1-trace-head{padding:7px 14px;font-family:var(--mono);font-size:9px;color:var(--muted2);cursor:pointer;display:flex;justify-content:space-between;user-select:none;}
+.d1-trace-head:hover{background:var(--s2);}
+.d1-trace-body{display:none;padding:10px 14px;max-height:140px;overflow-y:auto;background:#0a0d14;}
+.d1-trace-step{font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px;line-height:1.5;}
+.d1-trace-step .ts-goal{color:#a78bfa;}.d1-trace-step .ts-rule{color:#64748b;}
+.d1-sugg{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.sugg-lbl{font-family:var(--mono);font-size:9px;color:var(--muted2);white-space:nowrap;}
+.sugg-btn{font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;}
+.sugg-btn:hover{border-color:var(--ac);color:var(--ac);}
+/* Demo 2 — Unification */
+.d2-body{padding:18px 20px;display:flex;flex-direction:column;gap:14px;}
+.d2-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.d2-term-input{flex:1;min-width:140px;background:#0a0d14;border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-family:var(--mono);font-size:13px;color:#94a3b8;outline:none;transition:border-color .15s;}
+.d2-term-input:focus{border-color:var(--ac);}
+.d2-unify-sym{font-family:var(--mono);font-size:12px;color:var(--muted);}
+.d2-result{border-radius:8px;padding:12px 16px;font-family:var(--mono);font-size:11px;line-height:1.7;min-height:48px;}
+.d2-result.unified{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.3);color:var(--green);}
+.d2-result.failed{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.3);color:var(--red);}
+.d2-result.empty{background:#0a0d14;border:1px solid var(--border);color:var(--muted2);}
+.d2-presets{display:flex;gap:6px;flex-wrap:wrap;}
+.d2-preset-btn{font-family:var(--mono);font-size:9px;padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;}
+.d2-preset-btn:hover{border-color:var(--ac);color:var(--ac);}
+/* Demo 3 — Prolog vs Lisp */
+.d3-cols{display:grid;grid-template-columns:1fr 1fr;}
+.d3-col{display:flex;flex-direction:column;}
+.d3-col-head{padding:10px 16px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;}
+.d3-col.prolog .d3-col-head{color:var(--prolog);background:rgba(56,189,248,.04);}
+.d3-col.lisp .d3-col-head{color:var(--lisp);background:rgba(245,158,11,.04);border-left:1px solid var(--border);}
+.d3-code{padding:12px 14px;background:#0a0d14;font-family:var(--mono);font-size:10px;line-height:1.8;color:#94a3b8;min-height:180px;border-bottom:1px solid var(--border);white-space:pre;}
+.d3-col.lisp .d3-code{border-left:1px solid var(--border);}
+.d3-input-row{padding:10px 14px;display:flex;gap:8px;align-items:center;border-bottom:1px solid var(--border);}
+.d3-col.lisp .d3-input-row{border-left:1px solid var(--border);}
+.d3-input-row input{flex:1;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:6px 10px;font-family:var(--mono);font-size:11px;color:#94a3b8;outline:none;}
+.d3-input-row input:focus{border-color:var(--ac);}
+.d3-out{padding:10px 14px;min-height:70px;font-family:var(--mono);font-size:11px;color:#94a3b8;line-height:1.7;}
+.d3-col.lisp .d3-out{border-left:1px solid var(--border);}
+.d3-sol{color:var(--green);margin-bottom:2px;}
+.d3-fail{color:var(--red);}
+.d3-lisp-val{color:var(--amber);}
+.d3-insight{padding:14px 18px;border-top:1px solid var(--border);background:var(--ac-dim);font-size:13px;color:#c4b5fd;line-height:1.7;}
+.d3-insight strong{color:#e2e8f0;}
+/* Syntax coloring for displayed code */
+.kw{color:#a78bfa;}.atom-c{color:#94a3b8;}.var-c{color:#38bdf8;}
+.cmt{color:#334155;font-style:italic;}
+.pred-c{color:#c4b5fd;}.paren-c{color:#64748b;}
+/* Exercises etc */
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.ex-head{padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border);}
+.ex-num{font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(167,139,250,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.ex-title{font-weight:600;font-size:16px;color:#f1f5f9;}
+.ex-desc{font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6;}
+.ex-body{padding:20px;}
+.ex-body p{font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7;}
+.ex-body p:last-child{margin-bottom:0;}
+.ex-body p strong{color:#e2e8f0;}
+.disc-list{list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px;}
+.disc-list li{counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72;}
+.disc-list li::before{content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(167,139,250,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px;}
+.disc-list li strong{color:#e2e8f0;}
+.gloss-grid{display:flex;flex-direction:column;}
+.gloss-entry{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);padding:18px 0;}
+.gloss-entry:last-child{border-bottom:none;}
+.gloss-term{display:flex;flex-direction:column;gap:5px;padding-right:24px;}
+.gloss-term-name{font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700;}
+.gloss-abbr{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.gloss-def{font-size:14.5px;color:#94a3b8;line-height:1.72;}
+.gloss-def strong{color:#e2e8f0;}
+.gloss-code{font-family:var(--mono);font-size:11px;color:#c4b5fd;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:7px 12px;display:block;margin-top:8px;line-height:1.8;}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border);}
+.nav-btn{text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s;}
+.nav-btn:hover{border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow);}
+.nav-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.nav-title{font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px;}
+.nav-arrow{font-size:20px;color:var(--ac);}
+@media(max-width:680px){
+  .d1-body,.d3-cols,.lang-compare{grid-template-columns:1fr;}
+  .d1-left{border-right:none;border-bottom:1px solid var(--border);}
+  .d3-col.lisp .d3-code,.d3-col.lisp .d3-input-row,.d3-col.lisp .d3-out,.d3-col.lisp .d3-col-head{border-left:none;border-top:1px solid var(--border);}
+}
+</style>
+</head>
+<body>
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface);transition:color .15s" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 2: SYMBOLIC AI</span>
+  <span>›</span><span>Evolution of Intelligence</span><span>›</span>
+  <span style="color:#94a3b8">Era 2, Lesson 2 — Prolog &amp; Lisp</span>
+</nav>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 2 · LESSON 2</span>
+      <span>1958 – 1990</span><span>·</span>
+      <span>Logic Programming, Symbolic Computation &amp; the Languages of AI</span>
+    </div>
+    <h1>The Two Languages<br>of Symbolic AI</h1>
+    <p class="hero-sub">McCarthy invented Lisp in 1958 — the same year as the perceptron. Colmerauer invented Prolog in 1972 — the same year MYCIN was born. Two languages, two philosophies, one era.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1958</span><span class="tl-label">McCarthy invents Lisp — AI's first language</span></div>
+      <div class="tl-item"><span class="tl-year">1965</span><span class="tl-label">DENDRAL: first expert system — written in Lisp</span></div>
+      <div class="tl-item"><span class="tl-year">1972</span><span class="tl-label">Colmerauer &amp; Roussel: Prolog in Marseille</span></div>
+      <div class="tl-item"><span class="tl-year">1986</span><span class="tl-label">Fifth Generation Project collapses — AI winter II</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">🔶</span><div><strong>Explain</strong> why Lisp was the language of AI for thirty years — code as data, the REPL, symbolic expressions, and why these properties made it natural for building inference engines.</div></li>
+      <li><span class="obj-icon">🔷</span><div><strong>Write</strong> Prolog facts, rules, and queries — and understand how the resolver uses unification and backtracking to find all solutions automatically.</div></li>
+      <li><span class="obj-icon">🔗</span><div><strong>Demonstrate</strong> unification: the pattern-matching operation that is the mechanical heart of Prolog, logic programming, and ultimately the Attention mechanism in Transformers.</div></li>
+      <li><span class="obj-icon">⚖️</span><div><strong>Distinguish</strong> the declarative model (Prolog: say what is true, let the engine search) from the symbolic-procedural model (Lisp: say how to compute, but with symbols as data).</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">Code Is Data — and Logic Is Code</h2></div>
+    <div class="prose">
+      <p>John McCarthy invented Lisp in 1958 — the same year Rosenblatt announced the perceptron. The timing was not coincidental. McCarthy was building the theoretical foundations of AI at MIT, and he needed a language that could manipulate symbols the same way mathematics manipulates symbols. Numbers were well handled by existing languages. What McCarthy needed was a language in which <strong>a list of words, a logical rule, and a program were all the same kind of object</strong> — something you could store, pass around, and transform.</p>
+      <p>He got this from a radical design decision: in Lisp, code and data share the same syntax. A function call looks like <code>(classify robin)</code>. A list of facts looks like <code>(has-feathers robin)</code>. Both are s-expressions — nested lists of atoms. This property, called <strong>homoiconicity</strong>, means that a Lisp program can manipulate another Lisp program as easily as it manipulates a list of numbers. An inference engine, written in Lisp, is just a function that takes a list of rules and a list of facts and returns a list of conclusions. The engine and the knowledge it reasons about are made of the same material.</p>
+      <p>For thirty years, this made Lisp the language of AI. DENDRAL was Lisp. MACSYMA — the first computer algebra system — was Lisp. Most of the expert systems built at Stanford and MIT were Lisp. The language also pioneered features that are now ubiquitous: <strong>garbage collection</strong> (McCarthy invented it for Lisp), <strong>dynamic typing</strong>, <strong>closures</strong>, and the <strong>REPL</strong> — a read-eval-print loop that let researchers interact with their programs in real time, in 1958, when everyone else was submitting punch cards.</p>
+    </div>
+    <div class="pullquote">
+      <p>"Lisp has jokingly been called 'the most intelligent way to misuse a computer.' I think that description is a great compliment because it transmits the full flavor of liberation: it has assisted a number of our most gifted fellow humans in thinking previously impossible thoughts."</p>
+      <cite>&mdash; Edsger Dijkstra, 1972</cite>
+    </div>
+    <div class="prose">
+      <p>In 1972, a French computer scientist named <strong>Alain Colmerauer</strong>, working in Marseille with Philippe Roussel, took a different approach. Instead of giving programmers a general-purpose language and letting them build inference engines, why not make the language itself an inference engine? Colmerauer's insight was that a subset of first-order logic — specifically <strong>Horn clauses</strong> — could be used directly as a programming language. The interpreter would be a theorem prover. Writing a program meant stating logical facts and rules; running the program meant posing a query and letting the resolver find what was true.</p>
+      <p>The language was called <strong>Prolog</strong> — from <em>Programmation en Logique</em>. Its key mechanism was <strong>unification</strong>: a generalization of pattern matching in which variables can be bound to values by finding consistent substitutions that make two terms identical. Unification is to Prolog what addition is to arithmetic — the primitive operation from which everything else is built.</p>
+      <p>Prolog and Lisp represent genuinely different philosophies about what a programming language should be. Lisp says: here is a powerful notation for computation; build whatever you need. Prolog says: computation <em>is</em> proof; tell me what is true and I will find it. Both had profound influence on the development of AI — and both eventually ran into the same walls that stopped expert systems: the brittleness of closed-world reasoning, the difficulty of scaling to real-world knowledge, and the inability to handle uncertainty.</p>
+    </div>
+    <div class="lang-compare">
+      <div class="lang-card prolog">
+        <h4>🔷 Prolog — Logic Programming</h4>
+        <p><strong>Declarative:</strong> you state what is true. The engine figures out how to prove it. Variables range over the entire database — a query finds all solutions automatically.</p>
+        <p>Strength: recursive relations, search, constraint solving. Used in: computational linguistics, knowledge graphs, planning.</p>
+        <p><code>ancestor(X,Z) :- parent(X,Y), ancestor(Y,Z).</code></p>
+      </div>
+      <div class="lang-card lisp">
+        <h4>🔶 Lisp — Symbolic Computation</h4>
+        <p><strong>Symbolic-procedural:</strong> you say how to compute, but with symbols as first-class data. The inference engine is itself a Lisp program — code and knowledge are the same kind of object.</p>
+        <p>Strength: meta-programming, flexibility, expressiveness. Used in: AI research, theorem provers, Emacs, Clojure, Racket.</p>
+        <p><code>(defun classify (x) (cond ((bird? x) 'bird) ...))</code></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 DEMOS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+
+    <!-- DEMO 1: Prolog Console -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — The Prolog Console.</strong> A real Horn clause resolver runs in the browser. Edit the knowledge base, type a query, see all solutions. The trace shows each unification step.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Prolog — Horn Clause Resolver</span>
+        <span class="demo-hint">edit knowledge base · type query · press Enter or Run</span>
+      </div>
+      <div class="sc-tabs" id="d1Tabs"></div>
+      <div class="d1-body">
+        <div class="d1-left">
+          <div class="d1-kb-head">
+            <span>Knowledge Base</span>
+            <button class="ctrl-btn" style="padding:3px 8px;font-size:9px" onclick="d1ResetKB()">↺ Reset</button>
+          </div>
+          <textarea class="d1-kb" id="d1KB" spellcheck="false" rows="16"></textarea>
+        </div>
+        <div class="d1-right">
+          <div class="d1-query-row">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--ac);white-space:nowrap">?-</span>
+            <input type="text" id="d1Query" placeholder="ancestor(tom, X)." spellcheck="false" onkeydown="if(event.key==='Enter')d1Run()">
+            <button class="ctrl-btn go" onclick="d1Run()">▶ Run</button>
+          </div>
+          <div class="d1-results" id="d1Results">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);padding:14px 0;text-align:center">Type a query above and press Run</div>
+          </div>
+          <div class="d1-trace" id="d1TraceWrap">
+            <div class="d1-trace-head" onclick="d1ToggleTrace()">
+              <span>Resolution trace</span>
+              <span id="d1TraceArrow" style="font-size:9px;color:var(--muted2)">▼ expand</span>
+            </div>
+            <div class="d1-trace-body" id="d1TraceBody"></div>
+          </div>
+          <div class="d1-sugg">
+            <span class="sugg-lbl">Try:</span>
+            <div id="d1Suggs" style="display:flex;gap:5px;flex-wrap:wrap"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 2: Unification Explorer -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — Unification.</strong> Unification is the heart of Prolog — pattern-matching that binds variables. Enter two terms and see whether they unify and what bindings result.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Unification Explorer</span>
+        <span class="demo-hint">type two terms · click Unify · try the presets</span>
+      </div>
+      <div class="d2-body">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Presets</div>
+        <div class="d2-presets" id="d2Presets"></div>
+        <div class="d2-row" style="margin-top:6px">
+          <input class="d2-term-input" id="d2T1" placeholder="parent(X, bob)" spellcheck="false" oninput="d2Unify()">
+          <span class="d2-unify-sym">unify with</span>
+          <input class="d2-term-input" id="d2T2" placeholder="parent(tom, Y)" spellcheck="false" oninput="d2Unify()">
+        </div>
+        <div class="d2-result empty" id="d2Result">Enter two terms above to see if they unify.</div>
+      </div>
+    </div>
+
+    <!-- DEMO 3: Prolog vs Lisp -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 3 — Prolog vs Lisp.</strong> The same animal classifier, in both languages. Notice the key difference: Prolog can answer <em>who</em> is a flying bird; Lisp can only answer <em>is</em> this specific animal a flying bird.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Prolog vs Lisp — Animal Classifier</span>
+        <span class="demo-hint">try the existential query — who is a flying bird?</span>
+      </div>
+      <div class="d3-cols">
+        <div class="d3-col prolog">
+          <div class="d3-col-head">🔷 Prolog — Declarative</div>
+          <div class="d3-code" id="d3PrologCode"></div>
+          <div class="d3-input-row">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--prolog);white-space:nowrap">?-</span>
+            <input type="text" id="d3PQ" placeholder="flying_bird(X)." spellcheck="false" onkeydown="if(event.key==='Enter')d3RunProlog()">
+            <button class="ctrl-btn go" style="border-color:rgba(56,189,248,.3);color:var(--prolog)" onclick="d3RunProlog()">▶ Run</button>
+          </div>
+          <div class="d3-out" id="d3POut"><span style="color:var(--muted2)">Run a query →</span></div>
+        </div>
+        <div class="d3-col lisp">
+          <div class="d3-col-head">🔶 Lisp — Symbolic</div>
+          <div class="d3-code" id="d3LispCode"></div>
+          <div class="d3-input-row">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--lisp);white-space:nowrap">&gt;</span>
+            <input type="text" id="d3LQ" placeholder="(classify 'robin)" spellcheck="false" onkeydown="if(event.key==='Enter')d3RunLisp()">
+            <button class="ctrl-btn go" style="border-color:rgba(245,158,11,.3);color:var(--lisp)" onclick="d3RunLisp()">▶ Eval</button>
+          </div>
+          <div class="d3-out" id="d3LOut"><span style="color:var(--muted2)">Evaluate an expression →</span></div>
+        </div>
+      </div>
+      <div class="d3-insight" id="d3Insight">
+        <strong>Try this:</strong> In Prolog, run <code style="color:#c4b5fd">flying_bird(X).</code> — it finds all flying birds automatically. In Lisp, try <code style="color:#fbbf24">(classify 'X)</code> — it fails because X is not a known animal. Lisp requires you to know which animal you're asking about; Prolog searches the database for you. This is the fundamental difference between declarative and procedural reasoning.
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">🌳 Extend the Family Tree</div>
+        <div class="ex-desc">Add new facts and rules to the family tree knowledge base — and discover how Prolog reasoning extends automatically.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Load the Family Tree scenario. Add a fact: <strong><code>parent(jim, sue).</code></strong> Re-run <code>ancestor(tom, X)</code>. How many solutions now? The rule didn't change — only a fact was added, and Prolog automatically extended the transitive closure.</p>
+        <p>&rarr; Add a rule: <strong><code>cousin(X, Y) :- parent(P1, X), parent(P2, Y), sibling(P1, P2).</code></strong> What does <code>cousin(ann, X)</code> return? Trace the resolution steps to verify.</p>
+        <p><strong>Key insight:</strong> In Prolog, adding a fact doesn't require updating any function — the existing rules automatically incorporate it. Compare this to the Lisp classifier: if you add a new animal to the facts list, you only get correct results if the <code>classify</code> function's conditions happen to match. Rules and data are more cleanly separated in Prolog.</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">🔗 Unification by Hand</div>
+        <div class="ex-desc">Work through unification manually before checking with Demo 2.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Before using Demo 2, predict the result of each unification: (a) <code>foo</code> with <code>foo</code> (b) <code>X</code> with <code>tom</code> (c) <code>parent(X, bob)</code> with <code>parent(tom, Y)</code> (d) <code>f(X, X)</code> with <code>f(tom, bob)</code> (e) <code>ancestor(X, Z)</code> with <code>ancestor(tom, ann)</code>.</p>
+        <p>&rarr; For (d): <code>f(X, X)</code> with <code>f(tom, bob)</code>. X must be tom (from first arg) AND bob (from second arg). These contradict. Predict: FAILS. Verify with Demo 2.</p>
+        <p><strong>Key question:</strong> In the Prolog resolver, every time a rule is tried, its variables are renamed with a unique suffix (X becomes X_42, Y becomes Y_42, etc.). Why is this necessary? What would go wrong without renaming — try to construct a specific query that would fail incorrectly without it.</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">🔷🔶 The Existential Query</div>
+        <div class="ex-desc">Use Demo 3 to understand exactly why Prolog can answer "who?" while Lisp can only answer "is this one?"</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In the Prolog panel, run: <code>flying_bird(X).</code> You get all flying birds. Now run: <code>bird(X), \+(flying_bird(X)).</code> You get non-flying birds. Neither of these queries requires knowing the animals in advance — Prolog searches the entire database.</p>
+        <p>&rarr; In the Lisp panel, try: <code>(classify 'eagle)</code>, <code>(classify 'penguin)</code>, <code>(classify 'shark)</code>. Works for specific animals. Now try to answer "what are all flying birds?" in Lisp — you would need to write something like <code>(filter flying-bird? (all-known-animals))</code>. The list of all animals must exist somewhere explicitly.</p>
+        <p><strong>Key insight:</strong> Prolog's unification lets a variable <em>range over the database</em> — <code>X</code> in <code>flying_bird(X)</code> iterates over all possible bindings automatically. In Lisp, iteration requires an explicit data structure to iterate over. This is what "declarative" really means: in Prolog, you don't say how to search — you say what you want, and the engine searches for you.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>The Homoiconicity Advantage.</strong> Lisp's code-is-data property meant that an inference engine in Lisp could treat rules as data to be manipulated — modified, extended, even generated at runtime. Modern neural networks also blur the line between code and data: the weights are the "program." How does a neural network's forward pass resemble a Lisp interpreter evaluating a nested s-expression? Where does the analogy break down?</li>
+      <li><strong>The Closed World in Prolog.</strong> In Demo 1, try querying a predicate that doesn't exist in the knowledge base — for example, <code>likes(tom, X)</code> in the Family Tree. Prolog returns <code>false</code> — not "unknown." This is the closed-world assumption at the language level. Is it ever appropriate to treat "not in the database" as "false" rather than "unknown"? Give an example where it's safe and one where it's dangerous.</li>
+      <li><strong>Prolog's Influence on Modern AI.</strong> Unification — Prolog's core mechanism — reappears in surprising places. Pattern matching in Haskell and Rust, destructuring in Python and JavaScript, type inference in strongly-typed languages, and (at a deep level) the Attention mechanism in Transformers all involve finding consistent assignments of variables to values. Where else in your experience with technology have you encountered something that works like unification?</li>
+      <li><strong>The Fifth Generation Project.</strong> In 1982, Japan announced a ten-year, $400M project to build "fifth generation computers" using Prolog as the operating language — the idea was that logic programming would be as fundamental as assembly language, enabling AI at scale. The project ended in 1992 with few of its goals met. Given what you now know about Prolog's strengths and limitations, what specific properties of Prolog made this ambition plausible — and what would have prevented it from succeeding even with unlimited funding?</li>
+      <li><strong>Connection to Era 3.</strong> Both Prolog and Lisp assume complete, correct, and consistent knowledge. Real-world knowledge is incomplete (there are things we don't know), incorrect (some of what we "know" is wrong), and inconsistent (sources contradict each other). The statistical learning revolution in Era 3 was partly a response to this — probabilities can represent partial belief, tolerate noise, and handle contradiction. Can you think of a way to add probabilistic reasoning to Prolog? (Hint: look up "Probabilistic Logic Programming.")</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Horn Clause</span><span class="gloss-abbr">Prolog's logical unit</span></div>
+        <div class="gloss-def">A logical formula with at most one positive literal. Facts are Horn clauses with no body: <strong>parent(tom, bob).</strong> Rules are Horn clauses with conditions: <strong>ancestor(X,Z) :- parent(X,Y), ancestor(Y,Z).</strong> The entire Prolog language is built on Horn clauses — they are complete enough for many practical problems and efficient enough for a theorem prover to handle in real time.
+          <div class="gloss-code">head :- body1, body2, ..., bodyN.   % rule
+head.                                % fact (body is empty)</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Unification</span><span class="gloss-abbr">Prolog's pattern matching</span></div>
+        <div class="gloss-def">An operation that finds a substitution of variables for values that makes two terms identical. <strong>parent(X, bob)</strong> unifies with <strong>parent(tom, Y)</strong> via {X=tom, Y=bob}. Fails if no consistent substitution exists: <strong>f(X,X)</strong> cannot unify with <strong>f(tom,bob)</strong> because X cannot simultaneously be both tom and bob.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">SLD Resolution</span><span class="gloss-abbr">Prolog's proof strategy</span></div>
+        <div class="gloss-def">The algorithm Prolog uses to prove a query: pick the leftmost goal, find all clauses whose head unifies with it, substitute the clause body for the goal (with bindings applied), and recurse. When all goals are empty, a solution is found. <strong>Backtracking</strong> occurs when a branch fails — the resolver tries the next matching clause.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Homoiconicity</span><span class="gloss-abbr">Code = Data</span></div>
+        <div class="gloss-def">The property of a language in which programs and data share the same representation. In Lisp, both a list of facts and a function definition are s-expressions — nested lists of atoms. This means a Lisp program can generate, analyze, and modify other Lisp programs as easily as it processes any other data. Foundational to meta-programming and the design of inference engines in Lisp.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">S-Expression</span><span class="gloss-abbr">Lisp's syntax</span></div>
+        <div class="gloss-def">A parenthesized, prefix-notation term used in Lisp: <strong>(operator arg1 arg2 ...)</strong>. Function calls, data structures, control flow, and definitions all use the same syntax. <strong>(+ 1 2)</strong> is a function call. <strong>(1 2 3)</strong> is a list. <strong>(defun f (x) (* x x))</strong> is a function definition. The uniformity of s-expressions is what makes homoiconicity possible.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Negation as Failure</span><span class="gloss-abbr">\+ in Prolog</span></div>
+        <div class="gloss-def">The closed-world assumption made explicit: <strong>\+(Goal)</strong> succeeds if and only if Goal <em>cannot be proved</em> from the current database. Not the same as logical negation — it is an operational statement about the limits of the knowledge base. <strong>\+(flies(penguin))</strong> succeeds because there is no fact <code>flies(penguin)</code> in the database, not because we have proved penguins don't fly.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era2_lesson1_expert_systems.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 2, Lesson 1 — Expert Systems</div></div>
+    </a>
+    <div class="nav-btn" style="opacity:.35;cursor:default">
+      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 2, Lesson 3 — Data Cleaning</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+</div>
+<script>
+'use strict';
+/* ════════════════════════════════════════════════════
+   PROLOG ENGINE — Horn clause resolver
+   Handles: facts, rules, unification, backtracking,
+   negation-as-failure (\+), equality (=)
+════════════════════════════════════════════════════ */
+var _pVC = 0; // var counter for renaming
+function pA(v){return{t:'a',v:v};}  // atom
+function pV(n){return{t:'v',n:n};}  // variable
+function pC(f,a){return{t:'c',f:f,a:a};} // compound
+
+function pTok(src){
+  var r=[],i=0,c,j;
+  while(i<src.length){
+    c=src[i];
+    if(/\s/.test(c)){i++;continue;}
+    if(c==='%'){while(i<src.length&&src[i]!=='\n')i++;continue;}
+    if(c===':'&&src[i+1]==='-'){r.push(':-');i+=2;continue;}
+    if(c==='?'&&src[i+1]==='-'){r.push('?-');i+=2;continue;}
+    if(c==='\\'&&src[i+1]==='+'){r.push('\\+');i+=2;continue;}
+    if('(),.|'.indexOf(c)>=0){r.push(c);i++;continue;}
+    if(c==="'"){j=i+1;while(j<src.length&&src[j]!=="'")j++;r.push("'"+src.slice(i+1,j)+"'");i=j+1;continue;}
+    j=i;while(j<src.length&&/[a-zA-Z0-9_\-]/.test(src[j]))j++;
+    if(j>i){r.push(src.slice(i,j));i=j;continue;}
+    if(c==='='){r.push('=');i++;continue;}
+    i++;
+  }
+  return r;
+}
+
+var _pt,_pp;
+function _peek(){return _pt[_pp];}
+function _next(){return _pt[_pp++];}
+function _exp(t){var v=_next();if(v!==t)throw new Error('Expected '+JSON.stringify(t)+' got '+JSON.stringify(v));return v;}
+
+function _term(){
+  var t=_peek();
+  if(t===undefined)throw new Error('Unexpected end of input');
+  if(t==='\\+'){_next();return pC('\\+',[_term()]);}
+  _next();
+  // Variable: starts uppercase or _
+  if(/^[A-Z_]/.test(t)){
+    if(t==='_')return pV('_'+(++_pVC));
+    return pV(t);
+  }
+  // Quoted atom
+  if(t[0]==="'")return pA(t.slice(1,-1));
+  // Compound or atom
+  if(_peek()==='('){
+    _next();
+    var args=[];
+    if(_peek()!==')'){
+      args.push(_term());
+      while(_peek()===','){_next();args.push(_term());}
+    }
+    _exp(')');
+    return pC(t,args);
+  }
+  return pA(t);
+}
+
+function _termList(){
+  var ts=[_term()];
+  while(_peek()===','){_next();ts.push(_term());}
+  return ts;
+}
+
+function _clause(){
+  var head=_term();
+  if(_peek()===':-'){_next();var body=_termList();_exp('.');return{head:head,body:body};}
+  _exp('.');
+  return{head:head,body:[]};
+}
+
+function _query(){
+  _exp('?-');
+  var goals=_termList();
+  // consume optional dot
+  if(_peek()==='.')_next();
+  return goals;
+}
+
+function parseKB(src){
+  _pt=pTok(src);_pp=0;
+  var clauses=[],err=null;
+  while(_pp<_pt.length){
+    try{
+      if(_peek()==='?-')_query(); // skip queries in KB
+      else clauses.push(_clause());
+    }catch(e){err=e.message;break;}
+  }
+  return{clauses:clauses,error:err};
+}
+
+function parseGoals(src){
+  var s=src.trim();
+  if(s.startsWith('?-'))s=s.slice(2).trim();
+  if(!s.endsWith('.'))s+='.';
+  _pt=pTok(s);_pp=0;
+  return _termList();
+}
+
+function walk(term,sub){
+  while(term.t==='v'&&sub[term.n]!==undefined)term=sub[term.n];
+  return term;
+}
+
+function unify(t1,t2,sub){
+  t1=walk(t1,sub);t2=walk(t2,sub);
+  if(t1===t2)return sub;
+  if(t1.t==='a'&&t2.t==='a'&&t1.v===t2.v)return sub;
+  if(t1.t==='v'){if(t2.t==='v'&&t2.n===t1.n)return sub;return Object.assign({},sub,{[t1.n]:t2});}
+  if(t2.t==='v')return Object.assign({},sub,{[t2.n]:t1});
+  if(t1.t==='c'&&t2.t==='c'&&t1.f===t2.f&&t1.a.length===t2.a.length){
+    var s=sub;
+    for(var i=0;i<t1.a.length;i++){s=unify(t1.a[i],t2.a[i],s);if(s===null)return null;}
+    return s;
+  }
+  return null;
+}
+
+var _rID=0;
+function renameVars(clause){
+  var id=++_rID;
+  function r(term){
+    if(term.t==='v')return pV(term.n+'_'+id);
+    if(term.t==='c')return pC(term.f,term.a.map(r));
+    return term;
+  }
+  return{head:r(clause.head),body:clause.body.map(r)};
+}
+
+function applyS(term,sub){
+  term=walk(term,sub);
+  if(term.t==='v'||term.t==='a')return term;
+  return pC(term.f,term.a.map(function(a){return applyS(a,sub);}));
+}
+
+function tStr(term,sub){
+  if(sub)term=applyS(term,sub);
+  if(term.t==='a')return term.v;
+  if(term.t==='v')return term.n.replace(/_\d+$/,'');
+  if(term.t==='c'){
+    if(term.f==='\\+')return'\\+('+tStr(term.a[0])+')';
+    return term.f+'('+term.a.map(function(a){return tStr(a,sub);}).join(', ')+')';
+  }
+  return'?';
+}
+
+function solve(goals,db,sub,depth,sols,maxSol,trace){
+  if(sols.length>=maxSol||depth>100)return;
+  if(goals.length===0){sols.push({sub:sub,trace:trace.slice()});return;}
+  var goal=applyS(goals[0],sub),rest=goals.slice(1);
+  // Equality
+  if(goal.t==='c'&&goal.f==='='&&goal.a.length===2){
+    var s=unify(goal.a[0],goal.a[1],sub);
+    if(s!==null)solve(rest,db,s,depth+1,sols,maxSol,trace);
+    return;
+  }
+  // Negation as failure
+  if(goal.t==='c'&&goal.f==='\\+'&&goal.a.length===1){
+    var neg=[];solve([goal.a[0]],db,sub,depth+1,neg,1,[]);
+    if(neg.length===0)solve(rest,db,sub,depth+1,sols,maxSol,trace);
+    return;
+  }
+  var gs=tStr(goal);
+  for(var i=0;i<db.length;i++){
+    var cl=renameVars(db[i]);
+    var ns=unify(goal,cl.head,sub);
+    if(ns!==null){
+      var nt=trace.concat([{goal:gs,head:tStr(cl.head),rule:cl}]);
+      solve(cl.body.concat(rest),db,ns,depth+1,sols,maxSol,nt);
+    }
+  }
+}
+
+function prologQuery(queryStr,kbStr){
+  try{
+    var kb=parseKB(kbStr);
+    if(kb.error)return{ok:false,error:'KB parse error: '+kb.error};
+    var goals=parseGoals(queryStr);
+    // Collect query variable names
+    var qvars=[];
+    function cv(t){if(t.t==='v'&&qvars.indexOf(t.n)<0&&!t.n.startsWith('_'))qvars.push(t.n);if(t.t==='c')t.a.forEach(cv);}
+    goals.forEach(cv);
+    var sols=[];
+    solve(goals,kb.clauses,{},0,sols,10,[]);
+    return{
+      ok:true,
+      solutions:sols.map(function(s){
+        var b={};
+        qvars.forEach(function(v){var val=applyS(pV(v),s.sub);if(val.t!=='v')b[v]=tStr(val);});
+        return{bindings:b,trace:s.trace};
+      }),
+      qvars:qvars
+    };
+  }catch(e){return{ok:false,error:e.message};}
+}
+
+/* ════════════════════════════════════════════════════
+   LISP ENGINE — S-expression evaluator
+════════════════════════════════════════════════════ */
+function lTok(src){
+  var r=[],i=0,c,j;
+  while(i<src.length){
+    c=src[i];
+    if(/\s/.test(c)){i++;continue;}
+    if(c===';'){while(i<src.length&&src[i]!=='\n')i++;continue;}
+    if(c==='('||c===')'){r.push(c);i++;continue;}
+    if(c==="'"){r.push("'");i++;continue;}
+    j=i;while(j<src.length&&!/[\s()';\n]/.test(src[j]))j++;
+    if(j>i){r.push(src.slice(i,j));i=j;}else i++;
+  }
+  return r;
+}
+
+function lRead(toks,pos){
+  if(pos>=toks.length)return[null,pos];
+  var t=toks[pos];
+  if(t==="'"){var rr=lRead(toks,pos+1);return[['quote',rr[0]],rr[1]];}
+  if(t==='('){
+    var list=[],i=pos+1;
+    while(i<toks.length&&toks[i]!==')'){var item=lRead(toks,i);if(item[0]!==null)list.push(item[0]);i=item[1];}
+    return[list,i+1];
+  }
+  var n=parseFloat(t);
+  return[isNaN(n)||t===''?t:n,pos+1];
+}
+
+function lParseAll(src){
+  var toks=lTok(src),exprs=[],i=0;
+  while(i<toks.length){var r=lRead(toks,i);if(r[0]!==null)exprs.push(r[0]);i=r[1];}
+  return exprs;
+}
+
+function LEnv(parent){this.b={};this.p=parent;}
+LEnv.prototype.get=function(n){if(n in this.b)return this.b[n];if(this.p)return this.p.get(n);throw new Error('Unbound: '+n);};
+LEnv.prototype.set=function(n,v){this.b[n]=v;};
+
+function lEval(e,env){
+  if(e===null||e===undefined)return null;
+  if(typeof e==='number')return e;
+  if(typeof e==='boolean')return e;
+  if(typeof e==='string'){
+    if(e==='t'||e==='T')return true;
+    if(e==='nil'||e==='NIL'||e==='()')return null;
+    return env.get(e);
+  }
+  if(!Array.isArray(e)||e.length===0)return null;
+  var h=e[0];
+  if(h==='quote')return e[1];
+  if(h==='define'||h==='defvar'){var dv=lEval(e[2],env);env.set(e[1],dv);return undefined;}
+  if(h==='defun'){var fn={type:'fn',params:e[2],body:e[3],env:env,name:e[1]};env.set(e[1],fn);return undefined;}
+  if(h==='lambda')return{type:'fn',params:e[1],body:e[2],env:env};
+  if(h==='let'){var le=new LEnv(env);e[1].forEach(function(b){le.set(b[0],lEval(b[1],env));});return lEval(e[2],le);}
+  if(h==='cond'){for(var ci=1;ci<e.length;ci++){var ctest=e[ci][0];var cv=(ctest==='t'||ctest==='T'||ctest==='else')||lEval(ctest,env);if(cv)return lEval(e[ci][1],env);}return null;}
+  if(h==='if'){var ic=lEval(e[1],env);return ic?lEval(e[2],env):(e[3]?lEval(e[3],env):null);}
+  if(h==='and'){var la=true;for(var ai=1;ai<e.length;ai++){la=lEval(e[ai],env);if(!la)return null;}return la;}
+  if(h==='or'){for(var oi=1;oi<e.length;oi++){var ov=lEval(e[oi],env);if(ov)return ov;}return null;}
+  if(h==='not')return !lEval(e[1],env)?true:null;
+  if(h==='progn'){var pv=null;e.slice(1).forEach(function(x){pv=lEval(x,env);});return pv;}
+  var fn2=lEval(h,env);
+  var args=e.slice(1).map(function(a){return lEval(a,env);});
+  return lApply(fn2,args,env);
+}
+
+function lApply(fn,args){
+  if(typeof fn==='function')return fn.apply(null,args);
+  if(fn&&fn.type==='fn'){
+    var ce=new LEnv(fn.env);
+    fn.params.forEach(function(p,i){ce.set(p,args[i]);});
+    return lEval(fn.body,ce);
+  }
+  throw new Error('Not callable: '+lStr(fn));
+}
+
+function lStr(v){
+  if(v===null||v===undefined)return'NIL';
+  if(v===true)return'T';
+  if(v===false)return'NIL';
+  if(typeof v==='number')return String(v);
+  if(typeof v==='string')return v;
+  if(Array.isArray(v))return'('+v.map(lStr).join(' ')+')';
+  if(v&&v.type==='fn')return'#<function '+(v.name||'lambda')+'>';
+  return String(v);
+}
+
+function makeLispEnv(){
+  var env=new LEnv(null);
+  function def(n,f){env.set(n,f);}
+  def('car',function(l){return Array.isArray(l)?l[0]:null;});
+  def('cdr',function(l){return Array.isArray(l)?l.slice(1):null;});
+  def('cons',function(x,l){return Array.isArray(l)?[x].concat(l):[x];});
+  def('list',function(){return Array.from(arguments);});
+  def('null',function(x){return(!x||x===null||(Array.isArray(x)&&x.length===0))?true:null;});
+  def('not',function(x){return!x?true:null;});
+  def('equal',function(a,b){return JSON.stringify(a)===JSON.stringify(b)?true:null;});
+  def('eq',function(a,b){return a===b?true:null;});
+  def('atom',function(x){return!Array.isArray(x)?true:null;});
+  def('+',function(){var s=0;Array.from(arguments).forEach(function(x){s+=x;});return s;});
+  def('-',function(a,b){return b===undefined?-a:a-b;});
+  def('*',function(a,b){return a*b;});
+  def('<',function(a,b){return a<b?true:null;});
+  def('>',function(a,b){return a>b?true:null;});
+  def('=',function(a,b){return a===b?true:null;});
+  def('length',function(l){return Array.isArray(l)?l.length:0;});
+  def('append',function(a,b){return (Array.isArray(a)?a:[]).concat(Array.isArray(b)?b:[]);});
+  def('reverse',function(l){return Array.isArray(l)?l.slice().reverse():null;});
+  def('print',function(x){return x;}); // identity — we capture return value
+  def('member',function mem(x,l){
+    if(!l||!l.length)return null;
+    if(JSON.stringify(x)===JSON.stringify(l[0]))return l;
+    return mem(x,l.slice(1));
+  });
+  def('mapcar',function(fn,l){return(l||[]).map(function(x){return lApply(fn,[x]);});});
+  def('remove-if-not',function(fn,l){return(l||[]).filter(function(x){return lApply(fn,[x]);});});
+  def('format',function(){return null;}); // no-op
+  return env;
+}
+
+function lispEvalSrc(src,baseEnv){
+  try{
+    var exprs=lParseAll(src);
+    if(!exprs.length)return{ok:false,error:'No expression'};
+    var last=null;
+    exprs.forEach(function(e){last=lEval(e,baseEnv);});
+    return{ok:true,value:lStr(last)};
+  }catch(e){return{ok:false,error:e.message};}
+}
+
+/* ════════════════════════════════════════════════════
+   SCENARIOS
+════════════════════════════════════════════════════ */
+var SCENARIOS={
+  family:{
+    label:'🌳 Family Tree',
+    kb:
+`% Facts: parent/2
+parent(tom, bob).
+parent(tom, liz).
+parent(bob, ann).
+parent(bob, pat).
+parent(pat, jim).
+
+% Rules
+ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).
+
+sibling(X, Y) :-
+  parent(P, X),
+  parent(P, Y),
+  \\+(X = Y).`,
+    suggestions:[
+      'parent(tom, X).',
+      'ancestor(tom, X).',
+      'ancestor(X, jim).',
+      'sibling(ann, X).',
+      'ancestor(bob, X).',
+    ]
+  },
+  animals:{
+    label:'🐾 Animals',
+    kb:
+`% Facts
+has_feathers(robin).  flies(robin).
+has_feathers(eagle).  flies(eagle).
+has_feathers(penguin). lives_in_water(penguin).
+has_fur(tiger).  gives_milk(tiger).
+has_fur(cat).    gives_milk(cat).
+has_fins(salmon). cold_blooded(salmon).
+
+% Rules
+bird(X) :- has_feathers(X).
+flying_bird(X) :- bird(X), flies(X).
+penguin_type(X) :- bird(X), lives_in_water(X).
+mammal(X) :- has_fur(X), gives_milk(X).
+fish(X) :- has_fins(X), cold_blooded(X).
+non_flying_bird(X) :- bird(X), \\+(flies(X)).`,
+    suggestions:[
+      'bird(X).',
+      'flying_bird(X).',
+      'non_flying_bird(X).',
+      'mammal(X).',
+      'fish(X).',
+    ]
+  },
+  routes:{
+    label:'🗺️ Routes',
+    kb:
+`% European city connections (directed)
+connected(paris, london).
+connected(paris, madrid).
+connected(london, amsterdam).
+connected(amsterdam, berlin).
+connected(amsterdam, brussels).
+connected(berlin, warsaw).
+connected(madrid, lisbon).
+
+% Rules
+reachable(X, Y) :- connected(X, Y).
+reachable(X, Z) :-
+  connected(X, Y),
+  reachable(Y, Z).`,
+    suggestions:[
+      'reachable(paris, X).',
+      'reachable(london, X).',
+      'reachable(paris, warsaw).',
+      'connected(X, berlin).',
+      'reachable(paris, lisbon).',
+    ]
+  }
+};
+
+var D3_PROLOG_KB =
+`has_feathers(robin). flies(robin).
+has_feathers(eagle). flies(eagle).
+has_feathers(penguin). lives_in_water(penguin).
+has_fur(tiger). gives_milk(tiger).
+has_fur(cat).
+
+bird(X) :- has_feathers(X).
+flying_bird(X) :- bird(X), flies(X).
+penguin_type(X) :- bird(X), lives_in_water(X).
+mammal(X) :- has_fur(X), gives_milk(X).`;
+
+var D3_LISP_SRC =
+`(define facts
+  '((has-feathers robin) (flies robin)
+    (has-feathers eagle) (flies eagle)
+    (has-feathers penguin) (lives-in-water penguin)
+    (has-fur tiger) (gives-milk tiger)
+    (has-fur cat)))
+
+(defun has-fact (pred obj)
+  (member (list pred obj) facts))
+
+(defun bird? (x)
+  (has-fact 'has-feathers x))
+
+(defun flying-bird? (x)
+  (and (bird? x) (has-fact 'flies x)))
+
+(defun classify (x)
+  (cond ((and (bird? x) (has-fact 'lives-in-water x)) 'penguin)
+        ((flying-bird? x) 'flying-bird)
+        ((bird? x) 'bird)
+        ((and (has-fact 'has-fur x) (has-fact 'gives-milk x)) 'mammal)
+        (t 'unknown)))`;
+
+/* ════════════════════════════════════════════════════
+   DEMO 1 — PROLOG CONSOLE
+════════════════════════════════════════════════════ */
+(function(){
+  var currentSc='family';
+  var traceOpen=false;
+
+  function initScenario(){
+    var sc=SCENARIOS[currentSc];
+    document.getElementById('d1KB').value=sc.kb;
+    document.getElementById('d1Query').value='';
+    document.getElementById('d1Results').innerHTML='<div style="font-family:var(--mono);font-size:10px;color:var(--muted2);padding:14px 0;text-align:center">Type a query above and press Run</div>';
+    document.getElementById('d1TraceBody').innerHTML='';
+    // Suggestions
+    var suggs=document.getElementById('d1Suggs');
+    suggs.innerHTML=sc.suggestions.map(function(s){
+      return'<button class="sugg-btn" onclick="d1SetQuery(this)">'+s+'</button>';
+    }).join('');
+  }
+
+  window.d1SetQuery=function(btn){
+    document.getElementById('d1Query').value=btn.textContent;
+    d1Run();
+  };
+  window.d1ResetKB=function(){initScenario();};
+  window.d1ToggleTrace=function(){
+    traceOpen=!traceOpen;
+    document.getElementById('d1TraceBody').style.display=traceOpen?'block':'none';
+    document.getElementById('d1TraceArrow').textContent=traceOpen?'▲ hide':'▼ expand';
+  };
+
+  window.d1Run=function(){
+    var q=document.getElementById('d1Query').value.trim();
+    var kb=document.getElementById('d1KB').value;
+    if(!q)return;
+    var res=prologQuery(q,kb);
+    var out='';
+    var traceHtml='';
+    if(!res.ok){
+      out='<div class="d1-solution error">⚠ '+escH(res.error)+'</div>';
+    } else if(res.solutions.length===0){
+      out='<div class="d1-solution fail">false.</div>';
+    } else {
+      res.solutions.forEach(function(sol,i){
+        var binds=sol.bindings;
+        var keys=Object.keys(binds);
+        if(keys.length===0){
+          out+='<div class="d1-solution success">true.</div>';
+        } else {
+          out+='<div class="d1-solution success">';
+          out+=keys.map(function(k){return k+' = '+escH(binds[k]);}).join(',&nbsp; ');
+          out+='</div>';
+        }
+        // Trace
+        if(i===0){
+          sol.trace.forEach(function(step,si){
+            traceHtml+='<div class="d1-trace-step"><span class="ts-goal">'+escH(step.goal)+'</span> → <span class="ts-rule">match '+escH(step.head)+'</span></div>';
+          });
+        }
+      });
+      if(res.solutions.length>=10){
+        out+='<div class="d1-solution" style="color:var(--muted2)">(showing first 10 solutions)</div>';
+      }
+    }
+    document.getElementById('d1Results').innerHTML=out;
+    document.getElementById('d1TraceBody').innerHTML=traceHtml||'<div style="font-family:var(--mono);font-size:9px;color:var(--muted2)">No trace steps</div>';
+  };
+
+  function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+  // Build tabs
+  var tabs=document.getElementById('d1Tabs');
+  Object.keys(SCENARIOS).forEach(function(k,i){
+    var b=document.createElement('button');
+    b.className='sc-tab'+(i===0?' active':'');
+    b.textContent=SCENARIOS[k].label;
+    b.onclick=function(){
+      currentSc=k;
+      document.querySelectorAll('#d1Tabs .sc-tab').forEach(function(t,j){t.classList.toggle('active',j===i);});
+      initScenario();
+    };
+    tabs.appendChild(b);
+  });
+  initScenario();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 2 — UNIFICATION EXPLORER
+════════════════════════════════════════════════════ */
+(function(){
+  var PRESETS=[
+    {label:'atom = atom', t1:'foo', t2:'foo'},
+    {label:'X = tom', t1:'X', t2:'tom'},
+    {label:'compound', t1:'parent(X, bob)', t2:'parent(tom, Y)'},
+    {label:'fails: diff atoms', t1:'foo', t2:'bar'},
+    {label:'X=X conflict', t1:'f(X, X)', t2:'f(tom, bob)'},
+    {label:'nested', t1:'f(g(X), Y)', t2:'f(g(tom), bob)'},
+    {label:'ancestor rule', t1:'ancestor(X, Z)', t2:'ancestor(tom, ann)'},
+  ];
+
+  var presetDiv=document.getElementById('d2Presets');
+  PRESETS.forEach(function(p){
+    var b=document.createElement('button');
+    b.className='d2-preset-btn';b.textContent=p.label;
+    b.onclick=function(){
+      document.getElementById('d2T1').value=p.t1;
+      document.getElementById('d2T2').value=p.t2;
+      d2Unify();
+    };
+    presetDiv.appendChild(b);
+  });
+
+  window.d2Unify=function(){
+    var s1=document.getElementById('d2T1').value.trim();
+    var s2=document.getElementById('d2T2').value.trim();
+    var el=document.getElementById('d2Result');
+    if(!s1||!s2){el.className='d2-result empty';el.textContent='Enter two terms above.';return;}
+    try{
+      _pt=pTok(s1+'.');_pp=0;var t1=_term();
+      _pt=pTok(s2+'.');_pp=0;var t2=_term();
+      var result=unify(t1,t2,{});
+      if(result===null){
+        el.className='d2-result failed';
+        el.innerHTML='<strong>FAILS</strong> — no consistent substitution exists<br>'+
+          '<span style="opacity:.7">'+s1+' and '+s2+' cannot be made identical</span>';
+      } else {
+        var bindings=[];
+        Object.keys(result).forEach(function(k){
+          if(!k.includes('_')){// only show non-renamed vars
+            var val=applyS(pV(k),result);
+            if(val.t!=='v')bindings.push(k+' = '+tStr(val));
+          }
+        });
+        // Also check renamed vars from original names
+        function collectOrigVars(term){
+          var vars=[];
+          function walk2(t){if(t.t==='v'&&!t.n.startsWith('_'))vars.push(t.n);if(t.t==='c')t.a.forEach(walk2);}
+          walk2(term);return vars;
+        }
+        var v1=collectOrigVars(t1),v2=collectOrigVars(t2);
+        var allVars=v1.concat(v2.filter(function(v){return v1.indexOf(v)<0;}));
+        var realBindings=[];
+        allVars.forEach(function(v){
+          var val=applyS(pV(v),result);
+          if(val.t!=='v'||(val.t==='v'&&val.n!==v)){
+            realBindings.push(v+' = '+tStr(val,result));
+          }
+        });
+        el.className='d2-result unified';
+        if(realBindings.length===0){
+          el.innerHTML='<strong>UNIFIES</strong> — no variable bindings needed<br>Both terms are already identical';
+        } else {
+          el.innerHTML='<strong>UNIFIES</strong> — resulting bindings:<br>'+realBindings.map(function(b){return'<span style="color:#c4b5fd">'+b+'</span>';}).join('<br>');
+        }
+      }
+    }catch(e){
+      el.className='d2-result failed';
+      el.textContent='Parse error: '+e.message;
+    }
+  };
+  // Initialize
+  document.getElementById('d2T1').value='parent(X, bob)';
+  document.getElementById('d2T2').value='parent(tom, Y)';
+  d2Unify();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 3 — PROLOG vs LISP
+════════════════════════════════════════════════════ */
+(function(){
+  // Show the knowledge bases with basic syntax highlighting
+  function syntaxProlog(src){
+    return src.replace(/([a-z][a-zA-Z0-9_]*)\s*(?=\()/g,'<span class="pred-c">$1</span>')
+              .replace(/\b([A-Z][a-zA-Z0-9_]*)\b/g,'<span class="var-c">$1</span>')
+              .replace(/(:-)/g,'<span class="kw">$1</span>')
+              .replace(/(%.+)/g,'<span class="cmt">$1</span>');
+  }
+  function syntaxLisp(src){
+    return src.replace(/\b(defun|define|defvar|cond|and|or|not|if|let|lambda|quote)\b/g,'<span class="kw">$1</span>')
+              .replace(/('[\w\-]+)/g,'<span class="pred-c">$1</span>')
+              .replace(/(;.+)/g,'<span class="cmt">$1</span>');
+  }
+  document.getElementById('d3PrologCode').innerHTML=syntaxProlog(D3_PROLOG_KB);
+  document.getElementById('d3LispCode').innerHTML=syntaxLisp(D3_LISP_SRC);
+
+  // Shared Lisp env with D3 code pre-loaded
+  function makeD3LispEnv(){
+    var env=makeLispEnv();
+    try{lParseAll(D3_LISP_SRC).forEach(function(e){lEval(e,env);});}catch(e){}
+    return env;
+  }
+  var lispEnv=makeD3LispEnv();
+
+  window.d3RunProlog=function(){
+    var q=document.getElementById('d3PQ').value.trim();
+    if(!q)return;
+    var res=prologQuery(q,D3_PROLOG_KB);
+    var out='';
+    if(!res.ok){out='<span class="d3-fail">Error: '+q+'</span>';}
+    else if(res.solutions.length===0){out='<span class="d3-fail">false.</span>';}
+    else {
+      res.solutions.forEach(function(s){
+        var keys=Object.keys(s.bindings);
+        if(keys.length===0){out+='<div class="d3-sol">true.</div>';}
+        else{out+='<div class="d3-sol">'+keys.map(function(k){return k+' = '+s.bindings[k];}).join(',  ')+'</div>';}
+      });
+    }
+    document.getElementById('d3POut').innerHTML=out;
+    updateInsight(q,'prolog');
+  };
+
+  window.d3RunLisp=function(){
+    var expr=document.getElementById('d3LQ').value.trim();
+    if(!expr)return;
+    // Fresh env each time (re-load definitions)
+    var env=makeD3LispEnv();
+    var res=lispEvalSrc(expr,env);
+    var out='';
+    if(!res.ok){out='<span class="d3-fail">Error: '+res.error+'</span>';}
+    else{out='<span class="d3-lisp-val">→ '+res.value+'</span>';}
+    document.getElementById('d3LOut').innerHTML=out;
+    updateInsight(expr,'lisp');
+  };
+
+  function updateInsight(input,side){
+    var el=document.getElementById('d3Insight');
+    var lc=input.toLowerCase();
+    if(side==='prolog'&&(lc.indexOf('x')>=0||lc.indexOf('who')>=0)){
+      el.innerHTML='<strong>🔷 Prolog can answer "who?"</strong> The variable X ranges over the entire database — Prolog searches automatically and returns all solutions. This is the power of unification: variables are existentially quantified over the knowledge base.';
+    } else if(side==='lisp'&&lc.indexOf("'x")>=0){
+      el.innerHTML='<strong>🔶 Lisp cannot answer "who?"</strong> X is not a known animal atom — it\'s just a symbol. Lisp evaluates <code>(classify \'X)</code> as "classify the atom named X," not "find all animals that satisfy this." To find all flying birds in Lisp, you would need an explicit list of animals to iterate over: <code>(remove-if-not #\'flying-bird? \'(robin eagle penguin tiger cat))</code>';
+    } else if(side==='lisp'){
+      el.innerHTML='<strong>🔶 Lisp is procedural with symbols.</strong> <code>classify</code> is a function — you call it with a specific animal, it returns a classification. Change the facts list and the function automatically gives different answers. The knowledge (facts) and the rules (defun) are both just Lisp expressions — this is homoiconicity.';
+    } else {
+      el.innerHTML='<strong>Key difference:</strong> In Prolog, <code>flying_bird(X)</code> finds <em>all</em> X that satisfy the rule. In Lisp, you must know which animal you\'re asking about — there is no automatic search. Prolog\'s unification enables existential queries; Lisp requires explicit iteration.';
+    }
+  }
+
+  // Default queries
+  document.getElementById('d3PQ').value='flying_bird(X).';
+  document.getElementById('d3LQ').value="(classify 'robin)";
+})();
+</script>
+</body>
+</html>
