@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 1, Lesson 8 — The XOR Wall | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--surface:#161b27;--s2:#1a2035;--border:#1e2d40;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#334155;
+  --ac:#10b981;--ac-dim:rgba(16,185,129,.12);--ac-glow:rgba(16,185,129,.3);
+  --green:#4ade80;--red:#f87171;--amber:#f59e0b;--sky:#38bdf8;--violet:#8b5cf6;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;--disp:'Lora',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+.course-nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.era-badge{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em;}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 100px;}
+.hero{padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px;}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.week-badge{background:var(--ac);color:#012a1a;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em;}
+.hero h1{font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px;}
+.hero-sub{font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px;}
+.hero-timeline{display:flex;gap:36px;flex-wrap:wrap;}
+.tl-item{display:flex;flex-direction:column;gap:3px;}
+.tl-year{font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.1em;}
+.tl-label{font-size:13px;color:var(--muted);}
+.section{margin-bottom:68px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px;}
+.sec-title{font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.obj-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;}
+.obj-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.obj-list li strong{color:#f1f5f9;}
+.prose p{font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82;}
+.prose p:last-child{margin-bottom:0;}
+.prose p strong{color:#e2e8f0;}
+.prose blockquote{border-left:3px solid var(--ac);margin:28px 0;padding:12px 20px;background:var(--ac-dim);border-radius:0 8px 8px 0;font-style:italic;color:#94a3b8;font-size:15px;}
+.pullquote{background:linear-gradient(135deg,rgba(16,185,129,.07),rgba(16,185,129,.02));border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:22px 26px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:17px;font-style:italic;color:#6ee7b7;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+/* timeline strip */
+.winter-timeline{position:relative;margin:32px 0;padding-left:24px;}
+.winter-timeline::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--ac),var(--violet),var(--ac));opacity:.3;}
+.wt-item{position:relative;margin-bottom:20px;padding-left:20px;}
+.wt-item::before{content:'';position:absolute;left:-18px;top:6px;width:8px;height:8px;border-radius:50%;border:2px solid var(--ac);}
+.wt-item.dark::before{border-color:var(--red);}
+.wt-item.revival::before{border-color:var(--green);}
+.wt-year{font-family:var(--mono);font-size:11px;font-weight:700;margin-bottom:2px;}
+.wt-item .wt-year{color:var(--ac);}
+.wt-item.dark .wt-year{color:var(--red);}
+.wt-item.revival .wt-year{color:var(--green);}
+.wt-text{font-size:14px;color:#94a3b8;line-height:1.65;}
+.wt-text strong{color:#e2e8f0;}
+/* demos */
+.demo-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.demo-topbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.demo-tag{font-family:var(--mono);font-size:11px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase;}
+.demo-hint{font-family:var(--mono);font-size:10px;color:var(--muted2);}
+input[type=range].ac-slider{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,#0a0d14,var(--ac));}
+input[type=range].ac-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #6ee7b7;cursor:pointer;}
+/* ctrl buttons */
+.ctrl-btn{font-family:var(--mono);font-size:10px;padding:6px 13px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;}
+.ctrl-btn:hover{border-color:var(--ac);color:var(--ac);}
+.ctrl-btn.active{background:var(--ac-dim);border-color:rgba(16,185,129,.45);color:var(--ac);}
+.ctrl-btn.danger{border-color:rgba(248,113,113,.3);color:var(--red);}
+.ctrl-btn.danger:hover{background:rgba(248,113,113,.08);}
+.ctrl-btn.solve{border-color:rgba(139,92,246,.4);color:var(--violet);}
+.ctrl-btn.solve:hover{background:rgba(139,92,246,.1);}
+/* Demo 1 */
+.d1-outer{display:grid;grid-template-columns:1fr 260px;}
+.d1-canvas{padding:16px 20px;}
+.d1-side{padding:16px 18px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:14px;}
+.d1-func-btns{display:flex;flex-wrap:wrap;gap:6px;}
+.d1-status{font-family:var(--mono);font-size:11px;padding:8px 12px;border-radius:6px;border:1px solid var(--border);line-height:1.6;background:#0a0d14;}
+/* Demo 2 */
+.d2-outer{display:grid;grid-template-columns:1fr 280px;}
+.d2-canvas{padding:16px 20px;}
+.d2-side{padding:16px 18px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:14px;}
+.d2-neuron-row{display:flex;flex-direction:column;gap:10px;}
+.d2-neuron-card{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.d2-neuron-title{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.d2-w-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.d2-w-lbl{font-family:var(--mono);font-size:9px;color:var(--muted2);width:36px;}
+.d2-w-val{font-family:var(--mono);font-size:9px;text-align:right;min-width:32px;}
+input[type=range].w-sl{-webkit-appearance:none;appearance:none;flex:1;height:3px;border-radius:2px;outline:none;cursor:pointer;background:var(--border);}
+input[type=range].w-sl::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--ac);border:1.5px solid #6ee7b7;cursor:pointer;}
+.truth-table{font-family:var(--mono);font-size:11px;background:#0a0d14;border-radius:6px;overflow:hidden;border:1px solid var(--border);}
+.tt-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;padding:5px 10px;border-bottom:1px solid var(--border);}
+.tt-row:last-child{border-bottom:none;}
+.tt-row.hdr{background:var(--s2);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.tt-cell{text-align:center;}
+.tt-ok{color:var(--green);}
+.tt-bad{color:var(--red);}
+/* exercises */
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.ex-head{padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border);}
+.ex-num{font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(16,185,129,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.ex-title{font-weight:600;font-size:16px;color:#f1f5f9;}
+.ex-desc{font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6;}
+.ex-body{padding:20px;}
+.ex-body p{font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7;}
+.ex-body p:last-child{margin-bottom:0;}
+.ex-body p strong{color:#e2e8f0;}
+.disc-list{list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px;}
+.disc-list li{counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72;}
+.disc-list li::before{content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(16,185,129,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px;}
+.disc-list li strong{color:#e2e8f0;}
+.gloss-grid{display:flex;flex-direction:column;}
+.gloss-entry{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);padding:18px 0;}
+.gloss-entry:last-child{border-bottom:none;}
+.gloss-term{display:flex;flex-direction:column;gap:5px;padding-right:24px;padding-top:2px;}
+.gloss-term-name{font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700;}
+.gloss-abbr{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.gloss-def{font-size:14.5px;color:#94a3b8;line-height:1.72;}
+.gloss-def strong{color:#e2e8f0;}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border);}
+.nav-btn{text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s;}
+.nav-btn:hover{border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow);}
+.nav-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.nav-title{font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px;}
+.nav-arrow{font-size:20px;color:var(--ac);}
+/* era 2 teaser */
+.era-teaser{margin-top:40px;background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(16,185,129,.05));border:1px solid rgba(139,92,246,.2);border-radius:14px;padding:28px 32px;}
+.era-teaser h3{font-family:var(--disp);font-size:20px;font-weight:600;color:#c4b5fd;margin-bottom:10px;}
+.era-teaser p{font-size:14px;color:#94a3b8;line-height:1.75;}
+.era-teaser p strong{color:#e2e8f0;}
+</style>
+</head>
+<body>
+
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface);transition:color .15s" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 1: FOUNDATIONS</span>
+  <span>›</span><span>Evolution of Intelligence</span><span>›</span>
+  <span style="color:#94a3b8">Era 1, Lesson 8 — The XOR Wall</span>
+</nav>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 1 · LESSON 8</span>
+      <span>1969 – 1986</span><span>·</span>
+      <span>Linear Separability, the AI Winter &amp; the Two-Layer Fix</span>
+    </div>
+    <h1>The Wall at<br>the Edge of Thought</h1>
+    <p class="hero-sub">A single perceptron cannot learn XOR. This geometric fact — proved in 1969 — triggered a decade of defunded research, silenced a generation of researchers, and turned out to be a signpost, not a dead end.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1958</span><span class="tl-label">Rosenblatt's Perceptron — and the hype begins</span></div>
+      <div class="tl-item"><span class="tl-year">1969</span><span class="tl-label">Minsky &amp; Papert: <em>Perceptrons</em> — the wall is named</span></div>
+      <div class="tl-item"><span class="tl-year">1971</span><span class="tl-label">Rosenblatt dies at 43. Funding collapses.</span></div>
+      <div class="tl-item"><span class="tl-year">1986</span><span class="tl-label">Backpropagation — the wall falls</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">📐</span><div><strong>Prove geometrically</strong> that XOR is not linearly separable — that no single straight line can correctly classify all four XOR input points, no matter how it is positioned.</div></li>
+      <li><span class="obj-icon">🧊</span><div><strong>Explain</strong> why the Minsky-Papert proof triggered the first AI winter, and why the scientific conclusion was correct while the cultural reaction was excessive.</div></li>
+      <li><span class="obj-icon">🔓</span><div><strong>Construct</strong> a two-neuron hidden layer solution to XOR by positioning two decision boundaries that together create a linearly separable transformed space.</div></li>
+      <li><span class="obj-icon">🌅</span><div><strong>Identify</strong> the missing ingredient that delayed the solution by 17 years: not the architecture, but the training algorithm.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">The Hype, the Proof, and the Winter</h2></div>
+    <div class="prose">
+      <p>Frank Rosenblatt was not a modest man. In 1958, describing his newly invented Perceptron to the New York Times, he predicted it would eventually "be able to walk, talk, see, write, reproduce itself and be conscious of its existence." The US Navy, which funded the work, arranged a press conference. The coverage was breathless. Here was a machine that could learn — that adjusted its own internal parameters based on experience. It was, in the language of the day, a thinking machine.</p>
+      <p>The enthusiasm was not entirely misplaced. The perceptron really could learn. It could be trained to classify patterns — letters, shapes, simple categories — and it would converge on correct weights automatically given enough examples. Rosenblatt proved a convergence theorem: if a linear decision boundary exists that correctly classifies the training data, the perceptron learning rule will find it. That was a genuine mathematical result, and it was new.</p>
+      <p>The problem was what Rosenblatt didn't prove — and what Marvin Minsky and Seymour Papert at MIT did prove, in 1969, in a book called simply <em>Perceptrons</em>. The book was a systematic mathematical analysis of what single-layer perceptrons could and could not compute. Its most famous result was about a function so elementary it appears in introductory logic courses: <strong>XOR — exclusive or.</strong></p>
+      <p>XOR returns 1 when its two inputs differ and 0 when they match. Four inputs, four outputs: (0,0)→0, (0,1)→1, (1,0)→1, (1,1)→0. If you plot these four points in 2D and color them by output, the two positive examples are in diagonally opposite corners. <strong>No straight line can separate them from the two negative examples.</strong> This is not a training failure or a weight-setting problem. It is a geometric impossibility. A perceptron computes a linear decision boundary. XOR requires a non-linear one. No matter how long you train a single perceptron on XOR, it will never converge — not because it isn't trying, but because what it's trying to do is geometrically impossible.</p>
+    </div>
+
+    <div class="pullquote">
+      <p>"The perceptron has shown itself worthy of study despite — and even because of — its severe limitations. It is in those limitations that we can see most clearly the depth of the problems that remain."</p>
+      <cite>&mdash; Minsky &amp; Papert, <em>Perceptrons</em>, 1969</cite>
+    </div>
+
+    <div class="prose">
+      <p>Minsky and Papert were careful. They noted that multi-layer networks might overcome these limitations, but said that analysing such networks was "extremely difficult." What they proved applied specifically to single-layer perceptrons. But the AI community — and more importantly, the funding agencies — read the book more broadly. If the celebrated perceptron couldn't compute XOR, how much of the hype was real? Research programs were cancelled. PhD students changed fields. The term "connectionism" became unfashionable. The field that Rosenblatt had built entered what historians now call <strong>the first AI winter</strong>.</p>
+      <p>Rosenblatt himself never saw the revival. He died on his 43rd birthday in 1971, in a boating accident on the Chesapeake Bay, two years after the book that had done so much to undermine his life's work. The timing was not kind.</p>
+    </div>
+
+    <div class="winter-timeline">
+      <div class="wt-item">
+        <div class="wt-year">1958</div>
+        <div class="wt-text">Rosenblatt publishes the Perceptron. <strong>New York Times: "The Navy revealed... a machine that it expects will be able to walk, talk, see, write, reproduce itself and be conscious of its existence."</strong></div>
+      </div>
+      <div class="wt-item">
+        <div class="wt-year">1960</div>
+        <div class="wt-text">Widrow and Hoff develop ADALINE, an improved linear classifier. Excitement builds. Neural networks feel inevitable.</div>
+      </div>
+      <div class="wt-item dark">
+        <div class="wt-year">1969</div>
+        <div class="wt-text">Minsky and Papert publish <em>Perceptrons</em>. XOR proved unlearnable by single-layer networks. The proof is correct. The cultural response is catastrophic.</div>
+      </div>
+      <div class="wt-item dark">
+        <div class="wt-year">1971</div>
+        <div class="wt-text"><strong>Rosenblatt dies at 43.</strong> DARPA cuts neural network funding dramatically. Symbolic AI — rule-based expert systems — becomes dominant.</div>
+      </div>
+      <div class="wt-item dark">
+        <div class="wt-year">1974</div>
+        <div class="wt-text">Werbos derives backpropagation in his PhD thesis. The training algorithm for multi-layer networks exists — but almost nobody notices.</div>
+      </div>
+      <div class="wt-item dark">
+        <div class="wt-year">1969–1980</div>
+        <div class="wt-text">The long silence. Neural network papers are difficult to publish. Grant applications are rejected. A generation of researchers moves on.</div>
+      </div>
+      <div class="wt-item revival">
+        <div class="wt-year">1982</div>
+        <div class="wt-text">Hopfield publishes on recurrent networks. Interest begins to stir again.</div>
+      </div>
+      <div class="wt-item revival">
+        <div class="wt-year">1986</div>
+        <div class="wt-text"><strong>Rumelhart, Hinton &amp; Williams popularise backpropagation</strong> in <em>Nature</em>. Multi-layer networks can now be trained efficiently. The wall falls — not because the geometry changed, but because the training algorithm arrived.</div>
+      </div>
+      <div class="wt-item revival">
+        <div class="wt-year">Era 4</div>
+        <div class="wt-text">You will implement backpropagation yourself and train multi-layer networks from scratch. The 17-year gap will make sense then: the architecture was always there. What was missing was the calculus of learning.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 DEMOS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+
+    <!-- DEMO 1 — Linear Separability -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — The Geometry of Impossibility.</strong> Select a logical function. A draggable decision line represents the single perceptron's boundary. Find a placement that correctly classifies all four points — then try XOR.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Linear Separability</span>
+        <span class="demo-hint">drag the line · try each function · attempt XOR</span>
+      </div>
+      <div class="d1-outer">
+        <div class="d1-canvas">
+          <svg id="d1SVG" viewBox="0 0 420 340" style="display:block;width:100%;cursor:default"></svg>
+        </div>
+        <div class="d1-side">
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Logical Function</div>
+            <div class="d1-func-btns" id="d1FuncBtns"></div>
+          </div>
+          <div class="d1-status" id="d1Status"></div>
+          <div>
+            <button class="ctrl-btn" style="width:100%;margin-bottom:6px" onclick="d1TryRandom()">🎲 Try 1,000 random lines</button>
+            <button class="ctrl-btn danger" style="width:100%" id="d1ResetBtn" onclick="d1ResetLine()">↺ Reset line</button>
+          </div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);line-height:1.7;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d1Tip">
+            Drag either end of the line to rotate and translate it.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 2 — Two-Layer Fix -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — The Two-Layer Fix.</strong> Two hidden neurons each draw their own decision line. Together they can carve out a region that captures exactly the two XOR positives. Adjust the weights until the truth table is all green — or click <em>Show Solution</em> to see one valid answer.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">XOR — Two Hidden Neurons</span>
+        <span class="demo-hint">adjust weights · watch truth table · find the solution</span>
+      </div>
+      <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="ctrl-btn solve" onclick="d2ShowSolution()">💡 Show Solution</button>
+        <button class="ctrl-btn danger" onclick="d2Reset()">↺ Reset weights</button>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted2);margin-left:4px" id="d2SolveHint"></span>
+      </div>
+      <div class="d2-outer">
+        <div class="d2-canvas">
+          <svg id="d2SVG" viewBox="0 0 460 340" style="display:block;width:100%"></svg>
+        </div>
+        <div class="d2-side">
+          <div class="d2-neuron-row" id="d2Controls"></div>
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Truth Table</div>
+            <div class="truth-table" id="d2TT"></div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.7;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d2Note">
+            Each line shows where one hidden neuron fires. The output neuron fires when both hidden neurons agree.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">📐 The Geometry of Failure</div>
+        <div class="ex-desc">Use Demo 1 to build an intuition for linear separability — then experience the impossibility of XOR firsthand.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Work through AND, OR, and NAND in Demo 1. For each one, find a line placement that correctly classifies all four points. Describe in one sentence <em>why</em> each function is linearly separable — what does the geometry look like?</p>
+        <p>&rarr; Now select XOR. Click "Try 1,000 random lines." Every line fails. This is not a search problem — it is a proof by exhaustion. Describe in your own words what you see and why it is happening geometrically. (Hint: where are the two positive XOR points relative to the two negative ones?)</p>
+        <p><strong>Key question:</strong> XNOR (the complement of XOR — fires when inputs are the same) is also not linearly separable. Without running the demo, predict what its point layout looks like and why the same argument applies.</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">🔓 Break the Wall</div>
+        <div class="ex-desc">Use Demo 2 to find your own solution to XOR — without clicking "Show Solution" until you've genuinely tried.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 2, you have two decision lines (hidden neurons H1 and H2) and an output neuron. The output fires when <em>exactly one</em> hidden neuron fires. Your goal: position H1 and H2 so that (0,1) and (1,0) each activate exactly one hidden neuron, while (0,0) and (1,1) activate either both or neither.</p>
+        <p>&rarr; Start by thinking geometrically: you need two parallel lines that "straddle" the two positive XOR points, leaving (0,0) and (1,1) outside the band. Adjust w₁ and w₂ on each hidden neuron to rotate the line; adjust the bias (w₀) to translate it.</p>
+        <p>&rarr; Once you find a solution (all green in the truth table), click "Show Solution" and compare. Are the weights identical? Almost certainly not — there are infinitely many valid solutions. What do they have in common geometrically?</p>
+        <p><strong>Key insight:</strong> You just constructed a two-layer neural network by hand. The weights that solve XOR exist. The only reason it took the field 17 years to solve XOR in practice was that nobody knew how to <em>find</em> these weights automatically from data. That algorithm — backpropagation — is what you'll build in Era 4.</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">🧊 Reading the Winter</div>
+        <div class="ex-desc">Think critically about the gap between what Minsky and Papert proved and how the field responded.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Minsky and Papert proved that <em>single-layer</em> perceptrons cannot compute XOR. They explicitly noted that multi-layer networks might not have this limitation. Yet funding for neural network research collapsed anyway.</p>
+        <p>&rarr; List three reasons why the scientific community and funding agencies might have over-generalised from a result about single-layer networks to a judgment about neural networks in general. (Consider: the state of computing hardware in 1969, the difficulty of training multi-layer networks without backpropagation, the influence of Minsky's institutional authority, and the availability of competing approaches like symbolic AI.)</p>
+        <p>&rarr; Werbos derived backpropagation in 1974 — five years after the Minsky-Papert book. It was largely ignored until Rumelhart, Hinton, and Williams republished and popularised it in 1986. Why might a correct solution be ignored for 12 years? What does this suggest about how scientific fields evolve?</p>
+        <p><strong>Key question:</strong> The first AI winter was partly caused by over-promising (Rosenblatt's claims) followed by over-reacting (the response to Minsky-Papert). Can you identify a similar dynamic in recent AI history — where hype was followed by disillusionment that may have been excessive?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>The Cost of Hype.</strong> Rosenblatt's extravagant claims in 1958 set expectations that the perceptron could not meet. When the Minsky-Papert critique arrived, it landed on a field that had over-promised. How does the credibility lost through hype affect the reception of legitimate scientific results? Do you see parallels in how current AI capabilities are described?</li>
+      <li><strong>The Misread Proof.</strong> Minsky and Papert proved a specific, limited result. The community drew a broader conclusion. This is a recurring pattern in science: a result about a simplified model gets interpreted as a statement about the full problem. Can you think of other examples where a proof about a restricted case was over-generalised to a general conclusion?</li>
+      <li><strong>The Hidden Layer's Gift.</strong> The key insight of the two-layer solution is that the hidden layer performs a <em>change of representation</em> — it transforms the input space into a new space where the problem becomes linearly separable. This idea — that the right representation makes hard problems easy — is arguably the central idea of all of deep learning. Can you describe in your own words what "changing representation" means, using the XOR demo as a concrete example?</li>
+      <li><strong>The Training Gap.</strong> The architecture for solving XOR (two layers) was known by 1969. The training algorithm (backpropagation) was derived by 1974. The field didn't connect them until 1986. Twelve years passed. What does this gap suggest about the relationship between theoretical results and practical tools in computer science? What other theoretical results exist today that might be waiting for their "backpropagation moment"?</li>
+      <li><strong>Connection to Era 4.</strong> In Era 4 you will derive backpropagation from the chain rule of calculus, implement it yourself, and train multi-layer networks on real image data. At that point the XOR solution will be trivial — the network will find the weights automatically. What does it mean that something that required a human to carefully construct by hand in 1969 can now be learned by gradient descent in milliseconds?</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">XOR</span><span class="gloss-abbr">Exclusive Or</span></div>
+        <div class="gloss-def">The logical function that returns 1 when its inputs differ and 0 when they match: (0,0)→0, (0,1)→1, (1,0)→1, (1,1)→0. <strong>Not linearly separable</strong> — the canonical example of a problem a single perceptron cannot learn, regardless of training time or weight initialization.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Linear Separability</span><span class="gloss-abbr">Perceptron requirement</span></div>
+        <div class="gloss-def">A dataset is linearly separable if a hyperplane (line in 2D, plane in 3D) exists that correctly classifies all examples. A single perceptron can only learn linearly separable problems. The perceptron convergence theorem guarantees it will find the boundary — <strong>if one exists</strong>. If one doesn't, it will oscillate forever.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Hidden Layer</span><span class="gloss-abbr">Intermediate representation</span></div>
+        <div class="gloss-def">A layer of neurons between the input and output that performs a <strong>change of representation</strong>. Each hidden neuron computes a linear boundary; together they transform the input space into a new space where the output problem may be linearly separable. Two hidden neurons are sufficient to solve XOR.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">AI Winter</span><span class="gloss-abbr">1969–1986 (first)</span></div>
+        <div class="gloss-def">A period of reduced funding, interest, and research output in artificial intelligence following unmet expectations. The first AI winter followed the Minsky-Papert critique of perceptrons. A second, milder winter followed the limitations of expert systems in the late 1980s. Both were partly caused by <strong>hype cycles</strong> — promises that outran capability.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Backpropagation</span><span class="gloss-abbr">The missing ingredient</span></div>
+        <div class="gloss-def">The algorithm for efficiently computing gradients in multi-layer networks using the chain rule of calculus. Derived by Werbos (1974), popularised by Rumelhart, Hinton &amp; Williams (1986). <strong>Solved the training problem</strong> for multi-layer networks that the Minsky-Papert critique had left open — not by changing the architecture, but by finding an efficient way to learn the weights. Covered in depth in Era 4.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Decision Boundary</span><span class="gloss-abbr">The perceptron's dividing line</span></div>
+        <div class="gloss-def">The hyperplane defined by a perceptron's weights: <strong>w·x = θ</strong>. Points on one side are classified positive, the other negative. In 2D this is literally a line. Multiple decision boundaries — one per hidden neuron — can be combined to create non-linear classification regions.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Era 2 Teaser -->
+  <div class="era-teaser">
+    <h3>You've completed Era 1: Foundations</h3>
+    <p>You've built a perceptron, fit a regression line, normalized features, talked to ELIZA, read a confusion matrix, reasoned about false positives and false negatives, navigated a hierarchical database, and proved — geometrically — why the first AI winter was inevitable. <strong>Era 2 picks up where the winter left off.</strong> Expert systems, symbolic AI, relational databases, and the attempt to encode human knowledge directly into rules. The approach that replaced neural networks for a decade — and why it too eventually hit a wall.</p>
+  </div>
+
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era1_lesson7_hierarchical.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 1, Lesson 7 — Hierarchical Databases</div></div>
+    </a>
+    <div class="nav-btn" style="opacity:.35;cursor:default">
+      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 2, Lesson 1 — Expert Systems</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+
+</div>
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════
+   DEMO 1 — LINEAR SEPARABILITY EXPLORER
+═══════════════════════════════════════════════════ */
+(function(){
+  var FUNCTIONS = [
+    { id:'and',  label:'AND',  pts:[{x:0,y:0,v:0},{x:1,y:0,v:0},{x:0,y:1,v:0},{x:1,y:1,v:1}] },
+    { id:'or',   label:'OR',   pts:[{x:0,y:0,v:0},{x:1,y:0,v:1},{x:0,y:1,v:1},{x:1,y:1,v:1}] },
+    { id:'nand', label:'NAND', pts:[{x:0,y:0,v:1},{x:1,y:0,v:1},{x:0,y:1,v:1},{x:1,y:1,v:0}] },
+    { id:'nor',  label:'NOR',  pts:[{x:0,y:0,v:1},{x:1,y:0,v:0},{x:0,y:1,v:0},{x:1,y:1,v:0}] },
+    { id:'xor',  label:'XOR ⚠',pts:[{x:0,y:0,v:0},{x:1,y:0,v:1},{x:0,y:1,v:1},{x:1,y:1,v:0}] },
+  ];
+  var W=420,H=340,PAD=60;
+  var PW=W-PAD*2,PH=H-PAD*2;
+  function sx(v){return PAD+v*PW;}
+  function sy(v){return H-PAD-v*PH;}
+
+  var currentFn=0;
+  // Line defined by two endpoints (in SVG coords) that user drags
+  var lineA={x:PAD-10,y:H/2}, lineB={x:W-PAD+10,y:H/2};
+  var dragPt=null;
+  var randomRunning=false;
+  var randomBestScore=0, randomBestLine=null;
+
+  function classify(pt, la, lb) {
+    // Which side of the line from la→lb is pt on?
+    var dx=lb.x-la.x, dy=lb.y-la.y;
+    var cross=(pt.x-la.x)*dy-(pt.y-la.y)*dx;
+    return cross >= 0 ? 1 : 0;
+  }
+
+  function svgPtToData(svgX,svgY){return {x:(svgX-PAD)/PW, y:(H-PAD-svgY)/PH};}
+
+  function score(la,lb,pts){
+    var n=0;
+    pts.forEach(function(p){
+      var px=sx(p.x),py=sy(p.y);
+      if(classify({x:px,y:py},la,lb)===p.v) n++;
+    });
+    return n;
+  }
+
+  function render(){
+    var fn=FUNCTIONS[currentFn];
+    var svg=document.getElementById('d1SVG'); if(!svg) return;
+    var pts=fn.pts;
+    var sc=score(lineA,lineB,pts);
+    var allCorrect=sc===4;
+    var isXOR=fn.id==='xor';
+
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="8"/>';
+
+    // Grid
+    for(var g=0;g<=4;g++){
+      var gx=PAD+g/4*PW,gy=PAD+g/4*PH;
+      h+='<line x1="'+PAD+'" y1="'+gy.toFixed(0)+'" x2="'+(PAD+PW)+'" y2="'+gy.toFixed(0)+'" stroke="#131a2a" stroke-width="1"/>';
+      h+='<line x1="'+gx.toFixed(0)+'" y1="'+PAD+'" x2="'+gx.toFixed(0)+'" y2="'+(PAD+PH)+'" stroke="#131a2a" stroke-width="1"/>';
+    }
+    h+='<line x1="'+PAD+'" y1="'+(H-PAD)+'" x2="'+(PAD+PW)+'" y2="'+(H-PAD)+'" stroke="#2d3748" stroke-width="1.5"/>';
+    h+='<line x1="'+PAD+'" y1="'+PAD+'" x2="'+PAD+'" y2="'+(H-PAD)+'" stroke="#2d3748" stroke-width="1.5"/>';
+    h+='<text x="'+(PAD+PW+10)+'" y="'+(H-PAD+4)+'" fill="#334155" font-size="9" font-family="Space Mono,monospace">x₁</text>';
+    h+='<text x="'+(PAD-18)+'" y="'+(PAD-6)+'" fill="#334155" font-size="9" font-family="Space Mono,monospace">x₂</text>';
+
+    // Color half-planes
+    // Determine which side each corner is on
+    var corners=[{x:PAD,y:PAD},{x:PAD+PW,y:PAD},{x:PAD,y:PAD+PH},{x:PAD+PW,y:PAD+PH}];
+    // Use polygon clipping via SVG clipPath — simpler: just shade the two regions with low alpha rects
+    // Better: draw a filled polygon on each side of the line using clip
+    var lineCol=allCorrect?'#4ade80':isXOR?'#f87171':'#f59e0b';
+    h+='<line x1="'+lineA.x.toFixed(1)+'" y1="'+lineA.y.toFixed(1)+'" x2="'+lineB.x.toFixed(1)+'" y2="'+lineB.y.toFixed(1)+'" stroke="'+lineCol+'" stroke-width="2.5" stroke-dasharray="'+(allCorrect?'none':'6,3')+'"/>';
+
+    // Drag handles
+    h+='<circle cx="'+lineA.x.toFixed(1)+'" cy="'+lineA.y.toFixed(1)+'" r="10" fill="rgba(255,255,255,.04)" stroke="'+lineCol+'" stroke-width="1.5" data-end="a" style="cursor:grab"/>';
+    h+='<circle cx="'+lineA.x.toFixed(1)+'" cy="'+lineA.y.toFixed(1)+'" r="5" fill="'+lineCol+'" data-end="a" style="cursor:grab"/>';
+    h+='<circle cx="'+lineB.x.toFixed(1)+'" cy="'+lineB.y.toFixed(1)+'" r="10" fill="rgba(255,255,255,.04)" stroke="'+lineCol+'" stroke-width="1.5" data-end="b" style="cursor:grab"/>';
+    h+='<circle cx="'+lineB.x.toFixed(1)+'" cy="'+lineB.y.toFixed(1)+'" r="5" fill="'+lineCol+'" data-end="b" style="cursor:grab"/>';
+
+    // Random best line
+    if(randomBestLine && isXOR){
+      h+='<line x1="'+randomBestLine.a.x.toFixed(1)+'" y1="'+randomBestLine.a.y.toFixed(1)+'" x2="'+randomBestLine.b.x.toFixed(1)+'" y2="'+randomBestLine.b.y.toFixed(1)+'" stroke="rgba(139,92,246,.25)" stroke-width="1"/>';
+    }
+
+    // Data points
+    pts.forEach(function(p){
+      var px=sx(p.x),py=sy(p.y);
+      var pred=classify({x:px,y:py},lineA,lineB);
+      var correct=pred===p.v;
+      var col=p.v===1?'#4ade80':'#f87171';
+      h+='<circle cx="'+px.toFixed(0)+'" cy="'+py.toFixed(0)+'" r="16" fill="'+col+'" opacity="0.15"/>';
+      h+='<circle cx="'+px.toFixed(0)+'" cy="'+py.toFixed(0)+'" r="10" fill="'+col+'" opacity="0.85" stroke="'+col+'" stroke-width="1.5"/>';
+      if(!correct) h+='<circle cx="'+px.toFixed(0)+'" cy="'+py.toFixed(0)+'" r="15" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.4" stroke-dasharray="3,2"/>';
+      var lbl=p.v===1?'1':'0';
+      h+='<text x="'+px.toFixed(0)+'" y="'+(py+4).toFixed(0)+'" fill="'+(p.v===1?'#012a1a':'#300')+ '" font-size="11" font-weight="bold" text-anchor="middle" font-family="Space Mono,monospace" style="pointer-events:none">'+lbl+'</text>';
+      // input label
+      h+='<text x="'+px.toFixed(0)+'" y="'+(py+28).toFixed(0)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">('+p.x+','+p.y+')</text>';
+    });
+
+    // Score badge
+    var bcol=allCorrect?'#4ade80':sc>=3?'#f59e0b':'#f87171';
+    h+='<rect x="'+(W-80)+'" y="10" width="68" height="24" rx="5" fill="rgba(0,0,0,.3)" stroke="'+bcol+'" stroke-width="1.2"/>';
+    h+='<text x="'+(W-46)+'" y="26" fill="'+bcol+'" font-size="11" font-weight="bold" text-anchor="middle" font-family="Space Mono,monospace">'+sc+' / 4</text>';
+
+    svg.innerHTML=h;
+
+    // Re-attach drag events
+    svg.querySelectorAll('[data-end]').forEach(function(el){
+      el.addEventListener('pointerdown',function(e){
+        dragPt=el.getAttribute('data-end');
+        svg.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      });
+    });
+
+    // Status
+    var tip=document.getElementById('d1Tip');
+    var stat=document.getElementById('d1Status');
+    if(isXOR && randomBestScore>=0){
+      stat.style.color=allCorrect?'#4ade80':'#f87171';
+      stat.textContent=allCorrect
+        ?'✓ All correct (but this is XOR... try adjusting a point manually — can you stay correct?)'
+        :(sc+'/4 correct. Try dragging the line into any position — XOR is never fully separable.'+
+          (randomBestScore>0?' Best random attempt: '+randomBestScore+'/4.':''));
+      if(tip) tip.textContent='XOR is not linearly separable. The 1,000-random-lines test shows this experimentally — try it!';
+    } else {
+      stat.style.color=allCorrect?'#4ade80':sc>=3?'#f59e0b':'#94a3b8';
+      stat.textContent=allCorrect?'✓ All 4 points correctly classified!':sc+'/4 correct — keep adjusting the line.';
+      if(tip) tip.textContent='Drag either endpoint to rotate and translate the decision boundary.';
+    }
+  }
+
+  // Pointer drag
+  var svg=document.getElementById('d1SVG');
+  if(svg){
+    svg.addEventListener('pointermove',function(e){
+      if(!dragPt) return;
+      var r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;
+      var cx=(e.clientX-r.left)*(vb.width/r.width);
+      var cy=(e.clientY-r.top)*(vb.height/r.height);
+      if(dragPt==='a') lineA={x:cx,y:cy};
+      else lineB={x:cx,y:cy};
+      render();
+    });
+    svg.addEventListener('pointerup',function(){dragPt=null;});
+    svg.addEventListener('pointerleave',function(){dragPt=null;});
+  }
+
+  // Function buttons
+  var btnCont=document.getElementById('d1FuncBtns');
+  FUNCTIONS.forEach(function(fn,i){
+    var b=document.createElement('button');
+    b.className='ctrl-btn'+(i===0?' active':'')+(fn.id==='xor'?' danger':'');
+    b.textContent=fn.label;
+    b.onclick=function(){
+      currentFn=i;
+      randomBestScore=0; randomBestLine=null;
+      d1ResetLine();
+      document.querySelectorAll('.d1-func-btns .ctrl-btn').forEach(function(bb,j){
+        bb.classList.toggle('active',j===i);
+      });
+    };
+    btnCont.appendChild(b);
+  });
+
+  window.d1ResetLine=function(){
+    lineA={x:PAD-10,y:H/2}; lineB={x:W-PAD+10,y:H/2};
+    render();
+  };
+
+  window.d1TryRandom=function(){
+    if(randomRunning) return;
+    var fn=FUNCTIONS[currentFn];
+    var pts=fn.pts;
+    randomBestScore=0; randomBestLine=null;
+    var N=1000;
+    for(var i=0;i<N;i++){
+      // Random line: two random points in [0,W]×[0,H]
+      var la={x:Math.random()*W, y:Math.random()*H};
+      var lb={x:Math.random()*W, y:Math.random()*H};
+      var sc=score(la,lb,pts.map(function(p){return{x:sx(p.x),y:sy(p.y),v:p.v};}));
+      if(sc>randomBestScore){randomBestScore=sc;randomBestLine={a:la,b:lb};}
+      if(sc===4){lineA=la;lineB=lb;break;}
+    }
+    render();
+    var tip=document.getElementById('d1Tip');
+    if(fn.id==='xor' && tip){
+      tip.textContent='1,000 random lines tried. Best score: '+randomBestScore+'/4. XOR is never fully separable by a single line.';
+    }
+  };
+
+  render();
+})();
+
+/* ═══════════════════════════════════════════════════
+   DEMO 2 — TWO-LAYER XOR FIX
+═══════════════════════════════════════════════════ */
+(function(){
+  var W=460,H=340,PAD=60;
+  var PW=W-PAD*2,PH=H-PAD*2;
+  function sx(v){return PAD+v*PW;}
+  function sy(v){return H-PAD-v*PH;}
+
+  var XOR_PTS=[{x:0,y:0,v:0},{x:1,y:0,v:1},{x:0,y:1,v:1},{x:1,y:1,v:0}];
+
+  // Two hidden neurons: each has w1 (weight on x1), w2 (weight on x2), w0 (bias/threshold)
+  // Output neuron: fires when H1 XOR H2 (for simplicity we use: out = H1_fire XOR H2_fire)
+  // But to keep it more authentic: output fires when exactly one hidden fires (H1 + H2 == 1)
+  var neurons = [
+    {label:'H1', col:'#38bdf8', w1:2, w2:2, w0:-1},
+    {label:'H2', col:'#f59e0b', w1:2, w2:2, w0:-3},
+  ];
+
+  // SOLUTION weights (one valid construction)
+  var SOLUTION = [
+    {w1:2, w2:2, w0:-1},
+    {w1:2, w2:2, w0:-3},
+  ];
+
+  function sigmoid(z){return 1/(1+Math.exp(-z));}
+  function fire(n,x1,x2){return n.w1*x1+n.w2*x2+n.w0 > 0 ? 1 : 0;}
+
+  // Output: fire when exactly one hidden fires (XOR of hidden outputs)
+  function outFire(h1,h2){return (h1+h2)===1?1:0;}
+
+  // Decision line for neuron n: w1*x1 + w2*x2 + w0 = 0 => x2 = -(w1*x1 + w0)/w2
+  function lineY(n,x1){
+    if(Math.abs(n.w2)<0.01) return null;
+    return -(n.w1*x1+n.w0)/n.w2;
+  }
+
+  function buildControls(){
+    var cont=document.getElementById('d2Controls'); if(!cont) return;
+    cont.innerHTML='';
+    neurons.forEach(function(n,ni){
+      var card=document.createElement('div');
+      card.className='d2-neuron-card';
+      card.innerHTML='<div class="d2-neuron-title" style="color:'+n.col+'">'+n.label+' — Hidden Neuron '+ni+'</div>';
+      [
+        {key:'w1',label:'w₁ (x₁)',min:-4,max:4},
+        {key:'w2',label:'w₂ (x₂)',min:-4,max:4},
+        {key:'w0',label:'bias',  min:-5,max:5},
+      ].forEach(function(param){
+        var row=document.createElement('div');
+        row.className='d2-w-row';
+        var lbl=document.createElement('span');
+        lbl.className='d2-w-lbl'; lbl.textContent=param.label;
+        var sl=document.createElement('input');
+        sl.type='range'; sl.className='w-sl';
+        sl.min=param.min; sl.max=param.max; sl.step=0.25;
+        sl.value=n[param.key];
+        var val=document.createElement('span');
+        val.className='d2-w-val';
+        val.textContent=(n[param.key]>=0?'+':'')+n[param.key].toFixed(2);
+        val.style.color=n[param.key]>0?'#4ade80':n[param.key]<0?'#f87171':'#64748b';
+        sl.oninput=(function(neuron,k,valEl){
+          return function(){
+            neuron[k]=+this.value;
+            valEl.textContent=(neuron[k]>=0?'+':'')+neuron[k].toFixed(2);
+            valEl.style.color=neuron[k]>0?'#4ade80':neuron[k]<0?'#f87171':'#64748b';
+            render();
+          };
+        })(n,param.key,val);
+        row.appendChild(lbl); row.appendChild(sl); row.appendChild(val);
+        card.appendChild(row);
+      });
+      cont.appendChild(card);
+    });
+  }
+
+  function render(){
+    var svg=document.getElementById('d2SVG'); if(!svg) return;
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="8"/>';
+
+    // Grid
+    for(var g=0;g<=4;g++){
+      var gx=PAD+g/4*PW,gy=PAD+g/4*PH;
+      h+='<line x1="'+PAD+'" y1="'+gy.toFixed(0)+'" x2="'+(PAD+PW)+'" y2="'+gy.toFixed(0)+'" stroke="#131a2a" stroke-width="1"/>';
+      h+='<line x1="'+gx.toFixed(0)+'" y1="'+PAD+'" x2="'+gx.toFixed(0)+'" y2="'+(PAD+PH)+'" stroke="#131a2a" stroke-width="1"/>';
+    }
+    h+='<line x1="'+PAD+'" y1="'+(H-PAD)+'" x2="'+(PAD+PW)+'" y2="'+(H-PAD)+'" stroke="#2d3748" stroke-width="1.5"/>';
+    h+='<line x1="'+PAD+'" y1="'+PAD+'" x2="'+PAD+'" y2="'+(H-PAD)+'" stroke="#2d3748" stroke-width="1.5"/>';
+    h+='<text x="'+(PAD+PW+10)+'" y="'+(H-PAD+4)+'" fill="#334155" font-size="9" font-family="Space Mono,monospace">x₁</text>';
+    h+='<text x="'+(PAD-18)+'" y="'+(PAD-6)+'" fill="#334155" font-size="9" font-family="Space Mono,monospace">x₂</text>';
+
+    // Draw decision lines for each hidden neuron
+    neurons.forEach(function(n){
+      var x1data=0, x2data=1;
+      var y1=lineY(n,x1data), y2=lineY(n,x2data);
+      if(y1===null) return;
+      // Clamp and extend
+      var pairs=[];
+      // Parametric: sweep x from -0.3 to 1.3 and clip
+      for(var xi=-0.5;xi<=1.5;xi+=0.01){
+        var yi=lineY(n,xi);
+        if(yi===null) continue;
+        if(yi>=-0.15&&yi<=1.15) pairs.push([sx(xi),sy(yi)]);
+      }
+      if(pairs.length<2) return;
+      var p0=pairs[0],p1=pairs[pairs.length-1];
+      h+='<line x1="'+p0[0].toFixed(1)+'" y1="'+p0[1].toFixed(1)+'" x2="'+p1[0].toFixed(1)+'" y2="'+p1[1].toFixed(1)+'" stroke="'+n.col+'" stroke-width="2" opacity="0.7" stroke-dasharray="8,4"/>';
+      // Label
+      var mx=(p0[0]+p1[0])/2, my=(p0[1]+p1[1])/2;
+      h+='<text x="'+(mx+6).toFixed(0)+'" y="'+(my-6).toFixed(0)+'" fill="'+n.col+'" font-size="10" font-family="Space Mono,monospace">'+n.label+'</text>';
+    });
+
+    // Compute outputs and draw points
+    var correct=0;
+    XOR_PTS.forEach(function(p){
+      var h1=fire(neurons[0],p.x,p.y);
+      var h2=fire(neurons[1],p.x,p.y);
+      var out=outFire(h1,h2);
+      var ok=out===p.v;
+      if(ok) correct++;
+      var px=sx(p.x),py=sy(p.y);
+      var col=p.v===1?'#4ade80':'#f87171';
+      h+='<circle cx="'+px.toFixed(0)+'" cy="'+py.toFixed(0)+'" r="16" fill="'+col+'" opacity="0.15"/>';
+      h+='<circle cx="'+px.toFixed(0)+'" cy="'+py.toFixed(0)+'" r="10" fill="'+col+'" opacity="0.85"/>';
+      if(!ok) h+='<circle cx="'+px.toFixed(0)+'" cy="'+py.toFixed(0)+'" r="15" fill="none" stroke="#fff" stroke-width="2" opacity="0.5" stroke-dasharray="3,2"/>';
+      h+='<text x="'+px.toFixed(0)+'" y="'+(py+4).toFixed(0)+'" fill="'+(p.v===1?'#012a1a':'#300')+'" font-size="11" font-weight="bold" text-anchor="middle" font-family="Space Mono,monospace" style="pointer-events:none">'+(p.v===1?'1':'0')+'</text>';
+      h+='<text x="'+px.toFixed(0)+'" y="'+(py+28).toFixed(0)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">('+p.x+','+p.y+')</text>';
+      // H1/H2 fire indicators
+      h+='<text x="'+(px-26).toFixed(0)+'" y="'+(py-14).toFixed(0)+'" fill="'+(h1?neurons[0].col:'#334155')+'" font-size="8" font-family="Space Mono,monospace">H1:'+(h1?'1':'0')+'</text>';
+      h+='<text x="'+(px-26).toFixed(0)+'" y="'+(py-4).toFixed(0)+'" fill="'+(h2?neurons[1].col:'#334155')+'" font-size="8" font-family="Space Mono,monospace">H2:'+(h2?'1':'0')+'</text>';
+    });
+
+    // Score
+    var allOk=correct===4;
+    var bcol=allOk?'#4ade80':correct>=3?'#f59e0b':'#f87171';
+    h+='<rect x="'+(W-82)+'" y="10" width="70" height="24" rx="5" fill="rgba(0,0,0,.3)" stroke="'+bcol+'" stroke-width="1.2"/>';
+    h+='<text x="'+(W-47)+'" y="26" fill="'+bcol+'" font-size="11" font-weight="bold" text-anchor="middle" font-family="Space Mono,monospace">'+correct+' / 4</text>';
+
+    svg.innerHTML=h;
+
+    // Truth table
+    var tt=document.getElementById('d2TT'); if(!tt) return;
+    var rows='<div class="tt-row hdr"><div class="tt-cell">x₁</div><div class="tt-cell">x₂</div><div class="tt-cell">XOR</div><div class="tt-cell">Output</div></div>';
+    XOR_PTS.forEach(function(p){
+      var h1=fire(neurons[0],p.x,p.y),h2=fire(neurons[1],p.x,p.y),out=outFire(h1,h2);
+      var ok=out===p.v;
+      rows+='<div class="tt-row"><div class="tt-cell">'+p.x+'</div><div class="tt-cell">'+p.y+'</div><div class="tt-cell">'+p.v+'</div>';
+      rows+='<div class="tt-cell '+(ok?'tt-ok':'tt-bad')+'">'+(ok?'✓ '+out:'✗ '+out)+'</div></div>';
+    });
+    tt.innerHTML=rows;
+
+    // Note
+    var note=document.getElementById('d2Note'); if(!note) return;
+    if(allOk){
+      note.style.color='#4ade80';
+      note.textContent='✓ XOR solved! Both lines together create a "band" that captures exactly the two positive inputs. This is what one hidden layer does: it transforms the input space.';
+    } else {
+      note.style.color='var(--muted2)';
+      note.textContent='Goal: position the two lines so (0,1) and (1,0) each activate exactly one hidden neuron, while (0,0) and (1,1) activate both or neither.';
+    }
+
+    // Hint
+    var hint=document.getElementById('d2SolveHint'); if(!hint) return;
+    if(allOk){
+      hint.textContent='Solution found! Your weights may differ from the canonical one — both are valid.';
+      hint.style.color='#4ade80';
+    } else {
+      hint.textContent='Try to make the two lines parallel, straddling the positive XOR points.';
+      hint.style.color='var(--muted2)';
+    }
+  }
+
+  window.d2ShowSolution=function(){
+    SOLUTION.forEach(function(s,i){ neurons[i].w1=s.w1; neurons[i].w2=s.w2; neurons[i].w0=s.w0; });
+    buildControls();
+    render();
+    var hint=document.getElementById('d2SolveHint');
+    if(hint){ hint.textContent='Solution applied. H1 fires when x₁+x₂ > 0.5; H2 fires when x₁+x₂ > 1.5.'; hint.style.color='var(--violet)'; }
+  };
+
+  window.d2Reset=function(){
+    neurons[0]={label:'H1',col:'#38bdf8',w1:0,w2:0,w0:0};
+    neurons[1]={label:'H2',col:'#f59e0b',w1:0,w2:0,w0:0};
+    buildControls();
+    render();
+  };
+
+  buildControls();
+  render();
+})();
+</script>
+</body>
+</html>
