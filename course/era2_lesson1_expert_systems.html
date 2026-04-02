@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 2, Lesson 1 — Expert Systems | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--surface:#161b27;--s2:#1a2035;--border:#1e2d40;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#334155;
+  --ac:#a78bfa;--ac-dim:rgba(167,139,250,.11);--ac-glow:rgba(167,139,250,.28);
+  --green:#4ade80;--red:#f87171;--amber:#f59e0b;--sky:#38bdf8;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;--disp:'Lora',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+.course-nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.era-badge{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em;}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 100px;}
+/* Hero */
+.hero{padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px;}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.week-badge{background:var(--ac);color:#120a2e;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em;}
+.hero h1{font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px;}
+.hero-sub{font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px;}
+.hero-timeline{display:flex;gap:36px;flex-wrap:wrap;}
+.tl-item{display:flex;flex-direction:column;gap:3px;}
+.tl-year{font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.1em;}
+.tl-label{font-size:13px;color:var(--muted);}
+/* Sections */
+.section{margin-bottom:68px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px;}
+.sec-title{font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.obj-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;}
+.obj-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.obj-list li strong{color:#f1f5f9;}
+.prose p{font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82;}
+.prose p:last-child{margin-bottom:0;}
+.prose p strong{color:#e2e8f0;}
+.prose blockquote{border-left:3px solid var(--ac);margin:28px 0;padding:12px 20px;background:var(--ac-dim);border-radius:0 8px 8px 0;font-style:italic;color:#94a3b8;font-size:15px;}
+.pullquote{background:linear-gradient(135deg,rgba(167,139,250,.07),rgba(167,139,250,.02));border:1px solid rgba(167,139,250,.2);border-radius:12px;padding:22px 26px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:17px;font-style:italic;color:#c4b5fd;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+.case-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:28px 0;}
+.case-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+.case-card h4{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ac);margin-bottom:6px;}
+.case-card p{font-size:13px;color:#94a3b8;line-height:1.65;}
+.case-card .case-stat{font-family:var(--mono);font-size:12px;color:#c4b5fd;margin-top:8px;padding:4px 8px;background:#0a0d14;border-radius:4px;display:inline-block;}
+/* Demo shared */
+.demo-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.demo-topbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.demo-tag{font-family:var(--mono);font-size:11px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase;}
+.demo-hint{font-family:var(--mono);font-size:10px;color:var(--muted2);}
+.sc-tabs{display:flex;gap:6px;padding:12px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.sc-tab{font-family:var(--mono);font-size:10px;padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;}
+.sc-tab:hover{border-color:var(--ac);color:var(--ac);}
+.sc-tab.active{background:var(--ac-dim);border-color:rgba(167,139,250,.4);color:#c4b5fd;}
+.ctrl-btn{font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ctrl-btn:hover{border-color:var(--ac);color:var(--ac);}
+.ctrl-btn.active{background:var(--ac-dim);border-color:rgba(167,139,250,.4);color:#c4b5fd;}
+.ctrl-btn.warn{border-color:rgba(248,113,113,.3);color:var(--red);}
+.ctrl-btn.warn:hover{background:rgba(248,113,113,.08);}
+.ctrl-btn.go{border-color:rgba(74,222,128,.3);color:var(--green);}
+.ctrl-btn.go:hover{background:rgba(74,222,128,.08);}
+/* Demo 1 layout */
+.d1-body{display:grid;grid-template-columns:220px 1fr 1fr;min-height:420px;}
+.d1-col{border-right:1px solid var(--border);padding:14px 16px;}
+.d1-col:last-child{border-right:none;}
+.d1-col-title{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted2);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+/* Rule items */
+.rule-item{margin-bottom:6px;border-radius:7px;overflow:hidden;border:1px solid var(--border);}
+.rule-head{display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;background:#0a0d14;transition:background .12s;}
+.rule-head:hover{background:#0f1520;}
+.rule-toggle{width:14px;height:14px;border-radius:3px;border:1px solid var(--muted2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;cursor:pointer;transition:all .15s;}
+.rule-toggle.on{background:var(--ac);border-color:var(--ac);color:#120a2e;}
+.rule-label{font-family:var(--mono);font-size:10px;color:#94a3b8;flex:1;line-height:1.3;}
+.rule-expand{font-size:8px;color:var(--muted2);}
+.rule-body{padding:8px 10px;background:var(--bg);border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.7;display:none;}
+.rule-body.open{display:block;}
+.rule-body .cond{color:#94a3b8;}.rule-body .conc{color:#c4b5fd;}
+.rule-body .conf{color:var(--amber);}
+.rule-brittle{border-color:rgba(248,113,113,.3);}
+.rule-brittle .rule-head{background:rgba(248,113,113,.04);}
+.rule-brittle .rule-label{color:#fca5a5;}
+/* Fact checkboxes */
+.fact-item{display:flex;align-items:center;gap:8px;margin-bottom:5px;cursor:pointer;font-family:var(--mono);font-size:10px;color:#94a3b8;padding:3px 0;}
+.fact-item input{width:14px;height:14px;accent-color:var(--ac);cursor:pointer;flex-shrink:0;}
+.fact-item:hover{color:#c4b5fd;}
+.fact-item.highlighted{color:var(--ac);}
+/* Edge case buttons */
+.ec-section{margin-top:12px;padding-top:10px;border-top:1px solid var(--border);}
+.ec-title{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);margin-bottom:6px;}
+.ec-btn{display:block;width:100%;text-align:left;font-family:var(--mono);font-size:10px;padding:5px 8px;margin-bottom:4px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;}
+.ec-btn:hover{border-color:var(--amber);color:var(--amber);}
+.ec-btn.brittle{border-color:rgba(248,113,113,.25);color:#fca5a5;}
+/* Results */
+.result-area{min-height:120px;display:flex;flex-direction:column;gap:8px;}
+.fired-rule{padding:7px 10px;border-radius:6px;background:#0a0d14;border:1px solid var(--border);font-family:var(--mono);font-size:10px;line-height:1.5;}
+.fired-rule .fr-label{color:var(--ac);font-weight:700;margin-bottom:2px;}
+.fired-rule .fr-text{color:#94a3b8;}
+.fired-rule .fr-conc{color:#c4b5fd;}
+.fired-rule.conflict{border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.05);}
+.fired-rule.conflict .fr-label{color:var(--red);}
+.conclusion-box{padding:10px 14px;border-radius:8px;font-family:var(--mono);}
+.conclusion-box.success{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.3);color:var(--green);}
+.conclusion-box.partial{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.3);color:var(--amber);}
+.conclusion-box.failure{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.3);color:var(--red);}
+.conclusion-box.conflict{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.4);color:var(--red);}
+.conclusion-box .cl-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;opacity:.7;margin-bottom:4px;}
+.conclusion-box .cl-val{font-size:13px;font-weight:700;}
+.conclusion-box .cl-sub{font-size:10px;opacity:.75;margin-top:3px;line-height:1.5;}
+/* Allergy callout */
+.allergy-callout{padding:12px 16px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.4);border-radius:8px;font-size:13px;color:#fca5a5;line-height:1.65;display:none;}
+.allergy-callout strong{color:var(--red);}
+/* Demo 2 layout */
+.d2-body{display:grid;grid-template-columns:200px 1fr;}
+.d2-left{border-right:1px solid var(--border);padding:14px 16px;display:flex;flex-direction:column;gap:12px;}
+.d2-right{padding:14px 18px;display:flex;flex-direction:column;gap:12px;}
+.chain-mode-btns{display:flex;gap:6px;}
+.goal-select{font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:#0a0d14;color:#94a3b8;cursor:pointer;width:100%;}
+.goal-select:focus{outline:none;border-color:var(--ac);}
+.chain-steps{display:flex;flex-direction:column;gap:6px;min-height:200px;}
+.chain-step{padding:9px 12px;border-radius:7px;border:1px solid var(--border);font-family:var(--mono);font-size:10px;line-height:1.55;opacity:.45;transition:all .2s;}
+.chain-step.active{opacity:1;border-color:var(--ac);background:var(--ac-dim);}
+.chain-step.done{opacity:.7;border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.04);}
+.chain-step.failed{opacity:.7;border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.04);}
+.chain-step .cs-num{color:var(--ac);font-weight:700;margin-bottom:2px;}
+.chain-step.done .cs-num{color:var(--green);}
+.chain-step.failed .cs-num{color:var(--red);}
+.chain-step .cs-text{color:#94a3b8;}
+.chain-nav{display:flex;gap:8px;align-items:center;padding-top:8px;border-top:1px solid var(--border);}
+.chain-result{padding:10px 14px;border-radius:8px;font-family:var(--mono);font-size:11px;display:none;}
+.chain-result.show{display:block;}
+.chain-result.proved{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.3);color:var(--green);}
+.chain-result.failed{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.3);color:var(--red);}
+/* Exercises / Discussion */
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.ex-head{padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border);}
+.ex-num{font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(167,139,250,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.ex-title{font-weight:600;font-size:16px;color:#f1f5f9;}
+.ex-desc{font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6;}
+.ex-body{padding:20px;}
+.ex-body p{font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7;}
+.ex-body p:last-child{margin-bottom:0;}
+.ex-body p strong{color:#e2e8f0;}
+.disc-list{list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px;}
+.disc-list li{counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72;}
+.disc-list li::before{content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(167,139,250,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px;}
+.disc-list li strong{color:#e2e8f0;}
+.gloss-grid{display:flex;flex-direction:column;}
+.gloss-entry{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);padding:18px 0;}
+.gloss-entry:last-child{border-bottom:none;}
+.gloss-term{display:flex;flex-direction:column;gap:5px;padding-right:24px;padding-top:2px;}
+.gloss-term-name{font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700;}
+.gloss-abbr{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.gloss-def{font-size:14.5px;color:#94a3b8;line-height:1.72;}
+.gloss-def strong{color:#e2e8f0;}
+.gloss-code{font-family:var(--mono);font-size:11px;color:#c4b5fd;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:7px 12px;display:block;margin-top:8px;line-height:1.8;}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border);}
+.nav-btn{text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s;}
+.nav-btn:hover{border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow);}
+.nav-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.nav-title{font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px;}
+.nav-arrow{font-size:20px;color:var(--ac);}
+@media(max-width:700px){
+  .d1-body{grid-template-columns:1fr;}
+  .d1-col{border-right:none;border-bottom:1px solid var(--border);}
+  .d2-body{grid-template-columns:1fr;}
+  .d2-left{border-right:none;border-bottom:1px solid var(--border);}
+  .case-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface);transition:color .15s" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 2: SYMBOLIC AI</span>
+  <span>›</span><span>Evolution of Intelligence</span><span>›</span>
+  <span style="color:#94a3b8">Era 2, Lesson 1 — Expert Systems</span>
+</nav>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 2 · LESSON 1</span>
+      <span>1965 – 1990</span><span>·</span>
+      <span>Knowledge Bases, Inference Engines &amp; the Limits of Rules</span>
+    </div>
+    <h1>If This,<br>Then That</h1>
+    <p class="hero-sub">Neural networks had failed. The new approach was simpler: interview the expert, write down the rules, let the machine reason. It worked brilliantly — until it didn't.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1965</span><span class="tl-label">DENDRAL — first expert system, Stanford</span></div>
+      <div class="tl-item"><span class="tl-year">1972</span><span class="tl-label">MYCIN — diagnoses infections at specialist level</span></div>
+      <div class="tl-item"><span class="tl-year">1980</span><span class="tl-label">XCON saves DEC $40M/year — the commercial peak</span></div>
+      <div class="tl-item"><span class="tl-year">1987</span><span class="tl-label">Second AI winter — brittleness exposed</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">🧠</span><div><strong>Explain</strong> the expert systems paradigm: encode human expertise as if-then rules, apply an inference engine, produce conclusions without training on data.</div></li>
+      <li><span class="obj-icon">⚙️</span><div><strong>Distinguish</strong> forward chaining (facts → conclusions) from backward chaining (hypothesis → evidence), and identify which reasoning style suits each problem domain.</div></li>
+      <li><span class="obj-icon">⚠️</span><div><strong>Demonstrate</strong> the four failure modes of expert systems — confident wrong answer, silent failure, contradiction, and missing context — using three different domains.</div></li>
+      <li><span class="obj-icon">📉</span><div><strong>Explain</strong> why the knowledge acquisition bottleneck, brittleness, and maintenance explosion caused the second AI winter — and what that implies about encoding knowledge as rules.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">The Summer After the Winter</h2></div>
+    <div class="prose">
+      <p>By 1970 the first AI winter had arrived. The perceptron was discredited, neural network funding had collapsed, and Rosenblatt was dead. But the broader AI project hadn't stopped — it had simply changed its premise. If machines couldn't <em>learn</em> rules from data, perhaps the solution was to give them the rules directly. Interview a human expert. Extract their decision-making process. Write it down. Ship it.</p>
+      <p>This was the expert systems movement, and its ambition was not modest. The goal was to <strong>capture human expertise and make it universally available</strong> — to give every rural clinic access to a specialist diagnostician, every small manufacturer access to a world-class configuration engineer. The democratization of knowledge through code.</p>
+      <p>The first demonstration that this could actually work came from Stanford. In 1965, Edward Feigenbaum and Joshua Lederberg began building <strong>DENDRAL</strong> — a system that could determine the molecular structure of unknown organic compounds from mass spectrometry data. The task normally took expert chemists hours of painstaking analysis. DENDRAL encoded their inference rules and could do it in seconds. It was published in scientific journals and used by practising chemists. This was not a laboratory curiosity. It was a tool.</p>
+    </div>
+
+    <div class="case-grid">
+      <div class="case-card">
+        <h4>DENDRAL (1965)</h4>
+        <p>Stanford. Determines molecular structure from mass spectrometry. The first expert system to be genuinely useful in scientific practice.</p>
+        <span class="case-stat">Domain: Chemistry</span>
+      </div>
+      <div class="case-card">
+        <h4>MYCIN (1972–79)</h4>
+        <p>Stanford. Diagnoses bacterial blood infections, recommends antibiotics. Performs at specialist level in controlled trials.</p>
+        <span class="case-stat">69% vs 80% specialist accuracy</span>
+      </div>
+      <div class="case-card">
+        <h4>XCON (1980–)</h4>
+        <p>Digital Equipment Corporation. Configures VAX computer systems. Handles 80% of orders. The largest commercial expert system of the era.</p>
+        <span class="case-stat">$40M/year saved, 10,000+ rules</span>
+      </div>
+    </div>
+
+    <div class="prose">
+      <p>MYCIN is the case study that defined the field. Built at Stanford between 1972 and 1979, it was designed to diagnose bacterial blood infections — a time-critical problem where the wrong antibiotic could be fatal. It contained approximately 600 rules. In a 1979 blind trial, it was evaluated by ten physicians including specialists and faculty. MYCIN achieved 69% accuracy on cases where the accepted therapy was known. The average infectious disease specialist scored 80%. General physicians scored between 36% and 62%. <strong>The computer was better than most human doctors at this specific task.</strong></p>
+      <p>MYCIN was never deployed in clinical practice. The barrier was not technical — it was legal. No hospital would take responsibility for a diagnosis made by a computer program, regardless of its demonstrated accuracy. But the trial results reverberated through the field. If a rule-based system could approach specialist performance in medicine, the potential applications seemed unlimited.</p>
+    </div>
+
+    <div class="pullquote">
+      <p>"MYCIN illustrates both the power and the problems of expert systems. The power: it demonstrably works. The problems: it took years to build, it knows nothing outside its narrow domain, and it cannot explain <em>why</em> its rules are correct — only that they are."</p>
+      <cite>&mdash; Bruce Buchanan &amp; Edward Shortliffe, <em>Rule-Based Expert Systems</em>, 1984</cite>
+    </div>
+
+    <div class="prose">
+      <p>The commercial peak arrived in the early 1980s. XCON at Digital Equipment Corporation became the paradigm case for industrial expert systems: real money, real scale, measurable returns. By 1986 it had over 10,000 rules and required a team of full-time <em>knowledge engineers</em> just to maintain it. That last detail contains the story of the second AI winter in miniature.</p>
+      <p>Rules interact. Adding a new rule to handle a previously unhandled case might quietly break three existing rules that depended on assumptions the new rule violated. By the time XCON had 10,000 rules, no single person could hold the full system in their head. Debugging it meant trawling through thousands of interactions looking for the conflict. The <strong>maintenance explosion</strong> — the super-linear growth in complexity as knowledge bases grew — meant that expert systems did not scale. They were brilliant up to a few hundred rules. They became unmaintainable at a few thousand.</p>
+      <p>The brittleness was the other wall. Expert systems assumed that if something wasn't in the knowledge base, it was false — the <em>closed-world assumption</em>. MYCIN had no rules for drug allergies. A patient allergic to penicillin would receive a penicillin recommendation without hesitation, because MYCIN's world contained no allergies. It couldn't say "I don't know" — it could only say what its rules said. Outside the domain, it didn't degrade gracefully. It failed confidently.</p>
+    </div>
+  </section>
+
+  <!-- 03 DEMOS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+
+    <!-- DEMO 1 -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — The Expert System Lab.</strong> Three domains, each with a pre-loaded knowledge base. Check facts on the left, run inference, watch rules fire on the right. Then try the edge cases — including the penicillin allergy.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Expert System — Rule Engine</span>
+        <span class="demo-hint">toggle rules · set facts · observe failures</span>
+      </div>
+      <div class="sc-tabs" id="d1Tabs"></div>
+      <div class="d1-body">
+        <div class="d1-col" id="d1Rules">
+          <div class="d1-col-title">Knowledge Base <span style="color:var(--muted2)" id="d1RuleCount"></span></div>
+          <div id="d1RuleList"></div>
+        </div>
+        <div class="d1-col" id="d1FactsCol">
+          <div class="d1-col-title">Known Facts</div>
+          <div id="d1FactsList"></div>
+          <div class="ec-section">
+            <div class="ec-title">Edge Cases</div>
+            <div id="d1EdgeCases"></div>
+          </div>
+        </div>
+        <div class="d1-col">
+          <div class="d1-col-title">Inference Results</div>
+          <div style="display:flex;gap:6px;margin-bottom:10px">
+            <button class="ctrl-btn go" style="flex:1" onclick="d1Run()">▶ Run Inference</button>
+            <button class="ctrl-btn" onclick="d1Clear()">↺ Clear</button>
+          </div>
+          <div id="d1AllergyAlert" class="allergy-callout">
+            <strong>⚠ MYCIN-style failure detected.</strong> The system has diagnosed bacterial meningitis and recommends penicillin. You set <code>allergic_to_penicillin = true</code>. The system has no rule covering this. It recommends penicillin anyway.
+          </div>
+          <div id="d1ResultArea" class="result-area">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);padding:16px 0;text-align:center">Set facts and click Run Inference</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 2 -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — The Inference Engine.</strong> Step through forward or backward chaining on the same knowledge base. See which rules fire, which subgoals are created, and where the chain succeeds or fails.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Chaining Visualiser</span>
+        <span class="demo-hint">select mode &amp; scenario · step through inference</span>
+      </div>
+      <div class="sc-tabs" id="d2Tabs"></div>
+      <div class="d2-body">
+        <div class="d2-left">
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Mode</div>
+            <div class="chain-mode-btns">
+              <button class="ctrl-btn active" id="d2BtnFwd" onclick="d2SetMode('forward')">Forward</button>
+              <button class="ctrl-btn" id="d2BtnBwd" onclick="d2SetMode('backward')">Backward</button>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px" id="d2GoalLabel">Goal / Query</div>
+            <select class="goal-select" id="d2GoalSelect" onchange="d2Build()"></select>
+          </div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);line-height:1.65;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d2ModeDesc"></div>
+        </div>
+        <div class="d2-right">
+          <div class="chain-steps" id="d2Steps">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);text-align:center;padding:20px 0">Select a goal and click Step →</div>
+          </div>
+          <div class="chain-nav">
+            <button class="ctrl-btn" onclick="d2Step(-1)">← Prev</button>
+            <button class="ctrl-btn go" onclick="d2Step(1)">Next →</button>
+            <button class="ctrl-btn" onclick="d2RunAll()">Run All ▶▶</button>
+            <button class="ctrl-btn" style="margin-left:auto" onclick="d2Build()">↺ Reset</button>
+          </div>
+          <div class="chain-result" id="d2Result"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">🐧 The Penguin Problem</div>
+        <div class="ex-desc">Use the Animals scenario to discover why taxonomic rules always need exceptions — and how exceptions multiply.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 1, select the Animals scenario. Check: <strong>has_feathers, has_wings, can_fly</strong>. Run inference. Note the classification. Now clear and try: <strong>has_feathers, has_wings</strong> (no can_fly). What happens? Try: <strong>has_feathers, has_wings, lives_in_water, black_and_white</strong>.</p>
+        <p>&rarr; Click the <strong>Penguin</strong> edge case. A brittle rule fires — the system gets part of the answer right and part wrong. Toggle the brittle rule off. Does the result improve? What rule would you need to add to handle penguins correctly?</p>
+        <p><strong>Key question:</strong> The platypus has fur, gives milk (it's a mammal) but also lays eggs and has a bill. Try the Platypus edge case. The system classifies it correctly — but only because a specific platypus rule exists. What does this imply about the scalability of rule-based classification? How many special-case rules would you need for all ~8.7 million known animal species?</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">💊 The Penicillin Moment</div>
+        <div class="ex-desc">Reproduce the MYCIN drug allergy failure — the most instructive brittleness case in expert systems history.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Select the <strong>Infection Diagnosis</strong> scenario. Set: <strong>fever, stiff_neck, confusion, headache</strong>. Run inference. The system correctly identifies bacterial meningitis and recommends penicillin.</p>
+        <p>&rarr; Now also check <strong>allergic_to_penicillin</strong>. Run inference again. Read the alert that appears. The recommendation has not changed. This is not a bug — it is the system working exactly as designed. It has no rule for drug allergies, therefore drug allergies do not exist in its world.</p>
+        <p>&rarr; Try the <strong>Malaria (no travel)</strong> edge case. The patient has fever, chills, and body aches — the system diagnoses flu. The travel history that would change the diagnosis is absent from the facts, and the system has no way to ask for it.</p>
+        <p><strong>Key insight:</strong> Both failures are versions of the <em>closed-world assumption</em>: the system treats absence of information as absence of the thing. A human doctor would say "I need to ask about allergies before prescribing" and "Has this patient been abroad recently?" The expert system cannot ask questions it wasn't programmed to ask.</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">⚙️ Forward vs. Backward</div>
+        <div class="ex-desc">Use Demo 2 to understand when each chaining strategy is appropriate.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 2, select <strong>Animals</strong> in Forward mode. Choose a goal (e.g. "Robin facts") and step through. The engine starts with known facts and chains forward, firing every applicable rule until it reaches a classification.</p>
+        <p>&rarr; Switch to <strong>Infection Diagnosis</strong> in Backward mode. Choose "bacterial_meningitis" as the goal. Step through — the engine starts from the hypothesis and works backward, collecting the evidence needed to prove it. Notice that it only pursues evidence relevant to the hypothesis, ignoring the rest of the knowledge base.</p>
+        <p><strong>Key question:</strong> Forward chaining fires <em>all</em> applicable rules and produces <em>all</em> conclusions. Backward chaining only fires rules relevant to the current goal. For a knowledge base with 600 rules, when would forward chaining be impractically slow? When would backward chaining fail to find a correct answer?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>The Knowledge Acquisition Bottleneck.</strong> Building MYCIN required hundreds of hours of interviews with infectious disease specialists. The experts often contradicted each other and struggled to articulate rules they followed intuitively. Much expertise is tacit — it cannot be easily verbalized. What does this imply about the limits of the expert systems approach? Can you think of domains where tacit knowledge is so dominant that rule extraction would be essentially impossible?</li>
+      <li><strong>The Liability Gap.</strong> MYCIN was never deployed despite outperforming general physicians in trials. The barrier was legal liability — no hospital would accept responsibility for a computer's diagnosis. This gap between demonstrated capability and real-world deployment persists in AI today. What institutional and legal structures would need to change to allow AI diagnostic tools to be used clinically? Who should bear liability when an AI recommendation is wrong?</li>
+      <li><strong>The Closed World.</strong> Expert systems operate under the closed-world assumption: if a fact isn't in the knowledge base, it's false. Humans operate under the open-world assumption: absence of evidence is not evidence of absence. In what kinds of applications is the closed-world assumption safe? In what kinds is it dangerous?</li>
+      <li><strong>Rules vs. Weights.</strong> Expert systems encode knowledge as explicit if-then rules written by humans. Neural networks encode knowledge as numerical weights learned from data. Neither approach is universal. What are the genuine advantages of the expert systems approach that are lost in the move to learned models — and which of those advantages matter most in high-stakes domains like medicine or law?</li>
+      <li><strong>Connection to Era 3.</strong> The failure of expert systems partly motivated the statistical learning revolution: instead of encoding rules, learn probabilities from data. But the brittleness problem didn't disappear — it became the <em>distribution shift</em> problem. A statistical model trained on data from one hospital fails when deployed at another. How is distribution shift analogous to the closed-world assumption failure you saw in Demo 1?</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Expert System</span><span class="gloss-abbr">Rule-based AI</span></div>
+        <div class="gloss-def">An AI system that encodes domain expertise as a set of if-then rules in a <strong>knowledge base</strong> and uses an <strong>inference engine</strong> to apply those rules to new inputs. Doesn't learn from data — rules are written by knowledge engineers through expert interviews.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Forward Chaining</span><span class="gloss-abbr">Data-driven inference</span></div>
+        <div class="gloss-def">Start with known facts. Fire every rule whose conditions are satisfied. Add the conclusions to the fact base. Repeat until no new facts are produced. Good for: "given what I know, what can I conclude?" Used in monitoring, alerting, and classification systems.
+          <div class="gloss-code">facts: {fever, cough} → fire rule 3 → add: {possible_flu} → fire rule 7 → add: {recommend_rest}</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Backward Chaining</span><span class="gloss-abbr">Goal-driven inference</span></div>
+        <div class="gloss-def">Start with a hypothesis (goal). Find rules whose conclusion matches the goal. Try to prove each condition of those rules (recursively). If all conditions can be proven from known facts, the goal is proved. Good for: "can I prove this specific hypothesis?" Used in diagnosis and query answering. MYCIN used backward chaining.
+          <div class="gloss-code">goal: bacterial_meningitis → need: fever AND stiff_neck AND confusion → check facts</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Certainty Factor</span><span class="gloss-abbr">MYCIN's uncertainty model</span></div>
+        <div class="gloss-def">A value between −1 and +1 attached to a rule or fact, representing the confidence that the conclusion holds given the conditions. MYCIN's pre-Bayesian approach to uncertainty. CF = 0.85 means "strong positive evidence." Not statistically rigorous but practical and interpretable.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Closed-World Assumption</span><span class="gloss-abbr">CWA</span></div>
+        <div class="gloss-def">The assumption that any fact not present in the knowledge base is <strong>false</strong>. Expert systems use CWA. Contrast with the <strong>open-world assumption</strong> (OWA) used in databases and knowledge graphs: absence of a fact means it is <em>unknown</em>, not false. CWA enables efficient inference but causes dangerous failures when the knowledge base is incomplete.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Knowledge Acquisition Bottleneck</span><span class="gloss-abbr">The hard part</span></div>
+        <div class="gloss-def">The practical difficulty of extracting expertise from human experts and encoding it as rules. Experts often contradict each other, cannot articulate tacit knowledge, and forget edge cases. A primary reason expert systems are expensive to build and difficult to scale. MYCIN required hundreds of hours of specialist interviews for 600 rules.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era1_lesson8_xor.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 1, Lesson 8 — The XOR Wall</div></div>
+    </a>
+    <div class="nav-btn" style="opacity:.35;cursor:default">
+      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 2, Lesson 2 — Knowledge Representation &amp; Prolog</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+
+</div>
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════
+   KNOWLEDGE BASES
+═══════════════════════════════════════════════════ */
+var KB = {
+
+  animals: {
+    label: '🐾 Animals',
+    facts: [
+      {id:'has_feathers',  label:'Has feathers'},
+      {id:'has_wings',     label:'Has wings'},
+      {id:'can_fly',       label:'Can fly'},
+      {id:'has_fur',       label:'Has fur'},
+      {id:'gives_milk',    label:'Gives milk (nurses young)'},
+      {id:'has_scales',    label:'Has scales'},
+      {id:'cold_blooded',  label:'Cold-blooded'},
+      {id:'lives_in_water',label:'Lives in/near water'},
+      {id:'has_fins',      label:'Has fins'},
+      {id:'lays_eggs',     label:'Lays eggs'},
+      {id:'has_bill',      label:'Has a bill/beak'},
+      {id:'black_and_white',label:'Black and white coloring'},
+    ],
+    rules: [
+      {id:'r1', label:'Feathers → Bird', brittle:false, cf:0.95,
+       conditions:[{f:'has_feathers',v:true}],
+       conclusions:[{f:'is_bird',v:true}],
+       desc:'IF has_feathers THEN is_bird  (CF 0.95)'},
+      {id:'r2', label:'Bird + Can Fly → Flying Bird', brittle:false, cf:0.9,
+       conditions:[{f:'is_bird',v:true},{f:'can_fly',v:true}],
+       conclusions:[{f:'classification',v:'Flying Bird'}],
+       desc:'IF is_bird AND can_fly THEN classification = Flying Bird  (CF 0.9)'},
+      {id:'r3', label:'Bird + Water + B&W → Penguin', brittle:false, cf:0.95,
+       conditions:[{f:'is_bird',v:true},{f:'lives_in_water',v:true},{f:'black_and_white',v:true}],
+       conclusions:[{f:'classification',v:'Penguin'}],
+       desc:'IF is_bird AND lives_in_water AND black_and_white THEN classification = Penguin  (CF 0.95)'},
+      {id:'r4', label:'Fur + Milk → Mammal', brittle:false, cf:0.95,
+       conditions:[{f:'has_fur',v:true},{f:'gives_milk',v:true}],
+       conclusions:[{f:'is_mammal',v:true}],
+       desc:'IF has_fur AND gives_milk THEN is_mammal  (CF 0.95)'},
+      {id:'r5', label:'Milk (no fur) → Mammal', brittle:false, cf:0.75,
+       conditions:[{f:'gives_milk',v:true}],
+       conclusions:[{f:'is_mammal',v:true}],
+       desc:'IF gives_milk THEN is_mammal  (CF 0.75)  — catches dolphins (no fur)'},
+      {id:'r6', label:'Mammal + Water + Fins → Aquatic Mammal', brittle:false, cf:0.9,
+       conditions:[{f:'is_mammal',v:true},{f:'lives_in_water',v:true},{f:'has_fins',v:true}],
+       conclusions:[{f:'classification',v:'Aquatic Mammal (Dolphin/Whale)'}],
+       desc:'IF is_mammal AND lives_in_water AND has_fins THEN classification = Aquatic Mammal  (CF 0.9)'},
+      {id:'r7', label:'Wings + Fur + Milk → Bat', brittle:false, cf:0.95,
+       conditions:[{f:'has_wings',v:true},{f:'has_fur',v:true},{f:'gives_milk',v:true}],
+       conclusions:[{f:'classification',v:'Bat'}],
+       desc:'IF has_wings AND has_fur AND gives_milk THEN classification = Bat  (CF 0.95)'},
+      {id:'r8', label:'Fur + Eggs + Bill → Platypus', brittle:false, cf:0.95,
+       conditions:[{f:'has_fur',v:true},{f:'lays_eggs',v:true},{f:'has_bill',v:true}],
+       conclusions:[{f:'classification',v:'Platypus'}],
+       desc:'IF has_fur AND lays_eggs AND has_bill THEN classification = Platypus  (CF 0.95)'},
+      {id:'r9', label:'Scales + Cold-blooded → Reptile', brittle:false, cf:0.9,
+       conditions:[{f:'has_scales',v:true},{f:'cold_blooded',v:true}],
+       conclusions:[{f:'classification',v:'Reptile'}],
+       desc:'IF has_scales AND cold_blooded THEN classification = Reptile  (CF 0.9)'},
+      {id:'r10', label:'Fins + Cold-blooded → Fish', brittle:false, cf:0.9,
+       conditions:[{f:'has_fins',v:true},{f:'cold_blooded',v:true}],
+       conclusions:[{f:'classification',v:'Fish'}],
+       desc:'IF has_fins AND cold_blooded THEN classification = Fish  (CF 0.9)'},
+      {id:'rb1', label:'⚠ Wings → Bird  [BRITTLE]', brittle:true, cf:0.7,
+       conditions:[{f:'has_wings',v:true}],
+       conclusions:[{f:'is_bird',v:true}],
+       desc:'IF has_wings THEN is_bird  (CF 0.7)\n⚠ BRITTLE: Misclassifies bats as birds. A naive rule that works for most cases but fails on any winged mammal.'},
+    ],
+    edgeCases: [
+      {label:'🐧 Penguin', brittle:true, failMode:'Confident wrong answer (without R3)',
+       facts:{has_feathers:true,has_wings:true,can_fly:false,lives_in_water:true,black_and_white:true},
+       note:'Penguin: R1 fires (bird ✓). With brittle rule on: R_b1 also fires (wings→bird, redundant). Without R3: no specific classification — silent failure. With R3: correct.'},
+      {label:'🦇 Bat', brittle:true, failMode:'Confident wrong answer',
+       facts:{has_wings:true,has_fur:true,gives_milk:true,can_fly:true},
+       note:'Bat: R4+R5 fire (mammal ✓). R7 fires (bat ✓). BUT if brittle rule R_b1 is enabled: it also fires and adds is_bird — creating a CONFLICT. System says bat is both mammal AND bird.'},
+      {label:'🦆 Platypus', brittle:false, failMode:'Silent failure (without R8)',
+       facts:{has_fur:true,gives_milk:true,lays_eggs:true,has_bill:true},
+       note:'Platypus: R4 fires (mammal ✓). R8 fires (platypus ✓). Without R8: system says "mammal" — technically not wrong, but incomplete. There are millions of species; we cannot write a special rule for each.'},
+      {label:'🐬 Dolphin', brittle:false, failMode:'Silent failure (no fur)',
+       facts:{gives_milk:true,lives_in_water:true,has_fins:true,cold_blooded:false},
+       note:'Dolphin: no has_fur set (dolphins have no fur). R4 fails (needs fur). R5 fires via "gives_milk" (mammal ✓). R6 fires (aquatic mammal ✓). R10 would fire if cold_blooded=true — but it\'s false. Correct result, but only because R5 was added as a fallback.'},
+    ],
+    chainGoals: [
+      {label:'Robin (forward)', mode:'forward', facts:{has_feathers:true,can_fly:true,has_wings:true}},
+      {label:'Penguin (forward)', mode:'forward', facts:{has_feathers:true,has_wings:true,lives_in_water:true,black_and_white:true}},
+      {label:'Bat (forward)', mode:'forward', facts:{has_wings:true,has_fur:true,gives_milk:true,can_fly:true}},
+    ]
+  },
+
+  medical: {
+    label: '🏥 Infection Diagnosis',
+    facts: [
+      {id:'fever',              label:'Fever (>38.5°C)'},
+      {id:'stiff_neck',         label:'Stiff neck (nuchal rigidity)'},
+      {id:'confusion',          label:'Altered mental status / confusion'},
+      {id:'headache',           label:'Severe headache'},
+      {id:'photophobia',        label:'Photophobia (light sensitivity)'},
+      {id:'sore_throat',        label:'Sore throat'},
+      {id:'no_cough',           label:'No cough present'},
+      {id:'swollen_lymph',      label:'Swollen lymph nodes'},
+      {id:'cough',              label:'Cough'},
+      {id:'body_aches',         label:'Body aches / myalgia'},
+      {id:'ear_pain',           label:'Ear pain (otalgia)'},
+      {id:'chills',             label:'Chills / rigors'},
+      {id:'recent_travel',      label:'Recent travel to endemic region'},
+      {id:'allergic_to_penicillin', label:'⚠ Allergic to penicillin'},
+    ],
+    rules: [
+      {id:'m1', label:'Fever+Neck+Confusion → Bact. Meningitis', brittle:false, cf:0.92,
+       conditions:[{f:'fever',v:true},{f:'stiff_neck',v:true},{f:'confusion',v:true}],
+       conclusions:[{f:'diagnosis',v:'Bacterial Meningitis'},{f:'recommend',v:'Penicillin G IV'}],
+       desc:'IF fever AND stiff_neck AND confusion\nTHEN diagnosis = Bacterial Meningitis (CF 0.92)\n     recommend = Penicillin G IV'},
+      {id:'m2', label:'Fever+Neck+Headache → Viral Meningitis', brittle:false, cf:0.75,
+       conditions:[{f:'fever',v:true},{f:'stiff_neck',v:true},{f:'headache',v:true}],
+       conclusions:[{f:'diagnosis',v:'Viral Meningitis (possible)'}],
+       desc:'IF fever AND stiff_neck AND headache\nTHEN diagnosis = Viral Meningitis (CF 0.75)\n     (lower CF — needs CSF analysis to confirm)'},
+      {id:'m3', label:'Sore Throat+Fever+No Cough → Strep', brittle:false, cf:0.85,
+       conditions:[{f:'sore_throat',v:true},{f:'fever',v:true},{f:'no_cough',v:true},{f:'swollen_lymph',v:true}],
+       conclusions:[{f:'diagnosis',v:'Streptococcal Pharyngitis (Strep)'},{f:'recommend',v:'Amoxicillin'}],
+       desc:'IF sore_throat AND fever AND no_cough AND swollen_lymph\nTHEN diagnosis = Strep Throat (CF 0.85)\n     recommend = Amoxicillin'},
+      {id:'m4', label:'Fever+Cough+Aches → Influenza', brittle:false, cf:0.80,
+       conditions:[{f:'fever',v:true},{f:'cough',v:true},{f:'body_aches',v:true}],
+       conclusions:[{f:'diagnosis',v:'Influenza'},{f:'recommend',v:'Rest + Fluids (± antiviral)'}],
+       desc:'IF fever AND cough AND body_aches\nTHEN diagnosis = Influenza (CF 0.80)\n     recommend = Rest + Fluids'},
+      {id:'m5', label:'Fever+Travel+Chills+Aches → Malaria', brittle:false, cf:0.88,
+       conditions:[{f:'fever',v:true},{f:'recent_travel',v:true},{f:'chills',v:true},{f:'body_aches',v:true}],
+       conclusions:[{f:'diagnosis',v:'Malaria'},{f:'recommend',v:'Antimalarial therapy — urgent'}],
+       desc:'IF fever AND recent_travel AND chills AND body_aches\nTHEN diagnosis = Malaria (CF 0.88)\n     recommend = Antimalarial — urgent'},
+      {id:'m6', label:'Ear Pain+Fever → Otitis Media', brittle:false, cf:0.85,
+       conditions:[{f:'ear_pain',v:true},{f:'fever',v:true}],
+       conclusions:[{f:'diagnosis',v:'Otitis Media (Ear Infection)'},{f:'recommend',v:'Amoxicillin'}],
+       desc:'IF ear_pain AND fever\nTHEN diagnosis = Otitis Media (CF 0.85)\n     recommend = Amoxicillin'},
+    ],
+    edgeCases: [
+      {label:'💊 Penicillin Allergy', brittle:true, failMode:'Missing context (MYCIN case)',
+       facts:{fever:true,stiff_neck:true,confusion:true,headache:true,allergic_to_penicillin:true},
+       note:'THE MYCIN CASE: System correctly diagnoses bacterial meningitis. It recommends Penicillin G IV. The patient is allergic to penicillin. The system has no rule for drug allergies — it does not exist in this world. The recommendation does not change.'},
+      {label:'🦟 Malaria (no travel)', brittle:true, failMode:'Silent failure / wrong diagnosis',
+       facts:{fever:true,chills:true,body_aches:true,cough:false},
+       note:'Patient has fever, chills, body aches — classic malaria symptoms. But recent_travel is not set (the question was never asked). Rule m5 does not fire. Rule m4 fires: influenza. Patient goes home with the wrong diagnosis. Travel history is the differentiating fact the system cannot ask for.'},
+      {label:'😮 Strep (no fever)', brittle:true, failMode:'Silent failure (atypical presentation)',
+       facts:{sore_throat:true,no_cough:true,swollen_lymph:true},
+       note:'~20% of strep cases present without fever. Rule m3 requires fever — it does not fire. No other rule matches. Result: no diagnosis. A human physician would still suspect strep based on the Centor criteria and do a rapid test.'},
+      {label:'🧠 Meningitis (classic)', brittle:false, failMode:'Happy path',
+       facts:{fever:true,stiff_neck:true,confusion:true,headache:true,photophobia:true},
+       note:'Classic bacterial meningitis presentation. Rules m1 and m2 both fire — m1 with higher confidence. System correctly recommends Penicillin G IV. This is the happy path the knowledge base was designed for.'},
+    ],
+    chainGoals: [
+      {label:'Bacterial Meningitis (backward)', mode:'backward', goal:'diagnosis', targetVal:'Bacterial Meningitis',
+       facts:{fever:true,stiff_neck:true,confusion:true,headache:true}},
+      {label:'Influenza (backward)', mode:'backward', goal:'diagnosis', targetVal:'Influenza',
+       facts:{fever:true,cough:true,body_aches:true}},
+      {label:'All diagnoses (forward)', mode:'forward',
+       facts:{fever:true,cough:true,body_aches:true,stiff_neck:false}},
+    ]
+  },
+
+  helpdesk: {
+    label: '💻 IT Helpdesk',
+    facts: [
+      {id:'device_wont_start',  label:'Device will not start'},
+      {id:'plugged_in',         label:'Device is plugged in'},
+      {id:'power_light_on',     label:'Power indicator light is on'},
+      {id:'outlet_tested',      label:'Outlet tested with another device'},
+      {id:'no_internet',        label:'No internet connection'},
+      {id:'wifi_enabled',       label:'Wi-Fi is enabled on device'},
+      {id:'router_lights_ok',   label:'Router has normal indicator lights'},
+      {id:'can_ping_router',    label:'Device can ping the router'},
+      {id:'printer_not_working',label:'Printer not working'},
+      {id:'printer_connected',  label:'Printer shows as connected'},
+      {id:'has_paper',          label:'Printer has paper'},
+      {id:'driver_error',       label:'Driver error shown in system'},
+      {id:'network_intermittent',label:'Problem is intermittent'},
+    ],
+    rules: [
+      {id:'h1', label:'Won\'t Start + Not Plugged In → Plug In', brittle:false, cf:1.0,
+       conditions:[{f:'device_wont_start',v:true}],
+       conclusions:[{f:'check_first',v:'Is it plugged in? Test the outlet.'}],
+       desc:'IF device_wont_start\nTHEN first_check = Is it plugged in? Test the outlet.\n(First rule in any power troubleshooting tree)'},
+      {id:'h2', label:'Plugged In + No Power Light → Check Outlet', brittle:false, cf:0.9,
+       conditions:[{f:'device_wont_start',v:true},{f:'plugged_in',v:true}],
+       conclusions:[{f:'recommendation',v:'Check the outlet with another device'}],
+       desc:'IF device_wont_start AND plugged_in\nTHEN recommendation = Test outlet with another device  (CF 0.9)'},
+      {id:'h3', label:'Plugged In + Outlet OK + Power Light → Hardware', brittle:false, cf:0.85,
+       conditions:[{f:'plugged_in',v:true},{f:'outlet_tested',v:true},{f:'power_light_on',v:false}],
+       conclusions:[{f:'diagnosis',v:'Hardware failure — contact support'}],
+       desc:'IF plugged_in AND outlet_tested AND NOT power_light_on\nTHEN diagnosis = Hardware failure  (CF 0.85)'},
+      {id:'h4', label:'No Internet + No Wi-Fi → Enable Wi-Fi', brittle:false, cf:1.0,
+       conditions:[{f:'no_internet',v:true}],
+       conclusions:[{f:'check_first',v:'Is Wi-Fi enabled on the device?'}],
+       desc:'IF no_internet\nTHEN first_check = Is Wi-Fi enabled?'},
+      {id:'h5', label:'No Internet + Wi-Fi On + Bad Router → Restart Router', brittle:false, cf:0.88,
+       conditions:[{f:'no_internet',v:true},{f:'wifi_enabled',v:true}],
+       conclusions:[{f:'recommendation',v:'Check router lights — restart if abnormal'}],
+       desc:'IF no_internet AND wifi_enabled\nTHEN recommendation = Check router, restart if needed  (CF 0.88)'},
+      {id:'h6', label:'Wi-Fi OK + Router OK + Can\'t Ping → DNS Issue', brittle:false, cf:0.80,
+       conditions:[{f:'no_internet',v:true},{f:'wifi_enabled',v:true},{f:'router_lights_ok',v:true}],
+       conclusions:[{f:'diagnosis',v:'Possible DNS issue — try 8.8.8.8'},{f:'recommendation',v:'Change DNS to 8.8.8.8 or 1.1.1.1'}],
+       desc:'IF no_internet AND wifi_enabled AND router_lights_ok\nTHEN diagnosis = DNS issue  (CF 0.80)\n     recommendation = Change DNS server'},
+      {id:'h7', label:'Printer Not Working + Not Connected → Check Cable', brittle:false, cf:0.95,
+       conditions:[{f:'printer_not_working',v:true}],
+       conclusions:[{f:'check_first',v:'Is the printer connected and powered on?'}],
+       desc:'IF printer_not_working\nTHEN first_check = Is printer connected and powered?'},
+      {id:'h8', label:'Printer + Connected + No Paper → Add Paper', brittle:false, cf:1.0,
+       conditions:[{f:'printer_not_working',v:true},{f:'printer_connected',v:true}],
+       conclusions:[{f:'check_paper',v:'Check paper tray — is it empty?'}],
+       desc:'IF printer_not_working AND printer_connected\nTHEN check = Is the paper tray empty?'},
+      {id:'h9', label:'Printer + Paper + Driver Error → Reinstall Driver', brittle:false, cf:0.85,
+       conditions:[{f:'printer_not_working',v:true},{f:'printer_connected',v:true},{f:'has_paper',v:true},{f:'driver_error',v:true}],
+       conclusions:[{f:'diagnosis',v:'Driver corruption'},{f:'recommendation',v:'Uninstall and reinstall printer driver'}],
+       desc:'IF printer issues AND connected AND has_paper AND driver_error\nTHEN diagnosis = Driver corruption  (CF 0.85)\n     recommendation = Reinstall printer driver'},
+    ],
+    edgeCases: [
+      {label:'🔌 Dead Outlet', brittle:true, failMode:'Confident wrong answer',
+       facts:{device_wont_start:true,plugged_in:true,outlet_tested:false,power_light_on:false},
+       note:'Device is plugged in but the outlet is dead (not tested). Rule h3 fires: "hardware failure — contact support." The actual problem is a $0 fix (different outlet or flip the breaker). The system escalates to hardware replacement before eliminating the free solution.'},
+      {label:'📄 + 🖨️ Two Faults', brittle:true, failMode:'Incomplete diagnosis',
+       facts:{printer_not_working:true,printer_connected:true,has_paper:false,driver_error:true},
+       note:'Printer is out of paper AND has a driver error — two independent faults. Rule h8 fires and reports "check paper tray." The user adds paper. Printer still fails. Rule h9 also fired (driver error) but the user saw the paper result and stopped. Expert systems find the first applicable rule and present it — they don\'t distinguish between "this is the only problem" and "this is one of several problems."'},
+      {label:'🌐 Intermittent WiFi', brittle:true, failMode:'False negative (problem not present now)',
+       facts:{no_internet:false,wifi_enabled:true,router_lights_ok:true,network_intermittent:true},
+       note:'The network drops every 20 minutes but is working right now. no_internet=false, so no internet rules fire. System finds nothing wrong. The intermittent nature of the problem is invisible to a system that only evaluates the current state. A human tech would ask "how often does it happen?" — the system has no such rule.'},
+      {label:'✅ Simple Fix', brittle:false, failMode:'Happy path',
+       facts:{no_internet:true,wifi_enabled:false},
+       note:'Classic happy path: Wi-Fi is disabled. Rule h4 fires immediately. The system correctly identifies the issue in one step. This is what expert systems were designed for — common cases with clear causes.'},
+    ],
+    chainGoals: [
+      {label:'No Internet (forward)', mode:'forward', facts:{no_internet:true,wifi_enabled:true,router_lights_ok:true}},
+      {label:'Printer Fix (forward)', mode:'forward', facts:{printer_not_working:true,printer_connected:true,has_paper:true,driver_error:true}},
+      {label:'Won\'t Start (forward)', mode:'forward', facts:{device_wont_start:true,plugged_in:true,outlet_tested:true}},
+    ]
+  }
+};
+
+/* ═══════════════════════════════════════════════════
+   INFERENCE ENGINE
+═══════════════════════════════════════════════════ */
+function runForward(rules, initFacts) {
+  var facts = {};
+  Object.keys(initFacts).forEach(function(k){ facts[k] = initFacts[k]; });
+  var steps = [], changed = true, iter = 0;
+  var firedIds = {};
+  while (changed && iter < 20) {
+    changed = false; iter++;
+    rules.forEach(function(rule) {
+      if (!rule.enabled) return;
+      if (firedIds[rule.id]) return;
+      var allMet = rule.conditions.every(function(c) { return facts[c.f] === c.v; });
+      if (allMet) {
+        firedIds[rule.id] = true;
+        rule.conclusions.forEach(function(c) { facts[c.f] = c.v; });
+        steps.push({ type:'fire', rule:rule, newFacts: rule.conclusions.slice() });
+        changed = true;
+      }
+    });
+  }
+  return { facts:facts, steps:steps };
+}
+
+function buildBackwardSteps(rules, facts, goalFact, goalVal, depth, visited) {
+  if (depth > 8) return [{type:'fail',text:'Max depth reached'}];
+  var key = goalFact+'='+goalVal;
+  if (visited[key]) return [{type:'fail',text:'Cycle detected for '+goalFact}];
+  visited[key] = true;
+
+  if (facts[goalFact] === goalVal)
+    return [{type:'known', text:'✓ '+goalFact+' = '+goalVal+' (known fact)'}];
+
+  var matchRules = rules.filter(function(r){
+    return r.enabled && r.conclusions.some(function(c){return c.f===goalFact && c.v===goalVal;});
+  });
+  if (matchRules.length === 0)
+    return [{type:'fail',text:'✗ No rule concludes '+goalFact+' = '+goalVal+' — cannot prove'}];
+
+  var steps = [];
+  for (var ri=0; ri<matchRules.length; ri++) {
+    var rule = matchRules[ri];
+    steps.push({type:'try', text:'Trying rule '+rule.id+': '+rule.label});
+    var allProved = true;
+    for (var ci=0; ci<rule.conditions.length; ci++) {
+      var cond = rule.conditions[ci];
+      var subSteps = buildBackwardSteps(rules, facts, cond.f, cond.v, depth+1, JSON.parse(JSON.stringify(visited)));
+      steps = steps.concat(subSteps);
+      if (subSteps[subSteps.length-1].type === 'fail') { allProved = false; break; }
+    }
+    if (allProved) {
+      steps.push({type:'proved', text:'✓ Proved: '+goalFact+' = '+goalVal+' via rule '+rule.id});
+      return steps;
+    } else {
+      steps.push({type:'fail_rule', text:'✗ Rule '+rule.id+' failed — conditions not all met'});
+    }
+  }
+  steps.push({type:'fail', text:'✗ Could not prove '+goalFact+' = '+goalVal});
+  return steps;
+}
+
+/* ═══════════════════════════════════════════════════
+   DEMO 1 — EXPERT SYSTEM LAB
+═══════════════════════════════════════════════════ */
+(function(){
+  var currentSc = 'animals';
+  var facts = {};
+  var enabledRules = {};
+
+  function scenario() { return KB[currentSc]; }
+
+  function initScenario() {
+    facts = {};
+    enabledRules = {};
+    scenario().rules.forEach(function(r){ enabledRules[r.id] = true; });
+    renderRules();
+    renderFacts();
+    renderEdgeCases();
+    document.getElementById('d1ResultArea').innerHTML =
+      '<div style="font-family:var(--mono);font-size:10px;color:var(--muted2);padding:16px 0;text-align:center">Set facts and click Run Inference</div>';
+    document.getElementById('d1AllergyAlert').style.display = 'none';
+  }
+
+  function renderRules() {
+    var sc = scenario();
+    var html = '';
+    sc.rules.forEach(function(r) {
+      html += '<div class="rule-item'+(r.brittle?' rule-brittle':'')+'">'+
+        '<div class="rule-head" onclick="d1ToggleRule(\''+r.id+'\')">'+
+          '<div class="rule-toggle'+(enabledRules[r.id]?' on':'')+'">'+
+            (enabledRules[r.id]?'✓':'')+'</div>'+
+          '<div class="rule-label">'+r.label+'</div>'+
+          '<span class="rule-expand" onclick="d1ExpandRule(event,\'rb_'+r.id+'\')">▾</span>'+
+        '</div>'+
+        '<div class="rule-body" id="rb_'+r.id+'">'+
+          r.desc.replace(/\n/g,'<br>').replace(/(IF|AND|THEN)/g,'<span class="cond">$1</span>')+
+        '</div>'+
+      '</div>';
+    });
+    document.getElementById('d1RuleList').innerHTML = html;
+    document.getElementById('d1RuleCount').textContent = '('+sc.rules.length+' rules)';
+  }
+
+  function renderFacts() {
+    var sc = scenario();
+    var html = '';
+    sc.facts.forEach(function(f) {
+      html += '<label class="fact-item'+(facts[f.id]?' highlighted':'')+'">'+
+        '<input type="checkbox" '+(facts[f.id]?'checked':'')+
+        ' onchange="d1SetFact(\''+f.id+'\',this.checked)"> '+f.label+'</label>';
+    });
+    document.getElementById('d1FactsList').innerHTML = html;
+  }
+
+  function renderEdgeCases() {
+    var sc = scenario();
+    var html = '';
+    sc.edgeCases.forEach(function(ec, i) {
+      html += '<button class="ec-btn'+(ec.brittle?' brittle':'')+'\" onclick="d1LoadEdgeCase('+i+')">'+
+        ec.label+'<br><span style="opacity:.6;font-size:8px">'+ec.failMode+'</span></button>';
+    });
+    document.getElementById('d1EdgeCases').innerHTML = html;
+  }
+
+  window.d1ToggleRule = function(id) {
+    enabledRules[id] = !enabledRules[id];
+    renderRules();
+  };
+  window.d1ExpandRule = function(e, id) {
+    e.stopPropagation();
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('open');
+  };
+  window.d1SetFact = function(id, val) {
+    facts[id] = val;
+    if (!val) delete facts[id];
+    renderFacts();
+  };
+  window.d1LoadEdgeCase = function(i) {
+    var ec = scenario().edgeCases[i];
+    facts = {};
+    Object.keys(ec.facts).forEach(function(k){ if(ec.facts[k]) facts[k] = true; });
+    renderFacts();
+    // Auto-run and show note
+    d1Run();
+    // Show note in result area after results
+    var ra = document.getElementById('d1ResultArea');
+    var note = document.createElement('div');
+    note.style.cssText='margin-top:8px;padding:9px 12px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);border-radius:7px;font-size:12px;color:#fde68a;line-height:1.6;font-family:var(--font)';
+    note.textContent = ec.note;
+    ra.appendChild(note);
+  };
+
+  window.d1Run = function() {
+    var sc = scenario();
+    var activeRules = sc.rules.filter(function(r){ return enabledRules[r.id]; }).map(function(r){
+      return Object.assign({}, r, {enabled:true});
+    });
+    var result = runForward(activeRules, facts);
+    var html = '';
+
+    // Fired rules
+    if (result.steps.length === 0) {
+      html += '<div class="fired-rule"><div class="fr-label">No rules fired</div>'+
+        '<div class="fr-text">No conditions are fully satisfied by the current facts.</div></div>';
+    }
+    result.steps.forEach(function(s) {
+      html += '<div class="fired-rule"><div class="fr-label">✓ '+s.rule.label+' (CF '+s.rule.cf+')</div>'+
+        s.newFacts.map(function(c){ return '<div class="fr-conc">→ '+c.f+' = '+c.v+'</div>'; }).join('')+
+        '</div>';
+    });
+
+    // Check for conflicts
+    var classVals = result.steps.filter(function(s){
+      return s.newFacts.some(function(c){return c.f==='classification'||c.f==='diagnosis';});
+    });
+    var hasMammal = result.facts.is_mammal, hasBird = result.facts.is_bird;
+    var hasConflict = hasMammal && hasBird;
+
+    // Main conclusion
+    var diag = result.facts.diagnosis || result.facts.classification;
+    var mammalOrBird = hasMammal ? 'Mammal' : hasBird ? 'Bird' : null;
+    var finalClass = result.facts.classification || (mammalOrBird ? mammalOrBird+' (no specific type)' : null);
+    var rec = result.facts.recommendation || result.facts.recommend;
+
+    if (hasConflict) {
+      html += '<div class="conclusion-box conflict"><div class="cl-label">⚠ Contradiction</div>'+
+        '<div class="cl-val">Both is_mammal AND is_bird concluded</div>'+
+        '<div class="cl-sub">Two rules fired contradictory conclusions. The brittle "has_wings → bird" rule conflicts with mammal rules for this input. This is the rule maintenance problem.</div></div>';
+    } else if (diag || finalClass) {
+      html += '<div class="conclusion-box success">'+
+        '<div class="cl-label">'+(diag?'Diagnosis':'Classification')+'</div>'+
+        '<div class="cl-val">'+(diag||finalClass)+'</div>'+
+        (rec?'<div class="cl-sub">Recommendation: '+rec+'</div>':'')+
+        '</div>';
+    } else if (result.steps.length > 0) {
+      html += '<div class="conclusion-box partial"><div class="cl-label">Partial result</div>'+
+        '<div class="cl-val">Intermediate conclusions reached, no final classification</div>'+
+        '<div class="cl-sub">'+JSON.stringify(result.facts)+'</div></div>';
+    } else {
+      html += '<div class="conclusion-box failure"><div class="cl-label">No diagnosis</div>'+
+        '<div class="cl-val">Insufficient facts — no rules fired</div>'+
+        '<div class="cl-sub">This is silent failure. The system has no rule covering this combination. A human expert would ask follow-up questions.</div></div>';
+    }
+
+    document.getElementById('d1ResultArea').innerHTML = html;
+
+    // Allergy alert
+    var allergyAlert = document.getElementById('d1AllergyAlert');
+    if (facts.allergic_to_penicillin && result.facts.recommend === 'Penicillin G IV') {
+      allergyAlert.style.display = 'block';
+    } else {
+      allergyAlert.style.display = 'none';
+    }
+  };
+
+  window.d1Clear = function() {
+    facts = {};
+    renderFacts();
+    document.getElementById('d1ResultArea').innerHTML =
+      '<div style="font-family:var(--mono);font-size:10px;color:var(--muted2);padding:16px 0;text-align:center">Set facts and click Run Inference</div>';
+    document.getElementById('d1AllergyAlert').style.display = 'none';
+  };
+
+  // Build scenario tabs
+  var tabs = document.getElementById('d1Tabs');
+  Object.keys(KB).forEach(function(k, i) {
+    var b = document.createElement('button');
+    b.className = 'sc-tab'+(i===0?' active':'');
+    b.textContent = KB[k].label;
+    b.onclick = function() {
+      currentSc = k;
+      document.querySelectorAll('#d1Tabs .sc-tab').forEach(function(t,j){ t.classList.toggle('active',j===Object.keys(KB).indexOf(k)); });
+      initScenario();
+    };
+    tabs.appendChild(b);
+  });
+
+  initScenario();
+})();
+
+/* ═══════════════════════════════════════════════════
+   DEMO 2 — CHAINING VISUALISER
+═══════════════════════════════════════════════════ */
+(function(){
+  var currentSc = 'animals';
+  var mode = 'forward';
+  var allSteps = [];
+  var currentStep = -1;
+
+  function scenario() { return KB[currentSc]; }
+
+  function updateGoalSelect() {
+    var sc = scenario();
+    var sel = document.getElementById('d2GoalSelect');
+    sel.innerHTML = '';
+    sc.chainGoals.forEach(function(g, i) {
+      var opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = g.label;
+      sel.appendChild(opt);
+    });
+    updateModeDesc();
+  }
+
+  function updateModeDesc() {
+    var sc = scenario();
+    var idx = +document.getElementById('d2GoalSelect').value;
+    var goal = sc.chainGoals[idx] || sc.chainGoals[0];
+    var desc = document.getElementById('d2ModeDesc');
+    if (mode === 'forward') {
+      desc.textContent = 'Forward: start with known facts, fire all applicable rules, accumulate conclusions.';
+    } else {
+      desc.textContent = 'Backward: start from a hypothesis, find rules that would prove it, check their conditions recursively.';
+    }
+  }
+
+  window.d2SetMode = function(m) {
+    mode = m;
+    document.getElementById('d2BtnFwd').classList.toggle('active', m==='forward');
+    document.getElementById('d2BtnBwd').classList.toggle('active', m==='backward');
+    document.getElementById('d2GoalLabel').textContent = m==='forward' ? 'Starting Facts' : 'Goal / Hypothesis';
+    updateGoalSelect();
+    d2Build();
+  };
+
+  window.d2Build = function() {
+    var sc = scenario();
+    var idx = +document.getElementById('d2GoalSelect').value;
+    var goal = sc.chainGoals[idx] || sc.chainGoals[0];
+    var rules = sc.rules.map(function(r){ return Object.assign({},r,{enabled:true}); });
+    allSteps = [];
+    currentStep = -1;
+
+    if (mode === 'forward') {
+      var initFacts = goal.facts || {};
+      // Step 0: show initial facts
+      allSteps.push({type:'start', text:'Initial facts: '+Object.keys(initFacts).filter(function(k){return initFacts[k];}).join(', ')});
+      var result = runForward(rules, initFacts);
+      result.steps.forEach(function(s) {
+        allSteps.push({
+          type:'fire',
+          text:'Rule fires: '+s.rule.label+'\n→ Concludes: '+s.newFacts.map(function(c){return c.f+'='+c.v;}).join(', ')
+        });
+      });
+      var diag = result.facts.diagnosis || result.facts.classification || result.facts.recommendation;
+      allSteps.push({
+        type: diag ? 'proved' : 'fail',
+        text: diag ? 'Final conclusion: '+diag : 'No final classification reached — chain exhausted'
+      });
+    } else {
+      // Backward: pick first conclusion fact from a diagnosis rule as the goal
+      var goalFact = 'diagnosis';
+      var goalVal = (sc === KB.animals) ? 'classification' : undefined;
+      // Use the medical / helpdesk goals
+      if (goal.goal) goalFact = goal.goal;
+      if (goal.targetVal) goalVal = goal.targetVal;
+      var targetRule = rules.find(function(r){ return r.conclusions.some(function(c){return c.f===goalFact;}); });
+      if (!goalVal && targetRule) goalVal = targetRule.conclusions.find(function(c){return c.f===goalFact;}).v;
+
+      var initFacts = goal.facts || {};
+      allSteps.push({type:'start', text:'Goal: prove '+goalFact+' = "'+goalVal+'"'});
+      var bwSteps = buildBackwardSteps(rules, initFacts, goalFact, goalVal, 0, {});
+      allSteps = allSteps.concat(bwSteps.map(function(s){
+        return { type: s.type==='known'||s.type==='proved' ? 'proved' : s.type==='fail'||s.type==='fail_rule' ? 'fail' : 'fire',
+                 text: s.text };
+      }));
+    }
+
+    renderSteps();
+    document.getElementById('d2Result').className = 'chain-result';
+  };
+
+  function renderSteps() {
+    var html = '';
+    allSteps.forEach(function(s, i) {
+      var cls = 'chain-step';
+      if (i < currentStep) cls += ' done';
+      else if (i === currentStep) cls += ' active';
+      var stepType = s.type === 'proved' ? 'done' : s.type === 'fail' || s.type === 'fail_rule' ? 'failed' : '';
+      if (i <= currentStep && stepType) cls += ' '+stepType;
+      html += '<div class="'+cls+'">'+
+        '<div class="cs-num">Step '+(i+1)+'</div>'+
+        '<div class="cs-text">'+s.text.replace(/\n/g,'<br>')+'</div>'+
+      '</div>';
+    });
+    document.getElementById('d2Steps').innerHTML = html || '<div style="font-family:var(--mono);font-size:10px;color:var(--muted2);text-align:center;padding:20px 0">No steps yet</div>';
+  }
+
+  function showResult() {
+    var last = allSteps[allSteps.length-1];
+    var el = document.getElementById('d2Result');
+    if (!last) return;
+    el.className = 'chain-result show '+(last.type==='proved'?'proved':'failed');
+    el.textContent = last.type==='proved' ? '✓ '+last.text : '✗ '+last.text;
+  }
+
+  window.d2Step = function(dir) {
+    if (dir === 1 && currentStep < allSteps.length-1) currentStep++;
+    else if (dir === -1 && currentStep > -1) currentStep--;
+    renderSteps();
+    if (currentStep === allSteps.length-1) showResult();
+    // Scroll active step into view
+    var active = document.querySelector('.chain-step.active');
+    if (active) active.scrollIntoView({block:'nearest',behavior:'smooth'});
+  };
+
+  window.d2RunAll = function() {
+    currentStep = allSteps.length-1;
+    renderSteps();
+    showResult();
+  };
+
+  // Build tabs
+  var tabs = document.getElementById('d2Tabs');
+  Object.keys(KB).forEach(function(k, i) {
+    var b = document.createElement('button');
+    b.className = 'sc-tab'+(i===0?' active':'');
+    b.textContent = KB[k].label;
+    b.onclick = function() {
+      currentSc = k;
+      document.querySelectorAll('#d2Tabs .sc-tab').forEach(function(t,j){ t.classList.toggle('active',j===Object.keys(KB).indexOf(k)); });
+      updateGoalSelect();
+      d2Build();
+    };
+    tabs.appendChild(b);
+  });
+
+  updateGoalSelect();
+  d2Build();
+})();
+</script>
+</body>
+</html>
