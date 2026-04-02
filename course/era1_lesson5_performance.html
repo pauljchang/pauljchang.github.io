@@ -224,6 +224,9 @@ input[type=range].w2::-webkit-slider-thumb { -webkit-appearance:none;width:12px;
 .fl-stat { background:#0a0d14;border-radius:6px;padding:8px 10px; }
 .fl-stat-lbl { font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px; }
 .fl-stat-val { font-family:var(--mono);font-size:16px;color:#e2e8f0;font-weight:700; }
+.pullquote{background:linear-gradient(135deg,rgba(139,92,246,.07),rgba(139,92,246,.02));border:1px solid rgba(139,92,246,.2);border-radius:12px;padding:22px 26px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:17px;font-style:italic;color:#c4b5fd;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
 </style>
 </head>
 <body>
@@ -265,36 +268,23 @@ input[type=range].w2::-webkit-slider-thumb { -webkit-appearance:none;width:12px;
 
   <!-- 02 STORY -->
   <section class="section">
-    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">The Accuracy Illusion</h2></div>
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">The Algorithm in the Courtroom</h2></div>
     <div class="prose">
-      <p>In 2016, a well-publicized AI system achieved 99.5% accuracy detecting a rare skin condition affecting 0.4% of the population. Journalists called it superhuman. Dermatologists were impressed. There was one problem: a model that simply said "you don't have it" for every single patient would achieve 99.6% accuracy — slightly better, at zero cost, with zero intelligence.</p>
-      <p>Accuracy measures the fraction of predictions that are correct. When one class is rare, the "always predict the common class" strategy dominates — not because it's smart, but because it's never wrong about the 99% while ignoring the 1% entirely. <strong>This is the accuracy illusion</strong>, and it lurks in nearly every real-world ML deployment: fraud detection, medical diagnosis, spam filtering, equipment failure prediction.</p>
-      <p>The confusion matrix is the cure. Instead of collapsing all outcomes into one number, it separates predictions into four quadrants: things you correctly caught, things you incorrectly flagged, things you missed, and things you correctly ignored. From those four numbers, you can ask more precise questions — and those questions have very different answers depending on what failure means in your application.</p>
-      <blockquote>"A smoke alarm optimized for accuracy would never ring. It would achieve 99.99% accuracy by correctly predicting 'no fire' every moment of every day. We don't build smoke alarms that way. We shouldn't build classifiers that way either."</blockquote>
+      <p>In 2016, a company called Northpointe sold a risk-assessment tool called <strong>COMPAS &mdash; Correctional Offender Management Profiling for Alternative Sanctions</strong>. Courts across the United States used it to help judges decide whether a defendant awaiting trial should be held in jail or released. The tool assigned each defendant a score from 1 to 10 predicting their likelihood of reoffending. A high score could mean a longer sentence or denied bail. A low score could mean release.</p>
+      <p>That same year, the investigative journalism outlet ProPublica published an analysis titled <em>"Machine Bias."</em> They had obtained COMPAS scores for over 7,000 defendants in Broward County, Florida, and followed up two years later to see who actually reoffended. What they found was deeply troubling. The tool's <strong>overall accuracy was similar for Black and white defendants</strong> &mdash; about 65% in both cases. Northpointe had published this number. Journalists had cited it. Courts had relied on it.</p>
+      <p>But accuracy was the wrong metric. When ProPublica broke the confusion matrix open, a different picture emerged. Among defendants who <em>did not</em> reoffend, <strong>Black defendants were flagged as high-risk at nearly twice the rate of white defendants</strong> &mdash; a false positive rate of 44.9% vs. 23.5%. Among defendants who <em>did</em> reoffend, white defendants were more often incorrectly labeled low-risk &mdash; a false negative rate of 47.7% vs. 28.0%. The same overall accuracy concealed a deeply asymmetric distribution of errors across racial lines.</p>
+      <p>Northpointe disputed the analysis. Academics debated the statistics. Courts kept using the tool. The case became a landmark in the field of algorithmic fairness &mdash; not because it proved the tool was biased, but because it proved that <strong>a single accuracy number is not enough information to evaluate a classifier</strong>, especially one making consequential decisions about human lives. You need the full confusion matrix. You need to ask who is bearing the cost of each type of error.</p>
     </div>
-    <div class="detail-box">
-      <div class="detail-head" onclick="toggleDetail('mathBox','mathArrow')">
-        <span>📐 The Mathematics — Deriving Metrics from the Four Quadrants</span>
-        <span class="detail-arrow" id="mathArrow">▼ expand</span>
-      </div>
-      <div class="detail-body" id="mathBox">
-        <p>Given a confusion matrix with counts TP, FP, FN, TN:</p>
-        <div class="code-block">                  Predicted +    Predicted −
-Actual   +  |      TP        |      FN       |   (all real positives = P = TP+FN)
-Actual   −  |      FP        |      TN       |   (all real negatives = N = FP+TN)</div>
-        <p>The derived metrics:</p>
-        <div class="code-block">Accuracy    = (TP + TN) / (TP + FP + FN + TN)   ← misleading when imbalanced
-Precision   = TP / (TP + FP)                    ← "of what I flagged, how much was real?"
-Recall      = TP / (TP + FN)                    ← "of what was real, how much did I catch?"
-Specificity = TN / (TN + FP)                    ← "of all negatives, how many did I correctly ignore?"
-F1          = 2·TP / (2·TP + FP + FN)           ← harmonic mean of precision and recall
-FPR         = FP / (FP + TN)                    ← false alarm rate (x-axis of ROC curve)
-TPR = Recall = TP / (TP + FN)                   ← y-axis of ROC curve</div>
-        <p><strong>Why harmonic mean for F1?</strong> Arithmetic mean (P+R)/2 is fooled by a model with P=1.0 and R=0.001 — it scores 0.5, implying decent performance. Harmonic mean penalizes extreme imbalance: 2·(1.0·0.001)/(1.0+0.001) ≈ 0.002. A model that never misses anything real but only ever makes one prediction is not a good model.</p>
-        <p><strong>The ROC curve</strong> plots TPR (y-axis) against FPR (x-axis) as the decision threshold sweeps from 0 to 1. AUC = Area Under the ROC Curve: 0.5 means the model is no better than random; 1.0 is perfect. A model that scores all positives higher than all negatives has AUC = 1.0 regardless of the threshold chosen.</p>
-      </div>
+
+    <div class="pullquote">
+      <p>"The score proved remarkably unreliable in forecasting violent crime &mdash; and it was particularly likely to falsely flag Black defendants as future criminals, wrongly labeling them this way at almost twice the rate as white defendants."</p>
+      <cite>&mdash; ProPublica, "Machine Bias," May 2016</cite>
     </div>
-  </section>
+
+    <div class="prose">
+      <p>The COMPAS case is the reason the confusion matrix exists as a standard tool. Accuracy collapses a 2&times;2 table into a single number, discarding the information about <em>which</em> mistakes the model makes and <em>to whom</em>. The four quadrants &mdash; true positives, false positives, false negatives, true negatives &mdash; are not interchangeable. A false positive (predicting someone will reoffend when they won't) and a false negative (predicting they won't when they will) are entirely different events with entirely different consequences, and they may fall on entirely different populations.</p>
+      <blockquote>"A smoke alarm optimized for accuracy would never ring. It would achieve 99.99% accuracy by correctly predicting 'no fire' every moment of every day. We don't build smoke alarms that way &mdash; and we especially shouldn't build consequential classifiers that way when the false positives and false negatives fall unequally on people with less power to object."</blockquote>
+    </div>
 
   <!-- 03 DEMOS -->
   <section class="section">
@@ -433,6 +423,30 @@ TPR = Recall = TP / (TP + FN)                   ← y-axis of ROC curve</div>
             <div style="font-family:var(--mono);font-size:10px;color:#94a3b8;line-height:1.7" id="flFormula"></div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">&#9878; The COMPAS Matrix</div>
+          <div class="ex-desc">Reconstruct what ProPublica found &mdash; and understand why equal accuracy can hide unequal errors.</div></div></div>
+      <div class="ex-body">
+        <p>In Demo 1, set disease prevalence to <strong>13%</strong> (roughly matching the reoffending rate in the ProPublica dataset), sensitivity to <strong>65%</strong>, and specificity to <strong>76%</strong>. This approximates the COMPAS confusion matrix for white defendants in Broward County.</p>
+        <p>&rarr; Now keep accuracy approximately the same but increase the false positive rate: lower specificity to <strong>55%</strong> and raise sensitivity slightly. This approximates what ProPublica found for Black defendants. Overall accuracy stays near 65% &mdash; but the confusion matrices are strikingly different.</p>
+        <p>&rarr; Calculate the false positive rate (FP &divide; (FP + TN)) for both settings. What is the ratio? How many more people in the high-FP group are incorrectly predicted to reoffend per 1,000 defendants?</p>
+        <p><strong>Key insight:</strong> A single accuracy number hides this difference entirely. The confusion matrix reveals it immediately. This is why evaluation of consequential classifiers must always include a per-group breakdown of TP, FP, FN, TN &mdash; not just overall accuracy.</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">&#127942; Beat the Baseline</div>
+          <div class="ex-desc">The "always predict negative" classifier achieves high accuracy for free. Your task: build something actually better &mdash; measured by precision and recall, not accuracy.</div></div></div>
+      <div class="ex-body">
+        <p>Set prevalence to <strong>5%</strong> in Demo 1. Note the accuracy the "always negative" baseline achieves. Now try to build a model (adjust sensitivity and specificity) that beats the baseline on accuracy <em>and</em> achieves recall &ge; 60%.</p>
+        <p>&rarr; What is the minimum specificity needed to beat the baseline on accuracy? Does that specificity allow recall &ge; 60%? Is there a setting where both conditions hold simultaneously?</p>
+        <p>&rarr; Now switch to <strong>F1 score</strong> as your target. The baseline "always negative" has F1&nbsp;=&nbsp;0 (recall is zero, so F1 is zero). Find sensitivity and specificity that gives F1 &ge; 0.4. Is this easier or harder than beating the accuracy baseline?</p>
+        <p><strong>Key insight:</strong> F1 &ge; 0.4 is a far more meaningful bar than "beats 95% accuracy" when prevalence is 5%. The baseline clears the accuracy bar trivially and fails F1 completely. <strong>Choose your metric before you train your model &mdash; otherwise you optimise for the wrong thing.</strong></p>
       </div>
     </div>
 

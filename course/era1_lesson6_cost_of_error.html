@@ -163,6 +163,9 @@ input[type=range].ac-slider::-webkit-slider-thumb { -webkit-appearance:none;widt
 .fb-stat { background:#0a0d14;border-radius:6px;padding:8px 10px; }
 .fb-stat-lbl { font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px; }
 .fb-stat-val { font-family:var(--mono);font-size:15px;color:#e2e8f0;font-weight:700; }
+.pullquote{background:linear-gradient(135deg,rgba(244,63,94,.07),rgba(244,63,94,.02));border:1px solid rgba(244,63,94,.2);border-radius:12px;padding:22px 26px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:17px;font-style:italic;color:#fda4af;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
 </style>
 </head>
 <body>
@@ -182,8 +185,8 @@ input[type=range].ac-slider::-webkit-slider-thumb { -webkit-appearance:none;widt
       <span>Real-World Decision Making</span><span>·</span>
       <span>Precision, Recall &amp; Risk Tolerance</span>
     </div>
-    <h1>The Cost of Error</h1>
-    <p class="hero-sub">Precision and recall are always in tension. The right operating point isn't a statistical optimum — it's a human judgment about which kind of mistake is more acceptable.</p>
+    <h1>The Cost<br>of Error</h1>
+    <p class="hero-sub">A quota system that pushed lab technicians to screen more slides per day cost thousands of women their lives. The tools to prevent it existed. What was missing was the decision to use them.</p>
     <div class="hero-timeline">
       <div class="tl-item"><span class="tl-year">Medical</span><span class="tl-label">Miss no cancers, accept false alarms</span></div>
       <div class="tl-item"><span class="tl-year">Legal</span><span class="tl-label">Innocent until proven guilty = high precision</span></div>
@@ -204,25 +207,34 @@ input[type=range].ac-slider::-webkit-slider-thumb { -webkit-appearance:none;widt
 
   <!-- 02 STORY -->
   <section class="section">
-    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">Two Ways to Be Wrong</h2></div>
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">The Quota and the Missed Cancer</h2></div>
     <div class="prose">
-      <p>In Lesson 5 you learned to read the confusion matrix. Now comes the harder question: once you know your model makes both false positives and false negatives, <strong>which type of error should you work harder to avoid?</strong></p>
-      <p>The answer is never purely mathematical. It is always a value judgment about consequences. A fire alarm and a spam filter are both binary classifiers. They might even have identical confusion matrices on the same dataset. But they should be tuned to completely different operating points — because the cost of a missed fire and the cost of a missed spam email are not remotely comparable.</p>
-      <p>Precision and recall pull in opposite directions. <strong>Lower the decision threshold</strong> and more examples get flagged as positive — you catch more true positives (recall goes up) but also flag more negatives incorrectly (precision goes down). <strong>Raise the threshold</strong> and you only flag when very confident — precision rises but you miss more real positives (recall falls). You cannot maximize both simultaneously. Every operating point is a tradeoff.</p>
-      <blockquote>"The legal principle 'innocent until proven guilty' is not a statement about probability. It is a deliberate policy choice to prefer false negatives (acquitting the guilty) over false positives (convicting the innocent). The entire criminal justice system is a classifier tuned for high precision at the cost of recall."</blockquote>
-      <p>This lesson puts that tradeoff in your hands across ten real-world domains. The goal is not to find the "right" answer — it is to understand that <strong>the choice of operating point is a moral and practical decision</strong>, not a technical one, and that deploying a classifier without thinking carefully about this choice is itself a decision, usually a bad one.</p>
+      <p>In 1987, the United States Congress passed the Clinical Laboratory Improvement Amendments, triggered in part by a scandal that had been building quietly for years. Across the country, cytology laboratories &mdash; the labs that examine Pap smear slides for signs of cervical cancer &mdash; were under intense economic pressure. Insurance reimbursement rates were falling. Lab technicians, called cytotechnologists, were being pushed to screen more slides per day to maintain revenue. Some labs set explicit quotas: a technician might be expected to screen 100 or more slides in an eight-hour shift.</p>
+      <p>A Pap smear slide is a glass plate with cells scraped from the cervix, stained and fixed. A trained cytotechnologist examines it under a microscope, looking for cells that show abnormal morphology &mdash; a sign of pre-cancerous or cancerous change. The examination requires sustained concentration. Each slide takes two to five minutes when done carefully. At 100 slides a shift, you have less than five minutes per slide including documentation. Fatigue sets in. Attention drifts. <strong>False negatives accumulate.</strong></p>
+      <p>The consequences were not abstract. Women received normal results on slides that contained abnormal cells. They did not return for follow-up. Cancers that were detectable &mdash; and at that stage, treatable &mdash; were missed. By the time symptoms appeared, the disease had often progressed. A 1988 investigation by the Wall Street Journal found that some laboratories had false negative rates as high as 20 to 30 percent. The American Cancer Society estimated that tens of thousands of cases of cervical cancer were missed annually due to laboratory error, much of it attributable to productivity pressure.</p>
+      <p>This was not a technology failure. The microscopes worked. The staining protocols were correct. The cytotechnologists were trained. It was a <strong>threshold failure</strong> &mdash; a systematic decision, made implicitly through quota-setting and economic incentives, to trade recall for throughput. No one sat down and said "we will accept a 25% false negative rate on cancer screening." But that is what the quota system produced. The cost of each false negative was paid by a patient. The benefit of each additional slide screened accrued to the laboratory's balance sheet.</p>
+    </div>
+
+    <div class="pullquote" style="border-color:rgba(244,63,94,.25);background:linear-gradient(135deg,rgba(244,63,94,.07),rgba(244,63,94,.02));">
+      <p style="color:#fda4af;">"Gynecologists say they are finding more cervical cancer cases slipping through the cracks &mdash; cases in which Pap smears from months or even years earlier did show abnormal cells, but were reported as normal."</p>
+      <cite>&mdash; Wall Street Journal investigation into Pap smear screening laboratories, 1987</cite>
+    </div>
+
+    <div class="prose">
+      <p>The 1988 regulations that followed capped the number of slides a cytotechnologist could screen per day at 100, and later at 80. They mandated random re-screening of a percentage of slides reported as normal. They required laboratories to track and report false negative rates. These regulations were, in the language of this lesson, <strong>an explicit policy decision about the acceptable operating point on the precision-recall curve</strong>. Congress was not using that vocabulary. But that is precisely what they were doing: deciding that the false negative rate had been allowed to drift too high, and imposing structural constraints to force it down &mdash; at the cost of throughput.</p>
+      <p>The lesson generalises immediately. Every system that classifies people or objects has a throughput pressure: more loan applications processed per hour, more security screenings per lane, more medical images read per shift. Throughput pressure systematically pushes classifiers toward the high-threshold, high-false-negative end of the operating curve. The people who bear the cost of false negatives are rarely the same people who benefit from the throughput. <strong>The choice of operating point is always a moral decision</strong>, whether it is made explicitly or allowed to drift by default.</p>
     </div>
 
     <div class="tradeoff-visual">
       <div class="tradeoff-card card-recall">
-        <h4>🔴 Optimise for Recall (Minimize FN)</h4>
+        <h4>&#128308; Optimise for Recall (Minimize FN)</h4>
         <p>Catch everything real, even at the cost of many false alarms. The right choice when <strong>missing a true positive is catastrophic</strong> and false alarms are merely inconvenient.</p>
-        <div class="example">Cancer screening · Smoke alarms · TSA security · Bridge cracks · COVID detection</div>
+        <div class="example">Cancer screening &middot; Smoke alarms &middot; TSA security &middot; Bridge cracks &middot; COVID detection</div>
       </div>
       <div class="tradeoff-card card-precision">
-        <h4>🟢 Optimise for Precision (Minimize FP)</h4>
+        <h4>&#128994; Optimise for Precision (Minimize FP)</h4>
         <p>Only flag when very confident, even at the cost of missing some real positives. The right choice when <strong>a false accusation is itself harmful</strong> and missed detections are survivable.</p>
-        <div class="example">Spam filters · Criminal facial recognition · Drug approval · Loan denial</div>
+        <div class="example">Spam filters &middot; Criminal facial recognition &middot; Drug approval &middot; Loan denial</div>
       </div>
     </div>
   </section>
