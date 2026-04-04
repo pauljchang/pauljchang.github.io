@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 2, Lesson 3 — Data Cleaning | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--surface:#161b27;--s2:#1a2035;--border:#1e2d40;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#334155;
+  --ac:#38bdf8;--ac-dim:rgba(56,189,248,.10);--ac-glow:rgba(56,189,248,.28);
+  --green:#4ade80;--red:#f87171;--amber:#f59e0b;--violet:#a78bfa;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;--disp:'Lora',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+.course-nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.era-badge{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em;}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 100px;}
+.hero{padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px;}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.week-badge{background:var(--ac);color:#021825;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em;}
+.hero h1{font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px;}
+.hero-sub{font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px;}
+.hero-timeline{display:flex;gap:36px;flex-wrap:wrap;}
+.tl-item{display:flex;flex-direction:column;gap:3px;}
+.tl-year{font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.1em;}
+.tl-label{font-size:13px;color:var(--muted);}
+.section{margin-bottom:68px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px;}
+.sec-title{font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.obj-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;}
+.obj-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.obj-list li strong{color:#f1f5f9;}
+.prose p{font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82;}
+.prose p:last-child{margin-bottom:0;}
+.prose p strong{color:#e2e8f0;}
+.prose code{font-family:var(--mono);font-size:12px;background:#0a0d14;padding:2px 6px;border-radius:3px;border:1px solid var(--border);color:#7dd3fc;}
+.pullquote{background:linear-gradient(135deg,rgba(56,189,248,.07),rgba(56,189,248,.02));border:1px solid rgba(56,189,248,.2);border-radius:12px;padding:22px 26px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:17px;font-style:italic;color:#7dd3fc;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+/* NULL type cards */
+.null-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:24px 0;}
+.null-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+.null-card h4{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--ac);margin-bottom:6px;}
+.null-card p{font-size:13px;color:#94a3b8;line-height:1.65;margin-bottom:6px;}
+.null-card .ex{font-family:var(--mono);font-size:10px;color:var(--muted);background:#0a0d14;border-radius:4px;padding:4px 8px;display:inline-block;}
+/* Ternary truth table */
+.truth-table-wrap{margin:24px 0;overflow-x:auto;}
+.truth-table{border-collapse:collapse;font-family:var(--mono);font-size:11px;width:100%;}
+.truth-table th{background:var(--s2);color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.1em;padding:8px 12px;border:1px solid var(--border);text-align:center;}
+.truth-table td{padding:8px 12px;border:1px solid var(--border);text-align:center;}
+.tt-true{color:var(--green);font-weight:700;}
+.tt-false{color:var(--red);font-weight:700;}
+.tt-null{color:var(--amber);font-weight:700;}
+.tt-highlight{background:rgba(245,158,11,.08);}
+/* Demo shared */
+.demo-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.demo-topbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.demo-tag{font-family:var(--mono);font-size:11px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase;}
+.demo-hint{font-family:var(--mono);font-size:10px;color:var(--muted2);}
+.ctrl-btn{font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ctrl-btn:hover{border-color:var(--ac);color:var(--ac);}
+.ctrl-btn.active{background:var(--ac-dim);border-color:rgba(56,189,248,.4);color:var(--ac);}
+.ctrl-btn.go{border-color:rgba(74,222,128,.3);color:var(--green);}
+.ctrl-btn.go:hover{background:rgba(74,222,128,.08);}
+.ctrl-btn.danger{border-color:rgba(248,113,113,.3);color:var(--red);}
+/* Demo 1 — Dirty Dataset */
+.d1-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 18px;border-bottom:1px solid var(--border);}
+.d1-stat{background:#0a0d14;border-radius:6px;padding:8px 10px;text-align:center;}
+.d1-stat-num{font-family:var(--mono);font-size:18px;font-weight:700;color:#e2e8f0;}
+.d1-stat-lbl{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-top:2px;}
+.d1-table-wrap{overflow-x:auto;max-height:340px;overflow-y:auto;}
+.d1-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px;}
+.d1-table th{position:sticky;top:0;background:var(--s2);color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em;padding:8px 10px;border:1px solid var(--border);text-align:left;z-index:2;}
+.d1-table td{padding:6px 10px;border:1px solid var(--border);color:#94a3b8;white-space:nowrap;cursor:pointer;transition:background .1s;}
+.d1-table tr:hover td{background:var(--s2);}
+.d1-table td.null-cell{color:var(--amber);font-style:italic;}
+.d1-table td.error-cell{color:var(--red);background:rgba(248,113,113,.06);}
+.d1-table td.dup-cell{color:var(--violet);background:rgba(167,139,250,.06);}
+.d1-table td.fmt-cell{color:var(--amber);background:rgba(245,158,11,.06);}
+.d1-table td.ok-cell{color:var(--green);}
+.d1-table tr.fixed td{opacity:.5;}
+.d1-panel{padding:14px 18px;border-top:1px solid var(--border);}
+.d1-issue-box{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:13px;color:#94a3b8;line-height:1.65;min-height:60px;}
+.d1-issue-box strong{color:#e2e8f0;}
+.d1-issue-box .issue-type{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;}
+.d1-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.d1-action-btn{font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;}
+.d1-action-btn:hover{border-color:var(--ac);color:var(--ac);}
+.d1-action-btn.applied{border-color:rgba(74,222,128,.4);color:var(--green);background:rgba(74,222,128,.06);}
+.quality-bar{height:8px;border-radius:4px;overflow:hidden;background:var(--border);margin:10px 0;}
+.quality-fill{height:100%;border-radius:4px;transition:width .4s;background:linear-gradient(to right,var(--red),var(--amber),var(--green));}
+/* Demo 2 — Imputation */
+.d2-body{padding:18px 20px;}
+.d2-cols{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;}
+.d2-col{background:#0a0d14;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.d2-col-head{padding:8px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;}
+.d2-hist{padding:8px 10px;}
+.d2-col-stats{padding:6px 10px;border-top:1px solid var(--border);font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.6;}
+.d2-slider-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.d2-slider-lbl{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;}
+input[type=range].ac-sl{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,#0a0d14,var(--ac));}
+input[type=range].ac-sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #7dd3fc;cursor:pointer;}
+/* Demo 3 — Fuzzy matching */
+.d3-body{display:grid;grid-template-columns:1fr 1fr;min-height:320px;}
+.d3-left{padding:14px 18px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:10px;}
+.d3-right{padding:14px 18px;display:flex;flex-direction:column;gap:10px;}
+.match-item{padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-family:var(--mono);font-size:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.match-item.merge{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.06);}
+.match-item.keep{border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.05);}
+.match-score{font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;}
+.match-score.high{background:rgba(74,222,128,.15);color:var(--green);}
+.match-score.med{background:rgba(245,158,11,.15);color:var(--amber);}
+.match-score.low{background:rgba(248,113,113,.12);color:var(--red);}
+.pr-meter{margin-top:8px;background:#0a0d14;border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:10px;}
+.pr-row{display:flex;justify-content:space-between;margin-bottom:4px;}
+.pr-bar-wrap{height:6px;background:var(--border);border-radius:3px;margin-bottom:8px;overflow:hidden;}
+.pr-bar{height:100%;border-radius:3px;transition:width .3s;}
+/* NULL simulator */
+.null-sim{background:#0a0d14;border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin:24px 0;}
+.null-sim h4{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--amber);margin-bottom:12px;}
+.ns-query{font-family:var(--mono);font-size:12px;color:#94a3b8;background:var(--s2);border-radius:6px;padding:10px 14px;margin-bottom:10px;line-height:1.7;}
+.ns-query .kw{color:var(--ac);}
+.ns-query .val{color:var(--violet);}
+.ns-result{display:flex;gap:10px;flex-wrap:wrap;}
+.ns-res-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-family:var(--mono);font-size:10px;flex:1;min-width:140px;}
+.ns-res-card .ns-label{font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:4px;}
+.ns-res-card .ns-count{font-size:16px;font-weight:700;}
+.ns-res-card.danger .ns-count{color:var(--red);}
+.ns-res-card.safe .ns-count{color:var(--green);}
+.ns-warning{margin-top:8px;font-size:12px;color:#fca5a5;background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);border-radius:6px;padding:8px 12px;}
+/* ex, disc, gloss */
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.ex-head{padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border);}
+.ex-num{font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(56,189,248,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.ex-title{font-weight:600;font-size:16px;color:#f1f5f9;}
+.ex-desc{font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6;}
+.ex-body{padding:20px;}
+.ex-body p{font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7;}
+.ex-body p:last-child{margin-bottom:0;}
+.ex-body p strong{color:#e2e8f0;}
+.disc-list{list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px;}
+.disc-list li{counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72;}
+.disc-list li::before{content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(56,189,248,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px;}
+.disc-list li strong{color:#e2e8f0;}
+.gloss-grid{display:flex;flex-direction:column;}
+.gloss-entry{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);padding:18px 0;}
+.gloss-entry:last-child{border-bottom:none;}
+.gloss-term{display:flex;flex-direction:column;gap:5px;padding-right:24px;}
+.gloss-term-name{font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700;}
+.gloss-abbr{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.gloss-def{font-size:14.5px;color:#94a3b8;line-height:1.72;}
+.gloss-def strong{color:#e2e8f0;}
+.gloss-code{font-family:var(--mono);font-size:11px;color:#7dd3fc;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:7px 12px;display:block;margin-top:8px;line-height:1.8;}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border);}
+.nav-btn{text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s;}
+.nav-btn:hover{border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow);}
+.nav-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.nav-title{font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px;}
+.nav-arrow{font-size:20px;color:var(--ac);}
+@media(max-width:680px){
+  .null-cards,.d2-cols{grid-template-columns:1fr;}
+  .d3-body{grid-template-columns:1fr;}
+  .d3-left{border-right:none;border-bottom:1px solid var(--border);}
+  .d1-stats-row{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface);transition:color .15s" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 2: SYMBOLIC AI</span>
+  <span>›</span><span>Evolution of Intelligence</span><span>›</span>
+  <span style="color:#94a3b8">Era 2, Lesson 3 — Data Cleaning</span>
+</nav>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 2 · LESSON 3</span>
+      <span>1980s – Present</span><span>·</span>
+      <span>NULL Values, Missing Data, and the Data Janitor's Craft</span>
+    </div>
+    <h1>Garbage In,<br>Garbage Out</h1>
+    <p class="hero-sub">Before any model can reason, any query can run, or any rule can fire — the data has to be in a state where those operations are meaningful. Most of the time, it isn't.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1970</span><span class="tl-label">Codd introduces NULL — "unknown" as a first-class value</span></div>
+      <div class="tl-item"><span class="tl-year">1980s</span><span class="tl-label">Database explosion exposes real-world data quality problems</span></div>
+      <div class="tl-item"><span class="tl-year">1990s</span><span class="tl-label">Data warehousing — the first serious attempt at consolidation</span></div>
+      <div class="tl-item"><span class="tl-year">Today</span><span class="tl-label">60–80% of data science time is data cleaning</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">🗂️</span><div><strong>Distinguish</strong> the three meanings of NULL — not collected, not applicable, and unknown — and explain why each implies a different cleaning strategy.</div></li>
+      <li><span class="obj-icon">⚖️</span><div><strong>Apply</strong> ternary logic to SQL WHERE clauses and identify the silent failure mode: queries that exclude NULL rows without warning.</div></li>
+      <li><span class="obj-icon">🔍</span><div><strong>Classify</strong> data quality problems — NULLs, exact and fuzzy duplicates, outliers, and format inconsistencies — and choose an appropriate resolution strategy for each.</div></li>
+      <li><span class="obj-icon">📊</span><div><strong>Compare</strong> imputation strategies (drop, mean, median, mode) and identify which distribution shapes make each strategy harmful.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">The Warehouse That Wasn't</h2></div>
+    <div class="prose">
+      <p>By the mid-1980s, large organizations had accumulated years of data in relational databases. Insurance companies had policy records. Hospitals had patient records. Banks had transaction records. Each department had built its own system, in its own format, with its own conventions. When the data warehouse movement arrived — the idea that you could consolidate all of an organization's data into a single analytical store — the first discovery was almost universal: <strong>the data was not what anyone thought it was.</strong></p>
+      <p>A hospital attempting to consolidate patient records from two acquired clinics in 1987 found: dates of birth entered in six different formats. Patient names in all-caps in one system, title case in another. A blood type field that used "O+", "O positive", "O pos", and "0+" (with a zero) interchangeably. NULL values in the allergy field that meant three different things depending on which clinic entered the record — not collected, no known allergies, or the field didn't exist in the original paper form. And duplicate patients: the same person admitted under slightly different name spellings at different facilities, now appearing as two separate records with two separate medication histories.</p>
+      <p>This was not a rare situation. It was the standard situation. The lesson the data warehouse movement learned — slowly and expensively — was that <strong>data quality is not a technical problem, it is an organizational problem</strong>. The technical tools for cleaning data are not complicated. What is complicated is understanding the domain well enough to know what "correct" looks like, tracing the provenance of errors back to their source, and building processes that prevent the same errors from recurring.</p>
+    </div>
+    <div class="pullquote">
+      <p>"Data scientists spend 60% of their time on cleaning and organizing data. This is the least enjoyable part of the job — and, arguably, the most important."</p>
+      <cite>&mdash; CrowdFlower Data Science Report, 2016</cite>
+    </div>
+    <div class="prose">
+      <p>The phrase "garbage in, garbage out" predates computers — it was used by Charles Babbage in the 19th century to make exactly this point about mechanical calculation. But it took the database era to give the problem its modern form. A rule-based expert system like MYCIN could only fire rules on facts that were present and correct. A statistical model trained on dirty data learns the noise as signal. A query that silently ignores NULL rows returns a result that looks correct but isn't. <strong>Every downstream operation inherits whatever problems exist in the data, and most operations do not warn you that they're doing so.</strong></p>
+    </div>
+
+    <!-- NULL section -->
+    <div class="section-head" style="margin-top:40px;margin-bottom:16px"><span class="sec-num" style="font-size:13px">2a</span><h2 class="sec-title" style="font-size:20px">NULL: The Three-Headed Problem</h2></div>
+    <div class="prose">
+      <p>When Edgar Codd introduced NULL in the relational model, he was making a philosophical commitment: a database should be able to represent the state of <em>not knowing</em> something, distinct from knowing it is false. The alternative — inventing sentinel values like 99999 for unknown age or "N/A" for unknown name — pollutes the data with fake values that then corrupt every calculation.</p>
+      <p>The problem is that a single NULL marker is being asked to represent three completely different situations, each requiring a different response:</p>
+    </div>
+    <div class="null-cards">
+      <div class="null-card">
+        <h4>Not Collected</h4>
+        <p>The field existed but was never asked. Pre-2010 patient records have no email address — not because the patient doesn't have one, but because it wasn't collected.</p>
+        <span class="ex">email = NULL (record from 1987)</span>
+        <p style="font-size:12px;color:#64748b;margin-top:8px">Strategy: usually leave as NULL. Filling in a value would be fabricating data.</p>
+      </div>
+      <div class="null-card">
+        <h4>Not Applicable</h4>
+        <p>The field genuinely doesn't apply to this row. A male patient doesn't have a pregnancy date. A deceased patient doesn't have a next appointment.</p>
+        <span class="ex">pregnancy_date = NULL (male patient)</span>
+        <p style="font-size:12px;color:#64748b;margin-top:8px">Strategy: often correct to leave as NULL, but may indicate a schema design problem.</p>
+      </div>
+      <div class="null-card">
+        <h4>Unknown</h4>
+        <p>The field should have a value but we don't know it. The patient was unconscious on admission. The blood type wasn't on file. The allergy history was verbal and not recorded.</p>
+        <span class="ex">blood_type = NULL (unconscious admission)</span>
+        <p style="font-size:12px;color:#64748b;margin-top:8px">Strategy: the most dangerous case. May require imputation, flagging, or active collection.</p>
+      </div>
+    </div>
+
+    <div class="section-head" style="margin-top:36px;margin-bottom:16px"><span class="sec-num" style="font-size:13px">2b</span><h2 class="sec-title" style="font-size:20px">Ternary Logic: When NULL Meets Boolean</h2></div>
+    <div class="prose">
+      <p>Standard Boolean logic has two values: TRUE and FALSE. The moment you introduce NULL as "unknown," you need a third. SQL operates under <strong>three-valued logic</strong> — every logical expression can evaluate to TRUE, FALSE, or NULL (unknown). The rules are mostly intuitive, but a few cases are deeply counterintuitive and cause real bugs in production systems:</p>
+    </div>
+    <div class="truth-table-wrap">
+      <table class="truth-table">
+        <tr><th>A</th><th>B</th><th>A AND B</th><th>A OR B</th><th>NOT A</th></tr>
+        <tr><td class="tt-true">TRUE</td><td class="tt-true">TRUE</td><td class="tt-true">TRUE</td><td class="tt-true">TRUE</td><td class="tt-false">FALSE</td></tr>
+        <tr><td class="tt-true">TRUE</td><td class="tt-false">FALSE</td><td class="tt-false">FALSE</td><td class="tt-true">TRUE</td><td class="tt-false">FALSE</td></tr>
+        <tr class="tt-highlight"><td class="tt-true">TRUE</td><td class="tt-null">NULL</td><td class="tt-null">NULL</td><td class="tt-true">TRUE</td><td class="tt-false">FALSE</td></tr>
+        <tr><td class="tt-false">FALSE</td><td class="tt-true">TRUE</td><td class="tt-false">FALSE</td><td class="tt-true">TRUE</td><td class="tt-true">TRUE</td></tr>
+        <tr><td class="tt-false">FALSE</td><td class="tt-false">FALSE</td><td class="tt-false">FALSE</td><td class="tt-false">FALSE</td><td class="tt-true">TRUE</td></tr>
+        <tr class="tt-highlight"><td class="tt-false">FALSE</td><td class="tt-null">NULL</td><td class="tt-false">FALSE</td><td class="tt-null">NULL</td><td class="tt-true">TRUE</td></tr>
+        <tr class="tt-highlight"><td class="tt-null">NULL</td><td class="tt-true">TRUE</td><td class="tt-null">NULL</td><td class="tt-true">TRUE</td><td class="tt-null">NULL</td></tr>
+        <tr class="tt-highlight"><td class="tt-null">NULL</td><td class="tt-false">FALSE</td><td class="tt-false">FALSE</td><td class="tt-null">NULL</td><td class="tt-null">NULL</td></tr>
+        <tr class="tt-highlight"><td class="tt-null">NULL</td><td class="tt-null">NULL</td><td class="tt-null">NULL</td><td class="tt-null">NULL</td><td class="tt-null">NULL</td></tr>
+      </table>
+    </div>
+    <div class="prose">
+      <p>The highlighted rows are the ones that surprise people. <strong>NULL AND FALSE = FALSE</strong> — even though one operand is unknown, the other being FALSE guarantees the result is FALSE regardless of what the unknown turns out to be. Similarly, <strong>NULL OR TRUE = TRUE</strong> — the TRUE dominates. But <strong>NULL AND TRUE = NULL</strong> and <strong>NULL OR FALSE = NULL</strong> — when the definite value can't override the unknown, the result stays unknown.</p>
+      <p>The practical consequence is the most important: <strong>WHERE clauses only pass rows where the condition is TRUE</strong>. A condition that evaluates to NULL is treated the same as FALSE — the row is silently excluded. This means the query below does <em>not</em> return patients whose age is unknown:</p>
+    </div>
+
+    <!-- NULL simulator -->
+    <div class="null-sim">
+      <h4>⚠ The Silent NULL Trap — Interactive</h4>
+      <div class="ns-query">
+        <span class="kw">SELECT</span> * <span class="kw">FROM</span> patients <span class="kw">WHERE</span> age <span class="kw">!=</span> <span class="val">30</span>;
+      </div>
+      <div style="font-size:13px;color:#94a3b8;margin-bottom:10px">Out of 20 patients: 5 are age 30 (excluded by condition), 3 have NULL age (evaluation = NULL = silently excluded), 12 others pass.</div>
+      <div class="ns-result">
+        <div class="ns-res-card safe"><div class="ns-label">Rows returned</div><div class="ns-count">12</div></div>
+        <div class="ns-res-card danger"><div class="ns-label">Silently dropped (NULL age)</div><div class="ns-count">3</div></div>
+        <div class="ns-res-card"><div class="ns-label">Excluded (age = 30)</div><div class="ns-count">5</div></div>
+      </div>
+      <div class="ns-warning">The query returns 12 rows but gives no indication that 3 rows were dropped. A researcher counting "patients who are not 30" would report 12, missing the 3 unknowns. The correct query: <strong>WHERE age != 30 OR age IS NULL</strong></div>
+    </div>
+  </section>
+
+  <!-- 03 DEMOS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+
+    <!-- DEMO 1 -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — The Dirty Dataset.</strong> A realistic patient record table with seeded problems. Click any highlighted cell to see the issue and choose a cleaning action. Watch the data quality score improve.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Patient Records — Data Quality Audit</span>
+        <span class="demo-hint">click highlighted cells · choose cleaning action</span>
+      </div>
+      <div class="d1-stats-row" id="d1Stats"></div>
+      <div style="padding:8px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span style="font-family:var(--mono);font-size:9px;color:var(--muted2)">Legend:</span>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--amber)">■ NULL / missing</span>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--red)">■ outlier / error</span>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--violet)">■ duplicate</span>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--amber)">■ format issue</span>
+        <button class="ctrl-btn" style="margin-left:auto" onclick="d1Reset()">↺ Reset dataset</button>
+      </div>
+      <div class="d1-table-wrap"><table class="d1-table" id="d1Table"></table></div>
+      <div class="d1-panel">
+        <div class="d1-issue-box" id="d1IssueBox"><span style="color:var(--muted2);font-family:var(--mono);font-size:10px">Click a highlighted cell to inspect the issue</span></div>
+        <div class="d1-actions" id="d1Actions"></div>
+        <div style="margin-top:10px">
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:4px">
+            <span>Data Quality Score</span>
+            <span id="d1ScoreLbl">calculating...</span>
+          </div>
+          <div class="quality-bar"><div class="quality-fill" id="d1QualityFill" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 2 -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — Imputation Strategies.</strong> A patient age column with 20% missing values. Four strategies shown side-by-side with resulting distributions. See which strategy is honest and which is harmful for this data shape.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Imputation — Patient Ages</span>
+        <span class="demo-hint">adjust missing % · compare strategies · see distribution shift</span>
+      </div>
+      <div class="d2-body">
+        <div class="d2-slider-row">
+          <span class="d2-slider-lbl">Missing %:</span>
+          <input type="range" class="ac-sl" id="d2MissPct" min="5" max="50" step="5" value="20" oninput="d2Update()">
+          <span style="font-family:var(--mono);font-size:11px;color:var(--ac);min-width:32px" id="d2MissVal">20%</span>
+          <span class="d2-slider-lbl" style="margin-left:16px">Distribution:</span>
+          <button class="ctrl-btn" id="d2BtnNormal" onclick="d2SetDist('normal')">Normal</button>
+          <button class="ctrl-btn" id="d2BtnBimodal" onclick="d2SetDist('bimodal')">Bimodal</button>
+          <button class="ctrl-btn" id="d2BtnSkewed" onclick="d2SetDist('skewed')">Skewed</button>
+        </div>
+        <div class="d2-cols" id="d2Cols"></div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);margin-top:8px;line-height:1.6" id="d2Note"></div>
+      </div>
+    </div>
+
+    <!-- DEMO 3 -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 3 — Fuzzy Deduplication.</strong> Patient names with spelling variations. Drag the similarity threshold — too low merges distinct patients, too high misses real duplicates. The precision/recall tradeoff reappears.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Fuzzy Matching — Entity Resolution</span>
+        <span class="demo-hint">drag threshold · observe precision/recall tradeoff</span>
+      </div>
+      <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">Similarity threshold:</span>
+        <input type="range" class="ac-sl" id="d3Thresh" min="30" max="95" step="5" value="70" style="flex:1;min-width:120px" oninput="d3Update()">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--ac);min-width:36px" id="d3ThreshVal">70%</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">Algorithm:</span>
+        <button class="ctrl-btn active" id="d3BtnEdit" onclick="d3SetAlgo('edit')">Edit Distance</button>
+        <button class="ctrl-btn" id="d3BtnToken" onclick="d3SetAlgo('token')">Token Overlap</button>
+      </div>
+      <div class="d3-body">
+        <div class="d3-left">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Candidate Pairs</div>
+          <div id="d3Pairs"></div>
+        </div>
+        <div class="d3-right">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Precision / Recall</div>
+          <div class="pr-meter">
+            <div class="pr-row"><span style="color:var(--green)">Precision</span><span id="d3PrecVal" style="font-weight:700"></span></div>
+            <div class="pr-bar-wrap"><div class="pr-bar" id="d3PrecBar" style="background:var(--green)"></div></div>
+            <div class="pr-row"><span style="color:var(--amber)">Recall</span><span id="d3RecVal" style="font-weight:700"></span></div>
+            <div class="pr-bar-wrap"><div class="pr-bar" id="d3RecBar" style="background:var(--amber)"></div></div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.65;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d3Note"></div>
+          <div style="font-size:13px;color:#94a3b8;background:var(--ac-dim);border:1px solid rgba(56,189,248,.2);border-radius:8px;padding:10px 14px;line-height:1.65" id="d3Insight"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">⚠ The NULL Trap</div>
+        <div class="ex-desc">Predict what the following SQL queries return from a patient table where 15% of age values are NULL. No database required — use the ternary logic table.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>For each query, state: (a) which patients are included, (b) which are excluded, (c) whether any exclusion is silent (no warning, no error).</p>
+        <p><strong>Query A:</strong> <code>SELECT * FROM patients WHERE age &gt; 40</code><br>
+        <strong>Query B:</strong> <code>SELECT * FROM patients WHERE age &gt; 40 OR age IS NULL</code><br>
+        <strong>Query C:</strong> <code>SELECT COUNT(*) FROM patients</code><br>
+        <strong>Query D:</strong> <code>SELECT COUNT(age) FROM patients</code><br>
+        <strong>Query E:</strong> <code>SELECT AVG(age) FROM patients</code></p>
+        <p>&rarr; Queries C and D are particularly instructive. <code>COUNT(*)</code> counts all rows including NULLs. <code>COUNT(age)</code> counts only non-NULL values. The difference is the number of patients with unknown age. <code>AVG(age)</code> silently excludes NULLs — it computes the average of known ages only, with no indication that some ages were missing.</p>
+        <p><strong>Key question:</strong> A hospital reports "the average age of our patient population is 52." If 20% of age fields are NULL, is this statement accurate? What would be a more honest way to report it?</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">📊 When Mean Imputation Lies</div>
+        <div class="ex-desc">Use Demo 2 to find the distribution shape where mean imputation is most harmful — and explain why.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 2, switch to the <strong>Bimodal</strong> distribution. This represents a patient population with two distinct age groups — perhaps pediatric and adult wards combined. Set missing percentage to 30%.</p>
+        <p>&rarr; Apply mean imputation. The mean lands in the valley between the two peaks — a value that almost nobody in the real population has. Where does the imputed value cluster on the histogram? What does this do to analyses that depend on the age distribution?</p>
+        <p>&rarr; Switch to median imputation. The median is at roughly the same problematic location. What would be the honest approach for a bimodal distribution? (Hint: what does the analyst need to know before choosing a strategy?)</p>
+        <p><strong>Key insight:</strong> No imputation strategy is universally correct. The right choice depends on the mechanism of missingness (why is the data missing?), the shape of the underlying distribution, and the downstream analysis. The worst outcome is choosing a strategy without thinking about any of these — which is what most automated pipelines do.</p>
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">🔍 The Deduplication Dilemma</div>
+        <div class="ex-desc">Use Demo 3 to find the threshold where the cost of false positives equals the cost of false negatives for a medical context.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 3, start at threshold 50% and slowly raise it to 95%. Track how precision and recall change. At what threshold does precision first reach 100%? What is recall at that point?</p>
+        <p>&rarr; In a patient record system, a <strong>false positive merge</strong> (merging two different patients) is catastrophic — it could mean a patient receives another person's medication history or test results. A <strong>false negative</strong> (failing to merge the same patient's duplicate records) means fragmented care — the doctor doesn't see the full history.</p>
+        <p>&rarr; Given these stakes, should the threshold be higher or lower than you'd use for, say, deduplicating a mailing list? Write a one-sentence policy: "For patient record deduplication, the threshold should be ___ because ___."</p>
+        <p><strong>Bridge to Lesson 5:</strong> This is the same precision/recall tradeoff you saw in the confusion matrix lesson. The domain determines which error is more costly — and that determines the operating point. The math is the same; the stakes are different.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>The Mechanism of Missingness.</strong> Statisticians distinguish three types of missing data: MCAR (missing completely at random), MAR (missing at random — correlated with observed variables), and MNAR (missing not at random — correlated with the missing value itself). An income field that is more likely to be blank for high earners is MNAR. Why does the mechanism of missingness matter for choosing an imputation strategy? Give an example where ignoring the mechanism produces a biased result.</li>
+      <li><strong>Codd's NULL Debate.</strong> Chris Date, one of the most prominent relational database theorists, argued that Codd's NULL was a mistake and should be abolished — replaced by two separate markers: one for "inapplicable" and one for "unknown." Date pointed out that three-valued logic creates logical paradoxes and inconsistencies in SQL. Do you think a single NULL was the right design decision? What would a database with two distinct absence markers look like in practice?</li>
+      <li><strong>Cleaning as Interpretation.</strong> Every data cleaning decision is an interpretive act — a claim about what the "true" value is or should be. When you impute a missing age with the median, you are asserting that this patient is probably around the median age. When you flag a $999,999 salary as an entry error and correct it to $99,999, you are asserting the extra 9 was a typo. These assertions could be wrong. Who is responsible when a downstream model makes a harmful decision based on data that was cleaned incorrectly?</li>
+      <li><strong>The Reproducibility Crisis.</strong> A 2016 study found that over 70% of researchers had failed to reproduce another scientist's results, and over 50% had failed to reproduce their own. Data cleaning choices — which NULLs to drop, which outliers to cap, which duplicates to merge — are rarely documented in published papers, making exact reproduction impossible. What should the standard for data cleaning documentation be in scientific publications? How does this connect to the broader "garbage in" problem?</li>
+      <li><strong>Connection Forward.</strong> In Era 3 you will study statistical learning — training models on data rather than encoding rules. Every technique you will learn assumes the training data is a faithful sample of the real-world distribution. If the data has been cleaned in ways that introduce systematic bias — NULLs dropped non-randomly, outliers capped, duplicates merged incorrectly — the model learns from a corrupted sample. Can you give a specific example of a cleaning decision from this lesson that would produce a biased model if applied carelessly?</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">NULL</span><span class="gloss-abbr">Codd, 1970</span></div>
+        <div class="gloss-def">A marker in a relational database representing the absence of a value — distinct from zero, empty string, or false. Can mean <strong>not collected</strong>, <strong>not applicable</strong>, or <strong>unknown</strong>. These three meanings look identical in the database but imply different cleaning strategies. NULL propagates through arithmetic: NULL + 5 = NULL.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Three-Valued Logic</span><span class="gloss-abbr">TRUE / FALSE / NULL</span></div>
+        <div class="gloss-def">SQL's logical system in which expressions can evaluate to TRUE, FALSE, or NULL (unknown). WHERE clauses only pass rows where the condition is TRUE — NULL evaluates as "not TRUE" and the row is silently excluded. <strong>NULL = NULL evaluates to NULL, not TRUE.</strong> Use IS NULL and IS NOT NULL to test for the absence of a value.
+          <div class="gloss-code">WHERE age != 30           -- silently drops NULL ages
+WHERE age != 30 OR age IS NULL  -- includes unknowns</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Imputation</span><span class="gloss-abbr">Filling missing values</span></div>
+        <div class="gloss-def">The process of replacing NULL values with estimated values. Common strategies: <strong>mean imputation</strong> (replace with column average — harmful for skewed or bimodal distributions), <strong>median imputation</strong> (more robust to outliers), <strong>mode imputation</strong> (for categorical data), <strong>model-based imputation</strong> (predict the missing value from other columns). The right choice depends on the mechanism of missingness and the downstream analysis.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Entity Resolution</span><span class="gloss-abbr">Record linkage / deduplication</span></div>
+        <div class="gloss-def">The problem of determining when two records in a dataset refer to the same real-world entity. Exact matches (same ID, same name) are easy. Fuzzy matching (similar names, same address) requires a <strong>similarity metric</strong> (edit distance, token overlap, phonetic matching) and a <strong>threshold</strong> above which records are merged. The threshold controls the precision/recall tradeoff — lower threshold → higher recall, more false merges.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Edit Distance</span><span class="gloss-abbr">Levenshtein distance</span></div>
+        <div class="gloss-def">The minimum number of single-character edits (insertions, deletions, substitutions) needed to transform one string into another. "Smith" to "Smyth" = 1 edit (i→y). "John" to "Jon" = 1 deletion. Used in fuzzy deduplication to measure name similarity. Normalized edit distance = edit distance / max(len(s1), len(s2)), giving a similarity score in [0, 1].</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">MCAR / MAR / MNAR</span><span class="gloss-abbr">Missing data mechanisms</span></div>
+        <div class="gloss-def"><strong>Missing Completely At Random (MCAR):</strong> missingness is unrelated to any variable — safe to drop or impute. <strong>Missing At Random (MAR):</strong> missingness depends on observed variables — imputation conditioned on those variables is valid. <strong>Missing Not At Random (MNAR):</strong> missingness depends on the missing value itself — no imputation strategy is unbiased without additional assumptions. The mechanism must be understood before choosing a cleaning strategy.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era2_lesson2_prolog.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 2, Lesson 2 — Prolog &amp; Lisp</div></div>
+    </a>
+    <div class="nav-btn" style="opacity:.35;cursor:default">
+      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 2, Lesson 4 — Relational Databases &amp; SQL</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+</div>
+<script>
+'use strict';
+
+/* ════════════════════════════════════════════════════
+   DEMO 1 — DIRTY DATASET
+════════════════════════════════════════════════════ */
+(function(){
+  // Issue types: null, outlier, duplicate, format
+  var ORIGINAL = [
+    {id:1,  name:'Chen, Wei',        dob:'1978-03-14', bp:'120/80', weight:72,  blood:'A+',  allergy:'Penicillin',  status:'ok'},
+    {id:2,  name:'Okafor, Emeka',    dob:'1965/07/22', bp:'135/88', weight:85,  blood:'O+',  allergy:null,          status:'null_allergy'},
+    {id:3,  name:'Reyes, Maria',     dob:'1990-11-05', bp:'118/76', weight:61,  blood:'B-',  allergy:'None',        status:'ok'},
+    {id:4,  name:'Chen, Wei',        dob:'1978-03-14', bp:'120/80', weight:72,  blood:'A+',  allergy:'Penicillin',  status:'exact_dup'},
+    {id:5,  name:'Singh, Priya',     dob:'19450101',   bp:'145/92', weight:67,  blood:'AB+', allergy:'Sulfa',       status:'fmt_dob'},
+    {id:6,  name:'Park, James',      dob:'1988-06-30', bp:'122/79', weight:9999,blood:'O-',  allergy:null,          status:'outlier_wt'},
+    {id:7,  name:'Novak, Elena',     dob:'1995-02-18', bp:'115/74', weight:58,  blood:'A-',  allergy:'None',        status:'ok'},
+    {id:8,  name:'Okafor, E.',       dob:'1965-07-22', bp:'136/89', weight:85,  blood:'O+',  allergy:null,          status:'fuzzy_dup'},
+    {id:9,  name:'Williams, Ray',    dob:'1952-09-12', bp:'155/98', weight:91,  blood:null,  allergy:'Aspirin',     status:'null_blood'},
+    {id:10, name:'Torres, Lucia',    dob:'March 4 82', bp:'119/77', weight:63,  blood:'B+',  allergy:'None',        status:'fmt_dob'},
+    {id:11, name:'Kim, David',       dob:'1983-12-01', bp:'128/82', weight:80,  blood:'A+',  allergy:null,          status:'null_allergy'},
+    {id:12, name:'Patel, Ananya',    dob:'1971-04-25', bp:'140/90', weight:69,  blood:'O+',  allergy:'Latex',       status:'ok'},
+    {id:13, name:'Johnson, Carl',    dob:'1999-08-17', bp:'112/70', weight:0,   blood:'B-',  allergy:'None',        status:'outlier_wt'},
+    {id:14, name:'Reyes, M.',        dob:'1990-11-05', bp:'118/76', weight:61,  blood:'B-',  allergy:'None',        status:'fuzzy_dup'},
+    {id:15, name:'Schmidt, Anna',    dob:'1960-05-08', bp:'138/86', weight:74,  blood:'AB-', allergy:'Codeine',     status:'ok'},
+    {id:16, name:'Hassan, Fatima',   dob:'1987-01-29', bp:'124/80', weight:null,blood:'O+',  allergy:'Penicillin',  status:'null_weight'},
+    {id:17, name:'Brown, Thomas',    dob:'1945-11-30', bp:'160/100',weight:88,  blood:'A+',  allergy:'None',        status:'ok'},
+    {id:18, name:'Nakamura, Yuki',   dob:'1992/03/15', bp:'116/72', weight:54,  blood:'B+',  allergy:null,          status:'fmt_dob'},
+    {id:19, name:'Lopez, Carlos',    dob:'1977-06-20', bp:'132/84', weight:78,  blood:'O-',  allergy:'Sulfa',       status:'ok'},
+    {id:20, name:'Ahmed, Samir',     dob:'1984-10-03', bp:'126/81', weight:82,  blood:'A-',  allergy:'None',        status:'ok'},
+  ];
+
+  var ISSUES = {
+    null_allergy:{
+      type:'NULL',
+      title:'Missing allergy data',
+      desc:'Allergy field is <strong>NULL</strong>. This could mean: (1) no known allergies, (2) not collected on admission, or (3) the patient was unconscious. These are three different clinical situations requiring different responses.',
+      actions:[
+        {label:'Mark as "Not Collected"', result:'Honest — preserves uncertainty', fix:function(r){r.allergy='[not collected]';}},
+        {label:'Assume No Allergies', result:'⚠ Dangerous — could be wrong', fix:function(r){r.allergy='[assumed none]';}},
+        {label:'Flag for Follow-up', result:'Best practice — active resolution', fix:function(r){r.allergy='[NEEDS REVIEW]';}}
+      ]
+    },
+    null_blood:{
+      type:'NULL',
+      title:'Missing blood type',
+      desc:'Blood type is <strong>NULL</strong>. Unknown blood type could be life-threatening in an emergency requiring transfusion. This is the "unknown" variety of NULL — it should have a value but we don\'t know it.',
+      actions:[
+        {label:'Leave as NULL', result:'Safe — do not guess', fix:null},
+        {label:'Flag as Critical Missing', result:'✓ Best practice — triggers collection', fix:function(r){r.blood='[CRITICAL: UNKNOWN]';}}
+      ]
+    },
+    null_weight:{
+      type:'NULL',
+      title:'Missing weight',
+      desc:'Patient weight is <strong>NULL</strong>. Weight is used for drug dosing calculations. A NULL here could result in incorrect medication dosages.',
+      actions:[
+        {label:'Impute with ward median', result:'⚠ Risky for dosing — document assumption', fix:function(r){r.weight=74;}},
+        {label:'Flag for nurse to collect', result:'✓ Best practice', fix:function(r){r.weight='[NEEDED FOR DOSING]';}}
+      ]
+    },
+    exact_dup:{
+      type:'DUPLICATE',
+      title:'Exact duplicate record',
+      desc:'Row 4 is an <strong>exact duplicate</strong> of Row 1 (same patient, same name, same DOB, same values). Likely caused by a double data entry or a failed import that ran twice.',
+      actions:[
+        {label:'Delete duplicate row', result:'✓ Safe — identical values', fix:function(r){r._deleted=true;}},
+        {label:'Merge and keep one', result:'✓ Same result here', fix:function(r){r._deleted=true;}}
+      ]
+    },
+    fuzzy_dup:{
+      type:'DUPLICATE',
+      title:'Probable duplicate record',
+      desc:'This record has high similarity to another patient — same DOB, same BP, same weight, slightly different name format. Likely the same person registered twice at different points of care.',
+      actions:[
+        {label:'Flag for manual review', result:'✓ Best practice for fuzzy matches', fix:function(r){r.name+=' [REVIEW: possible dup]';}},
+        {label:'Auto-merge', result:'⚠ Risk of merging different patients', fix:function(r){r._deleted=true;}}
+      ]
+    },
+    outlier_wt:{
+      type:'OUTLIER',
+      title:'Outlier weight value',
+      desc:'Weight value is <strong>suspicious</strong>. 9999 is a common sentinel value used as a placeholder when weight was not measured. 0 is physiologically impossible for a living adult patient.',
+      actions:[
+        {label:'Replace with NULL', result:'✓ Honest — removes false data', fix:function(r){r.weight=null;}},
+        {label:'Cap to plausible range', result:'⚠ Only if you can verify the intent', fix:function(r){r.weight=70;}}
+      ]
+    },
+    fmt_dob:{
+      type:'FORMAT',
+      title:'Inconsistent date format',
+      desc:'Date of birth uses a non-standard format. The system expects YYYY-MM-DD. Inconsistent formats cause silent errors in date arithmetic — age calculations, days-since-admission, and appointment scheduling all break silently.',
+      actions:[
+        {label:'Parse and standardize', result:'✓ Convert to YYYY-MM-DD', fix:function(r){
+          var raw=r.dob;
+          // 19450101 → 1945-01-01
+          if(/^\d{8}$/.test(raw)) r.dob=raw.slice(0,4)+'-'+raw.slice(4,6)+'-'+raw.slice(6,8);
+          // 1965/07/22 → 1965-07-22
+          else if(raw.includes('/')) r.dob=raw.replace(/\//g,'-');
+          // March 4 82 → 1982-03-04 (approximate)
+          else r.dob='1982-03-04';
+        }},
+        {label:'Flag for manual entry', result:'⚠ Slower but safer for ambiguous cases', fix:function(r){r.dob+=' [FORMAT ERROR]';}}
+      ]
+    }
+  };
+
+  var tableData = ORIGINAL.map(function(r){return Object.assign({},r);});
+  var selectedRow = null;
+  var selectedIssue = null;
+
+  function countIssues(){
+    var counts={nulls:0,dups:0,outliers:0,formats:0,fixed:0};
+    tableData.forEach(function(r){
+      if(r._deleted||r._fixed) return counts.fixed++;
+      if(r.status==='ok') return;
+      if(r.status.startsWith('null')) counts.nulls++;
+      else if(r.status.includes('dup')) counts.dups++;
+      else if(r.status.startsWith('outlier')) counts.outliers++;
+      else if(r.status.startsWith('fmt')) counts.formats++;
+    });
+    return counts;
+  }
+
+  function qualityScore(){
+    var total=tableData.length;
+    var ok=tableData.filter(function(r){return r.status==='ok'||r._fixed||r._deleted;}).length;
+    return Math.round(ok/total*100);
+  }
+
+  function renderStats(){
+    var c=countIssues(),qs=qualityScore();
+    document.getElementById('d1Stats').innerHTML=
+      '<div class="d1-stat"><div class="d1-stat-num" style="color:var(--amber)">'+c.nulls+'</div><div class="d1-stat-lbl">NULL issues</div></div>'+
+      '<div class="d1-stat"><div class="d1-stat-num" style="color:var(--violet)">'+c.dups+'</div><div class="d1-stat-lbl">Duplicates</div></div>'+
+      '<div class="d1-stat"><div class="d1-stat-num" style="color:var(--red)">'+c.outliers+'</div><div class="d1-stat-lbl">Outliers</div></div>'+
+      '<div class="d1-stat"><div class="d1-stat-num" style="color:var(--amber)">'+c.formats+'</div><div class="d1-stat-lbl">Format errors</div></div>';
+    document.getElementById('d1ScoreLbl').textContent=qs+'%';
+    document.getElementById('d1QualityFill').style.width=qs+'%';
+  }
+
+  function cellClass(r, col){
+    if(r._deleted) return '';
+    if(r.status==='ok'||r._fixed) return 'ok-cell';
+    var s=r.status;
+    if(col==='allergy'&&s==='null_allergy') return 'null-cell';
+    if(col==='blood'&&s==='null_blood') return 'null-cell';
+    if(col==='weight'&&s==='null_weight') return 'null-cell';
+    if(col==='weight'&&s==='outlier_wt') return 'error-cell';
+    if(col==='dob'&&s==='fmt_dob') return 'fmt-cell';
+    if(col==='name'&&(s==='exact_dup'||s==='fuzzy_dup')) return 'dup-cell';
+    return '';
+  }
+
+  function renderTable(){
+    var cols=['id','name','dob','bp','weight','blood','allergy'];
+    var hdrs=cols.map(function(c){return'<th>'+c+'</th>';}).join('');
+    var rows=tableData.map(function(r,ri){
+      if(r._deleted) return'<tr class="fixed"><td colspan="7" style="color:var(--muted2);font-family:var(--mono);font-size:9px;text-align:center">Row '+r.id+' — deleted (duplicate)</td></tr>';
+      var cls=r._fixed?'fixed':'';
+      var tds=cols.map(function(c){
+        var v=r[c];
+        var cellCls=r._fixed?'ok-cell':cellClass(r,c);
+        var disp=v===null?'<em>NULL</em>':v;
+        return'<td class="'+cellCls+'" onclick="d1CellClick('+ri+',\''+c+'\')">'+(v===null?'<em style="color:var(--amber)">NULL</em>':v)+'</td>';
+      }).join('');
+      return'<tr class="'+cls+'">'+tds+'</tr>';
+    }).join('');
+    document.getElementById('d1Table').innerHTML='<thead><tr>'+hdrs+'</tr></thead><tbody>'+rows+'</tbody>';
+    renderStats();
+  }
+
+  window.d1CellClick=function(ri,col){
+    var r=tableData[ri];
+    if(r._deleted||r._fixed||r.status==='ok') return;
+    selectedRow=ri;
+    var issue=ISSUES[r.status];
+    if(!issue){document.getElementById('d1IssueBox').innerHTML='<span style="color:var(--muted2)">No issue detected for this cell</span>';document.getElementById('d1Actions').innerHTML='';return;}
+    var typeColor={NULL:'var(--amber)',DUPLICATE:'var(--violet)',OUTLIER:'var(--red)',FORMAT:'var(--amber)'};
+    document.getElementById('d1IssueBox').innerHTML=
+      '<div class="issue-type" style="color:'+typeColor[issue.type]+'">'+issue.type+'</div>'+
+      '<strong>'+issue.title+'</strong><br>'+issue.desc;
+    document.getElementById('d1Actions').innerHTML=issue.actions.map(function(a,i){
+      return'<button class="d1-action-btn" onclick="d1ApplyAction('+ri+','+i+')">'+a.label+'<br><span style="font-size:8px;opacity:.7">'+a.result+'</span></button>';
+    }).join('');
+  };
+
+  window.d1ApplyAction=function(ri,ai){
+    var r=tableData[ri];
+    var issue=ISSUES[r.status];
+    if(!issue) return;
+    var action=issue.actions[ai];
+    if(action.fix) action.fix(r);
+    r._fixed=true;
+    document.getElementById('d1IssueBox').innerHTML='<span style="color:var(--green)">✓ Action applied: '+action.label+'</span>';
+    document.getElementById('d1Actions').innerHTML='';
+    renderTable();
+  };
+
+  window.d1Reset=function(){
+    tableData=ORIGINAL.map(function(r){return Object.assign({},r);});
+    selectedRow=null;
+    document.getElementById('d1IssueBox').innerHTML='<span style="color:var(--muted2);font-family:var(--mono);font-size:10px">Click a highlighted cell to inspect the issue</span>';
+    document.getElementById('d1Actions').innerHTML='';
+    renderTable();
+  };
+
+  renderTable();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 2 — IMPUTATION STRATEGIES
+════════════════════════════════════════════════════ */
+(function(){
+  var dist='normal';
+  function seededRng(s){var n=s|0;return function(){n=(n*1664525+1013904223)&0xffffffff;return(n>>>0)/4294967295;};}
+  function gauss(r){return Math.sqrt(-2*Math.log(r()+1e-9))*Math.cos(2*Math.PI*r());}
+
+  function genData(dist,n){
+    var rng=seededRng(42),pts=[];
+    for(var i=0;i<n;i++){
+      var v;
+      if(dist==='normal')    v=45+gauss(rng)*14;
+      else if(dist==='bimodal') v=rng()<0.45?(28+gauss(rng)*7):(62+gauss(rng)*8);
+      else /* skewed */      v=Math.abs(25+gauss(rng)*8+Math.exp(rng()*2.5)*3);
+      pts.push(Math.round(Math.max(1,Math.min(99,v))));
+    }
+    return pts;
+  }
+
+  function drawHist(canvasId,data,color,title,missPct,impColor){
+    var el=document.getElementById(canvasId);if(!el)return;
+    var W=el.offsetWidth||140,H=120;
+    var mn=0,mx=100,BINS=20,bw=W/BINS;
+    var counts=new Array(BINS).fill(0);
+    data.forEach(function(v){var b=Math.min(BINS-1,Math.floor((v-mn)/(mx-mn)*BINS));counts[b]++;});
+    var maxC=Math.max.apply(null,counts)||1;
+    var svg='<rect width="'+W+'" height="'+H+'" fill="#0a0d14"/>';
+    counts.forEach(function(c,i){
+      var bh=Math.round(c/maxC*(H-16));
+      var cx=i*bw+bw/2;
+      svg+='<rect x="'+(i*bw+0.5)+'" y="'+(H-16-bh)+'" width="'+(bw-1)+'" height="'+bh+'" fill="'+(color||'var(--ac)')+'" opacity="0.8"/>';
+    });
+    svg+='<text x="'+(W/2)+'" y="'+(H-3)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">Age (years)</text>';
+    el.innerHTML=svg;
+  }
+
+  function stats(data){
+    var sorted=data.slice().sort(function(a,b){return a-b;});
+    var mean=data.reduce(function(s,v){return s+v;},0)/data.length;
+    var median=sorted[Math.floor(sorted.length/2)];
+    var freq={};data.forEach(function(v){freq[v]=(freq[v]||0)+1;});
+    var mode=+Object.keys(freq).reduce(function(a,b){return freq[a]>freq[b]?a:b;});
+    return{mean:Math.round(mean*10)/10,median:median,mode:mode,n:data.length};
+  }
+
+  window.d2Update=function(){
+    var pct=+document.getElementById('d2MissPct').value;
+    document.getElementById('d2MissVal').textContent=pct+'%';
+    var N=200,nMiss=Math.round(N*pct/100);
+    var full=genData(dist,N);
+    var observed=full.slice(0,N-nMiss);
+    var s=stats(observed);
+    var impMean=observed.concat(new Array(nMiss).fill(Math.round(s.mean)));
+    var impMedian=observed.concat(new Array(nMiss).fill(s.median));
+    var impMode=observed.concat(new Array(nMiss).fill(s.mode));
+    var COLS=[
+      {id:'d2c0',title:'Drop missing rows',data:observed,color:'#f87171',note:'n='+observed.length+' (lost '+nMiss+' rows)'},
+      {id:'d2c1',title:'Mean imputation',data:impMean,color:'var(--amber)',note:'mean='+s.mean+', n='+N},
+      {id:'d2c2',title:'Median imputation',data:impMedian,color:'var(--ac)',note:'median='+s.median+', n='+N},
+      {id:'d2c3',title:'Mode imputation',data:impMode,color:'var(--violet)',note:'mode='+s.mode+', n='+N},
+    ];
+    var html=COLS.map(function(c){
+      var sid=c.id+'_svg';
+      return'<div class="d2-col">'+
+        '<div class="d2-col-head" style="color:'+c.color+'">'+c.title+'</div>'+
+        '<div class="d2-hist"><svg id="'+sid+'" viewBox="0 0 140 120" style="display:block;width:100%"></svg></div>'+
+        '<div class="d2-col-stats">'+c.note+'</div>'+
+      '</div>';
+    }).join('');
+    document.getElementById('d2Cols').innerHTML=html;
+    // Draw histograms
+    COLS.forEach(function(c){
+      var svgEl=document.getElementById(c.id+'_svg');
+      if(!svgEl)return;
+      var W=140,H=120,BINS=20,bw=W/BINS;
+      var counts=new Array(BINS).fill(0);
+      c.data.forEach(function(v){var b=Math.min(BINS-1,Math.floor(v/100*BINS));counts[b]++;});
+      var maxC=Math.max.apply(null,counts)||1;
+      var svg='<rect width="'+W+'" height="'+H+'" fill="#0a0d14"/>';
+      counts.forEach(function(ct,i){
+        var bh=Math.round(ct/maxC*(H-14));
+        svg+='<rect x="'+(i*bw+0.5)+'" y="'+(H-14-bh)+'" width="'+(bw-1)+'" height="'+bh+'" fill="'+c.color+'" opacity="0.8"/>';
+      });
+      svg+='<text x="70" y="'+(H-2)+'" fill="#334155" font-size="7" text-anchor="middle" font-family="Space Mono,monospace">Age</text>';
+      svgEl.innerHTML=svg;
+    });
+    var notes={
+      normal:'Normal distribution: mean and median are both good choices. Drop-rows loses data but is unbiased.',
+      bimodal:'⚠ Bimodal distribution: mean and median fall in the VALLEY between peaks — imputing a value almost nobody has. Neither strategy is honest for this shape.',
+      skewed:'⚠ Skewed distribution: mean is pulled toward the tail. Median is more robust. Mode may cluster at the peak. None are perfect.'
+    };
+    document.getElementById('d2Note').textContent=notes[dist];
+    ['Normal','Bimodal','Skewed'].forEach(function(d){
+      var btn=document.getElementById('d2Btn'+d);
+      if(btn)btn.classList.toggle('active',d.toLowerCase()===dist);
+    });
+  };
+
+  window.d2SetDist=function(d){dist=d;d2Update();};
+  d2Update();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 3 — FUZZY DEDUPLICATION
+════════════════════════════════════════════════════ */
+(function(){
+  // Pairs: [nameA, nameB, trueMatch (bool)]
+  var PAIRS=[
+    {a:'Chen, Wei',         b:'Chen, W.',           truth:true},
+    {a:'Okafor, Emeka',     b:'Okafor, E.',          truth:true},
+    {a:'Reyes, Maria',      b:'Reyes, M.',           truth:true},
+    {a:'Singh, Priya',      b:'Patel, Priya',        truth:false}, // different patients
+    {a:'Park, James',       b:'Park, James A.',      truth:true},
+    {a:'Novak, Elena',      b:'Novak, Helena',       truth:false}, // different patients
+    {a:'Williams, Ray',     b:'Williams, Raymond',   truth:true},
+    {a:'Torres, Lucia',     b:'Torres, Luisa',       truth:false}, // different patients
+    {a:'Kim, David',        b:'Kim, D.',             truth:true},
+    {a:'Schmidt, Anna',     b:'Schmitt, Anna',       truth:false}, // typo in different patient
+    {a:'Hassan, Fatima',    b:'Hassan, Fatimah',     truth:true},
+    {a:'Brown, Thomas',     b:'Brown, Tom',          truth:true},
+  ];
+
+  var algo='edit';
+
+  function editSim(s1,s2){
+    s1=s1.toLowerCase();s2=s2.toLowerCase();
+    var m=s1.length,n=s2.length;
+    var dp=[];
+    for(var i=0;i<=m;i++){dp[i]=[];for(var j=0;j<=n;j++){dp[i][j]=i===0?j:j===0?i:0;}}
+    for(var i=1;i<=m;i++)for(var j=1;j<=n;j++){
+      dp[i][j]=s1[i-1]===s2[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+    }
+    return 1-dp[m][n]/Math.max(m,n);
+  }
+
+  function tokenSim(s1,s2){
+    var t1=s1.toLowerCase().replace(/[,\.]/g,'').split(/\s+/);
+    var t2=s2.toLowerCase().replace(/[,\.]/g,'').split(/\s+/);
+    // Check token containment: each token of s1 starts some token of s2
+    var matches=t1.filter(function(t){
+      return t2.some(function(u){return u.startsWith(t)||t.startsWith(u);});
+    }).length;
+    return matches/Math.max(t1.length,t2.length);
+  }
+
+  function similarity(a,b){
+    return algo==='edit'?editSim(a,b):tokenSim(a,b);
+  }
+
+  window.d3Update=function(){
+    var thresh=+document.getElementById('d3Thresh').value/100;
+    document.getElementById('d3ThreshVal').textContent=Math.round(thresh*100)+'%';
+
+    var tp=0,fp=0,fn=0,tn=0;
+    var pairsHtml='';
+    PAIRS.forEach(function(p){
+      var sim=similarity(p.a,p.b);
+      var predicted=sim>=thresh;
+      if(predicted&&p.truth) tp++;
+      else if(predicted&&!p.truth) fp++;
+      else if(!predicted&&p.truth) fn++;
+      else tn++;
+      var pct=Math.round(sim*100);
+      var scoreClass=pct>=80?'high':pct>=60?'med':'low';
+      var cls=predicted?(p.truth?'merge':'merge'):(p.truth?'keep':'keep');
+      var conflict=predicted!==p.truth;
+      pairsHtml+='<div class="match-item '+(predicted?'merge':'keep')+'" style="'+(conflict?'border-color:rgba(248,113,113,.5);background:rgba(248,113,113,.06)':'')+'">'+
+        '<span>'+p.a+' &nbsp;↔&nbsp; '+p.b+'</span>'+
+        '<span style="display:flex;align-items:center;gap:6px">'+
+          (conflict?'<span style="font-size:8px;color:var(--red)">'+( predicted&&!p.truth?'FALSE MERGE':'MISSED')+'</span>':'')+
+          '<span class="match-score '+scoreClass+'">'+pct+'%</span>'+
+          '<span style="font-family:var(--mono);font-size:9px;color:'+(predicted?'var(--green)':'var(--muted2)')+'">'+
+            (predicted?'MERGE':'keep')+
+          '</span>'+
+        '</span>'+
+      '</div>';
+    });
+
+    document.getElementById('d3Pairs').innerHTML=pairsHtml;
+
+    var prec=tp+fp>0?tp/(tp+fp):1;
+    var rec=tp+fn>0?tp/(tp+fn):0;
+    document.getElementById('d3PrecVal').textContent=Math.round(prec*100)+'%';
+    document.getElementById('d3RecVal').textContent=Math.round(rec*100)+'%';
+    document.getElementById('d3PrecBar').style.width=Math.round(prec*100)+'%';
+    document.getElementById('d3RecBar').style.width=Math.round(rec*100)+'%';
+
+    var note='TP='+tp+' FP='+fp+' FN='+fn+' TN='+tn+'\n';
+    note+='Merges: '+(tp+fp)+' total ('+(fp>0?fp+' false, ':'')+''+tp+' correct)';
+    document.getElementById('d3Note').textContent=note;
+
+    var insight;
+    if(thresh<0.5) insight='Very aggressive: merging many pairs. High recall but precision suffers — '+fp+' false merges could combine different patients\' records.';
+    else if(thresh>0.85) insight='Very conservative: only merging near-identical names. High precision but '+fn+' real duplicates are missed — fragmented patient histories.';
+    else if(fp>0) insight='Some false merges at this threshold ('+fp+'). For patient records, even one false merge is serious — a patient receives another person\'s medication history.';
+    else if(fn>0) insight='Zero false merges but '+fn+' real duplicates missed. The doctor sees two separate records for the same patient — incomplete history.';
+    else insight='At this threshold: no false merges and no missed matches on this dataset. In practice, a threshold that works perfectly on a sample will always have edge cases at scale.';
+    document.getElementById('d3Insight').textContent=insight;
+  };
+
+  window.d3SetAlgo=function(a){
+    algo=a;
+    document.getElementById('d3BtnEdit').classList.toggle('active',a==='edit');
+    document.getElementById('d3BtnToken').classList.toggle('active',a==='token');
+    d3Update();
+  };
+
+  d3Update();
+})();
+</script>
+</body>
+</html>
