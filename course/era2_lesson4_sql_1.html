@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 2, Lesson 4 — Relational Databases &amp; SQL | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--surface:#161b27;--s2:#1a2035;--border:#1e2d40;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#334155;
+  --ac:#4ade80;--ac-dim:rgba(74,222,128,.10);--ac-glow:rgba(74,222,128,.25);
+  --green:#4ade80;--red:#f87171;--amber:#f59e0b;--sky:#38bdf8;--violet:#a78bfa;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;--disp:'Lora',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+.course-nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.era-badge{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em;}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 100px;}
+.hero{padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px;}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.week-badge{background:var(--ac);color:#012010;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em;}
+.hero h1{font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px;}
+.hero-sub{font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px;}
+.hero-timeline{display:flex;gap:36px;flex-wrap:wrap;}
+.tl-item{display:flex;flex-direction:column;gap:3px;}
+.tl-year{font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.1em;}
+.tl-label{font-size:13px;color:var(--muted);}
+.section{margin-bottom:68px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px;}
+.sec-title{font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.obj-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;}
+.obj-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.obj-list li strong{color:#f1f5f9;}
+.prose p{font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82;}
+.prose p:last-child{margin-bottom:0;}
+.prose p strong{color:#e2e8f0;}
+.prose code{font-family:var(--mono);font-size:12px;background:#0a0d14;padding:2px 6px;border-radius:3px;border:1px solid var(--border);color:#86efac;}
+.pullquote{background:linear-gradient(135deg,rgba(74,222,128,.07),rgba(74,222,128,.02));border:1px solid rgba(74,222,128,.2);border-radius:12px;padding:22px 26px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:17px;font-style:italic;color:#86efac;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+/* demo shared */
+.demo-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.demo-topbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.demo-tag{font-family:var(--mono);font-size:11px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase;}
+.demo-hint{font-family:var(--mono);font-size:10px;color:var(--muted2);}
+.ctrl-btn{font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ctrl-btn:hover{border-color:var(--ac);color:var(--ac);}
+.ctrl-btn.active{background:var(--ac-dim);border-color:rgba(74,222,128,.4);color:var(--ac);}
+.ctrl-btn.go{border-color:rgba(74,222,128,.3);color:var(--green);}
+.ctrl-btn.go:hover{background:rgba(74,222,128,.08);}
+.ctrl-btn.warn{border-color:rgba(248,113,113,.3);color:var(--red);}
+input[type=range].ac-sl{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,#0a0d14,var(--ac));}
+input[type=range].ac-sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #86efac;cursor:pointer;}
+/* demo 1 — anomaly + normalization */
+.norm-steps{display:flex;gap:0;border-bottom:1px solid var(--border);}
+.norm-step{flex:1;padding:10px 14px;font-family:var(--mono);font-size:10px;color:var(--muted);border-right:1px solid var(--border);cursor:pointer;transition:all .15s;text-align:center;}
+.norm-step:last-child{border-right:none;}
+.norm-step:hover{background:var(--s2);color:#94a3b8;}
+.norm-step.active{background:var(--ac-dim);color:var(--ac);}
+.norm-body{display:grid;grid-template-columns:1fr 320px;}
+.norm-left{padding:16px 18px;border-right:1px solid var(--border);overflow-x:auto;}
+.norm-right{padding:16px 18px;display:flex;flex-direction:column;gap:12px;}
+.norm-table{border-collapse:collapse;font-family:var(--mono);font-size:10px;width:100%;min-width:500px;}
+.norm-table th{background:var(--s2);color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em;padding:7px 10px;border:1px solid var(--border);text-align:left;}
+.norm-table td{padding:6px 10px;border:1px solid var(--border);color:#94a3b8;white-space:nowrap;}
+.norm-table td.bad{color:var(--red);background:rgba(248,113,113,.06);}
+.norm-table td.fixed{color:var(--green);}
+.norm-table td.fk{color:var(--sky);}
+.norm-desc{background:#0a0d14;border-radius:8px;padding:12px 14px;font-size:13px;color:#94a3b8;line-height:1.7;}
+.norm-desc strong{color:#e2e8f0;}
+.norm-desc .nf-badge{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;padding:3px 8px;border-radius:4px;background:var(--ac-dim);color:var(--ac);display:inline-block;margin-bottom:6px;}
+.anomaly-trigger{padding:10px 14px;background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.25);border-radius:8px;font-size:13px;color:#94a3b8;line-height:1.6;}
+.anomaly-trigger strong{color:var(--red);}
+.anomaly-trigger button{font-family:var(--mono);font-size:10px;padding:5px 10px;border-radius:5px;border:1px solid rgba(248,113,113,.4);background:none;color:var(--red);cursor:pointer;margin-top:8px;display:block;transition:all .15s;}
+.anomaly-trigger button:hover{background:rgba(248,113,113,.1);}
+.anomaly-result{display:none;padding:8px 10px;background:rgba(248,113,113,.08);border-radius:5px;font-family:var(--mono);font-size:10px;color:var(--red);margin-top:6px;line-height:1.6;}
+/* demo 2 — sql query lab */
+.sql-body{display:grid;grid-template-columns:220px 1fr;}
+.sql-qlist{border-right:1px solid var(--border);padding:10px;}
+.sql-qbtn{display:block;width:100%;text-align:left;font-family:var(--mono);font-size:10px;padding:8px 10px;border-radius:6px;border:1px solid transparent;background:none;color:var(--muted);cursor:pointer;margin-bottom:4px;transition:all .15s;line-height:1.4;}
+.sql-qbtn:hover{background:#0a0d14;border-color:var(--border);color:#94a3b8;}
+.sql-qbtn.active{background:var(--ac-dim);border-color:rgba(74,222,128,.35);color:var(--ac);}
+.sql-qbtn .qnum{display:block;font-size:9px;color:var(--muted2);margin-bottom:2px;}
+.sql-detail{padding:14px 18px;display:flex;flex-direction:column;gap:10px;}
+.sql-english{background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:10px 14px;font-size:14px;color:#86efac;line-height:1.65;}
+.sql-editor{position:relative;}
+.sql-code{width:100%;background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:var(--mono);font-size:11px;color:#94a3b8;line-height:1.85;resize:vertical;outline:none;min-height:90px;transition:border-color .15s;}
+.sql-code:focus{border-color:var(--ac);}
+.sql-run-row{display:flex;gap:8px;align-items:center;}
+.sql-results{background:#0a0d14;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.sql-results-hdr{padding:6px 12px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;color:var(--ac);text-transform:uppercase;letter-spacing:.1em;display:flex;justify-content:space-between;}
+.sql-results-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px;}
+.sql-results-table th{background:var(--s2);color:var(--muted);font-size:9px;padding:6px 10px;border:1px solid var(--border);text-align:left;}
+.sql-results-table td{padding:5px 10px;border:1px solid var(--border);color:#94a3b8;}
+.sql-error{padding:10px 14px;font-family:var(--mono);font-size:11px;color:var(--red);}
+.sql-verdict{font-size:13px;color:#94a3b8;line-height:1.7;padding:8px 12px;background:var(--ac-dim);border:1px solid rgba(74,222,128,.2);border-radius:6px;}
+.sql-verdict strong{color:#e2e8f0;}
+/* demo 3 — schema explorer */
+.schema-body{padding:18px 20px;}
+.schema-svg-wrap{background:#0a0d14;border-radius:10px;overflow:hidden;margin-bottom:14px;}
+.table-detail{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-family:var(--mono);font-size:11px;}
+.td-name{font-size:13px;font-weight:700;color:var(--ac);margin-bottom:8px;}
+.td-col{display:flex;gap:8px;margin-bottom:3px;align-items:baseline;}
+.td-col-name{color:#94a3b8;min-width:160px;}
+.td-col-type{color:var(--muted2);min-width:80px;}
+.td-col-note{color:var(--muted);font-size:9px;}
+.td-pk{color:var(--amber);}
+.td-fk{color:var(--sky);}
+/* exercises */
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.ex-head{padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border);}
+.ex-num{font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(74,222,128,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.ex-title{font-weight:600;font-size:16px;color:#f1f5f9;}
+.ex-desc{font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6;}
+.ex-body{padding:20px;}
+.ex-body p{font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7;}
+.ex-body p:last-child{margin-bottom:0;}
+.ex-body p strong{color:#e2e8f0;}
+.disc-list{list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px;}
+.disc-list li{counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72;}
+.disc-list li::before{content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(74,222,128,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px;}
+.disc-list li strong{color:#e2e8f0;}
+.gloss-grid{display:flex;flex-direction:column;}
+.gloss-entry{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);padding:18px 0;}
+.gloss-entry:last-child{border-bottom:none;}
+.gloss-term{display:flex;flex-direction:column;gap:5px;padding-right:24px;}
+.gloss-term-name{font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700;}
+.gloss-abbr{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.gloss-def{font-size:14.5px;color:#94a3b8;line-height:1.72;}
+.gloss-def strong{color:#e2e8f0;}
+.gloss-code{font-family:var(--mono);font-size:11px;color:#86efac;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:7px 12px;display:block;margin-top:8px;line-height:1.8;}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border);}
+.nav-btn{text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s;}
+.nav-btn:hover{border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow);}
+.nav-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.nav-title{font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px;}
+.nav-arrow{font-size:20px;color:var(--ac);}
+@media(max-width:700px){
+  .norm-body,.sql-body{grid-template-columns:1fr;}
+  .norm-left{border-right:none;border-bottom:1px solid var(--border);}
+  .sql-qlist{border-right:none;border-bottom:1px solid var(--border);}
+}
+</style>
+</head>
+<body>
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface);transition:color .15s" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 2: SYMBOLIC AI</span>
+  <span>›</span><span>Evolution of Intelligence</span><span>›</span>
+  <span style="color:#94a3b8">Era 2, Lesson 4 — Relational Databases &amp; SQL</span>
+</nav>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 2 · LESSON 4</span>
+      <span>1970 – Present</span><span>·</span>
+      <span>The Relational Model, SQL, and Normal Forms</span>
+    </div>
+    <h1>One Fact,<br>One Place</h1>
+    <p class="hero-sub">Edgar Codd proposed organizing all data as flat tables connected by shared keys. The idea was so powerful that it displaced IMS, made Oracle a Fortune 500 company, and remains the dominant database paradigm fifty years later.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1970</span><span class="tl-label">Codd publishes "A Relational Model of Data"</span></div>
+      <div class="tl-item"><span class="tl-year">1974</span><span class="tl-label">IBM's System R — first SQL database (internal)</span></div>
+      <div class="tl-item"><span class="tl-year">1979</span><span class="tl-label">Oracle ships — before IBM does</span></div>
+      <div class="tl-item"><span class="tl-year">1986</span><span class="tl-label">ANSI SQL standardized — the language becomes universal</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">🗄️</span><div><strong>Explain</strong> Codd's relational model — why flat tables connected by foreign keys solved the many-to-many problem that IMS could not.</div></li>
+      <li><span class="obj-icon">⚠️</span><div><strong>Identify</strong> update, insertion, and deletion anomalies in a denormalized table — and trace them to the root cause: one fact stored in multiple places.</div></li>
+      <li><span class="obj-icon">🔧</span><div><strong>Decompose</strong> a denormalized table through 1NF, 2NF, and 3NF, motivated at each step by a specific failure mode.</div></li>
+      <li><span class="obj-icon">📝</span><div><strong>Write and read</strong> SQL SELECT, WHERE, JOIN, GROUP BY, and aggregate queries against a four-table hospital database.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">The Paper That Disrupted IBM</h2></div>
+    <div class="prose">
+      <p>In June 1970, a researcher named Edgar F. Codd published a paper in the Communications of the ACM titled "A Relational Model of Data for Large Shared Data Banks." Codd worked at IBM's San Jose Research Laboratory. IBM's flagship database product was IMS — the hierarchical system we examined in Lesson 1.7, the one built for the Apollo program. Codd's paper implicitly argued that IMS was architecturally wrong.</p>
+      <p>The paper proposed something radical in its simplicity: store all data as flat tables. No trees, no pointers, no navigational paths. Each table is a mathematical <strong>relation</strong> — a set of rows (tuples) over a fixed set of columns (attributes). Relationships between tables are expressed not through physical pointers but through <strong>shared values</strong>: a patient table has a patient ID; an appointments table references that same patient ID as a foreign key. The connection is logical, not physical. You can traverse it in any direction without pre-defining the path.</p>
+      <p>IBM's response was complicated. The company knew the relational model was superior — Codd's mathematics were impeccable. But they had thousands of IMS customers, a large consulting business built around IMS, and no financial incentive to make their own product obsolete. They began building a relational system internally — called System R — but kept it experimental while continuing to sell IMS commercially.</p>
+    </div>
+    <div class="pullquote">
+      <p>"I had a running war with the IMS people. They said the relational model was theoretically interesting but practically useless. I said IMS was practically deployed but theoretically bankrupt."</p>
+      <cite>&mdash; Edgar F. Codd, interviewed 1993</cite>
+    </div>
+    <div class="prose">
+      <p>The gap IBM left was filled by a startup. In 1977, Larry Ellison read a published paper about IBM's System R — including its query language, which IBM had named SQL. Ellison recognized that IBM had not yet shipped a commercial product. He founded Software Development Laboratories, hired two engineers, and built a relational database from the System R paper. They named it Oracle. <strong>Oracle shipped in 1979, two years before IBM's own relational product, DB2.</strong> IBM's published research had handed Ellison the blueprint for what would become one of the most valuable software companies in history.</p>
+      <p>By 1986, ANSI had standardized SQL and it was the universal language of data. IMS retreated to the mainframe environments where it was too embedded to remove. The hierarchical model didn't disappear — it still runs billions of transactions daily — but it stopped being the default. From 1986 onward, when an organization needed a database, they built a relational one.</p>
+      <p>The intellectual core of Codd's contribution was deceptively simple: <strong>every fact should be stored in exactly one place.</strong> If a fact appears in two places, those two copies can diverge. Once they diverge, which one is true? This principle — called normalization — is the foundation of relational database design. A fully normalized database has no redundancy: no fact is repeated. And because no fact is repeated, there is no inconsistency to resolve.</p>
+    </div>
+  </section>
+
+  <!-- 03 DEMOS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+
+    <!-- DEMO 1 — Normalization -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — The Update Anomaly &amp; Normalization.</strong> Start with a single denormalized appointments table. Trigger the update anomaly — change one doctor's department and watch which rows break. Then step through 1NF → 2NF → 3NF, each step removing a specific class of problem.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Normalization Workshop</span>
+        <span class="demo-hint">click steps · trigger anomaly · watch the table decompose</span>
+      </div>
+      <div class="norm-steps" id="normSteps"></div>
+      <div class="norm-body">
+        <div class="norm-left" id="normTableArea"></div>
+        <div class="norm-right" id="normDesc"></div>
+      </div>
+    </div>
+
+    <!-- DEMO 2 — SQL Query Lab -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — SQL Query Lab.</strong> A real in-memory SQL executor. Five preset queries cover SELECT, WHERE, JOIN, GROUP BY, and aggregates. Edit the SQL and run your own variations.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">SQL — Hospital Database</span>
+        <span class="demo-hint">select query · edit SQL · press Run or Ctrl+Enter</span>
+      </div>
+      <div class="sql-body">
+        <div class="sql-qlist" id="sqlQList"></div>
+        <div class="sql-detail" id="sqlDetail">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);text-align:center;padding:24px 0">Select a query to begin</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 3 — Schema Explorer -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 3 — Schema Explorer.</strong> The four-table hospital schema visualized. Click any table to see its columns, types, and key relationships. Foreign keys replace the pointer hacks IMS needed.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Schema Diagram</span>
+        <span class="demo-hint">click a table to inspect columns &amp; relationships</span>
+      </div>
+      <div class="schema-body">
+        <div class="schema-svg-wrap">
+          <svg id="schemaSVG" viewBox="0 0 860 280" style="display:block;width:100%"></svg>
+        </div>
+        <div class="table-detail" id="tableDetail">
+          <div style="color:var(--muted2);font-family:var(--mono);font-size:10px">Click a table above to inspect its schema</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">⚠️ Hunt the Anomalies</div>
+        <div class="ex-desc">Use Demo 1 to identify all three types of anomaly in the denormalized table — before any normalization steps.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 1, stay on the "Denormalized" step. Trigger the update anomaly — Dr. Reyes moves from Cardiology to Neurology. How many rows need updating? What happens if one is missed?</p>
+        <p>&rarr; Now think through the <strong>insertion anomaly</strong>: can you add a new doctor to the system without also creating a fake appointment? Why or why not? What does this imply about the structure of the table?</p>
+        <p>&rarr; Think through the <strong>deletion anomaly</strong>: if you delete the only appointment for a particular doctor, what else gets deleted along with it? Is this a problem?</p>
+        <p><strong>Key question:</strong> All three anomalies stem from the same root cause — one fact (the doctor's department) is stored in multiple rows. Why does storing one fact in multiple places inevitably create these three failure modes? Write a one-sentence explanation for each.</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">📝 Write Your Own JOIN</div>
+        <div class="ex-desc">Use Demo 2 to explore how JOIN connects tables that IMS could only connect with pointer hacks.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Run Query 3 (appointments with doctor names). Study the JOIN condition: <code>ON a.doctor_id = d.id</code>. This is a logical connection through a shared value — no physical pointer, no pre-defined traversal path.</p>
+        <p>&rarr; Modify the query to also show the patient's name (you'll need a second JOIN to the patients table). What does the ON condition look like for the second join?</p>
+        <p>&rarr; Run Query 5 (patients per doctor). Change <code>COUNT(*)</code> to <code>COUNT(DISTINCT patient_id)</code>. Does the result change? Why might a doctor have multiple appointments with the same patient, and why does DISTINCT matter here?</p>
+        <p><strong>Key question:</strong> In IMS (Lesson 1.7), finding all appointments for a given doctor required navigating a specific path through the tree. In SQL, you write <code>WHERE doctor_id = 3</code> regardless of how the data is physically stored. What does this tell you about the difference between <em>navigational</em> (IMS) and <em>declarative</em> (SQL) query models?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">🔧 Design a Schema</div>
+        <div class="ex-desc">Apply normalization principles to a new domain — without any scaffolding.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>A school wants to track: students, the courses they take, the teachers who teach those courses, and the grades students receive. Start with a single flat table containing all this information. Write out what columns it would have.</p>
+        <p>&rarr; Identify at least two update anomalies, one insertion anomaly, and one deletion anomaly in your flat table. Then decompose it into a normalized schema. How many tables do you end up with? What are the foreign key relationships?</p>
+        <p>&rarr; In Demo 3, look at how the hospital schema handles the many-to-many relationship between patients and doctors (via the appointments table). Your student-course schema has the same many-to-many structure. What is the equivalent junction table? What columns does it need beyond the two foreign keys?</p>
+        <p><strong>Key insight:</strong> A many-to-many relationship always requires a junction table in a relational database. This is the same insight that solved the bolt problem in the IMS lesson — <code>asm_parts(assembly_id, part_number, quantity)</code> was a junction table. The pattern is universal.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>The Oracle Paradox.</strong> IBM published the System R paper — including the SQL query language — as academic research. Larry Ellison used that paper to build Oracle and ship it before IBM did. IBM's own research became the foundation of its primary competitor. What does this suggest about the relationship between open academic publication and commercial competition in technology? Should IBM have kept System R secret?</li>
+      <li><strong>Normalization vs. Performance.</strong> A fully normalized database minimizes redundancy but can require many JOINs to answer a single question. In high-traffic systems (social media, financial trading, game servers), JOINs across large tables are expensive. Modern data warehouses often deliberately <em>denormalize</em> data — reintroducing redundancy — to improve query speed. Given what you know about the anomalies normalization prevents, what are the risks of intentional denormalization? What safeguards would you need?</li>
+      <li><strong>SQL at 50.</strong> SQL was standardized in 1986 and is still the dominant data query language in 2025. Python is from 1991 and has largely displaced languages from the same era. JavaScript is from 1995 and has evolved dramatically. Why has SQL remained stable and dominant while most programming languages from the same period have been replaced or transformed? What does this suggest about the relationship between a language's design and its longevity?</li>
+      <li><strong>Connection to Data Cleaning.</strong> In Lesson 3 you cleaned a patient dataset with NULLs, duplicates, and format inconsistencies. A properly normalized schema prevents many of these problems from arising in the first place. Which specific data quality issues from Lesson 3 would a normalized schema have prevented? Which would it not prevent? What does this suggest about the relationship between schema design and data quality?</li>
+      <li><strong>Connection to Era 3 — NoSQL.</strong> In the 2000s, companies like Google, Amazon, and Facebook found that relational databases didn't scale to billions of users and petabytes of data. They built alternative systems — NoSQL databases — that sacrificed some relational guarantees for horizontal scalability. In Era 3, Lesson 4, you will study document stores like MongoDB. Based on what you've learned about the relational model, what specific relational properties do you predict NoSQL databases had to abandon? What did they gain in return?</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Relation</span><span class="gloss-abbr">Mathematical table</span></div>
+        <div class="gloss-def">Codd's term for a table: a set of tuples (rows) over a fixed set of attributes (columns). Each row is unique; order doesn't matter. A relation has no duplicate rows and no notion of "first" or "last." SQL tables are an implementation of relations, with some relaxations (SQL allows duplicate rows unless you use DISTINCT or a primary key).</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Foreign Key</span><span class="gloss-abbr">Logical pointer</span></div>
+        <div class="gloss-def">A column in one table whose values reference the primary key of another table. <strong>The relational model's replacement for physical pointers.</strong> <code>appointments.doctor_id</code> references <code>doctors.id</code>. The connection is logical — enforced by the database engine — and traversable in any direction, unlike IMS's physical tree pointers.
+          <div class="gloss-code">appointments.doctor_id → doctors.id  (logical, bidirectional)
+IMS parent segment → child segment   (physical, top-down only)</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Normalization</span><span class="gloss-abbr">One fact, one place</span></div>
+        <div class="gloss-def">The process of organizing a database schema to minimize redundancy and eliminate update anomalies. Proceeds through <strong>normal forms</strong>: 1NF (atomic values, no repeating groups), 2NF (no partial key dependencies), 3NF (no transitive dependencies). The practical goal: every fact appears in exactly one place, so changing it requires updating exactly one row.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Update Anomaly</span><span class="gloss-abbr">The redundancy tax</span></div>
+        <div class="gloss-def">When updating a fact requires changing multiple rows, and missing one leaves the database in an inconsistent state. Example: a doctor's department stored on every appointment row — moving the doctor to a new department requires updating every appointment. Missing one row produces two different "true" departments simultaneously. Normalization eliminates this by storing the department in exactly one place.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">JOIN</span><span class="gloss-abbr">SQL's relational connector</span></div>
+        <div class="gloss-def">A SQL operation that combines rows from two tables based on a matching condition (usually a foreign key relationship). <strong>INNER JOIN</strong> returns only rows with matches in both tables. <strong>LEFT JOIN</strong> returns all rows from the left table plus any matches from the right (unmatched right-side columns are NULL). JOINs are the SQL equivalent of IMS path traversal — but declarative and bidirectional.
+          <div class="gloss-code">SELECT p.name, d.name
+FROM appointments a
+JOIN patients p ON a.patient_id = p.id
+JOIN doctors  d ON a.doctor_id  = d.id</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">GROUP BY</span><span class="gloss-abbr">Aggregation</span></div>
+        <div class="gloss-def">A SQL clause that partitions rows into groups and applies aggregate functions (COUNT, AVG, SUM, MIN, MAX) to each group. The operation IMS had no native support for — requiring application-level loops. <code>GROUP BY doctor_id</code> with <code>COUNT(*)</code> counts appointments per doctor in a single declarative statement.
+          <div class="gloss-code">SELECT doctor_id, COUNT(*) AS n_appointments
+FROM appointments
+GROUP BY doctor_id
+ORDER BY n_appointments DESC</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era2_lesson3_data_cleaning.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 2, Lesson 3 — Data Cleaning</div></div>
+    </a>
+    <div class="nav-btn" style="opacity:.35;cursor:default">
+      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 2, Lesson 5 — Fuzzy Logic</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+</div>
+<script>
+'use strict';
+
+/* ════════════════════════════════════════════════════
+   DATABASE — in-memory hospital tables
+════════════════════════════════════════════════════ */
+var DB = {
+  patients: [
+    {id:1, name:'Chen, Wei',      dob:'1978-03-14', blood_type:'A+', phone:'415-555-0101'},
+    {id:2, name:'Okafor, Emeka',  dob:'1965-07-22', blood_type:'O+', phone:'415-555-0102'},
+    {id:3, name:'Reyes, Maria',   dob:'1990-11-05', blood_type:'B-', phone:'415-555-0103'},
+    {id:4, name:'Singh, Priya',   dob:'1945-01-01', blood_type:'AB+',phone:'415-555-0104'},
+    {id:5, name:'Park, James',    dob:'1988-06-30', blood_type:'O-', phone:'415-555-0105'},
+    {id:6, name:'Novak, Elena',   dob:'1995-02-18', blood_type:'A-', phone:'415-555-0106'},
+    {id:7, name:'Williams, Ray',  dob:'1952-09-12', blood_type:'A+', phone:'415-555-0107'},
+    {id:8, name:'Torres, Lucia',  dob:'1982-03-04', blood_type:'B+', phone:'415-555-0108'},
+  ],
+  doctors: [
+    {id:1, name:'Dr. Reyes',    specialty:'Cardiology',    department:'Cardiology',   years_exp:18},
+    {id:2, name:'Dr. Singh',    specialty:'Neurology',     department:'Neurology',    years_exp:12},
+    {id:3, name:'Dr. Park',     specialty:'General',       department:'Primary Care', years_exp:8},
+    {id:4, name:'Dr. Hassan',   specialty:'Oncology',      department:'Oncology',     years_exp:22},
+    {id:5, name:'Dr. Nakamura', specialty:'Radiology',     department:'Radiology',    years_exp:15},
+  ],
+  appointments: [
+    {id:1,  patient_id:1, doctor_id:1, date:'2024-01-15', diagnosis:'Hypertension',      status:'completed'},
+    {id:2,  patient_id:2, doctor_id:3, date:'2024-01-18', diagnosis:'Annual checkup',    status:'completed'},
+    {id:3,  patient_id:3, doctor_id:2, date:'2024-01-20', diagnosis:'Migraine',          status:'completed'},
+    {id:4,  patient_id:1, doctor_id:1, date:'2024-02-01', diagnosis:'Hypertension f/u',  status:'completed'},
+    {id:5,  patient_id:4, doctor_id:3, date:'2024-02-05', diagnosis:'Diabetes mgmt',     status:'completed'},
+    {id:6,  patient_id:5, doctor_id:4, date:'2024-02-10', diagnosis:'Screening',         status:'completed'},
+    {id:7,  patient_id:6, doctor_id:3, date:'2024-02-14', diagnosis:'Annual checkup',    status:'completed'},
+    {id:8,  patient_id:7, doctor_id:1, date:'2024-02-20', diagnosis:'Chest pain eval',   status:'completed'},
+    {id:9,  patient_id:2, doctor_id:2, date:'2024-03-01', diagnosis:'Headache',          status:'completed'},
+    {id:10, patient_id:8, doctor_id:3, date:'2024-03-05', diagnosis:'Annual checkup',    status:'completed'},
+    {id:11, patient_id:3, doctor_id:4, date:'2024-03-10', diagnosis:'Follow-up',         status:'scheduled'},
+    {id:12, patient_id:1, doctor_id:5, date:'2024-03-15', diagnosis:'Chest X-ray',       status:'scheduled'},
+  ],
+  medications: [
+    {id:1,  patient_id:1, doctor_id:1, drug:'Lisinopril',    dose:'10mg',  frequency:'daily',   start:'2024-01-15'},
+    {id:2,  patient_id:1, doctor_id:1, drug:'Amlodipine',    dose:'5mg',   frequency:'daily',   start:'2024-02-01'},
+    {id:3,  patient_id:4, doctor_id:3, drug:'Metformin',     dose:'500mg', frequency:'twice',   start:'2024-02-05'},
+    {id:4,  patient_id:3, doctor_id:2, drug:'Sumatriptan',   dose:'50mg',  frequency:'prn',     start:'2024-01-20'},
+    {id:5,  patient_id:7, doctor_id:1, drug:'Aspirin',       dose:'81mg',  frequency:'daily',   start:'2024-02-20'},
+    {id:6,  patient_id:2, doctor_id:2, drug:'Topiramate',    dose:'25mg',  frequency:'nightly', start:'2024-03-01'},
+  ]
+};
+
+/* ════════════════════════════════════════════════════
+   MINI SQL EXECUTOR
+   Supports: SELECT cols FROM table [JOIN ... ON ...]
+             [WHERE cond] [GROUP BY col] [ORDER BY col [DESC]]
+             [LIMIT n]  plus COUNT(*)/AVG/SUM/MIN/MAX
+════════════════════════════════════════════════════ */
+function sqlExec(query) {
+  try {
+    var q = query.trim().replace(/\s+/g,' ');
+    // Tokenize keywords case-insensitive
+    var upper = q.toUpperCase();
+    function idx(kw){ return upper.indexOf(kw); }
+
+    // Parse SELECT
+    var selStart = idx('SELECT ') + 7;
+    var fromPos = idx(' FROM ');
+    if(fromPos<0) throw new Error('Missing FROM clause');
+    var selectStr = q.slice(selStart, fromPos).trim();
+
+    // Parse FROM + optional JOINs
+    var remainAfterFrom = q.slice(fromPos+6).trim();
+    var upperRem = remainAfterFrom.toUpperCase();
+    // Find WHERE / GROUP / ORDER / LIMIT in remaining
+    var joinMatches = [], joinRx = /\bINNER\s+JOIN\b|\bJOIN\b/gi, jm;
+    while((jm=joinRx.exec(remainAfterFrom))!==null) joinMatches.push(jm.index);
+
+    // Base table
+    var firstKw = ['WHERE ','GROUP BY ','ORDER BY ','LIMIT ','JOIN ','INNER JOIN '].map(function(k){
+      var p=upperRem.indexOf(k); return p<0?Infinity:p;
+    }).reduce(function(a,b){return Math.min(a,b);});
+    var baseTableStr = remainAfterFrom.slice(0, firstKw===Infinity?undefined:firstKw).trim();
+    // Handle alias: "appointments a" or "appointments AS a"
+    var baseAlias, baseName;
+    var bParts = baseTableStr.split(/\s+/);
+    baseName = bParts[0].toLowerCase();
+    baseAlias = (bParts[1]&&bParts[1].toUpperCase()==='AS') ? bParts[2] : bParts[1] || baseName;
+    baseAlias = (baseAlias||baseName).toLowerCase();
+
+    // Collect rows with table alias prefixes
+    function getTable(name){
+      var t = DB[name.toLowerCase()];
+      if(!t) throw new Error('Unknown table: '+name);
+      return t;
+    }
+
+    var rows = getTable(baseName).map(function(r){
+      var out={};
+      Object.keys(r).forEach(function(k){ out[baseAlias+'.'+k]=r[k]; out[k]=r[k]; });
+      return out;
+    });
+
+    // Process JOINs
+    var joinRx2 = /\b(?:INNER\s+)?JOIN\s+(\w+)\s+(?:(?:AS\s+)?(\w+)\s+)?ON\s+(\S+)\s*=\s*(\S+)/gi;
+    var jMatch;
+    while((jMatch=joinRx2.exec(remainAfterFrom))!==null){
+      var jtName=jMatch[1].toLowerCase(), jtAlias=(jMatch[2]||jMatch[1]).toLowerCase();
+      var condA=jMatch[3].toLowerCase(), condB=jMatch[4].toLowerCase();
+      var joinTable=getTable(jtName).map(function(r){
+        var out={};
+        Object.keys(r).forEach(function(k){ out[jtAlias+'.'+k]=r[k]; });
+        return out;
+      });
+      var newRows=[];
+      rows.forEach(function(lr){
+        joinTable.forEach(function(rr){
+          var lv=lr[condA]!==undefined?lr[condA]:lr[condA.split('.').pop()];
+          var rv=rr[condB]!==undefined?rr[condB]:rr[condB.split('.').pop()];
+          if(lv===rv){
+            var merged=Object.assign({},lr,rr);
+            newRows.push(merged);
+          }
+        });
+      });
+      rows=newRows;
+    }
+
+    // WHERE
+    var wherePos=upperRem.indexOf(' WHERE '), whereStr=null;
+    var groupPos=upperRem.indexOf(' GROUP BY '), orderPos=upperRem.indexOf(' ORDER BY '), limitPos=upperRem.indexOf(' LIMIT ');
+    if(wherePos>=0){
+      var whereEnd=[groupPos,orderPos,limitPos].filter(function(p){return p>wherePos;}).reduce(function(a,b){return Math.min(a,b);},Infinity);
+      whereStr=remainAfterFrom.slice(wherePos+7,whereEnd===Infinity?undefined:whereEnd).trim();
+    }
+    if(whereStr){
+      rows=rows.filter(function(r){ return evalWhere(whereStr,r); });
+    }
+
+    // Resolve column value
+    function colVal(r,col){
+      col=col.toLowerCase().trim();
+      if(r[col]!==undefined) return r[col];
+      // try without table prefix
+      var bare=col.split('.').pop();
+      if(r[bare]!==undefined) return r[bare];
+      // try all keys containing the bare name
+      var found=null;
+      Object.keys(r).forEach(function(k){ if(k.endsWith('.'+bare)||k===bare) found=r[k]; });
+      return found;
+    }
+
+    // Detect aggregates in SELECT
+    var aggRx=/\b(COUNT|AVG|SUM|MIN|MAX)\s*\(\s*(\*|[\w\.]+)\s*\)/gi;
+    var hasAgg=aggRx.test(selectStr);
+
+    // GROUP BY
+    var groupStr=null;
+    if(groupPos>=0){
+      var groupEnd=[orderPos,limitPos].filter(function(p){return p>groupPos;}).reduce(function(a,b){return Math.min(a,b);},Infinity);
+      groupStr=remainAfterFrom.slice(groupPos+10,groupEnd===Infinity?undefined:groupEnd).trim();
+    }
+
+    if(groupStr||hasAgg){
+      var groups={}, groupKeys=groupStr?groupStr.split(',').map(function(s){return s.trim().toLowerCase();}):['__all__'];
+      rows.forEach(function(r){
+        var key=groupStr?groupKeys.map(function(k){return colVal(r,k);}).join('||'):'__all__';
+        if(!groups[key]) groups[key]={key:key,rows:[],sample:r,groupVals:{}};
+        groupKeys.forEach(function(k){ groups[key].groupVals[k]=colVal(r,k); });
+        groups[key].rows.push(r);
+      });
+      rows=Object.values(groups).map(function(g){
+        var out=Object.assign({},g.sample);
+        Object.keys(g.groupVals).forEach(function(k){ out[k]=g.groupVals[k]; var bare=k.split('.').pop(); out[bare]=g.groupVals[k]; });
+        // Compute aggregates
+        var aggRx2=/\b(COUNT|AVG|SUM|MIN|MAX)\s*\(\s*(\*|[\w\.]+)\s*\)/gi, am;
+        while((am=aggRx2.exec(selectStr))!==null){
+          var fn=am[1].toUpperCase(), col=am[2]==='*'?null:am[2].toLowerCase();
+          var vals=g.rows.map(function(r){ return col?colVal(r,col):1; }).filter(function(v){return v!==null&&v!==undefined;});
+          var result;
+          if(fn==='COUNT') result=col&&am[2]!=='*'?vals.length:g.rows.length;
+          else if(fn==='AVG') result=vals.length?vals.reduce(function(a,b){return a+b;},0)/vals.length:null;
+          else if(fn==='SUM') result=vals.reduce(function(a,b){return a+b;},0);
+          else if(fn==='MIN') result=vals.length?Math.min.apply(null,vals):null;
+          else if(fn==='MAX') result=vals.length?Math.max.apply(null,vals):null;
+          var alias=am[0].replace(/\s/g,'_').toLowerCase();
+          out[am[0].toLowerCase()]=result;
+          out[alias]=result;
+        }
+        return out;
+      });
+    }
+
+    // ORDER BY
+    if(orderPos>=0){
+      var orderEnd=limitPos>orderPos?limitPos:Infinity;
+      var orderStr=remainAfterFrom.slice(orderPos+10,orderEnd===Infinity?undefined:orderEnd).trim();
+      var desc=orderStr.toUpperCase().endsWith(' DESC');
+      var orderCol=orderStr.replace(/\s+DESC$/i,'').replace(/\s+ASC$/i,'').trim().toLowerCase();
+      rows.sort(function(a,b){
+        var av=colVal(a,orderCol),bv=colVal(b,orderCol);
+        if(av===bv)return 0;
+        var r=av<bv?-1:1;
+        return desc?-r:r;
+      });
+    }
+
+    // LIMIT
+    if(limitPos>=0){
+      var limitNum=parseInt(remainAfterFrom.slice(limitPos+7).trim());
+      if(!isNaN(limitNum)) rows=rows.slice(0,limitNum);
+    }
+
+    // Project SELECT columns
+    var cols=[], aliases=[];
+    // Parse select list handling aggregates with aliases
+    var selParts=splitSelect(selectStr);
+    selParts.forEach(function(part){
+      part=part.trim();
+      var asMatch=part.match(/^(.+?)\s+AS\s+(\w+)$/i);
+      if(asMatch){cols.push(asMatch[1].trim());aliases.push(asMatch[2]);}
+      else{cols.push(part);aliases.push(part);}
+    });
+
+    var resultRows=rows.map(function(r){
+      var out={};
+      cols.forEach(function(c,i){
+        var alias=aliases[i];
+        if(c==='*'){Object.assign(out,r);}
+        else{
+          // Try direct aggregate key first
+          var aggKey=c.replace(/\s/g,'_').toLowerCase();
+          if(r[c.toLowerCase()]!==undefined) out[alias]=r[c.toLowerCase()];
+          else if(r[aggKey]!==undefined) out[alias]=r[aggKey];
+          else out[alias]=colVal(r,c);
+        }
+      });
+      return out;
+    });
+
+    // Get column names
+    var colNames = cols[0]==='*' ? Object.keys(resultRows[0]||{}).filter(function(k){return!k.includes('.');}) : aliases;
+    // Filter out alias-duplicated col names
+    colNames=colNames.filter(function(k){return!k.includes('||');});
+
+    return{ok:true, rows:resultRows, cols:colNames};
+  } catch(e) { return{ok:false, error:e.message}; }
+}
+
+function splitSelect(s){
+  var parts=[],depth=0,cur='';
+  for(var i=0;i<s.length;i++){
+    if(s[i]==='(')depth++;else if(s[i]===')')depth--;
+    if(s[i]===','&&depth===0){parts.push(cur);cur='';}
+    else cur+=s[i];
+  }
+  if(cur.trim())parts.push(cur);
+  return parts;
+}
+
+function evalWhere(expr, row){
+  try{
+    // Handle simple conditions: col op val, with AND/OR
+    // Replace col references with values
+    var e = expr;
+    // Handle string literals
+    e = e.replace(/'([^']*)'/g, function(m,s){ return JSON.stringify(s); });
+    // Replace col refs (word.word or word)
+    e = e.replace(/\b([a-z_][a-z0-9_]*(?:\.[a-z_][a-z0-9_]*)?)\b/gi, function(m){
+      if(['AND','OR','NOT','NULL','IS','IN','LIKE'].indexOf(m.toUpperCase())>=0) return m;
+      var v = row[m.toLowerCase()];
+      if(v===undefined){var bare=m.toLowerCase().split('.').pop(); v=row[bare];}
+      if(v===null||v===undefined) return 'null';
+      if(typeof v==='string') return JSON.stringify(v);
+      return v;
+    });
+    // Handle IS NULL / IS NOT NULL
+    e = e.replace(/null\s+IS\s+NOT\s+NULL/gi,'false').replace(/null\s+IS\s+NULL/gi,'true');
+    e = e.replace(/(\S+)\s+IS\s+NOT\s+NULL/gi,'($1!==null&&$1!==undefined)').replace(/(\S+)\s+IS\s+NULL/gi,'($1===null||$1===undefined)');
+    e = e.replace(/\bAND\b/gi,'&&').replace(/\bOR\b/gi,'||').replace(/\bNOT\b/gi,'!');
+    return !!Function('"use strict";return('+e+')')();
+  }catch(ex){return false;}
+}
+
+/* ════════════════════════════════════════════════════
+   DEMO 1 — NORMALIZATION WORKSHOP
+════════════════════════════════════════════════════ */
+(function(){
+  var STEPS = [
+    {
+      label:'0NF — Raw',
+      desc:{
+        badge:'Zero Normal Form',
+        title:'Non-atomic cells: lists stuffed into fields',
+        text:'The raw table as it might arrive from a legacy system or spreadsheet export. Two serious violations: <strong>patient_allergies</strong> contains comma-separated lists (multiple values in one cell), and <strong>doctor_specialties</strong> does too. A doctor with two specialties appears to have ONE specialty that happens to contain a comma. These cannot be queried, sorted, or joined reliably.',
+        anomaly:{
+          title:'⚠ Try to query: find all patients allergic to Penicillin',
+          desc:'With allergies stuffed into one field, a simple WHERE clause fails — "Penicillin, Aspirin" does not equal "Penicillin". You\'d need a fragile LIKE \'%Penicillin%\' search that also matches "Penicillin-resistant" by accident. Non-atomic data breaks every downstream operation.',
+          trigger:'atomicAnomaly'
+        }
+      },
+      tables:[{
+        name:'appointments_raw  ← 0NF violations highlighted in red',
+        cols:['appt_id','date','patient_name','patient_allergies','doctor_name','doctor_specialties','dept'],
+        rows:[
+          [1,'2024-01-15','Chen, Wei',   'Penicillin, Aspirin',          'Dr. Reyes','Cardiology, Interventional',  'Cardiology',  {bad:[3,5]}],
+          [2,'2024-01-18','Okafor, Emeka','[none]',                      'Dr. Park', 'General, Geriatrics',         'Primary Care',{bad:[5]}],
+          [3,'2024-01-20','Reyes, Maria','Sulfa',                        'Dr. Singh','Neurology',                   'Neurology',   {}],
+          [4,'2024-02-01','Chen, Wei',   'Penicillin, Aspirin',          'Dr. Reyes','Cardiology, Interventional',  'Cardiology',  {bad:[3,5]}],
+          [5,'2024-02-20','Williams, Ray','[none]',                      'Dr. Reyes','Cardiology, Interventional',  'Cardiology',  {bad:[5]}],
+        ]
+      }]
+    },
+    {
+      label:'1NF',
+      desc:{
+        badge:'First Normal Form',
+        title:'Atomic values — one fact per cell',
+        text:'1NF requires every cell to contain exactly one value — no comma-separated lists, no arrays, no repeating groups. We fix the violations: <strong>patient_allergies</strong> moves to a separate table (one row per allergy per patient), and each doctor gets exactly one primary specialty in the main table. The multi-valued problem is gone. <strong>New problem visible:</strong> doctor specialties and departments are still duplicated across every appointment row.',
+      },
+      tables:[
+        {
+          name:'appointments  ← atomic values only',
+          cols:['appt_id','date','patient_name','doctor_name','doctor_specialty','dept'],
+          rows:[
+            [1,'2024-01-15','Chen, Wei',   'Dr. Reyes','Cardiology','Cardiology',  {fixed:[2,3,4,5]}],
+            [2,'2024-01-18','Okafor, Emeka','Dr. Park','General',  'Primary Care',{fixed:[2,3,4,5]}],
+            [3,'2024-01-20','Reyes, Maria','Dr. Singh','Neurology', 'Neurology',   {fixed:[2,3,4,5]}],
+            [4,'2024-02-01','Chen, Wei',   'Dr. Reyes','Cardiology','Cardiology',  {bad:[4,5]}],
+            [5,'2024-02-20','Williams, Ray','Dr. Reyes','Cardiology','Cardiology', {bad:[4,5]}],
+          ]
+        },
+        {
+          name:'patient_allergies  ← split out from non-atomic field',
+          cols:['patient_name','allergy'],
+          rows:[
+            ['Chen, Wei',   'Penicillin',{fixed:[0,1]}],
+            ['Chen, Wei',   'Aspirin',   {fixed:[0,1]}],
+            ['Reyes, Maria','Sulfa',     {fixed:[0,1]}],
+          ]
+        },
+        {
+          name:'doctor_specialties  ← split out: each doctor may have multiple',
+          cols:['doctor_name','specialty'],
+          rows:[
+            ['Dr. Reyes','Cardiology',        {fixed:[0,1]}],
+            ['Dr. Reyes','Interventional Cardiology',{fixed:[0,1]}],
+            ['Dr. Park', 'General Practice', {fixed:[0,1]}],
+            ['Dr. Park', 'Geriatrics',       {fixed:[0,1]}],
+            ['Dr. Singh','Neurology',        {fixed:[0,1]}],
+          ]
+        }
+      ]
+    },
+    {
+      label:'2NF',
+      desc:{
+        badge:'Second Normal Form',
+        title:'No partial key dependencies',
+        text:'2NF: every non-key column must depend on the <strong>whole</strong> primary key, not just part of it. In a table with a composite key (patient_id, doctor_id), doctor_specialty depends only on doctor_id — not on the full composite key. We fix this by splitting doctor info into its own table.',
+      },
+      tables:[
+        {
+          name:'appointments',
+          cols:['appt_id','patient_name','doctor_id','date','diagnosis'],
+          rows:[
+            [1,'Chen, Wei',    1,'2024-01-15','Hypertension',{}],
+            [2,'Okafor, Emeka',3,'2024-01-18','Annual checkup',{}],
+            [3,'Reyes, Maria', 2,'2024-01-20','Migraine',{}],
+            [4,'Chen, Wei',    1,'2024-02-01','Hypertension f/u',{}],
+            [5,'Williams, Ray',1,'2024-02-20','Chest pain eval',{}],
+          ]
+        },
+        {
+          name:'doctors',
+          cols:['doctor_id','doctor_name','specialty','department'],
+          rows:[
+            [1,'Dr. Reyes','Cardiology','Cardiology',{fixed:[1,2,3]}],
+            [2,'Dr. Singh','Neurology', 'Neurology',{}],
+            [3,'Dr. Park', 'General',  'Primary Care',{}],
+          ]
+        }
+      ]
+    },
+    {
+      label:'3NF',
+      desc:{
+        badge:'Third Normal Form',
+        title:'No transitive dependencies',
+        text:'3NF: non-key columns must not depend on other non-key columns. In the doctors table, <strong>department depends on specialty</strong> (Cardiology specialty → Cardiology department). This is a transitive dependency. If we rename a department, we update the doctors table — but if two specialties share a department, we still have redundancy. We split further: doctors and departments become separate tables, and patients get their own table too.',
+      },
+      tables:[
+        {
+          name:'appointments',
+          cols:['appt_id','patient_id','doctor_id','date','diagnosis'],
+          rows:[
+            [1,1,1,'2024-01-15','Hypertension',{fixed:[0]}],
+            [2,2,3,'2024-01-18','Annual checkup',{fixed:[0,1]}],
+            [3,3,2,'2024-01-20','Migraine',{fixed:[0,1]}],
+            [4,1,1,'2024-02-01','Hypertension f/u',{fixed:[0,1]}],
+            [5,7,1,'2024-02-20','Chest pain eval',{fixed:[0,1]}],
+          ]
+        },
+        {
+          name:'patients',
+          cols:['id','name','dob','blood_type'],
+          rows:[
+            [1,'Chen, Wei',   '1978-03-14','A+',{fixed:[0,1,2,3]}],
+            [2,'Okafor, Emeka','1965-07-22','O+',{fixed:[0,1,2,3]}],
+            [3,'Reyes, Maria','1990-11-05','B-',{fixed:[0,1,2,3]}],
+            [7,'Williams, Ray','1952-09-12','A+',{fixed:[0,1,2,3]}],
+          ]
+        },
+        {
+          name:'doctors',
+          cols:['id','name','specialty_id','years_exp'],
+          rows:[
+            [1,'Dr. Reyes',1,18,{fixed:[0,1,2,3]}],
+            [2,'Dr. Singh',2,12,{fixed:[0,1,2,3]}],
+            [3,'Dr. Park', 3,8, {fixed:[0,1,2,3]}],
+          ]
+        },
+        {
+          name:'specialties',
+          cols:['id','specialty','department'],
+          rows:[
+            [1,'Cardiology','Cardiology',{fixed:[0,1,2,3]}],
+            [2,'Neurology', 'Neurology', {fixed:[0,1,2,3]}],
+            [3,'General',   'Primary Care',{fixed:[0,1,2,3]}],
+          ]
+        }
+      ]
+    }
+  ];
+
+  var currentStep=0;
+  var anomalyFired=false;
+
+  function renderStepBtns(){
+    var html='';
+    STEPS.forEach(function(s,i){
+      html+='<div class="norm-step'+(i===currentStep?' active':'')+'" onclick="normGoStep('+i+')">'+s.label+'</div>';
+    });
+    document.getElementById('normSteps').innerHTML=html;
+  }
+
+  function renderTable(tbl){
+    var html='<div style="font-family:var(--mono);font-size:9px;color:var(--ac);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">'+escH(tbl.name)+'</div>';
+    html+='<table class="norm-table"><thead><tr>'+tbl.cols.map(function(c){return'<th>'+escH(c)+'</th>';}).join('')+'</tr></thead><tbody>';
+    tbl.rows.forEach(function(row){
+      var meta=row[row.length-1];
+      html+='<tr>';
+      tbl.cols.forEach(function(c,ci){
+        var v=row[ci];
+        var cls='';
+        if(meta&&meta.bad&&meta.bad.indexOf(ci)>=0) cls='bad';
+        if(meta&&meta.fixed&&meta.fixed.indexOf(ci)>=0) cls='fixed';
+        if(meta&&meta.fk&&meta.fk.indexOf(ci)>=0) cls='fk';
+        html+='<td class="'+cls+'">'+escH(String(v))+'</td>';
+      });
+      html+='</tr>';
+    });
+    html+='</tbody></table>';
+    return html;
+  }
+
+  function renderStep(){
+    var step=STEPS[currentStep];
+    var tablesHtml=step.tables.map(renderTable).join('<div style="height:14px"></div>');
+
+    var rightHtml='<div class="norm-desc"><div class="nf-badge">'+step.desc.badge+'</div><strong>'+step.desc.title+'</strong><br><br>'+step.desc.text+'</div>';
+
+    if(step.desc.anomaly){
+      rightHtml+='<div class="anomaly-trigger"><strong>'+step.desc.anomaly.title+'</strong><br>'+step.desc.anomaly.desc+'<button onclick="d1FireAnomaly()">▶ Move Dr. Reyes to Neurology</button><div class="anomaly-result" id="anomalyResult"></div></div>';
+    }
+    if(step.desc.note){
+      rightHtml+='<div class="norm-desc" style="border-color:rgba(74,222,128,.2)">'+step.desc.note+'</div>';
+    }
+    if(currentStep===3){
+      rightHtml+='<div class="norm-desc" style="background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.25)"><strong style="color:var(--green)">✓ Third Normal Form achieved.</strong><br>Every fact lives in exactly one place. Moving Dr. Reyes to Neurology now requires updating exactly <strong>one row</strong> in the specialties table. All appointments automatically reflect the change through the foreign key relationship.</div>';
+    }
+    document.getElementById('normTableArea').innerHTML=tablesHtml;
+    document.getElementById('normDesc').innerHTML=rightHtml;
+    renderStepBtns();
+    anomalyFired=false;
+  }
+
+  window.normGoStep=function(i){currentStep=i;renderStep();};
+
+  window.d1FireAnomaly=function(){
+    var el=document.getElementById('anomalyResult');
+    if(!el) return;
+    el.style.display='block';
+    var step=STEPS[currentStep];
+    var trigger=step.desc.anomaly?step.desc.anomaly.trigger:'updateAnomaly';
+    if(trigger==='atomicAnomaly'){
+      el.innerHTML=
+        '<span style="color:var(--muted)">SQL attempt:</span> WHERE patient_allergies = \'Penicillin\'<br>'+
+        '<span style="color:var(--red)">→ 0 rows returned.</span> "Penicillin, Aspirin" ≠ "Penicillin"<br><br>'+
+        'Workaround: WHERE patient_allergies LIKE \'%Penicillin%\'<br>'+
+        '<span style="color:var(--amber)">→ Also matches "Penicillin-resistant bacteria". Fragile and unpredictable.</span><br><br>'+
+        'Non-atomic data makes every query a guessing game. 1NF fixes this by storing one allergy per row.';
+    } else {
+      el.innerHTML='Updating row 1: doctor_dept → "Neurology" ✓<br>Updating row 4: doctor_dept → "Neurology" ✓<br><span style="color:var(--amber)">Row 5 not updated — missed in batch operation.</span><br><br>Database now has TWO answers to "what department is Dr. Reyes in?"<br>Rows 1, 4 say: Neurology<br>Row 5 says: <strong>Cardiology</strong><br><br>Which is correct? The database cannot tell you.';
+    }
+    anomalyFired=true;
+  };
+
+  function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  renderStep();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 2 — SQL QUERY LAB
+════════════════════════════════════════════════════ */
+(function(){
+  var QUERIES=[
+    {
+      label:'Q1: Basic SELECT + WHERE',
+      english:'Find all patients born before 1960 — name, date of birth, and blood type.',
+      sql:'SELECT name, dob, blood_type\nFROM patients\nWHERE dob < \'1960-01-01\'\nORDER BY dob',
+      verdict:'<strong>SELECT + WHERE</strong> is the foundation of every query. The WHERE clause filters rows; ORDER BY sorts results. Note: this query operates on a single table — no JOIN required.'
+    },
+    {
+      label:'Q2: Multi-column filter',
+      english:'Find completed appointments in February 2024.',
+      sql:'SELECT id, date, diagnosis, patient_id, doctor_id\nFROM appointments\nWHERE date >= \'2024-02-01\'\n  AND date <= \'2024-02-28\'\n  AND status = \'completed\'\nORDER BY date',
+      verdict:'<strong>AND</strong> combines multiple conditions — all must be true for a row to be included. Compare with IMS: the same query would require navigating a path and checking conditions at each level.'
+    },
+    {
+      label:'Q3: JOIN — two tables',
+      english:'Show all appointments with patient name and doctor name — not just IDs.',
+      sql:'SELECT a.date, a.diagnosis,\n       p.name AS patient,\n       d.name AS doctor\nFROM appointments a\nJOIN patients p ON a.patient_id = p.id\nJOIN doctors  d ON a.doctor_id  = d.id\nORDER BY a.date',
+      verdict:'<strong>JOIN</strong> replaces IMS pointer traversal with a logical connection through shared key values. The ON clause specifies which values to match. Two JOINs here — one for patients, one for doctors. The query works equally well in any direction: start from appointments, patients, or doctors.'
+    },
+    {
+      label:'Q4: Aggregate — COUNT + AVG',
+      english:'How many years of experience does each doctor have on average, by specialty?',
+      sql:'SELECT specialty, \n       COUNT(*) AS doctor_count,\n       AVG(years_exp) AS avg_experience\nFROM doctors\nGROUP BY specialty\nORDER BY avg_experience DESC',
+      verdict:'<strong>GROUP BY + aggregate functions</strong> — the operation IMS had no native support for. DL/I required nested application loops; SQL expresses this in four lines. COUNT(*) counts rows per group; AVG() computes the mean of a numeric column.'
+    },
+    {
+      label:'Q5: Three-table JOIN + GROUP BY',
+      english:'How many completed appointments does each doctor have? Show doctor name and count.',
+      sql:'SELECT d.name AS doctor,\n       d.specialty,\n       COUNT(*) AS appointments\nFROM appointments a\nJOIN doctors d ON a.doctor_id = d.id\nWHERE a.status = \'completed\'\nGROUP BY d.id, d.name, d.specialty\nORDER BY appointments DESC',
+      verdict:'This combines everything: <strong>JOIN</strong> connects tables, <strong>WHERE</strong> filters before grouping, <strong>GROUP BY</strong> aggregates, <strong>ORDER BY</strong> sorts results. Notice: GROUP BY includes all non-aggregate SELECT columns (d.id, d.name, d.specialty) — a SQL requirement that reflects the mathematical definition of grouping.'
+    }
+  ];
+
+  var currentQ=0;
+
+  function buildQList(){
+    var html='';
+    QUERIES.forEach(function(q,i){
+      html+='<button class="sql-qbtn'+(i===0?' active':'')+'" onclick="sqlSelectQ('+i+')"><span class="qnum">'+['Q1','Q2','Q3','Q4','Q5'][i]+'</span>'+q.label.replace(/^Q\d+:\s*/,'')+'</button>';
+    });
+    document.getElementById('sqlQList').innerHTML=html;
+  }
+
+  function renderQuery(qi){
+    var q=QUERIES[qi];
+    document.getElementById('sqlDetail').innerHTML=
+      '<div class="sql-english">'+escH(q.english)+'</div>'+
+      '<div class="sql-editor">'+
+        '<textarea class="sql-code" id="sqlEditor" rows="6" spellcheck="false" onkeydown="if((event.ctrlKey||event.metaKey)&&event.key===\'Enter\')sqlRun()">'+escH(q.sql)+'</textarea>'+
+      '</div>'+
+      '<div class="sql-run-row">'+
+        '<button class="ctrl-btn go" onclick="sqlRun()">▶ Run (Ctrl+Enter)</button>'+
+        '<button class="ctrl-btn" onclick="sqlResetQ()">↺ Reset</button>'+
+        '<span style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-left:8px" id="sqlRowCount"></span>'+
+      '</div>'+
+      '<div id="sqlResultArea"></div>'+
+      '<div class="sql-verdict" id="sqlVerdict">'+q.verdict+'</div>';
+    sqlRun();
+  }
+
+  window.sqlSelectQ=function(i){
+    currentQ=i;
+    document.querySelectorAll('.sql-qbtn').forEach(function(b,j){b.classList.toggle('active',j===i);});
+    renderQuery(i);
+  };
+
+  window.sqlResetQ=function(){
+    var ta=document.getElementById('sqlEditor');
+    if(ta) ta.value=QUERIES[currentQ].sql;
+    sqlRun();
+  };
+
+  window.sqlRun=function(){
+    var ta=document.getElementById('sqlEditor'); if(!ta) return;
+    var res=sqlExec(ta.value);
+    var ra=document.getElementById('sqlResultArea'); if(!ra) return;
+    if(!res.ok){
+      ra.innerHTML='<div class="sql-results"><div class="sql-error">⚠ '+escH(res.error)+'</div></div>';
+      var rc=document.getElementById('sqlRowCount'); if(rc) rc.textContent='';
+      return;
+    }
+    var cols=res.cols.filter(function(c){return c!=='*';});
+    // dedupe cols
+    var seen={}, dedupedCols=[];
+    cols.forEach(function(c){if(!seen[c]){seen[c]=1;dedupedCols.push(c);}});
+    cols=dedupedCols;
+    var hdrs=cols.map(function(c){return'<th>'+escH(c)+'</th>';}).join('');
+    var trows=res.rows.map(function(r){
+      return'<tr>'+cols.map(function(c){
+        var v=r[c];
+        if(v===null||v===undefined) v='NULL';
+        if(typeof v==='number') v=Math.round(v*100)/100;
+        return'<td>'+escH(String(v))+'</td>';
+      }).join('')+'</tr>';
+    }).join('');
+    ra.innerHTML='<div class="sql-results"><div class="sql-results-hdr"><span>Results</span><span>'+res.rows.length+' row'+(res.rows.length===1?'':'s')+'</span></div><div style="overflow-x:auto"><table class="sql-results-table"><thead><tr>'+hdrs+'</tr></thead><tbody>'+trows+'</tbody></table></div></div>';
+    var rc=document.getElementById('sqlRowCount');
+    if(rc) rc.textContent=res.rows.length+' row'+(res.rows.length===1?'':'s')+' returned';
+  };
+
+  function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  buildQList();
+  renderQuery(0);
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 3 — SCHEMA EXPLORER
+════════════════════════════════════════════════════ */
+(function(){
+  var SCHEMA = {
+    patients:{
+      x:40, y:60, w:180, h:130, color:'#4ade80',
+      cols:[
+        {name:'id',        type:'INT',     note:'PRIMARY KEY'},
+        {name:'name',      type:'VARCHAR', note:''},
+        {name:'dob',       type:'DATE',    note:''},
+        {name:'blood_type',type:'CHAR(3)', note:''},
+        {name:'phone',     type:'VARCHAR', note:''},
+      ]
+    },
+    doctors:{
+      x:640, y:60, w:170, h:120, color:'#38bdf8',
+      cols:[
+        {name:'id',        type:'INT',     note:'PRIMARY KEY'},
+        {name:'name',      type:'VARCHAR', note:''},
+        {name:'specialty', type:'VARCHAR', note:''},
+        {name:'department',type:'VARCHAR', note:''},
+        {name:'years_exp', type:'INT',     note:''},
+      ]
+    },
+    appointments:{
+      x:270, y:40, w:190, h:145, color:'#a78bfa',
+      cols:[
+        {name:'id',        type:'INT',     note:'PRIMARY KEY'},
+        {name:'patient_id',type:'INT',     note:'FK → patients.id'},
+        {name:'doctor_id', type:'INT',     note:'FK → doctors.id'},
+        {name:'date',      type:'DATE',    note:''},
+        {name:'diagnosis', type:'VARCHAR', note:''},
+        {name:'status',    type:'VARCHAR', note:''},
+      ]
+    },
+    medications:{
+      x:270, y:195, w:190, h:120, color:'#f59e0b',
+      cols:[
+        {name:'id',        type:'INT',     note:'PRIMARY KEY'},
+        {name:'patient_id',type:'INT',     note:'FK → patients.id'},
+        {name:'doctor_id', type:'INT',     note:'FK → doctors.id'},
+        {name:'drug',      type:'VARCHAR', note:''},
+        {name:'dose',      type:'VARCHAR', note:''},
+        {name:'frequency', type:'VARCHAR', note:''},
+      ]
+    }
+  };
+
+  var RELATIONS=[
+    {from:'appointments',fromCol:'patient_id', to:'patients', toCol:'id'},
+    {from:'appointments',fromCol:'doctor_id',  to:'doctors',  toCol:'id'},
+    {from:'medications', fromCol:'patient_id', to:'patients', toCol:'id'},
+    {from:'medications', fromCol:'doctor_id',  to:'doctors',  toCol:'id'},
+  ];
+
+  function tblMid(tbl){
+    var s=SCHEMA[tbl];
+    return{x:s.x+s.w/2, y:s.y+s.h/2};
+  }
+  function tblEdge(tbl,toX,toY){
+    var s=SCHEMA[tbl];
+    var cx=s.x+s.w/2, cy=s.y+s.h/2;
+    var dx=toX-cx, dy=toY-cy;
+    var angle=Math.atan2(dy,dx);
+    var ex=cx+Math.cos(angle)*(s.w/2+2);
+    var ey=cy+Math.sin(angle)*(s.h/2+2);
+    return{x:ex,y:ey};
+  }
+
+  var selectedTable=null;
+
+  function renderSchema(){
+    var svg=document.getElementById('schemaSVG'); if(!svg) return;
+    var h='<rect width="860" height="280" fill="#0a0d14" rx="8"/>';
+
+    // Draw relations
+    RELATIONS.forEach(function(rel){
+      var fromM=tblMid(rel.from), toM=tblMid(rel.to);
+      var e1=tblEdge(rel.from,toM.x,toM.y);
+      var e2=tblEdge(rel.to,fromM.x,fromM.y);
+      h+='<line x1="'+e1.x.toFixed(0)+'" y1="'+e1.y.toFixed(0)+'" x2="'+e2.x.toFixed(0)+'" y2="'+e2.y.toFixed(0)+'" stroke="rgba(100,116,139,.4)" stroke-width="1.5" stroke-dasharray="5,3"/>';
+      // FK label at midpoint
+      var mx=(e1.x+e2.x)/2, my=(e1.y+e2.y)/2;
+      h+='<text x="'+mx.toFixed(0)+'" y="'+(my-4).toFixed(0)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">FK</text>';
+    });
+
+    // Draw tables
+    Object.keys(SCHEMA).forEach(function(tname){
+      var s=SCHEMA[tname];
+      var isSel=selectedTable===tname;
+      h+='<rect x="'+s.x+'" y="'+s.y+'" width="'+s.w+'" height="'+s.h+'" rx="8" fill="'+(isSel?'rgba(255,255,255,.04)':'rgba(0,0,0,.3)')+'" stroke="'+s.color+'" stroke-width="'+(isSel?2:1.2)+'"/>';
+      h+='<rect x="'+s.x+'" y="'+s.y+'" width="'+s.w+'" height="22" rx="8" fill="'+s.color+'" opacity="0.15"/>';
+      h+='<rect x="'+s.x+'" y="'+(s.y+12)+'" width="'+s.w+'" height="10" fill="'+s.color+'" opacity="0.15"/>';
+      h+='<text x="'+(s.x+s.w/2)+'" y="'+(s.y+14)+'" fill="'+s.color+'" font-size="11" font-weight="bold" text-anchor="middle" font-family="Space Mono,monospace">'+tname+'</text>';
+      s.cols.forEach(function(col,ci){
+        var cy=s.y+26+ci*16;
+        var isPK=col.note.includes('PRIMARY');
+        var isFK=col.note.includes('FK');
+        var colColor=isPK?'#f59e0b':isFK?'#38bdf8':'#64748b';
+        h+='<text x="'+(s.x+8)+'" y="'+cy+'" fill="'+colColor+'" font-size="9" font-family="Space Mono,monospace">'+(isPK?'🔑 ':isFK?'🔗 ':'')+col.name+'</text>';
+        h+='<text x="'+(s.x+s.w-8)+'" y="'+cy+'" fill="#1e2d40" font-size="8" text-anchor="end" font-family="Space Mono,monospace">'+col.type+'</text>';
+      });
+      // Invisible click target
+      h+='<rect x="'+s.x+'" y="'+s.y+'" width="'+s.w+'" height="'+s.h+'" rx="8" fill="transparent" data-tbl="'+tname+'" style="cursor:pointer"/>';
+    });
+    svg.innerHTML=h;
+    svg.querySelectorAll('[data-tbl]').forEach(function(el){
+      el.addEventListener('click',function(){selectTable(el.getAttribute('data-tbl'));});
+    });
+  }
+
+  function selectTable(name){
+    selectedTable=name;
+    renderSchema();
+    var s=SCHEMA[name];
+    var rels=RELATIONS.filter(function(r){return r.from===name||r.to===name;});
+    var relHtml=rels.map(function(r){
+      if(r.from===name) return'<div class="td-col"><span class="td-col-name td-fk">'+r.fromCol+'</span><span class="td-col-note">→ '+r.to+'.'+r.toCol+'</span></div>';
+      return'<div class="td-col"><span class="td-col-name td-fk">←</span><span class="td-col-note">'+r.from+'.'+r.fromCol+' references this table</span></div>';
+    }).join('');
+
+    var colHtml=s.cols.map(function(col){
+      var isPK=col.note.includes('PRIMARY'),isFK=col.note.includes('FK');
+      var cls=isPK?'td-pk':isFK?'td-fk':'';
+      return'<div class="td-col"><span class="td-col-name '+cls+'">'+(isPK?'🔑 ':isFK?'🔗 ':'')+col.name+'</span><span class="td-col-type">'+col.type+'</span><span class="td-col-note">'+col.note+'</span></div>';
+    }).join('');
+
+    document.getElementById('tableDetail').innerHTML=
+      '<div class="td-name" style="color:'+s.color+'">'+name+'</div>'+
+      colHtml+
+      (relHtml?'<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)"><div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Relationships</div>'+relHtml+'</div>':'');
+  }
+
+  renderSchema();
+  selectTable('appointments'); // default selection
+})();
+</script>
+</body>
+</html>
