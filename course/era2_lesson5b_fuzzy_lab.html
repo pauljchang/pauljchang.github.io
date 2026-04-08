@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 2, Lesson 5 — Fuzzy Logic Lab | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--surface:#161b27;--s2:#1a2035;--border:#1e2d40;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#334155;
+  --ac:#f59e0b;--ac-dim:rgba(245,158,11,.10);--ac-glow:rgba(245,158,11,.25);
+  --green:#4ade80;--red:#f87171;--sky:#38bdf8;--violet:#a78bfa;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;--disp:'Lora',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+.course-nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.era-badge{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em;}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 80px;}
+.lab-hero{padding:40px 0 32px;border-bottom:1px solid var(--border);margin-bottom:48px;}
+.lab-hero h1{font-family:var(--disp);font-size:36px;font-weight:600;color:#f1f5f9;margin-bottom:8px;}
+.lab-hero p{font-size:15px;color:var(--muted);}
+.demo-section{margin-bottom:60px;}
+.demo-section h2{font-family:var(--disp);font-size:22px;font-weight:600;color:#f1f5f9;margin-bottom:6px;}
+.demo-section .demo-intro{font-size:14px;color:var(--muted);margin-bottom:16px;line-height:1.65;}
+.demo-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+.demo-topbar{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
+.demo-tag{font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase;}
+.demo-hint{font-family:var(--mono);font-size:9px;color:var(--muted2);}
+input[type=range].sl{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,#0a0d14,var(--ac));}
+input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #fcd34d;cursor:pointer;}
+.stat-box{background:#0a0d14;border-radius:6px;padding:8px 10px;}
+.stat-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:3px;}
+.stat-val{font-family:var(--mono);font-size:14px;font-weight:700;color:#e2e8f0;}
+.nav-row{display:flex;justify-content:space-between;margin-top:48px;padding-top:28px;border-top:1px solid var(--border);}
+.nav-btn{text-decoration:none;color:inherit;display:flex;align-items:center;gap:14px;padding:12px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s;}
+.nav-btn:hover{border-color:var(--ac);box-shadow:0 0 14px var(--ac-glow);}
+.nav-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.nav-title{font-size:14px;font-weight:500;color:#e2e8f0;margin-top:2px;}
+.nav-arrow{font-size:18px;color:var(--ac);}
+</style>
+</head>
+<body>
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface)" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 2: SYMBOLIC AI</span>
+  <span>›</span>
+  <a href="era2_lesson5a_fuzzy.html" style="color:var(--muted);text-decoration:none">Lesson 5 — Fuzzy Logic</a>
+  <span>›</span><span style="color:#94a3b8">Interactive Lab</span>
+</nav>
+<div class="wrap">
+  <div class="lab-hero">
+    <h1>🧪 Fuzzy Logic — Interactive Lab</h1>
+    <p>Three demos: membership function editor · fuzzy inference engine · Boolean vs. Fuzzy classifier</p>
+  </div>
+
+  <!-- DEMO 1 -->
+  <div class="demo-section">
+    <h2>Demo 1 — Membership Function Editor</h2>
+    <p class="demo-intro">Drag the vertical input slider to set the current temperature. Watch how it simultaneously belongs to multiple fuzzy sets — to different degrees. Drag the control point handles on the chart to reshape the membership functions.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Membership Functions — Temperature</span>
+        <span class="demo-hint">drag input slider · drag control points to reshape</span>
+      </div>
+      <div style="padding:18px 20px">
+        <svg id="d1svg" viewBox="0 0 680 200" style="display:block;width:100%;cursor:default;touch-action:none"></svg>
+        <div style="display:flex;align-items:center;gap:12px;margin:12px 0">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap">Temperature:</span>
+          <input type="range" class="sl" id="d1input" min="0" max="50" value="22" oninput="d1render()">
+          <span style="font-family:var(--mono);font-size:12px;color:var(--ac);min-width:40px" id="d1val">22°C</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px" id="d1bars"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMO 2 -->
+  <div class="demo-section">
+    <h2>Demo 2 — Fuzzy Inference Engine</h2>
+    <p class="demo-intro">Set temperature and humidity. Watch all four stages of fuzzy inference update live: fuzzification, rule evaluation, aggregation, and defuzzification to a crisp fan speed.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">HVAC Fuzzy Controller</span>
+        <span class="demo-hint">drag sliders · watch inference stages</span>
+      </div>
+      <div style="padding:16px 18px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div style="background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--ac);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Temperature (°C)</div>
+            <input type="range" class="sl" id="d2temp" min="0" max="45" value="26" oninput="d2render()">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--ac);margin-top:4px" id="d2tempval">26°C</div>
+          </div>
+          <div style="background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--ac);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Humidity (%)</div>
+            <input type="range" class="sl" id="d2hum" min="0" max="100" value="70" oninput="d2render()">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--ac);margin-top:4px" id="d2humval">70%</div>
+          </div>
+        </div>
+        <!-- Stage 1 -->
+        <div style="background:#0a0d14;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+          <div style="padding:7px 12px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2)">
+            <span style="background:var(--ac-dim);color:var(--ac);border-radius:3px;padding:2px 6px;margin-right:6px">1</span>Fuzzification
+          </div>
+          <div style="padding:10px 12px" id="d2fuzz"></div>
+        </div>
+        <!-- Stage 2 -->
+        <div style="background:#0a0d14;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+          <div style="padding:7px 12px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2)">
+            <span style="background:var(--ac-dim);color:var(--ac);border-radius:3px;padding:2px 6px;margin-right:6px">2</span>Rule Evaluation
+          </div>
+          <div style="padding:10px 12px" id="d2rules"></div>
+        </div>
+        <!-- Stages 3+4 -->
+        <div style="display:grid;grid-template-columns:1fr 200px;gap:12px">
+          <div style="background:#0a0d14;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+            <div style="padding:7px 12px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2)">
+              <span style="background:var(--ac-dim);color:var(--ac);border-radius:3px;padding:2px 6px;margin-right:6px">3</span>Aggregated Output Set
+            </div>
+            <div style="padding:10px 12px">
+              <svg id="d2agg" viewBox="0 0 400 100" style="display:block;width:100%"></svg>
+            </div>
+          </div>
+          <div style="background:#0a0d14;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+            <div style="padding:7px 12px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2)">
+              <span style="background:var(--ac-dim);color:var(--ac);border-radius:3px;padding:2px 6px;margin-right:6px">4</span>Output
+            </div>
+            <div style="padding:14px;display:flex;flex-direction:column;gap:10px">
+              <div class="stat-box"><div class="stat-lbl">Fan Speed</div><div class="stat-val" id="d2out">—</div></div>
+              <div class="stat-box"><div class="stat-lbl">Method</div><div class="stat-val" style="font-size:10px;color:#94a3b8">Centroid</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMO 3 -->
+  <div class="demo-section">
+    <h2>Demo 3 — Boolean vs. Fuzzy Classifier</h2>
+    <p class="demo-intro">Set patient vitals with the sliders. The Boolean classifier uses hard thresholds — drag BP from 139 to 141 and watch it snap. The fuzzy classifier responds proportionally. The same facts, two fundamentally different models of "high risk."</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Cardiovascular Risk — Boolean vs. Fuzzy</span>
+        <span class="demo-hint">drag BP slowly through 140 — watch the Boolean panel snap</span>
+      </div>
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">Systolic BP (mmHg)</div>
+          <input type="range" class="sl" id="d3bp" min="90" max="200" value="135" oninput="d3render()">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--ac);margin-top:3px" id="d3bpv">135</div>
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">Age (years)</div>
+          <input type="range" class="sl" id="d3age" min="20" max="90" value="55" oninput="d3render()">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--ac);margin-top:3px" id="d3agev">55</div>
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">BMI</div>
+          <input type="range" class="sl" id="d3bmi" min="16" max="45" value="26" oninput="d3render()">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--ac);margin-top:3px" id="d3bmiv">26.0</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr">
+        <div style="padding:16px 18px;border-right:1px solid var(--border)">
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--red);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border)">⬤ Boolean — Crisp Thresholds</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);margin-bottom:8px;line-height:1.8" id="d3bool_rules"></div>
+          <div style="background:#0a0d14;border-radius:8px;padding:14px;text-align:center;margin-top:8px">
+            <div style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:6px">Risk Assessment</div>
+            <div style="font-family:var(--mono);font-size:22px;font-weight:700" id="d3bool_out">—</div>
+          </div>
+        </div>
+        <div style="padding:16px 18px">
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border)">〰 Fuzzy — Graded Membership</div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px" id="d3fuzz_bars"></div>
+          <div style="background:#0a0d14;border-radius:8px;padding:14px;text-align:center;margin-top:8px">
+            <div style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:6px">Risk Score</div>
+            <div style="font-family:var(--mono);font-size:22px;font-weight:700" id="d3fuzz_out">—</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:10px 16px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.6" id="d3insight"></div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <a class="nav-btn" href="era2_lesson5a_fuzzy.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Back</div><div class="nav-title">Lesson 5 — Concepts &amp; History</div></div>
+    </a>
+    <div class="nav-btn" style="opacity:.35;cursor:default">
+      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 2, Lesson 6 — Decision Trees</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </div>
+</div>
+<script>
+'use strict';
+
+/* ── DEMO 1: Membership Function Editor ─────────────────────── */
+(function(){
+  var W=680,H=200,PL=40,PR=16,PT=16,PB=36;
+  var PW=W-PL-PR, PH=H-PT-PB;
+  function sx(v){return PL+v/50*PW;}
+  function sy(v){return PT+PH-v*PH;}
+
+  // Five sets: freezing, cold, cool, warm, hot
+  // Each defined by [left, peak_left, peak_right, right] — trapezoid
+  var SETS=[
+    {name:'Freezing', color:'#38bdf8', pts:[0,0,4,12]},
+    {name:'Cold',     color:'#818cf8', pts:[4,10,16,22]},
+    {name:'Cool',     color:'#34d399', pts:[16,20,24,28]},
+    {name:'Warm',     color:'#f59e0b', pts:[24,28,32,36]},
+    {name:'Hot',      color:'#f87171', pts:[32,40,50,50]},
+  ];
+
+  function trapMem(pts, x){
+    var l=pts[0],pl=pts[1],pr=pts[2],r=pts[3];
+    if(x<=l||x>=r) return 0;
+    if(x>=pl&&x<=pr) return 1;
+    if(x<pl) return (x-l)/(pl-l||1);
+    return (r-x)/(r-pr||1);
+  }
+
+  var dragSet=null, dragPt=null;
+
+  function d1render(){
+    var svg=document.getElementById('d1svg'); if(!svg) return;
+    var inp=+document.getElementById('d1input').value;
+    document.getElementById('d1val').textContent=inp+'°C';
+
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    // Grid
+    for(var g=0;g<=5;g++){
+      var gx=PL+g/5*PW;
+      h+='<line x1="'+gx.toFixed(0)+'" y1="'+PT+'" x2="'+gx.toFixed(0)+'" y2="'+(PT+PH)+'" stroke="#131a2a" stroke-width="1"/>';
+      h+='<text x="'+gx.toFixed(0)+'" y="'+(PT+PH+16)+'" fill="#334155" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">'+(g*10)+'°</text>';
+    }
+    for(var yg=0;yg<=4;yg++){
+      var gy=PT+yg/4*PH;
+      h+='<line x1="'+PL+'" y1="'+gy.toFixed(0)+'" x2="'+(W-PR)+'" y2="'+gy.toFixed(0)+'" stroke="#131a2a" stroke-width="1"/>';
+      h+='<text x="'+(PL-6)+'" y="'+(gy+3).toFixed(0)+'" fill="#334155" font-size="8" text-anchor="end" font-family="Space Mono,monospace">'+(1-yg/4).toFixed(2)+'</text>';
+    }
+    h+='<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+PH)+'" stroke="#2d3748" stroke-width="1.5"/>';
+    h+='<line x1="'+PL+'" y1="'+(PT+PH)+'" x2="'+(W-PR)+'" y2="'+(PT+PH)+'" stroke="#2d3748" stroke-width="1.5"/>';
+
+    // Membership curves
+    SETS.forEach(function(s,si){
+      var pts=s.pts;
+      var path='M'+sx(pts[0]).toFixed(1)+','+sy(0).toFixed(1);
+      for(var x=pts[0];x<=pts[3];x+=0.5){
+        path+='L'+sx(x).toFixed(1)+','+sy(trapMem(pts,x)).toFixed(1);
+      }
+      path+='L'+sx(pts[3]).toFixed(1)+','+sy(0).toFixed(1);
+      h+='<path d="'+path+'" fill="'+s.color+'" opacity="0.15"/>';
+      // Line
+      var line='M'+sx(pts[0]).toFixed(1)+','+sy(0).toFixed(1);
+      for(var x=pts[0];x<=pts[3];x+=0.5){
+        line+='L'+sx(x).toFixed(1)+','+sy(trapMem(pts,x)).toFixed(1);
+      }
+      line+='L'+sx(pts[3]).toFixed(1)+','+sy(0).toFixed(1);
+      h+='<path d="'+line+'" fill="none" stroke="'+s.color+'" stroke-width="2"/>';
+      // Drag handles at peak points
+      [1,2].forEach(function(pi){
+        var hx=sx(pts[pi]),hy=sy(1);
+        h+='<circle cx="'+hx.toFixed(1)+'" cy="'+hy.toFixed(1)+'" r="6" fill="'+s.color+'" opacity="0.8" data-si="'+si+'" data-pi="'+pi+'" style="cursor:ew-resize"/>';
+      });
+      // Label
+      var mx=sx((pts[1]+pts[2])/2);
+      h+='<text x="'+mx.toFixed(0)+'" y="'+(PT+10)+'" fill="'+s.color+'" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">'+s.name+'</text>';
+    });
+
+    // Input line
+    var ix=sx(inp);
+    h+='<line x1="'+ix.toFixed(1)+'" y1="'+PT+'" x2="'+ix.toFixed(1)+'" y2="'+(PT+PH)+'" stroke="white" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>';
+
+    svg.innerHTML=h;
+    svg.querySelectorAll('[data-si]').forEach(function(el){
+      el.addEventListener('pointerdown',function(e){
+        dragSet=+el.getAttribute('data-si');
+        dragPt=+el.getAttribute('data-pi');
+        svg.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      });
+    });
+
+    // Membership bars
+    var barsHtml='';
+    SETS.forEach(function(s){
+      var m=trapMem(s.pts,inp);
+      var pct=Math.round(m*100);
+      barsHtml+='<div style="display:flex;align-items:center;gap:8px">'
+        +'<span style="font-family:var(--mono);font-size:10px;color:'+s.color+';min-width:64px">'+s.name+'</span>'
+        +'<div style="flex:1;background:var(--border);border-radius:3px;height:10px;overflow:hidden">'
+        +'<div style="width:'+pct+'%;height:100%;background:'+s.color+';border-radius:3px;transition:width .1s"></div></div>'
+        +'<span style="font-family:var(--mono);font-size:10px;color:'+s.color+';min-width:36px;text-align:right">'+m.toFixed(2)+'</span>'
+        +'</div>';
+    });
+    document.getElementById('d1bars').innerHTML=barsHtml;
+  }
+
+  var svg=document.getElementById('d1svg');
+  if(svg){
+    svg.addEventListener('pointermove',function(e){
+      if(dragSet===null) return;
+      var r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;
+      var cx=(e.clientX-r.left)*(vb.width/r.width);
+      var val=Math.round((cx-PL)/PW*50);
+      val=Math.max(0,Math.min(50,val));
+      var s=SETS[dragSet];
+      if(dragPt===1){
+        s.pts[1]=Math.min(val,s.pts[2]-1);
+        s.pts[0]=Math.min(s.pts[0],s.pts[1]);
+      } else {
+        s.pts[2]=Math.max(val,s.pts[1]+1);
+        s.pts[3]=Math.max(s.pts[3],s.pts[2]);
+      }
+      d1render();
+    });
+    svg.addEventListener('pointerup',function(){dragSet=null;dragPt=null;});
+  }
+  window.d1render=d1render;
+  d1render();
+})();
+
+/* ── DEMO 2: Fuzzy Inference Engine ─────────────────────────── */
+(function(){
+  // Temp membership functions (0-45°C)
+  function tempMem(t){
+    return{
+      cool: Math.max(0,Math.min(1,(22-t)/8,(t-10)/6)),
+      warm: Math.max(0,Math.min(1,(t-18)/8,(35-t)/7)),
+      hot:  Math.max(0,Math.min(1,(t-28)/8,1))
+    };
+  }
+  // Humidity (0-100)
+  function humMem(h){
+    return{
+      low:  Math.max(0,Math.min(1,(50-h)/20,1)),
+      high: Math.max(0,Math.min(1,(h-40)/20,1))
+    };
+  }
+
+  var RULES=[
+    {cond:function(t,h){return Math.min(t.hot,h.high);},   out:'fast',   text:'IF temp IS hot AND hum IS high → fan IS FAST'},
+    {cond:function(t,h){return Math.min(t.warm,h.high);},  out:'medium', text:'IF temp IS warm AND hum IS high → fan IS MEDIUM'},
+    {cond:function(t,h){return Math.min(t.warm,h.low);},   out:'slow',   text:'IF temp IS warm AND hum IS low → fan IS SLOW'},
+    {cond:function(t,h){return t.cool;},                   out:'slow',   text:'IF temp IS cool → fan IS SLOW'},
+    {cond:function(t,h){return 0;},                        out:'off',    text:'IF temp IS cold → fan IS OFF'},
+  ];
+
+  // Output sets: off=[0,0,15], slow=[5,20,35], medium=[25,45,65], fast=[55,80,100]
+  var OUT_SETS={
+    off:    {l:0,  pl:0,  pr:0,  r:15, color:'#38bdf8'},
+    slow:   {l:5,  pl:15, pr:25, r:35, color:'#818cf8'},
+    medium: {l:25, pl:40, pr:55, r:65, color:'#f59e0b'},
+    fast:   {l:55, pl:70, pr:90, r:100,color:'#f87171'},
+  };
+
+  function trapM(s,x){
+    if(x<=s.l||x>=s.r) return 0;
+    if(x>=s.pl&&x<=s.pr) return 1;
+    if(x<s.pl) return(x-s.l)/(s.pl-s.l||0.001);
+    return(s.r-x)/(s.r-s.pr||0.001);
+  }
+
+  function d2render(){
+    var temp=+document.getElementById('d2temp').value;
+    var hum=+document.getElementById('d2hum').value;
+    document.getElementById('d2tempval').textContent=temp+'°C';
+    document.getElementById('d2humval').textContent=hum+'%';
+
+    var tm=tempMem(temp), hm=humMem(hum);
+
+    // Stage 1: fuzzification
+    var fuzzHtml='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+    [['cool',tm.cool,'#34d399'],['warm',tm.warm,'#f59e0b'],['hot',tm.hot,'#f87171']].forEach(function(r){
+      fuzzHtml+='<div style="display:flex;align-items:center;gap:6px">'
+        +'<span style="font-family:var(--mono);font-size:9px;color:'+r[2]+';min-width:60px">temp.'+r[0]+'</span>'
+        +'<div style="flex:1;background:var(--border);border-radius:2px;height:8px;overflow:hidden">'
+        +'<div style="width:'+Math.round(r[1]*100)+'%;height:100%;background:'+r[2]+'"></div></div>'
+        +'<span style="font-family:var(--mono);font-size:9px;color:'+r[2]+';min-width:30px;text-align:right">'+r[1].toFixed(2)+'</span>'
+        +'</div>';
+    });
+    [['low',hm.low,'#38bdf8'],['high',hm.high,'#a78bfa']].forEach(function(r){
+      fuzzHtml+='<div style="display:flex;align-items:center;gap:6px">'
+        +'<span style="font-family:var(--mono);font-size:9px;color:'+r[2]+';min-width:60px">hum.'+r[0]+'</span>'
+        +'<div style="flex:1;background:var(--border);border-radius:2px;height:8px;overflow:hidden">'
+        +'<div style="width:'+Math.round(r[1]*100)+'%;height:100%;background:'+r[2]+'"></div></div>'
+        +'<span style="font-family:var(--mono);font-size:9px;color:'+r[2]+';min-width:30px;text-align:right">'+r[1].toFixed(2)+'</span>'
+        +'</div>';
+    });
+    fuzzHtml+='</div>';
+    document.getElementById('d2fuzz').innerHTML=fuzzHtml;
+
+    // Stage 2: rule firing
+    var firings={off:0,slow:0,medium:0,fast:0};
+    var rulesHtml='';
+    RULES.forEach(function(rule){
+      var str=rule.cond(tm,hm);
+      str=Math.round(str*100)/100;
+      if(str>firings[rule.out]) firings[rule.out]=str;
+      var col=str>0.05?'var(--ac)':'var(--muted2)';
+      rulesHtml+='<div style="margin-bottom:6px">'
+        +'<div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:'+col+';">'
+        +'<span>'+rule.text+'</span><span style="font-weight:700">'+str.toFixed(2)+'</span></div>'
+        +'<div style="height:5px;background:var(--border);border-radius:2px;margin-top:3px;overflow:hidden">'
+        +'<div style="width:'+Math.round(str*100)+'%;height:100%;background:'+col+';border-radius:2px"></div></div>'
+        +'</div>';
+    });
+    document.getElementById('d2rules').innerHTML=rulesHtml;
+
+    // Stages 3+4: aggregation + defuzzification
+    var W=400,H=100,PL=20,PR=10,PT=8,PB=20,PW=W-PL-PR,PH=H-PT-PB;
+    function sx(v){return PL+v/100*PW;}
+    function sy(v){return PT+PH-v*PH;}
+
+    // Compute aggregated membership at each point
+    var aggH='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="4"/>';
+    aggH+='<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+PH)+'" stroke="#2d3748" stroke-width="1"/>';
+    aggH+='<line x1="'+PL+'" y1="'+(PT+PH)+'" x2="'+(W-PR)+'" y2="'+(PT+PH)+'" stroke="#2d3748" stroke-width="1"/>';
+
+    // Draw each output set clipped at its firing strength
+    Object.keys(firings).forEach(function(k){
+      var s=OUT_SETS[k], clip=firings[k];
+      if(clip<0.01) return;
+      var pathd='M'+sx(s.l).toFixed(1)+','+sy(0).toFixed(1);
+      for(var x=s.l;x<=s.r;x+=1){
+        var m=Math.min(trapM(s,x),clip);
+        pathd+='L'+sx(x).toFixed(1)+','+sy(m).toFixed(1);
+      }
+      pathd+='L'+sx(s.r).toFixed(1)+','+sy(0).toFixed(1);
+      aggH+='<path d="'+pathd+'" fill="'+s.color+'" opacity="0.25"/>';
+      aggH+='<path d="'+pathd+'" fill="none" stroke="'+s.color+'" stroke-width="1.5"/>';
+    });
+
+    // Compute centroid
+    var num=0,den=0;
+    for(var x=0;x<=100;x+=0.5){
+      var agg=0;
+      Object.keys(firings).forEach(function(k){
+        var s=OUT_SETS[k];
+        agg=Math.max(agg,Math.min(trapM(s,x),firings[k]));
+      });
+      num+=x*agg*0.5; den+=agg*0.5;
+    }
+    var centroid=den>0.001?num/den:0;
+
+    // Draw centroid line
+    var cx=sx(centroid);
+    aggH+='<line x1="'+cx.toFixed(1)+'" y1="'+PT+'" x2="'+cx.toFixed(1)+'" y2="'+(PT+PH)+'" stroke="white" stroke-width="2" stroke-dasharray="4,3"/>';
+    aggH+='<text x="'+cx.toFixed(0)+'" y="'+(H-4)+'" fill="white" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">'+centroid.toFixed(0)+'%</text>';
+    for(var xg=0;xg<=4;xg++){
+      aggH+='<text x="'+sx(xg*25).toFixed(0)+'" y="'+(H-6)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+(xg*25)+'</text>';
+    }
+
+    document.getElementById('d2agg').innerHTML=aggH;
+    var label=centroid<20?'OFF':centroid<40?'SLOW':centroid<65?'MEDIUM':'FAST';
+    document.getElementById('d2out').textContent=Math.round(centroid)+'% — '+label;
+    document.getElementById('d2out').style.color=centroid<20?'var(--sky)':centroid<40?'var(--violet)':centroid<65?'var(--ac)':'var(--red)';
+  }
+  window.d2render=d2render;
+  d2render();
+})();
+
+/* ── DEMO 3: Boolean vs Fuzzy ───────────────────────────────── */
+(function(){
+  function d3render(){
+    var bp=+document.getElementById('d3bp').value;
+    var age=+document.getElementById('d3age').value;
+    var bmi=+document.getElementById('d3bmi').value;
+    document.getElementById('d3bpv').textContent=bp;
+    document.getElementById('d3agev').textContent=age;
+    document.getElementById('d3bmiv').textContent=bmi.toFixed(1);
+
+    // Boolean
+    var bp_high=bp>=140, age_risk=age>=60, bmi_over=bmi>=30;
+    var risk_count=[bp_high,age_risk,bmi_over].filter(Boolean).length;
+    var bool_risk=risk_count>=2?'HIGH':risk_count===1?'MODERATE':'LOW';
+    var bool_col=bool_risk==='HIGH'?'var(--red)':bool_risk==='MODERATE'?'var(--ac)':'var(--green)';
+    document.getElementById('d3bool_out').textContent=bool_risk;
+    document.getElementById('d3bool_out').style.color=bool_col;
+    document.getElementById('d3bool_rules').innerHTML=
+      '<span style="color:'+(bp_high?'var(--red)':'var(--green)')+'">BP '+(bp_high?'≥':'<')+' 140: '+(bp_high?'HIGH':'NORMAL')+'</span><br>'
+      +'<span style="color:'+(age_risk?'var(--red)':'var(--green)')+'">Age '+(age_risk?'≥':'<')+' 60: '+(age_risk?'AT RISK':'OK')+'</span><br>'
+      +'<span style="color:'+(bmi_over?'var(--red)':'var(--green)')+'">BMI '+(bmi_over?'≥':'<')+' 30: '+(bmi_over?'OBESE':'OK')+'</span>';
+
+    // Fuzzy memberships
+    var bp_m=Math.max(0,Math.min(1,(bp-120)/30));
+    var age_m=Math.max(0,Math.min(1,(age-40)/30));
+    var bmi_m=Math.max(0,Math.min(1,(bmi-22)/12));
+    var fuzz_risk=(bp_m*0.5+age_m*0.3+bmi_m*0.2);
+    var fuzz_col=fuzz_risk>0.65?'var(--red)':fuzz_risk>0.35?'var(--ac)':'var(--green)';
+
+    var barsHtml=[
+      {lbl:'BP risk',val:bp_m,col:'#f87171'},
+      {lbl:'Age risk',val:age_m,col:'#f59e0b'},
+      {lbl:'BMI risk',val:bmi_m,col:'#a78bfa'},
+    ].map(function(b){
+      return '<div style="display:flex;align-items:center;gap:8px">'
+        +'<span style="font-family:var(--mono);font-size:9px;color:'+b.col+';min-width:52px">'+b.lbl+'</span>'
+        +'<div style="flex:1;background:var(--border);border-radius:2px;height:8px;overflow:hidden">'
+        +'<div style="width:'+Math.round(b.val*100)+'%;height:100%;background:'+b.col+'"></div></div>'
+        +'<span style="font-family:var(--mono);font-size:9px;color:'+b.col+';min-width:30px;text-align:right">'+b.val.toFixed(2)+'</span>'
+        +'</div>';
+    }).join('');
+    document.getElementById('d3fuzz_bars').innerHTML=barsHtml;
+    document.getElementById('d3fuzz_out').textContent=fuzz_risk.toFixed(3);
+    document.getElementById('d3fuzz_out').style.color=fuzz_col;
+
+    // Insight
+    var snap=Math.abs(bp-140)<=2;
+    var insight=snap
+      ? '⚠ BP is near the Boolean threshold of 140. A 1 mmHg change flips the Boolean output between LOW/MODERATE and HIGH/LOW. The fuzzy score changes by ~0.03 — proportional and smooth.'
+      : bp_high && !age_risk && !bmi_over
+        ? 'Boolean: HIGH risk (BP alone triggers it). Fuzzy: '+fuzz_risk.toFixed(2)+' — moderate, since age and BMI are healthy. The fuzzy system incorporates all three factors continuously.'
+        : !bp_high && age_risk && bmi_over
+          ? 'Boolean: MODERATE risk (2 of 3 factors). Fuzzy: '+fuzz_risk.toFixed(2)+'. Age and BMI carry less weight than BP in the fuzzy model — is that clinically justified?'
+          : 'Drag systolic BP slowly through 140 mmHg to see the Boolean snap. The fuzzy score changes continuously regardless of where thresholds are drawn.';
+    document.getElementById('d3insight').textContent=insight;
+  }
+  window.d3render=d3render;
+  d3render();
+})();
+</script>
+</body>
+</html>

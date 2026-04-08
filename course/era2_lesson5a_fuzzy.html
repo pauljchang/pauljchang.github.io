@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 2, Lesson 5 — Fuzzy Logic | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--surface:#161b27;--s2:#1a2035;--border:#1e2d40;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#334155;
+  --ac:#f59e0b;--ac-dim:rgba(245,158,11,.10);--ac-glow:rgba(245,158,11,.25);
+  --green:#4ade80;--red:#f87171;--sky:#38bdf8;--violet:#a78bfa;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;--disp:'Lora',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+.course-nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.era-badge{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em;}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 100px;}
+.hero{padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px;}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.week-badge{background:var(--ac);color:#1c0d00;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em;}
+.hero h1{font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px;}
+.hero-sub{font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px;}
+.hero-timeline{display:flex;gap:36px;flex-wrap:wrap;}
+.tl-item{display:flex;flex-direction:column;gap:3px;}
+.tl-year{font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.1em;}
+.tl-label{font-size:13px;color:var(--muted);}
+.section{margin-bottom:68px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px;}
+.sec-title{font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.obj-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;}
+.obj-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.obj-list li strong{color:#f1f5f9;}
+.prose p{font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82;}
+.prose p:last-child{margin-bottom:0;}
+.prose p strong{color:#e2e8f0;}
+.prose code{font-family:var(--mono);font-size:12px;background:#0a0d14;padding:2px 6px;border-radius:3px;border:1px solid var(--border);color:#fcd34d;}
+.pullquote{background:linear-gradient(135deg,rgba(245,158,11,.07),rgba(245,158,11,.02));border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:22px 26px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:17px;font-style:italic;color:#fcd34d;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+.personal-box{background:linear-gradient(135deg,rgba(167,139,250,.07),rgba(245,158,11,.04));border:1px solid rgba(167,139,250,.25);border-radius:12px;padding:22px 26px;margin:32px 0;}
+.personal-box h4{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--violet);margin-bottom:10px;}
+.personal-box p{font-size:14px;color:#94a3b8;line-height:1.75;}
+.personal-box p strong{color:#e2e8f0;}
+.math-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0;}
+.math-card{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.math-card h4{font-family:var(--mono);font-size:10px;color:var(--ac);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+.math-card .formula{font-family:var(--mono);font-size:13px;color:#e2e8f0;margin-bottom:6px;}
+.math-card p{font-size:12px;color:#64748b;line-height:1.6;}
+.tt-wrap{overflow-x:auto;margin:24px 0;}
+.tt{border-collapse:collapse;font-family:var(--mono);font-size:11px;width:100%;}
+.tt th{background:var(--s2);color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em;padding:8px 12px;border:1px solid var(--border);text-align:center;}
+.tt td{padding:7px 12px;border:1px solid var(--border);text-align:center;}
+.tt-t{color:var(--green);font-weight:700;}
+.tt-f{color:var(--red);font-weight:700;}
+.tt-eg{color:var(--ac);font-weight:700;}
+.highlight-row{background:rgba(245,158,11,.06);}
+.lab-cta{background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(245,158,11,.04));border:1px solid rgba(245,158,11,.3);border-radius:14px;padding:28px 32px;margin:40px 0;display:flex;align-items:center;gap:24px;}
+.lab-cta-icon{font-size:36px;flex-shrink:0;}
+.lab-cta h3{font-family:var(--disp);font-size:20px;font-weight:600;color:#fcd34d;margin-bottom:6px;}
+.lab-cta p{font-size:14px;color:#94a3b8;line-height:1.65;margin-bottom:14px;}
+.lab-cta-btn{display:inline-block;font-family:var(--mono);font-size:11px;padding:10px 20px;border-radius:7px;border:1px solid rgba(245,158,11,.5);background:rgba(245,158,11,.12);color:var(--ac);text-decoration:none;transition:all .15s;}
+.lab-cta-btn:hover{background:rgba(245,158,11,.2);border-color:var(--ac);}
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.ex-head{padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border);}
+.ex-num{font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(245,158,11,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.ex-title{font-weight:600;font-size:16px;color:#f1f5f9;}
+.ex-desc{font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6;}
+.ex-body{padding:20px;}
+.ex-body p{font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7;}
+.ex-body p:last-child{margin-bottom:0;}
+.ex-body p strong{color:#e2e8f0;}
+.disc-list{list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px;}
+.disc-list li{counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72;}
+.disc-list li::before{content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(245,158,11,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px;}
+.disc-list li strong{color:#e2e8f0;}
+.gloss-grid{display:flex;flex-direction:column;}
+.gloss-entry{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);padding:18px 0;}
+.gloss-entry:last-child{border-bottom:none;}
+.gloss-term{display:flex;flex-direction:column;gap:5px;padding-right:24px;}
+.gloss-term-name{font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700;}
+.gloss-abbr{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.gloss-def{font-size:14.5px;color:#94a3b8;line-height:1.72;}
+.gloss-def strong{color:#e2e8f0;}
+.gloss-code{font-family:var(--mono);font-size:11px;color:#fcd34d;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:7px 12px;display:block;margin-top:8px;line-height:1.8;}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border);}
+.nav-btn{text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s;}
+.nav-btn:hover{border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow);}
+.nav-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.nav-title{font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px;}
+.nav-arrow{font-size:20px;color:var(--ac);}
+@media(max-width:680px){.math-row{grid-template-columns:1fr;}.hero h1{font-size:38px;}}
+</style>
+</head>
+<body>
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface)" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 2: SYMBOLIC AI</span>
+  <span>›</span><span>Era 2, Lesson 5 — Fuzzy Logic</span>
+</nav>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 2 · LESSON 5</span>
+      <span>1965 – Present</span><span>·</span>
+      <span>Degrees of Truth Beyond True and False</span>
+    </div>
+    <h1>Shades of<br>Gray</h1>
+    <p class="hero-sub">In 1965, Lotfi Zadeh proposed that membership in a set is not binary — it is a matter of degree. The Western AI community was skeptical. Japan built it into subway systems.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1965</span><span class="tl-label">Zadeh publishes "Fuzzy Sets" — largely ignored in the West</span></div>
+      <div class="tl-item"><span class="tl-year">1980s</span><span class="tl-label">Japan and Taiwan adopt fuzzy logic for industrial control</span></div>
+      <div class="tl-item"><span class="tl-year">1987</span><span class="tl-label">Sendai subway — fuzzy logic controls acceleration and braking</span></div>
+      <div class="tl-item"><span class="tl-year">1990s</span><span class="tl-label">Western industry catches up — washing machines, cameras, HVAC</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">〰️</span><div><strong>Explain</strong> why crisp Boolean logic is inadequate for describing vague, continuous real-world concepts — and what fuzzy sets add.</div></li>
+      <li><span class="obj-icon">📐</span><div><strong>Define</strong> fuzzy membership functions and apply fuzzy AND, OR, and NOT to compute truth values in [0, 1].</div></li>
+      <li><span class="obj-icon">⚙️</span><div><strong>Trace</strong> the full fuzzy inference cycle: fuzzification → rule evaluation → aggregation → defuzzification.</div></li>
+      <li><span class="obj-icon">⚖️</span><div><strong>Contrast</strong> fuzzy and Boolean classifiers on a concrete problem and explain why gradedness eliminates the boundary snap problem.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">The Imprecision Problem</h2></div>
+    <div class="prose">
+      <p>By the mid-1960s, the symbolic AI program was in full swing. Expert systems encoded knowledge as crisp if-then rules. Logic was Boolean. A patient either had a fever or did not. Blood pressure was either high or normal. Every concept had a sharp boundary, and the boundary was wherever the knowledge engineer drew it.</p>
+      <p>This bothered Lotfi Zadeh. An Azerbaijani-born Iranian-American mathematician at UC Berkeley, Zadeh worked in control systems — designing the feedback loops that keep aircraft stable and chemical plants safe. His domain was full of concepts that resisted crisp definition. A room was not simply <em>hot</em> or <em>not hot</em>. An aircraft was not simply <em>pitching</em> or <em>not pitching</em>. These were matters of degree, and any control system that pretended otherwise was throwing away information.</p>
+      <p>In 1965, Zadeh published a paper in the journal <em>Information and Control</em> titled "Fuzzy Sets." Its central proposal was simple: replace the membership function of a classical set — which maps every element to 0 (not a member) or 1 (a member) — with a <strong>fuzzy membership function</strong> that maps every element to a value anywhere in [0, 1]. A person 180 cm tall might have membership 0.7 in the set "tall people." At 200 cm, membership approaches 1. At 150 cm, it might be 0.1. Tallness is a matter of degree, and the mathematics should say so.</p>
+      <p>The Western AI and mathematics communities were largely unimpressed. Critics argued that fuzzy logic confused two distinct concepts: <strong>vagueness</strong> (a concept is inherently graded — "tall" has no sharp boundary) and <strong>uncertainty</strong> (we don't know which of several crisp states is true — "I'm not sure if it will rain"). Probability theory handles uncertainty; it was not clear fuzzy logic was adding anything. Zadeh's critics, most prominently the statistician William Kruskal and the philosopher Rudolf Carnap, argued the framework was either redundant or incoherent.</p>
+    </div>
+    <div class="pullquote">
+      <p>"The notion of a fuzzy set provides a convenient point of departure for the construction of a conceptual framework which parallels in many respects the framework used in the case of ordinary sets, but is more general than the latter and, potentially, may prove to have a much wider scope of applicability."</p>
+      <cite>&mdash; Lotfi Zadeh, "Fuzzy Sets," Information and Control, 1965</cite>
+    </div>
+    <div class="prose">
+      <p>Japan and Taiwan did not wait for the philosophical debate to resolve. Japanese engineers in the 1980s applied fuzzy logic to real control problems with measurable results. The <strong>Sendai subway system</strong>, which opened in 1987, used a fuzzy logic controller for automatic train operation — smoother acceleration, more precise stopping at platforms, and lower energy consumption than the conventional PID controller it replaced. Hitachi, Panasonic, and Mitsubishi shipped fuzzy controllers in washing machines, air conditioners, and camera autofocus systems. The word ファジー (fuzzy) became a consumer electronics marketing term in Japan. By the early 1990s, Japanese companies were filing thousands of fuzzy logic patents annually while American companies filed dozens.</p>
+      <p>The Western reversal was partly embarrassment and partly economic pressure. If Japanese washing machines with fuzzy logic were outperforming American ones without it, the philosophical objections began to seem less important. By the mid-1990s, fuzzy logic was mainstream in control engineering worldwide — not because the critics had been refuted, but because the applications worked.</p>
+    </div>
+
+    <div class="personal-box">
+      <h4>✦ A Personal Connection</h4>
+      <p>The author of this course has a family connection to this story. His father-in-law, <strong>Dr. Share-Young Lee</strong>, was the founding chair of the Department of Computer Science at National Taiwan University — established in 1977, during the same decade that fuzzy logic was finding its most enthusiastic reception across Asia. Dr. Lee published research on fuzzy logic as well as work on bubble memory, and authored several computer science textbooks, all in Chinese. He was part of a generation of Taiwanese and Japanese researchers who took Zadeh's ideas seriously while much of the Western AI establishment remained skeptical. The academic departments these researchers built — including NTU's CSIE — were among the institutions where fuzzy logic moved from theory to engineering practice.</p>
+    </div>
+  </section>
+
+  <!-- 03 THE MATHEMATICS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">The Mathematics of Fuzzy Logic</h2></div>
+    <div class="prose">
+      <p>Fuzzy logic extends classical Boolean logic in a precise mathematical way. The extension is conservative: when membership values are restricted to exactly 0 or 1, fuzzy logic reduces to classical logic. Everything classical logic can do, fuzzy logic can also do. The reverse is not true.</p>
+    </div>
+
+    <div class="math-row">
+      <div class="math-card">
+        <h4>Fuzzy AND (T-norm)</h4>
+        <div class="formula">μ(A∧B) = min(μA, μB)</div>
+        <p>The AND of two fuzzy values is the minimum. If "hot" = 0.7 and "humid" = 0.4, then "hot AND humid" = 0.4. The weakest condition determines the conjunction.</p>
+      </div>
+      <div class="math-card">
+        <h4>Fuzzy OR (T-conorm)</h4>
+        <div class="formula">μ(A∨B) = max(μA, μB)</div>
+        <p>The OR of two fuzzy values is the maximum. If "tall" = 0.7 or "heavy" = 0.4, then "tall OR heavy" = 0.7. The strongest condition determines the disjunction.</p>
+      </div>
+      <div class="math-card">
+        <h4>Fuzzy NOT (complement)</h4>
+        <div class="formula">μ(¬A) = 1 − μA</div>
+        <p>The NOT of a fuzzy value is its complement. If "warm" = 0.6 then "not warm" = 0.4. Note: NOT(NOT(A)) = A — double negation holds, as in classical logic.</p>
+      </div>
+    </div>
+
+    <div class="prose">
+      <p>These three operations give fuzzy logic its computational backbone. Notice something important: when μA and μB are both restricted to {0, 1}, min() becomes AND, max() becomes OR, and 1−x becomes NOT — exactly classical Boolean logic. Fuzziness is a generalization, not a replacement.</p>
+      <p>The full fuzzy inference cycle has four stages:</p>
+    </div>
+
+    <div class="tt-wrap">
+      <table class="tt">
+        <tr><th>#</th><th>Stage</th><th>Input</th><th>Operation</th><th>Output</th></tr>
+        <tr><td class="tt-eg">1</td><td>Fuzzification</td><td>Crisp sensor value (e.g., 26°C)</td><td>Apply membership functions</td><td>Fuzzy memberships (e.g., warm=0.6, hot=0.2)</td></tr>
+        <tr class="highlight-row"><td class="tt-eg">2</td><td>Rule Evaluation</td><td>Fuzzy memberships</td><td>Apply IF-THEN rules using min/max</td><td>Firing strength per rule (e.g., rule 1 fires at 0.4)</td></tr>
+        <tr><td class="tt-eg">3</td><td>Aggregation</td><td>Firing strengths + output fuzzy sets</td><td>Clip each output set, union them all</td><td>Combined output fuzzy set</td></tr>
+        <tr class="highlight-row"><td class="tt-eg">4</td><td>Defuzzification</td><td>Combined output fuzzy set</td><td>Centroid (center of mass)</td><td>Single crisp output value (e.g., fan speed = 62%)</td></tr>
+      </table>
+    </div>
+
+    <div class="prose">
+      <p>The last stage — <strong>defuzzification</strong> — is what makes fuzzy logic practical for real actuators. A fan motor needs a specific voltage, not a fuzzy set. The centroid method computes the center of mass of the aggregated output membership function: it is the value that would balance the shape if it were a physical object resting on a fulcrum. This produces a smooth, proportional output that changes continuously as inputs change — unlike a crisp rule system that snaps between output states at threshold boundaries.</p>
+      <p><strong>Fuzzy vs. probability — the key distinction.</strong> This confused Zadeh's critics for decades. Probability expresses <em>uncertainty about which crisp state is true</em>: "There's a 70% chance this patient has high blood pressure" means we're not sure which of two crisp states (high / not high) is the case. Fuzzy membership expresses <em>gradedness of the concept itself</em>: "This patient's blood pressure is 0.7 high" means the concept "high" is inherently vague and this patient instantiates it to degree 0.7. The first is epistemological — about our knowledge. The second is ontological — about the concept. Both are legitimate. Neither replaces the other.</p>
+    </div>
+  </section>
+
+  <!-- Lab CTA -->
+  <div class="lab-cta">
+    <div class="lab-cta-icon">🧪</div>
+    <div>
+      <h3>Interactive Lab — Fuzzy Logic in Action</h3>
+      <p>The companion lab page has three demos: a membership function editor where you drag control points and see degrees of membership update live; a full fuzzy inference engine with fuzzification → rule evaluation → aggregation → defuzzification; and a side-by-side Boolean vs. fuzzy classifier showing why gradedness eliminates the boundary snap problem.</p>
+      <a href="era2_lesson5b_fuzzy_lab.html" class="lab-cta-btn">Open the Interactive Lab →</a>
+    </div>
+  </div>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">〰️ Design Your Own Membership Functions</div>
+        <div class="ex-desc">Using Demo 1 in the lab, classify patient age into pediatric / adult / geriatric.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Open the lab and use Demo 1. Set the domain to age (0–100 years). Position the membership function control points so that: a 5-year-old is fully "pediatric," a 35-year-old is fully "adult," and an 80-year-old is fully "geriatric." Decide where the crossover regions should be.</p>
+        <p>&rarr; At what age is a patient equally "adult" and "geriatric"? What does that crossover point mean clinically? Is there a meaningful difference between a patient who is 0.5 adult and 0.5 geriatric vs. a patient who is 1.0 adult? What information does the fuzzy representation carry that a crisp threshold discards?</p>
+        <p><strong>Key question:</strong> A hospital protocol says "administer dosage X to adult patients." Under Boolean logic, a 17-year-old gets the child dosage and an 18-year-old gets the adult dosage. Under fuzzy logic, an 18-year-old might be 0.1 adult and 0.9 pediatric. Which system is more clinically honest, and which is more legally convenient? Are these the same thing?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">⚙️ Trace a Rule by Hand</div>
+        <div class="ex-desc">Work through one full fuzzy inference cycle manually, then verify with Demo 2.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Given: temperature = 26°C, humidity = 75%. Using the membership functions from Demo 2 (you can read off the values from the fuzzification stage), compute by hand:</p>
+        <p>(a) The membership degree of 26°C in "warm" and "hot"<br>
+        (b) The membership degree of 75% in "high" humidity<br>
+        (c) The firing strength of the rule: IF temp IS warm AND humidity IS high THEN fan IS medium<br>
+        (d) If the "medium" fan output set spans [40, 80] with peak at 60, and fires at strength 0.6, what is the clipped output set?</p>
+        <p><strong>Key insight:</strong> The clipping step is where the firing strength becomes the new maximum of the output set — the output set is "cut" at the firing strength. Multiple rules produce multiple clipped output sets, which are then combined by taking the union (max at each point). Run Demo 2 to verify your hand calculation.</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">⚖️ The Boundary Snap Problem</div>
+        <div class="ex-desc">Use Demo 3 to find the exact input values where Boolean logic snaps and fuzzy logic doesn't.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 3, set BMI = 25, age = 50, and slowly drag systolic blood pressure from 135 to 145. Observe both panels.</p>
+        <p>&rarr; At what exact BP value does the Boolean classifier change its output? What is the fuzzy classifier's output at that same value, and how does it compare to 1 mmHg below and 1 mmHg above?</p>
+        <p>&rarr; Now set BP = 160 (hypertensive) and drag age from 25 to 80. The Boolean classifier treats a 25-year-old and a 79-year-old identically if their BP is the same. The fuzzy classifier does not. What additional clinical information does the fuzzy classifier incorporate, and why does age matter for cardiovascular risk assessment?</p>
+        <p><strong>Key question:</strong> Medical guidelines use crisp thresholds (BP &gt; 140 = hypertensive) for legal and administrative clarity. Fuzzy logic would produce more clinically accurate gradations. What are the arguments for keeping crisp thresholds even when fuzzy ones would be more accurate? This is not a purely technical question.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>Vagueness vs. Uncertainty.</strong> Zadeh's critics argued fuzzy logic confuses vagueness with uncertainty. Give your own example of a concept that is vague (inherently graded) and a different example of a situation that is uncertain (we don't know which crisp state is true). Can you find a case where the same real-world situation involves both simultaneously? How would you handle it?</li>
+      <li><strong>The Asian Advantage.</strong> Fuzzy logic was invented in the United States, largely ignored by American industry for two decades, and commercialized at scale in Japan and Taiwan. What does this pattern suggest about the relationship between basic research and applied engineering? Can you identify other technologies that followed a similar path — invented in one country, adopted first in another?</li>
+      <li><strong>Connection to Expert Systems.</strong> In Lesson 2.1, you saw that expert systems fail at the boundary — MYCIN fires a rule or doesn't fire it, with no gradation. Fuzzy expert systems (rules with fuzzy predicates) can express "IF temperature IS somewhat elevated AND symptoms ARE moderately consistent with bacterial infection THEN diagnosis IS possibly bacterial meningitis (0.6)." What does this gain, and what does it lose, compared to a crisp expert system?</li>
+      <li><strong>Fuzzy Logic vs. Neural Networks.</strong> Both fuzzy logic and neural networks can approximate any continuous function. Fuzzy systems are interpretable — you can read the rules. Neural networks are not — you cannot read the weights. For a medical diagnosis system, which property matters more: accuracy or interpretability? Does the answer change depending on whether the system is making a recommendation or making a decision?</li>
+      <li><strong>Connection to Era 3 — Probabilistic Models.</strong> In Era 3 you will study Bayesian methods, which handle uncertainty rigorously using probability. Both fuzzy logic and Bayesian inference produce outputs in [0, 1], but they mean different things. Could you combine them — using fuzzy membership functions to define linguistic concepts, and Bayesian inference to update beliefs about which fuzzy category applies? What would such a system look like?</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Fuzzy Set</span><span class="gloss-abbr">Zadeh, 1965</span></div>
+        <div class="gloss-def">A set in which membership is a matter of degree rather than binary membership. Defined by a <strong>membership function</strong> μ: X → [0,1]. Classical sets are the special case where μ maps only to {0,1}. Fuzzy sets allow partial membership: an element can belong to a set to degree 0.7, simultaneously belonging to another set to degree 0.3.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Membership Function</span><span class="gloss-abbr">μ: X → [0,1]</span></div>
+        <div class="gloss-def">The function that defines a fuzzy set by mapping each element of the universe of discourse to its degree of membership. Common shapes: <strong>triangular</strong> (peak at one value, zero at two others), <strong>trapezoidal</strong> (flat top between two values), <strong>Gaussian</strong> (smooth bell curve), <strong>sigmoid</strong> (smooth step). Shape encodes domain knowledge about how the concept varies.
+          <div class="gloss-code">μ_warm(t) = max(0, min((t−15)/10, (30−t)/5))  % triangular, peak at 23°C</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Fuzzification</span><span class="gloss-abbr">Step 1 of inference</span></div>
+        <div class="gloss-def">Converting a crisp input value into fuzzy membership degrees by evaluating it against all relevant membership functions. A temperature of 26°C might fuzzify to: cold=0, cool=0, warm=0.6, hot=0.2. One crisp number becomes several partial memberships, one per linguistic term.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Defuzzification</span><span class="gloss-abbr">Step 4 of inference</span></div>
+        <div class="gloss-def">Converting the aggregated fuzzy output set back into a single crisp value suitable for an actuator. The most common method is the <strong>centroid</strong> (center of mass): integrate x·μ(x) over the output domain and divide by the integral of μ(x). Produces a smooth output that varies continuously as inputs change.
+          <div class="gloss-code">output = ∫ x·μ(x) dx  /  ∫ μ(x) dx</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Linguistic Variable</span><span class="gloss-abbr">Zadeh's key concept</span></div>
+        <div class="gloss-def">A variable whose values are words or phrases in a natural language rather than numbers. Example: "temperature" takes values {freezing, cold, cool, warm, hot} rather than {15, 20, 25, 30, 35}. Each linguistic value is defined by a fuzzy membership function. Rules are then expressed in natural language: IF temperature IS warm THEN fan IS medium.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">T-norm / T-conorm</span><span class="gloss-abbr">Fuzzy AND / OR</span></div>
+        <div class="gloss-def">Generalizations of Boolean AND and OR to fuzzy values. The standard T-norm is <strong>min(a,b)</strong> — fuzzy AND. The standard T-conorm is <strong>max(a,b)</strong> — fuzzy OR. Other T-norms exist (product: a·b, Łukasiewicz: max(0, a+b−1)) with different properties. The choice of T-norm affects inference behavior at extreme membership values.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era2_lesson4_sql.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 2, Lesson 4 — Relational Databases &amp; SQL</div></div>
+    </a>
+    <a class="nav-btn" href="era2_lesson5b_fuzzy_lab.html">
+      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 2, Lesson 5 — Interactive Lab</div></div>
+      <span class="nav-arrow">→</span>
+    </a>
+  </nav>
+</div>
+</body>
+</html>
