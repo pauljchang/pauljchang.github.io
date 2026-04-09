@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 2, Lesson 6 — Decision Trees | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--surface:#161b27;--s2:#1a2035;--border:#1e2d40;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#334155;
+  --ac:#f43f5e;--ac-dim:rgba(244,63,94,.10);--ac-glow:rgba(244,63,94,.25);
+  --green:#4ade80;--red:#f87171;--amber:#f59e0b;--sky:#38bdf8;--violet:#a78bfa;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;--disp:'Lora',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+.course-nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.era-badge{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em;}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 100px;}
+.hero{padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px;}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.week-badge{background:var(--ac);color:#1a0008;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em;}
+.hero h1{font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px;}
+.hero-sub{font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px;}
+.hero-timeline{display:flex;gap:36px;flex-wrap:wrap;}
+.tl-item{display:flex;flex-direction:column;gap:3px;}
+.tl-year{font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.1em;}
+.tl-label{font-size:13px;color:var(--muted);}
+.section{margin-bottom:68px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px;}
+.sec-title{font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.obj-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;}
+.obj-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.obj-list li strong{color:#f1f5f9;}
+.prose p{font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82;}
+.prose p:last-child{margin-bottom:0;}
+.prose p strong{color:#e2e8f0;}
+.prose code{font-family:var(--mono);font-size:12px;background:#0a0d14;padding:2px 6px;border-radius:3px;border:1px solid var(--border);color:#fda4af;}
+.pullquote{background:linear-gradient(135deg,rgba(244,63,94,.07),rgba(244,63,94,.02));border:1px solid rgba(244,63,94,.2);border-radius:12px;padding:22px 26px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:17px;font-style:italic;color:#fda4af;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+/* demo shared */
+.demo-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.demo-topbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.demo-tag{font-family:var(--mono);font-size:11px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase;}
+.demo-hint{font-family:var(--mono);font-size:10px;color:var(--muted2);}
+.ctrl-btn{font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ctrl-btn:hover{border-color:var(--ac);color:var(--ac);}
+.ctrl-btn.active{background:var(--ac-dim);border-color:rgba(244,63,94,.4);color:var(--ac);}
+input[type=range].sl{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,#0a0d14,var(--ac));}
+input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #fda4af;cursor:pointer;}
+/* exercises */
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.ex-head{padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border);}
+.ex-num{font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(244,63,94,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.ex-title{font-weight:600;font-size:16px;color:#f1f5f9;}
+.ex-desc{font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6;}
+.ex-body{padding:20px;}
+.ex-body p{font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7;}
+.ex-body p:last-child{margin-bottom:0;}
+.ex-body p strong{color:#e2e8f0;}
+.disc-list{list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px;}
+.disc-list li{counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72;}
+.disc-list li::before{content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(244,63,94,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px;}
+.disc-list li strong{color:#e2e8f0;}
+.gloss-grid{display:flex;flex-direction:column;}
+.gloss-entry{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);padding:18px 0;}
+.gloss-entry:last-child{border-bottom:none;}
+.gloss-term{display:flex;flex-direction:column;gap:5px;padding-right:24px;}
+.gloss-term-name{font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700;}
+.gloss-abbr{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.gloss-def{font-size:14.5px;color:#94a3b8;line-height:1.72;}
+.gloss-def strong{color:#e2e8f0;}
+.gloss-code{font-family:var(--mono);font-size:11px;color:#fda4af;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:7px 12px;display:block;margin-top:8px;line-height:1.8;}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border);}
+.nav-btn{text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s;}
+.nav-btn:hover{border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow);}
+.nav-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.nav-title{font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px;}
+.nav-arrow{font-size:20px;color:var(--ac);}
+</style>
+</head>
+<body>
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface)" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 2: SYMBOLIC AI</span>
+  <span>›</span><span style="color:#94a3b8">Era 2, Lesson 6 — Decision Trees</span>
+</nav>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 2 · LESSON 6</span>
+      <span>1979 – Present</span><span>·</span>
+      <span>Learning Rules from Data — ID3, Entropy &amp; Information Gain</span>
+    </div>
+    <h1>The Machine<br>Writes the Rules</h1>
+    <p class="hero-sub">Every expert system we've seen required a human to write the rules. Decision trees change the premise: give the algorithm examples of correct decisions, and it constructs the rules itself.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1948</span><span class="tl-label">Shannon publishes information theory — entropy defined</span></div>
+      <div class="tl-item"><span class="tl-year">1979</span><span class="tl-label">Quinlan's ID3 — information gain drives tree construction</span></div>
+      <div class="tl-item"><span class="tl-year">1984</span><span class="tl-label">CART — Breiman et al., Gini impurity, pruning</span></div>
+      <div class="tl-item"><span class="tl-year">2016</span><span class="tl-label">ProPublica: a two-node tree matches COMPAS accuracy</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">🌳</span><div><strong>Explain</strong> how decision trees learn if-then rules from data — and why this was a direct response to the knowledge acquisition bottleneck of expert systems.</div></li>
+      <li><span class="obj-icon">📐</span><div><strong>Compute</strong> entropy and information gain for a candidate split, and explain why the algorithm chooses the split that maximizes information gain.</div></li>
+      <li><span class="obj-icon">🪓</span><div><strong>Demonstrate</strong> overfitting: a tree that grows too deep memorizes training data and fails on test data — and identify pruning as the structural fix.</div></li>
+      <li><span class="obj-icon">⚖️</span><div><strong>Analyze</strong> the COMPAS two-node tree and explain the paradox it creates: maximum interpretability, comparable accuracy, and a visible bias encoded directly in the rules.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">Automating the Knowledge Engineer</h2></div>
+    <div class="prose">
+      <p>Ross Quinlan was working on expert systems in the late 1970s when he got frustrated with the same problem everyone else in the field was running into: the knowledge acquisition bottleneck. Building MYCIN had required hundreds of hours of specialist interviews. Building XCON required a team of full-time knowledge engineers who spent their careers keeping the rules from contradicting each other. The rules were expensive to extract, fragile to maintain, and depended entirely on whether the human expert could articulate what they knew.</p>
+      <p>Quinlan's question was pointed: what if you didn't need the expert interview at all? What if you could give the system a set of <strong>examples</strong> — past cases with known correct answers — and let it figure out the rules itself? The examples were often available. The specialists who had made the correct decisions in those cases were not always available to explain their reasoning. Data was cheaper than expertise.</p>
+      <p>In 1979, Quinlan published <strong>ID3 — Iterative Dichotomiser 3</strong>. The algorithm was elegant: at each step, look at all the features you haven't split on yet, compute how much information each potential split would give you about the class labels, and choose the split that gives you the most information. Recurse on each resulting subset until the subsets are pure (all one class) or you run out of features. The result is a tree — a set of nested if-then rules — constructed automatically from data.</p>
+      <p>The key mathematical ingredient was borrowed from Claude Shannon's 1948 information theory: <strong>entropy</strong>, a measure of impurity or uncertainty in a set of labels. A set that is all one class has zero entropy — complete certainty. A set evenly split between classes has maximum entropy — complete uncertainty. The algorithm picks splits that reduce entropy the most, measured by <strong>information gain</strong>: the difference between the parent node's entropy and the weighted average entropy of the child nodes.</p>
+    </div>
+
+    <div class="pullquote">
+      <p>"The knowledge acquisition bottleneck is the fundamental problem of expert systems. ID3 addresses it directly: instead of asking the expert to articulate rules, we ask them to provide examples. The algorithm does the rest."</p>
+      <cite>&mdash; Ross Quinlan, paraphrased from "Learning Efficient Classification Procedures," 1983</cite>
+    </div>
+
+    <div class="prose">
+      <p>In 2016, the same year ProPublica published "Machine Bias," researchers asked a pointed question: how complex does a model actually need to be to match COMPAS's accuracy on the Broward County recidivism dataset? They trained a decision tree on the same data. The result was disquieting in its simplicity. The learned tree had essentially <strong>two decision nodes</strong>:</p>
+    </div>
+
+    <!-- COMPAS tree static SVG -->
+    <div style="background:#0a0d14;border:1px solid var(--border);border-radius:12px;padding:24px;margin:24px 0;">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px">The COMPAS-matching Decision Tree — Learned from 7,000 Broward County Cases</div>
+      <svg viewBox="0 0 600 220" style="display:block;width:100%;max-width:600px;margin:0 auto">
+        <!-- Root node -->
+        <rect x="200" y="10" width="200" height="50" rx="8" fill="#1a2035" stroke="#f43f5e" stroke-width="1.5"/>
+        <text x="300" y="32" fill="#fda4af" font-size="12" text-anchor="middle" font-family="Space Mono,monospace">Age &lt; 25?</text>
+        <text x="300" y="50" fill="#64748b" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">the only question that matters</text>
+        <!-- YES branch -->
+        <line x1="250" y1="60" x2="120" y2="120" stroke="#f43f5e" stroke-width="1.5"/>
+        <text x="155" y="97" fill="#f43f5e" font-size="10" font-family="Space Mono,monospace">YES</text>
+        <rect x="50" y="120" width="140" height="50" rx="8" fill="rgba(248,113,113,0.12)" stroke="#f87171" stroke-width="1.5"/>
+        <text x="120" y="142" fill="#f87171" font-size="12" text-anchor="middle" font-weight="bold" font-family="Space Mono,monospace">HIGH RISK</text>
+        <text x="120" y="158" fill="#64748b" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">young → predict reoffend</text>
+        <!-- NO branch -->
+        <line x1="350" y1="60" x2="430" y2="120" stroke="#64748b" stroke-width="1.5"/>
+        <text x="405" y="97" fill="#64748b" font-size="10" font-family="Space Mono,monospace">NO</text>
+        <!-- Second node -->
+        <rect x="340" y="120" width="220" height="50" rx="8" fill="#1a2035" stroke="#f43f5e" stroke-width="1.5"/>
+        <text x="450" y="142" fill="#fda4af" font-size="12" text-anchor="middle" font-family="Space Mono,monospace">Prior convictions &gt; 3?</text>
+        <text x="450" y="158" fill="#64748b" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">second question</text>
+        <!-- YES leaf -->
+        <line x1="400" y1="170" x2="340" y2="195" stroke="#f43f5e" stroke-width="1.5"/>
+        <text x="345" y="188" fill="#f43f5e" font-size="10" font-family="Space Mono,monospace">YES</text>
+        <rect x="270" y="195" width="120" height="18" rx="4" fill="rgba(248,113,113,0.12)" stroke="#f87171" stroke-width="1"/>
+        <text x="330" y="208" fill="#f87171" font-size="10" text-anchor="middle" font-weight="bold" font-family="Space Mono,monospace">HIGH RISK</text>
+        <!-- NO leaf -->
+        <line x1="510" y1="170" x2="540" y2="195" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="530" y="188" fill="#4ade80" font-size="10" font-family="Space Mono,monospace">NO</text>
+        <rect x="490" y="195" width="100" height="18" rx="4" fill="rgba(74,222,128,0.08)" stroke="#4ade80" stroke-width="1"/>
+        <text x="540" y="208" fill="#4ade80" font-size="10" text-anchor="middle" font-weight="bold" font-family="Space Mono,monospace">LOW RISK</text>
+      </svg>
+      <div style="font-size:13px;color:#94a3b8;margin-top:16px;line-height:1.7;padding:10px 14px;background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.2);border-radius:8px">
+        <strong style="color:#e2e8f0">This two-node tree matched COMPAS's accuracy on the Broward County dataset.</strong> COMPAS has 137 survey questions and a proprietary scoring algorithm. This tree has two questions. The complexity bought nothing in accuracy — but it did buy opacity. And look at what the tree learned: the most predictive feature is age. Age correlates with race in the dataset. The algorithm didn't know about race. It didn't need to.
+      </div>
+    </div>
+
+    <div class="prose">
+      <p>The two-node tree is the lesson in concentrated form. Decision trees are interpretable by design — you can read every rule the model learned. But interpretability does not equal fairness. The tree learned to use age as a proxy for recidivism risk, and age is not race-neutral in a dataset shaped by decades of racially unequal policing and prosecution. The bias is visible in the tree. It was invisible in COMPAS. Whether visibility makes things better or worse is not a technical question.</p>
+      <p>Decision trees also introduced the first clear instance of a problem that will follow us through Era 3 and beyond: <strong>overfitting</strong>. A tree grown to full depth — splitting until every leaf is pure — memorizes the training data perfectly. Every training example gets its own leaf if necessary. The training accuracy is 100%. But the tree has learned the noise in the training data as if it were signal. Applied to new examples it has never seen, it performs far worse than a shallower tree that captured the genuine pattern without memorizing the exceptions. The fix — <strong>pruning</strong> — removes branches that don't improve generalization. But identifying which branches to remove requires a second dataset the tree has never seen: the test set.</p>
+    </div>
+  </section>
+
+  <!-- 03 DEMOS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+
+    <!-- DEMO 1: Entropy + Information Gain -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — Entropy &amp; Information Gain.</strong> Mode A: drag the slider to set the proportion of positive examples and see entropy. Mode B: set a parent node and a proposed split — see information gain computed live.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Entropy &amp; Information Gain</span>
+        <div style="display:flex;gap:6px">
+          <button class="ctrl-btn active" id="d1modeA" onclick="d1setMode('A')">A: Entropy</button>
+          <button class="ctrl-btn" id="d1modeB" onclick="d1setMode('B')">B: Info Gain</button>
+        </div>
+      </div>
+      <div style="padding:18px 20px" id="d1body"></div>
+    </div>
+
+    <!-- DEMO 2: Tree Builder -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — Tree Builder.</strong> A small heart disease dataset. Click a feature to split on — the information gain for each candidate is shown as bars. Build the tree greedily and see the rules emerge.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Tree Builder — Heart Risk Dataset</span>
+        <span class="demo-hint">click a feature to split · watch IG bars · build the tree</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 300px;min-height:320px">
+        <div style="padding:16px 18px;border-right:1px solid var(--border)" id="d2tree"></div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px" id="d2panel"></div>
+      </div>
+    </div>
+
+    <!-- DEMO 3: Overfitting -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 3 — Overfitting.</strong> Watch training and test accuracy as the tree grows deeper. Training accuracy climbs monotonically. Test accuracy peaks early, then falls as the tree memorizes noise.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Overfitting — Training vs Test Accuracy</span>
+        <span class="demo-hint">click Grow to add a depth level · watch the curves diverge</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 240px">
+        <div style="padding:16px 18px;border-right:1px solid var(--border)">
+          <svg id="d3chart" viewBox="0 0 460 240" style="display:block;width:100%"></svg>
+        </div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;gap:8px">
+            <button class="ctrl-btn" style="flex:1;border-color:rgba(74,222,128,.3);color:var(--green)" onclick="d3grow()">▶ Grow</button>
+            <button class="ctrl-btn" onclick="d3reset()">↺ Reset</button>
+          </div>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:4px">Current Depth</div>
+            <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:#e2e8f0" id="d3depth">0</div>
+          </div>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:2px">Train Accuracy</div>
+            <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--green)" id="d3train">—</div>
+          </div>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:2px">Test Accuracy</div>
+            <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--amber)" id="d3test">—</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.6;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d3note">Click Grow to start.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">📐 Entropy by Hand</div>
+        <div class="ex-desc">Compute entropy and information gain manually, then verify with Demo 1.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>A node contains 10 patients: 6 high-risk, 4 low-risk. Compute the entropy H of this node using H = −p⁺ log₂(p⁺) − p⁻ log₂(p⁻) where p⁺ = 6/10 and p⁻ = 4/10.</p>
+        <p>&rarr; Now suppose we split on "age ≥ 60": left child has 5 patients (4 high-risk, 1 low-risk), right child has 5 patients (2 high-risk, 3 low-risk). Compute the entropy of each child node, then compute the weighted average entropy after the split. The information gain is the parent entropy minus this weighted average.</p>
+        <p><strong>Key question:</strong> In Demo 1 Mode B, what proportion split produces the maximum possible information gain for a given parent entropy? Is there a parent entropy value where no split can produce positive information gain?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">🌳 Build the Tree Greedily</div>
+        <div class="ex-desc">Use Demo 2 to build a decision tree for heart disease risk — one split at a time.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 2, let the information gain bars guide your choices. At each node, split on the feature with the highest IG. Build the full tree until all leaves are pure or no IG-positive split remains.</p>
+        <p>&rarr; At some point you may have a node where two features tie in information gain. Try both and observe the resulting subtrees. Are they equally good? What criterion other than IG might break the tie?</p>
+        <p><strong>Key question:</strong> The tree you built is equivalent to a set of if-then rules — write them out explicitly. Compare this to the COMPAS tree shown in the lesson. Which is more complex? Does complexity correlate with accuracy here?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">🪓 Find the Overfitting Point</div>
+        <div class="ex-desc">Use Demo 3 to identify the depth at which the tree starts to overfit.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Grow the tree step by step in Demo 3. Record training and test accuracy at each depth. At what depth does test accuracy peak? What is the gap between training and test accuracy at that depth vs. at maximum depth?</p>
+        <p>&rarr; The "optimal" depth for this dataset is the depth that maximizes test accuracy. But in a real setting, you would not know the test accuracy during training — you'd only see training accuracy climbing. What could you use instead of test accuracy to detect the overfitting point during training?</p>
+        <p><strong>Key insight:</strong> A tree grown to depth 1 (a "decision stump") is the most pruned possible tree — one split, two leaves. It has high bias (too simple to capture complex patterns) but low variance (very stable across different training sets). A full-depth tree has low bias but high variance. The bias-variance tradeoff — which gets its own lesson in Era 3 — is visible here in its simplest form.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>The Opacity Paradox.</strong> The COMPAS tree is maximally interpretable — you can read every rule. COMPAS itself is a black box. Yet both encode the same bias (age as a proxy for race). Does interpretability help here? If you can see the bias in a decision tree, does that make it more or less acceptable to use than an opaque model with the same bias?</li>
+      <li><strong>Learning vs. Encoding.</strong> Decision trees learn rules from data. Expert systems have humans write rules. The COMPAS tree learned to use age; a human knowledge engineer might have explicitly prohibited using age. Which approach is more dangerous, and under what conditions? When is it better to learn from data, and when is it better to encode knowledge directly?</li>
+      <li><strong>The Overfitting Problem as a General Principle.</strong> Overfitting in decision trees is a specific instance of a general problem: a model that is too complex relative to the data it's trained on will memorize noise. Can you think of overfitting in a non-machine-learning context? (Hint: consider a student who memorizes past exam questions without understanding the underlying concepts, or a financial model calibrated exactly to historical data.)</li>
+      <li><strong>Entropy and Information.</strong> Shannon's entropy was developed to measure the information content of communication signals — how many bits are needed to encode a message. Quinlan borrowed it to measure impurity in classification nodes. Is this borrowing legitimate, or is it a metaphor that happens to produce good algorithms? What would it mean for information gain to be the "wrong" measure for tree construction?</li>
+      <li><strong>Connection to Era 3 — Random Forests.</strong> The main weakness of a single decision tree is variance: small changes in training data produce very different trees. Era 3 introduces Random Forests — ensembles of many decision trees, each trained on a random subset of the data and features, whose predictions are averaged. How does averaging across many high-variance models reduce overall variance? And what does this averaging cost in terms of interpretability?</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Entropy</span><span class="gloss-abbr">H — Shannon, 1948</span></div>
+        <div class="gloss-def">A measure of impurity or uncertainty in a set of class labels. Zero when all examples belong to one class (complete certainty); maximum when classes are equally distributed (complete uncertainty). Used by ID3 and C4.5 to measure the quality of a split.
+          <div class="gloss-code">H(S) = −p⁺ log₂(p⁺) − p⁻ log₂(p⁻)</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Information Gain</span><span class="gloss-abbr">IG — ID3's split criterion</span></div>
+        <div class="gloss-def">The reduction in entropy achieved by splitting a node on a particular feature. Computed as the parent entropy minus the weighted average entropy of the child nodes. ID3 greedily selects the feature with the highest information gain at each step.
+          <div class="gloss-code">IG(S, A) = H(S) − Σ |Sᵥ|/|S| · H(Sᵥ)</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Gini Impurity</span><span class="gloss-abbr">CART's alternative to entropy</span></div>
+        <div class="gloss-def">An alternative measure of node impurity used by CART. Computationally simpler than entropy (no logarithm), produces similar trees in practice. Gini = 1 − Σ pᵢ². Zero for a pure node, maximum at 0.5 for a binary 50/50 split. Used by scikit-learn's DecisionTreeClassifier by default.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Overfitting</span><span class="gloss-abbr">Memorizing noise</span></div>
+        <div class="gloss-def">When a model learns the training data too well — including its noise and idiosyncrasies — and therefore generalizes poorly to new data. A fully-grown decision tree has zero training error (it can partition training examples into pure leaves) but high test error. <strong>Symptom:</strong> training accuracy much higher than test accuracy. <strong>Fix:</strong> pruning, or stopping growth early.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Pruning</span><span class="gloss-abbr">Controlled complexity</span></div>
+        <div class="gloss-def">Removing branches from a decision tree that do not improve generalization. <strong>Pre-pruning</strong> (early stopping): stop growing when a split doesn't improve accuracy on a validation set by a minimum threshold. <strong>Post-pruning</strong>: grow the full tree then remove branches bottom-up, keeping removals that improve validation accuracy. Pruning trades training accuracy for test accuracy.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Bias–Variance Tradeoff</span><span class="gloss-abbr">Preview of Era 3</span></div>
+        <div class="gloss-def">The tension between a model that is too simple (high bias — misses real patterns) and a model that is too complex (high variance — sensitive to noise in training data). A decision stump has high bias; a full-depth tree has high variance. The optimal depth balances both. Formalised in Era 3 — the decomposition error = bias² + variance + irreducible noise.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era2_lesson5a_fuzzy.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 2, Lesson 5 — Fuzzy Logic</div></div>
+    </a>
+    <div class="nav-btn" style="opacity:.35;cursor:default">
+      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 2, Lesson 7 — The Connectionist Debate</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+</div>
+<script>
+'use strict';
+
+/* ════════════════════════════════════════════════════
+   DEMO 1 — ENTROPY + INFORMATION GAIN
+════════════════════════════════════════════════════ */
+(function(){
+  var mode = 'A';
+
+  function H(p) {
+    if(p<=0||p>=1) return 0;
+    var q=1-p;
+    return -(p*Math.log2(p)+q*Math.log2(q));
+  }
+
+  function renderA() {
+    var p = +document.getElementById('d1slA').value/100;
+    var h = H(p);
+    document.getElementById('d1vA').textContent = Math.round(p*100)+'% positive';
+    document.getElementById('d1hA').textContent = 'H = '+h.toFixed(4);
+
+    // Draw entropy curve
+    var W=460,PH=160,PL=44,PR=12,PT=12,PB=28,PW=W-PL-PR,PGH=PH-PT-PB;
+    var svg='<rect width="'+W+'" height="'+PH+'" fill="#0a0d14" rx="6"/>';
+    // Axes
+    svg+='<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+PGH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+    svg+='<line x1="'+PL+'" y1="'+(PT+PGH)+'" x2="'+(PL+PW)+'" y2="'+(PT+PGH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+    [0,0.25,0.5,0.75,1].forEach(function(v){
+      var x=PL+v*PW;
+      svg+='<line x1="'+x.toFixed(0)+'" y1="'+PT+'" x2="'+x.toFixed(0)+'" y2="'+(PT+PGH)+'" stroke="#131a2a" stroke-width="1"/>';
+      svg+='<text x="'+x.toFixed(0)+'" y="'+(PT+PGH+14)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+Math.round(v*100)+'%</text>';
+    });
+    [0,0.5,1].forEach(function(v){
+      var y=PT+PGH-v*PGH;
+      svg+='<text x="'+(PL-4)+'" y="'+(y+3)+'" fill="#334155" font-size="8" text-anchor="end" font-family="Space Mono,monospace">'+v.toFixed(1)+'</text>';
+    });
+    // Curve
+    var d='';
+    for(var i=0;i<=100;i++){
+      var px=i/100, hy=H(px);
+      var cx=PL+px*PW, cy=PT+PGH-hy*PGH;
+      d+=(i===0?'M':'L')+cx.toFixed(1)+','+cy.toFixed(1);
+    }
+    svg+='<path d="'+d+'" fill="none" stroke="#f43f5e" stroke-width="2"/>';
+    // Current point
+    var cpx=PL+p*PW, cpy=PT+PGH-h*PGH;
+    svg+='<circle cx="'+cpx.toFixed(1)+'" cy="'+cpy.toFixed(1)+'" r="6" fill="#f43f5e" stroke="#fda4af" stroke-width="2"/>';
+    svg+='<line x1="'+cpx.toFixed(1)+'" y1="'+(PT+PGH)+'" x2="'+cpx.toFixed(1)+'" y2="'+cpy.toFixed(1)+'" stroke="#f43f5e" stroke-width="1" stroke-dasharray="4,3" opacity="0.6"/>';
+    svg+='<text x="'+(cpx+8).toFixed(0)+'" y="'+(cpy-6).toFixed(0)+'" fill="#fda4af" font-size="10" font-family="Space Mono,monospace">H='+h.toFixed(3)+'</text>';
+
+    document.getElementById('d1svgA').innerHTML=svg;
+  }
+
+  function renderB() {
+    var pPar = +document.getElementById('d1slPar').value/100;
+    var pL   = +document.getElementById('d1slL').value/100;
+    var pR   = +document.getElementById('d1slR').value/100;
+    var fracL= +document.getElementById('d1slFrac').value/100;
+    var fracR = 1-fracL;
+    var hPar=H(pPar), hL=H(pL), hR=H(pR);
+    var hAfter=fracL*hL+fracR*hR;
+    var ig=Math.max(0,hPar-hAfter);
+
+    document.getElementById('d1vPar').textContent=Math.round(pPar*100)+'% pos  H='+hPar.toFixed(3);
+    document.getElementById('d1vL').textContent=Math.round(fracL*100)+'% of data  '+Math.round(pL*100)+'% pos  H='+hL.toFixed(3);
+    document.getElementById('d1vR').textContent=Math.round(fracR*100)+'% of data  '+Math.round(pR*100)+'% pos  H='+hR.toFixed(3);
+    document.getElementById('d1ig').textContent='Information Gain = '+hPar.toFixed(3)+' − '+hAfter.toFixed(3)+' = '+ig.toFixed(3);
+    document.getElementById('d1ig').style.color=ig>0.1?'var(--green)':ig>0?'var(--amber)':'var(--red)';
+
+    // IG bar
+    var pct=Math.round(ig/1*100);
+    document.getElementById('d1igbar').innerHTML=
+      '<div style="height:12px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:6px">'
+      +'<div style="width:'+pct+'%;height:100%;background:'+(ig>0.1?'var(--green)':ig>0?'var(--amber)':'var(--red)')+';border-radius:4px;transition:width .2s"></div></div>';
+  }
+
+  function buildModeA(){
+    document.getElementById('d1body').innerHTML=
+      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'
+        +'<span style="font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap">Proportion positive:</span>'
+        +'<input type="range" class="sl" id="d1slA" min="0" max="100" value="50" style="flex:1" oninput="d1renderA()">'
+        +'<span style="font-family:var(--mono);font-size:11px;color:var(--ac);min-width:100px" id="d1vA">50% positive</span>'
+      +'</div>'
+      +'<svg id="d1svgA" viewBox="0 0 460 160" style="display:block;width:100%"></svg>'
+      +'<div style="font-family:var(--mono);font-size:14px;font-weight:700;color:#fda4af;margin-top:10px;text-align:center" id="d1hA">H = 1.0000</div>'
+      +'<div style="font-family:var(--mono);font-size:10px;color:var(--muted2);margin-top:4px;text-align:center">Drag toward 0% or 100% to see entropy collapse to zero. 50/50 is maximum uncertainty.</div>';
+    window.d1renderA=renderA;
+    renderA();
+  }
+
+  function buildModeB(){
+    document.getElementById('d1body').innerHTML=
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">'
+        +'<div style="background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px">'
+          +'<div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Parent Node</div>'
+          +'<input type="range" class="sl" id="d1slPar" min="1" max="99" value="60" oninput="d1renderB()">'
+          +'<div style="font-family:var(--mono);font-size:10px;color:var(--ac);margin-top:4px" id="d1vPar"></div>'
+        +'</div>'
+        +'<div style="background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px">'
+          +'<div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Split fraction (left/right)</div>'
+          +'<input type="range" class="sl" id="d1slFrac" min="10" max="90" value="50" oninput="d1renderB()">'
+          +'<div style="font-family:var(--mono);font-size:10px;color:var(--ac);margin-top:4px">Split</div>'
+        +'</div>'
+        +'<div style="background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px">'
+          +'<div style="font-family:var(--mono);font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Left Child — % positive</div>'
+          +'<input type="range" class="sl" id="d1slL" min="0" max="100" value="80" oninput="d1renderB()" style="background:linear-gradient(to right,#0a0d14,var(--green))">'
+          +'<div style="font-family:var(--mono);font-size:10px;color:var(--green);margin-top:4px" id="d1vL"></div>'
+        +'</div>'
+        +'<div style="background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px">'
+          +'<div style="font-family:var(--mono);font-size:9px;color:var(--amber);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Right Child — % positive</div>'
+          +'<input type="range" class="sl" id="d1slR" min="0" max="100" value="30" oninput="d1renderB()" style="background:linear-gradient(to right,#0a0d14,var(--amber))">'
+          +'<div style="font-family:var(--mono);font-size:10px;color:var(--amber);margin-top:4px" id="d1vR"></div>'
+        +'</div>'
+      +'</div>'
+      +'<div style="margin-top:14px;background:#0a0d14;border-radius:8px;padding:12px 14px">'
+        +'<div style="font-family:var(--mono);font-size:12px;font-weight:700" id="d1ig"></div>'
+        +'<div id="d1igbar"></div>'
+        +'<div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-top:8px">Maximum possible IG = parent entropy (when both children are pure). Zero IG means the split is useless.</div>'
+      +'</div>';
+    window.d1renderB=renderB;
+    renderB();
+  }
+
+  window.d1setMode=function(m){
+    mode=m;
+    document.getElementById('d1modeA').classList.toggle('active',m==='A');
+    document.getElementById('d1modeB').classList.toggle('active',m==='B');
+    if(m==='A') buildModeA(); else buildModeB();
+  };
+  buildModeA();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 2 — TREE BUILDER
+════════════════════════════════════════════════════ */
+(function(){
+  // Simple heart disease risk dataset: 20 patients
+  // Features: Age>=60, HighBP, HighChol, Smoker, Diabetic. Label: HighRisk
+  var DATA=[
+    {Age:1,BP:1,Chol:1,Smoke:1,Diab:1,risk:1},
+    {Age:1,BP:1,Chol:1,Smoke:0,Diab:0,risk:1},
+    {Age:1,BP:0,Chol:1,Smoke:1,Diab:0,risk:1},
+    {Age:1,BP:1,Chol:0,Smoke:0,Diab:1,risk:1},
+    {Age:0,BP:1,Chol:1,Smoke:1,Diab:1,risk:1},
+    {Age:1,BP:0,Chol:0,Smoke:0,Diab:0,risk:0},
+    {Age:0,BP:1,Chol:1,Smoke:0,Diab:0,risk:1},
+    {Age:0,BP:0,Chol:1,Smoke:1,Diab:0,risk:0},
+    {Age:0,BP:0,Chol:0,Smoke:0,Diab:1,risk:0},
+    {Age:0,BP:0,Chol:0,Smoke:1,Diab:0,risk:0},
+    {Age:1,BP:0,Chol:1,Smoke:0,Diab:1,risk:1},
+    {Age:0,BP:1,Chol:0,Smoke:0,Diab:0,risk:0},
+    {Age:1,BP:1,Chol:0,Smoke:1,Diab:0,risk:1},
+    {Age:0,BP:0,Chol:1,Smoke:0,Diab:1,risk:1},
+    {Age:0,BP:1,Chol:0,Smoke:1,Diab:1,risk:1},
+    {Age:1,BP:0,Chol:0,Smoke:0,Diab:0,risk:0},
+    {Age:0,BP:0,Chol:0,Smoke:0,Diab:0,risk:0},
+    {Age:1,BP:1,Chol:1,Smoke:0,Diab:0,risk:1},
+    {Age:0,BP:1,Chol:1,Smoke:1,Diab:0,risk:1},
+    {Age:0,BP:0,Chol:0,Smoke:1,Diab:0,risk:0},
+  ];
+  var FEATURES=[
+    {key:'Age',  label:'Age ≥ 60'},
+    {key:'BP',   label:'High BP'},
+    {key:'Chol', label:'High Cholesterol'},
+    {key:'Smoke',label:'Smoker'},
+    {key:'Diab', label:'Diabetic'},
+  ];
+
+  function H(rows){
+    if(!rows.length) return 0;
+    var pos=rows.filter(function(r){return r.risk;}).length;
+    var p=pos/rows.length;
+    if(p<=0||p>=1) return 0;
+    return -(p*Math.log2(p)+(1-p)*Math.log2(1-p));
+  }
+  function IG(rows,feat){
+    var left=rows.filter(function(r){return r[feat]===1;});
+    var right=rows.filter(function(r){return r[feat]===0;});
+    return H(rows)-(left.length/rows.length*H(left)+right.length/rows.length*H(right));
+  }
+  function majority(rows){
+    var pos=rows.filter(function(r){return r.risk;}).length;
+    return pos>=rows.length/2?1:0;
+  }
+
+  var tree=null; // will be built step by step
+
+  // Tree is represented as array of {depth, label, rows, usedFeats, parent}
+  // We show splits one level at a time
+  var treeNodes=[]; // built nodes (leaves + splits)
+  var pendingLeaves=[{rows:DATA,used:[],path:'Root'}];
+
+  function bestSplit(rows,used){
+    var best={feat:null,ig:-1};
+    FEATURES.forEach(function(f){
+      if(used.indexOf(f.key)>=0) return;
+      var ig=IG(rows,f.key);
+      if(ig>best.ig){best.ig=ig;best.feat=f.key;best.label=f.label;}
+    });
+    return best;
+  }
+
+  function renderD2(){
+    // Tree panel — simple text tree
+    var treeHtml='<div style="font-family:var(--mono);font-size:11px;color:#94a3b8;line-height:2">';
+    treeHtml+='<div style="font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:8px">Learned Tree ('+treeNodes.length+' nodes built)</div>';
+    if(treeNodes.length===0){
+      treeHtml+='<div style="color:var(--muted2)">No splits yet — click a feature to begin.</div>';
+    } else {
+      treeNodes.forEach(function(n){
+        var pad='&nbsp;'.repeat(n.depth*4);
+        var pos=n.rows.filter(function(r){return r.risk;}).length;
+        if(n.type==='split'){
+          treeHtml+=pad+'<span style="color:#fda4af">IF '+n.featLabel+'</span><br>';
+        } else {
+          var col=n.label===1?'var(--red)':'var(--green)';
+          treeHtml+=pad+'→ <span style="color:'+col+';font-weight:700">'+(n.label===1?'HIGH RISK':'LOW RISK')+'</span>';
+          treeHtml+=' <span style="color:var(--muted2);font-size:9px">('+pos+'/'+n.rows.length+')</span><br>';
+        }
+      });
+    }
+    treeHtml+='</div>';
+    document.getElementById('d2tree').innerHTML=treeHtml;
+
+    // Side panel — show IG for available splits
+    if(pendingLeaves.length===0){
+      document.getElementById('d2panel').innerHTML='<div style="font-family:var(--mono);font-size:10px;color:var(--green)">✓ Tree complete — all leaves are pure or no features remain.</div>';
+      return;
+    }
+    var current=pendingLeaves[0];
+    var pos=current.rows.filter(function(r){return r.risk;}).length;
+    var panelHtml='<div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Current node: '+current.path+'</div>';
+    panelHtml+='<div style="font-family:var(--mono);font-size:10px;color:#94a3b8;margin-bottom:10px">'+pos+'/'+current.rows.length+' high-risk  H='+H(current.rows).toFixed(3)+'</div>';
+    panelHtml+='<div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Click feature to split on:</div>';
+
+    var igs=FEATURES.filter(function(f){return current.used.indexOf(f.key)<0;}).map(function(f){
+      return{key:f.key,label:f.label,ig:IG(current.rows,f.key)};
+    }).sort(function(a,b){return b.ig-a.ig;});
+    var maxIG=igs.length?igs[0].ig:0;
+
+    igs.forEach(function(f){
+      var pct=maxIG>0?Math.round(f.ig/maxIG*100):0;
+      panelHtml+='<div onclick="d2split(\''+f.key+'\')" style="cursor:pointer;margin-bottom:6px;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:#0a0d14;transition:background .12s" onmouseover="this.style.borderColor=\'#f43f5e\'" onmouseout="this.style.borderColor=\'var(--border)\'">'
+        +'<div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;margin-bottom:4px">'
+        +'<span style="color:'+(f.ig===maxIG?'var(--ac)':'#94a3b8')+'">'+f.label+'</span>'
+        +'<span style="color:'+(f.ig===maxIG?'var(--green)':'var(--muted)')+'">IG='+f.ig.toFixed(3)+'</span>'
+        +'</div>'
+        +'<div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">'
+        +'<div style="width:'+pct+'%;height:100%;background:'+(f.ig===maxIG?'var(--ac)':'#4d4d4d')+';border-radius:3px"></div>'
+        +'</div></div>';
+    });
+    if(igs.length===0) panelHtml+='<div style="font-family:var(--mono);font-size:10px;color:var(--muted2)">No features left — this node becomes a leaf.</div>';
+    document.getElementById('d2panel').innerHTML=panelHtml;
+  }
+
+  window.d2split=function(featKey){
+    if(!pendingLeaves.length) return;
+    var current=pendingLeaves.shift();
+    var feat=FEATURES.find(function(f){return f.key===featKey;});
+    var depth=current.depth||0;
+
+    // Add split node to tree
+    treeNodes.push({type:'split',depth:depth,featLabel:feat.label,rows:current.rows});
+
+    // Children
+    var left=current.rows.filter(function(r){return r[featKey]===1;});
+    var right=current.rows.filter(function(r){return r[featKey]===0;});
+    var newUsed=current.used.concat([featKey]);
+
+    [left,right].forEach(function(child,i){
+      if(!child.length) return;
+      var cPath=current.path+(i===0?' → '+feat.label+' YES':' → '+feat.label+' NO');
+      var childH=H(child);
+      if(childH<0.01||newUsed.length>=FEATURES.length){
+        // Leaf
+        var label=majority(child);
+        treeNodes.push({type:'leaf',depth:depth+1,rows:child,label:label,path:cPath});
+      } else {
+        pendingLeaves.push({rows:child,used:newUsed,path:cPath,depth:depth+1});
+        treeNodes.push({type:'pending',depth:depth+1,rows:child,path:cPath});
+      }
+    });
+
+    // Remove pending placeholders — replace with actual children
+    treeNodes=treeNodes.filter(function(n){return n.type!=='pending';});
+    // Re-add them if they're still pending
+    pendingLeaves.forEach(function(p){
+      var exists=treeNodes.find(function(n){return n.path===p.path;});
+      if(!exists) treeNodes.push({type:'pending',depth:p.depth||1,rows:p.rows,path:p.path});
+    });
+    renderD2();
+  };
+
+  renderD2();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 3 — OVERFITTING
+════════════════════════════════════════════════════ */
+(function(){
+  // Pre-computed accuracy data for a synthetic 2-class dataset
+  // as tree depth increases from 0 to 7
+  var DATA=[
+    {depth:0, train:0.52, test:0.50},
+    {depth:1, train:0.72, test:0.70},
+    {depth:2, train:0.80, test:0.76},
+    {depth:3, train:0.87, test:0.78},
+    {depth:4, train:0.92, test:0.75},
+    {depth:5, train:0.96, test:0.71},
+    {depth:6, train:0.99, test:0.66},
+    {depth:7, train:1.00, test:0.62},
+  ];
+  var current=0;
+
+  function renderD3(){
+    var d=DATA[current];
+    document.getElementById('d3depth').textContent=current===0?'Stump (1)':current;
+    document.getElementById('d3train').textContent=current===0?'—':Math.round(d.train*100)+'%';
+    document.getElementById('d3test').textContent=current===0?'—':Math.round(d.test*100)+'%';
+
+    var notes=['Click Grow to add the first split (decision stump).',
+      'Depth 1 — one split. High bias but generalises well. Training ≈ test.',
+      'Depth 2 — better fit. Test accuracy improving. Still reasonable.',
+      'Depth 3 — peak test accuracy. This is the sweet spot for this dataset.',
+      'Depth 4 — training keeps rising. Test accuracy starts to fall. Overfitting begins.',
+      'Depth 5 — gap widens. The tree is memorising training noise.',
+      'Depth 6 — test accuracy well below peak. Train-test gap is large.',
+      'Depth 7 — near-perfect training accuracy. Test accuracy near random. Fully overfit.'];
+    document.getElementById('d3note').textContent=notes[current];
+
+    // Chart
+    var W=460,H=240,PL=44,PR=16,PT=16,PB=36,PW=W-PL-PR,PH=H-PT-PB;
+    function sx(i){return PL+i/(DATA.length-1)*PW;}
+    function sy(v){return PT+PH-(v-0.4)/(1-0.4)*PH;}
+
+    var svg='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    // Grid
+    [0.5,0.6,0.7,0.8,0.9,1.0].forEach(function(v){
+      var y=sy(v);
+      svg+='<line x1="'+PL+'" y1="'+y.toFixed(0)+'" x2="'+(PL+PW)+'" y2="'+y.toFixed(0)+'" stroke="#131a2a" stroke-width="1"/>';
+      svg+='<text x="'+(PL-4)+'" y="'+(y+3).toFixed(0)+'" fill="#334155" font-size="8" text-anchor="end" font-family="Space Mono,monospace">'+Math.round(v*100)+'%</text>';
+    });
+    DATA.forEach(function(d,i){
+      var x=sx(i);
+      svg+='<line x1="'+x.toFixed(0)+'" y1="'+PT+'" x2="'+x.toFixed(0)+'" y2="'+(PT+PH)+'" stroke="#131a2a" stroke-width="1"/>';
+      svg+='<text x="'+x.toFixed(0)+'" y="'+(PT+PH+16)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+(i===0?'stump':i)+'</text>';
+    });
+    svg+='<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+PH)+'" stroke="#2d3748" stroke-width="1.5"/>';
+    svg+='<line x1="'+PL+'" y1="'+(PT+PH)+'" x2="'+(PL+PW)+'" y2="'+(PT+PH)+'" stroke="#2d3748" stroke-width="1.5"/>';
+    svg+='<text x="'+(PL+PW/2)+'" y="'+(PT+PH+28)+'" fill="#475569" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">Tree Depth</text>';
+
+    // Lines for visible data points
+    if(current>0){
+      var trainD='', testD='';
+      for(var i=0;i<=current;i++){
+        var px=sx(i).toFixed(1), pyt=sy(DATA[i].train).toFixed(1), pyv=sy(DATA[i].test).toFixed(1);
+        trainD+=(i===0?'M':'L')+px+','+pyt;
+        testD+=(i===0?'M':'L')+px+','+pyv;
+      }
+      svg+='<path d="'+trainD+'" fill="none" stroke="#4ade80" stroke-width="2.5"/>';
+      svg+='<path d="'+testD+'" fill="none" stroke="#f59e0b" stroke-width="2.5"/>';
+      for(var i=0;i<=current;i++){
+        svg+='<circle cx="'+sx(i).toFixed(1)+'" cy="'+sy(DATA[i].train).toFixed(1)+'" r="4" fill="#4ade80"/>';
+        svg+='<circle cx="'+sx(i).toFixed(1)+'" cy="'+sy(DATA[i].test).toFixed(1)+'" r="4" fill="#f59e0b"/>';
+      }
+      // Best test marker
+      var bestIdx=1;for(var i=2;i<=current;i++){if(DATA[i].test>DATA[bestIdx].test)bestIdx=i;}
+      if(current>=3){
+        svg+='<line x1="'+sx(bestIdx).toFixed(0)+'" y1="'+PT+'" x2="'+sx(bestIdx).toFixed(0)+'" y2="'+(PT+PH)+'" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="4,3"/>';
+        svg+='<text x="'+(sx(bestIdx)+4).toFixed(0)+'" y="'+(PT+12)+'" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Space Mono,monospace">best test</text>';
+      }
+    }
+
+    // Legend
+    svg+='<rect x="'+(PL+4)+'" y="'+(PT+4)+'" width="90" height="36" rx="4" fill="rgba(0,0,0,.5)"/>';
+    svg+='<line x1="'+(PL+10)+'" y1="'+(PT+15)+'" x2="'+(PL+22)+'" y2="'+(PT+15)+'" stroke="#4ade80" stroke-width="2"/>';
+    svg+='<text x="'+(PL+26)+'" y="'+(PT+19)+'" fill="#4ade80" font-size="9" font-family="Space Mono,monospace">Training</text>';
+    svg+='<line x1="'+(PL+10)+'" y1="'+(PT+30)+'" x2="'+(PL+22)+'" y2="'+(PT+30)+'" stroke="#f59e0b" stroke-width="2"/>';
+    svg+='<text x="'+(PL+26)+'" y="'+(PT+34)+'" fill="#f59e0b" font-size="9" font-family="Space Mono,monospace">Test</text>';
+
+    document.getElementById('d3chart').innerHTML=svg;
+  }
+
+  window.d3grow=function(){
+    if(current<DATA.length-1){current++;renderD3();}
+  };
+  window.d3reset=function(){current=0;renderD3();};
+  renderD3();
+})();
+</script>
+</body>
+</html>
