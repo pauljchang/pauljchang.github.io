@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 2, Lesson 7 — The Connectionist Debate | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--surface:#161b27;--s2:#1a2035;--border:#1e2d40;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#334155;
+  --ac:#8b5cf6;--ac-dim:rgba(139,92,246,.10);--ac-glow:rgba(139,92,246,.25);
+  --green:#4ade80;--red:#f87171;--amber:#f59e0b;--sky:#38bdf8;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;--disp:'Lora',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+.course-nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.era-badge{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em;}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 100px;}
+.hero{padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px;}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.week-badge{background:var(--ac);color:#0e0318;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em;}
+.hero h1{font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px;}
+.hero-sub{font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px;}
+.hero-timeline{display:flex;gap:36px;flex-wrap:wrap;}
+.tl-item{display:flex;flex-direction:column;gap:3px;}
+.tl-year{font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.1em;}
+.tl-label{font-size:13px;color:var(--muted);}
+.section{margin-bottom:68px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px;}
+.sec-title{font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.obj-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;}
+.obj-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.obj-list li strong{color:#f1f5f9;}
+.prose p{font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82;}
+.prose p:last-child{margin-bottom:0;}
+.prose p strong{color:#e2e8f0;}
+.prose code{font-family:var(--mono);font-size:12px;background:#0a0d14;padding:2px 6px;border-radius:3px;border:1px solid var(--border);color:#c4b5fd;}
+.pullquote{background:linear-gradient(135deg,rgba(139,92,246,.07),rgba(139,92,246,.02));border:1px solid rgba(139,92,246,.2);border-radius:12px;padding:22px 26px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:17px;font-style:italic;color:#c4b5fd;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+.demo-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.demo-topbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.demo-tag{font-family:var(--mono);font-size:11px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase;}
+.demo-hint{font-family:var(--mono);font-size:10px;color:var(--muted2);}
+.ctrl-btn{font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ctrl-btn:hover{border-color:var(--ac);color:var(--ac);}
+.ctrl-btn.go{border-color:rgba(139,92,246,.4);color:var(--ac);}
+.ctrl-btn.go:hover{background:var(--ac-dim);}
+.ctrl-btn.warn{border-color:rgba(248,113,113,.3);color:var(--red);}
+.ctrl-btn.warn:hover{background:rgba(248,113,113,.07);}
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.ex-head{padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border);}
+.ex-num{font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(139,92,246,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.ex-title{font-weight:600;font-size:16px;color:#f1f5f9;}
+.ex-desc{font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6;}
+.ex-body{padding:20px;}
+.ex-body p{font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7;}
+.ex-body p:last-child{margin-bottom:0;}
+.ex-body p strong{color:#e2e8f0;}
+.disc-list{list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px;}
+.disc-list li{counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72;}
+.disc-list li::before{content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(139,92,246,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px;}
+.disc-list li strong{color:#e2e8f0;}
+.gloss-grid{display:flex;flex-direction:column;}
+.gloss-entry{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);padding:18px 0;}
+.gloss-entry:last-child{border-bottom:none;}
+.gloss-term{display:flex;flex-direction:column;gap:5px;padding-right:24px;}
+.gloss-term-name{font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700;}
+.gloss-abbr{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.gloss-def{font-size:14.5px;color:#94a3b8;line-height:1.72;}
+.gloss-def strong{color:#e2e8f0;}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border);}
+.nav-btn{text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s;}
+.nav-btn:hover{border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow);}
+.nav-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.nav-title{font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px;}
+.nav-arrow{font-size:20px;color:var(--ac);}
+</style>
+</head>
+<body>
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface)" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 2: SYMBOLIC AI</span>
+  <span>›</span><span style="color:#94a3b8">Era 2, Lesson 7 — The Connectionist Debate</span>
+</nav>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 2 · LESSON 7</span>
+      <span>1987 – 1995</span><span>·</span>
+      <span>The Second AI Winter &amp; the Return of Neural Networks</span>
+    </div>
+    <h1>When the Rules<br>Ran Out</h1>
+    <p class="hero-sub">By 1987 symbolic AI dominated the field, commanded hundreds of millions in funding, and was running in production at major corporations. By 1991 the money was gone, the companies were bankrupt, and a quieter revolution was underway.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1987</span><span class="tl-label">Lisp Machine market collapses — symbolic AI hardware disappears</span></div>
+      <div class="tl-item"><span class="tl-year">1988</span><span class="tl-label">Expert system maintenance costs become untenable</span></div>
+      <div class="tl-item"><span class="tl-year">1989</span><span class="tl-label">LeCun trains CNN on handwritten digits — used by US Post Office</span></div>
+      <div class="tl-item"><span class="tl-year">1991</span><span class="tl-label">Japan's Fifth Generation Project ends — symbolic AI consensus collapses</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">📉</span><div><strong>Explain</strong> the specific events that triggered the second AI winter — the Lisp Machine collapse, the expert system maintenance crisis, and the Fifth Generation Project's failure.</div></li>
+      <li><span class="obj-icon">🧠</span><div><strong>Describe</strong> the connectionist counter-argument: what neural networks offered that symbolic AI could not, and why backpropagation changed the terms of the debate.</div></li>
+      <li><span class="obj-icon">⚖️</span><div><strong>State</strong> the Fodor-Pylyshyn systematicity argument and the connectionist response — and explain why the debate was never formally resolved.</div></li>
+      <li><span class="obj-icon">🌅</span><div><strong>Identify</strong> the early connectionist results (LeCun's LeNet, Hopfield networks) that seeded Era 3's statistical learning revolution.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">The Collapse</h2></div>
+    <div class="prose">
+      <p>In 1986 symbolic AI was ascendant. The US Department of Defense's DARPA was funding AI research at unprecedented levels. Japan's Ministry of International Trade and Industry had committed $400 million to the Fifth Generation Computer Project, aiming to build Prolog-based AI systems that could translate languages, understand speech, and reason with expert-level knowledge. The UK had its own Alvey Programme. Expert systems were shipping at DEC, American Express, General Electric, and dozens of other corporations. A generation of AI researchers had built careers on the premise that knowledge engineering — encoding human expertise as logical rules — was the path to machine intelligence.</p>
+      <p>The first crack appeared in hardware. <strong>Lisp Machines</strong> — specialized workstations built by companies like Symbolics, LMI, and Xerox, optimized for running Lisp and Prolog programs — were the physical infrastructure of symbolic AI. They were expensive ($70,000-$100,000 each), proprietary, and fast at symbolic computation. In 1987, Sun Microsystems and other vendors began shipping general-purpose Unix workstations that were nearly as fast at symbolic computation, cost a fraction of the price, and could run everything else as well. The Lisp Machine market collapsed in a single year. Symbolics filed for bankruptcy. The hardware ecosystem that had been built around symbolic AI vanished.</p>
+      <p>The second crack appeared in maintenance. XCON at Digital Equipment Corporation had grown from 250 rules in 1980 to over 10,000 by 1988. A team of full-time knowledge engineers maintained it. Adding a new product line to DEC's catalog required months of rule updates, conflict resolution, and regression testing. The maintenance cost was approaching the productivity gain. Similar stories emerged from American Express (fraud detection expert systems), General Electric (locomotive repair diagnostics), and others. The knowledge acquisition bottleneck had been partially addressed by tools that automated rule extraction — but the maintenance explosion had not been addressed at all. Rules interacted in ways their authors hadn't anticipated. Changing one rule broke three others. The brittleness that had been theoretical in Lesson 2.1 was now a budget line item.</p>
+    </div>
+
+    <div class="pullquote">
+      <p>"The term 'AI winter' was coined because, just like agricultural winter, there was a sudden frost. Funding dried up almost overnight. Graduate students stopped listing AI on their resumes. The field had over-promised and under-delivered, and the people holding the budgets noticed."</p>
+      <cite>&mdash; Attributed to Roger Schank, Yale AI Lab, circa 1988</cite>
+    </div>
+
+    <div class="prose">
+      <p>Japan's Fifth Generation Project ended in 1991 with a quiet acknowledgment that its central premise — that Prolog-based parallel inference machines would become the dominant computing platform of the 1990s — had not been realized. The project produced some useful research in parallel processing and logic programming, but nothing that resembled the original vision. The international funding consensus for symbolic AI dissolved.</p>
+      <p>While symbolic AI was contracting, something was growing in the margins. The 1986 publication of backpropagation by Rumelhart, Hinton, and Williams had given the connectionist camp a practical training algorithm. By 1989, <strong>Yann LeCun</strong> at Bell Labs had trained a convolutional neural network — which he called LeNet — on handwritten digit recognition with results good enough that the US Postal Service began using it to sort mail. This was the first commercially deployed deep learning system. It operated quietly, processing millions of ZIP codes per day, while the academic debate between symbolists and connectionists continued in conference proceedings and journal pages.</p>
+      <p>The debate had a genuine intellectual core. <strong>Jerry Fodor and Zenon Pylyshyn</strong> published "Connectionism and Cognitive Architecture" in 1988, arguing that neural networks were fundamentally incapable of supporting structured, compositional thought. Their central argument was <em>systematicity</em>: any cognitive system capable of thinking "John loves Mary" must also be capable of thinking "Mary loves John" — not because it has seen this particular sentence, but because it understands the relational structure. Symbolic systems have this property by design — the relation <code>loves(john, mary)</code> immediately supports the query <code>loves(mary, john) → false</code>. Distributed representations in neural networks, Fodor and Pylyshyn argued, could not provide this structural guarantee.</p>
+      <p>The connectionists — Rumelhart, McClelland, Smolensky — responded that systematicity was an empirical property that neural networks could learn, not a structural requirement that only symbolic systems could satisfy. Paul Smolensky argued for "tensor product representations" that could encode compositional structure in distributed form. The debate was sophisticated and unresolved. Neural networks did not win the argument. They won the benchmarks — and eventually, that mattered more.</p>
+    </div>
+  </section>
+
+  <!-- 03 DEMOS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+
+    <!-- DEMO 1: Maintenance Explosion -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — The Maintenance Explosion.</strong> Add rules to a knowledge base one at a time. Watch how the number of potential rule interactions grows quadratically — and how conflict probability grows with it. This is why XCON at 10,000 rules required a full-time engineering team.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Knowledge Base — Maintenance Simulator</span>
+        <span class="demo-hint">add rules · watch interactions explode</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 240px">
+        <div style="padding:16px 18px;border-right:1px solid var(--border)">
+          <svg id="d1svg" viewBox="0 0 460 220" style="display:block;width:100%"></svg>
+        </div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:6px">
+            <button class="ctrl-btn go" style="flex:1" onclick="d1add(1)">+ Add 1 Rule</button>
+            <button class="ctrl-btn go" onclick="d1add(10)">+10</button>
+          </div>
+          <button class="ctrl-btn warn" onclick="d1reset()">↺ Reset</button>
+          <div style="background:#0a0d14;border-radius:6px;padding:8px 10px">
+            <div style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:3px">Rules</div>
+            <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:#e2e8f0" id="d1rcount">0</div>
+          </div>
+          <div style="background:#0a0d14;border-radius:6px;padding:8px 10px">
+            <div style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--amber);margin-bottom:3px">Interactions (n²/2)</div>
+            <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--amber)" id="d1icount">0</div>
+          </div>
+          <div style="background:#0a0d14;border-radius:6px;padding:8px 10px">
+            <div style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--red);margin-bottom:3px">Conflicts detected</div>
+            <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--red)" id="d1ccount">0</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);line-height:1.65;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d1note">Add rules to begin.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 2: Systematicity Test -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — The Systematicity Test.</strong> The Fodor-Pylyshyn challenge: a symbolic system handles relational queries it has never seen because it understands structure. A pattern-matching system fails when relations are reversed or names are swapped.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Systematicity — Symbolic vs Pattern Matcher</span>
+        <span class="demo-hint">type a query · try reversals and novel names</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr">
+        <div style="padding:16px 18px;border-right:1px solid var(--border)">
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--sky);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)">🔷 Symbolic System (Prolog-style)</div>
+          <div style="font-family:var(--mono);font-size:10px;color:#94a3b8;background:#0a0d14;border-radius:6px;padding:10px;margin-bottom:10px;line-height:1.8">
+            loves(john, mary).<br>
+            loves(mary, alice).<br>
+            loves(bob, carol).<br>
+            <span style="color:var(--muted2)">% Rule:</span><br>
+            loves_someone(X) :- loves(X, _).
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--sky);white-space:nowrap">?-</span>
+            <input type="text" id="d2sym_q" placeholder="loves(john, mary)." style="flex:1;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-family:var(--mono);font-size:11px;color:#94a3b8;outline:none" onkeydown="if(event.key==='Enter')d2run()">
+            <button class="ctrl-btn go" onclick="d2run()">▶</button>
+          </div>
+          <div style="font-family:var(--mono);font-size:11px;min-height:48px;padding:8px 10px;background:#0a0d14;border-radius:6px" id="d2sym_out"><span style="color:var(--muted2)">—</span></div>
+          <div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap" id="d2suggs"></div>
+        </div>
+        <div style="padding:16px 18px">
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)">🔶 Pattern Matcher (lookup-based)</div>
+          <div style="font-family:var(--mono);font-size:10px;color:#94a3b8;background:#0a0d14;border-radius:6px;padding:10px;margin-bottom:10px;line-height:1.8">
+            <span style="color:var(--muted2)">// Trained patterns (exact matches only):</span><br>
+            "loves john mary" → <span style="color:var(--green)">true</span><br>
+            "loves mary alice" → <span style="color:var(--green)">true</span><br>
+            "loves bob carol" → <span style="color:var(--green)">true</span><br>
+            <span style="color:var(--muted2)">// No structural understanding.</span>
+          </div>
+          <div style="font-family:var(--mono);font-size:11px;min-height:48px;padding:8px 10px;background:#0a0d14;border-radius:6px" id="d2nn_out"><span style="color:var(--muted2)">—</span></div>
+          <div style="margin-top:10px;font-size:12px;color:#94a3b8;line-height:1.65;padding:8px 10px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:6px" id="d2insight">Try a query — then try reversing the names.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 3: Timeline -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 3 — The Crossing Curves.</strong> Symbolic AI funding and connectionist momentum, 1980–1995. Click any event to read what happened.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">AI History — 1980 to 1995</span>
+        <span class="demo-hint">click events on the timeline</span>
+      </div>
+      <div style="padding:16px 18px">
+        <svg id="d3svg" viewBox="0 0 860 180" style="display:block;width:100%;cursor:default"></svg>
+        <div style="margin-top:14px;padding:12px 16px;background:#0a0d14;border:1px solid var(--border);border-radius:8px;min-height:60px;font-size:13px;color:#94a3b8;line-height:1.7" id="d3detail">Click any event above to read what happened.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">📉 The Quadratic Wall</div>
+        <div class="ex-desc">Use Demo 1 to find the rule count where maintenance becomes untenable — and estimate what XCON required.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Add rules in Demo 1 until you reach 50. Note the number of potential interactions. At what rule count does the interaction count exceed 1,000? At what count does it exceed 10,000?</p>
+        <p>&rarr; XCON had approximately 10,000 rules at its peak. Use the formula n(n−1)/2 to compute the number of pairwise rule interactions. If each interaction takes 1 second to manually verify, how many person-years would it take to audit all interactions once?</p>
+        <p><strong>Key question:</strong> This quadratic growth is why large knowledge bases become unmaintainable. Can you think of a software engineering analogy — another system where complexity grows quadratically with the number of components and eventually becomes unmanageable?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">⚖️ The Systematicity Argument</div>
+        <div class="ex-desc">Use Demo 2 to probe the limits of pattern matching — and think through what Fodor and Pylyshyn were really claiming.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 2, try: (1) <code>loves(john, mary)</code> — both systems should succeed. (2) <code>loves(mary, john)</code> — the symbolic system correctly returns false; the pattern matcher fails. (3) <code>loves(alice, bob)</code> — a query about names not in the training data. (4) <code>loves_someone(bob)</code> — tests whether the system understands the derived rule.</p>
+        <p>&rarr; The pattern matcher fails on queries 2–4 because it only knows what it has explicitly seen. The symbolic system succeeds because it understands the <em>structure</em> of the relation. This is Fodor and Pylyshyn's point: systematicity requires structural representation, not just pattern storage.</p>
+        <p><strong>Key question:</strong> Modern large language models (GPT, Claude) are, at their core, very sophisticated pattern matchers trained on vast amounts of text. Do they exhibit systematicity? Try asking a language model whether "mary loves john" follows from "john loves mary" — does it get it right? Does that mean it understands the relation, or that it has seen enough similar patterns?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">🌅 Reading the Transition</div>
+        <div class="ex-desc">Use Demo 3 to trace the exact moment when symbolic AI's decline and connectionism's rise intersected.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Click through all events in Demo 3's timeline in chronological order. Identify: (1) the last major symbolic AI investment before the collapse, (2) the first connectionist result that produced real commercial value, (3) the event that most clearly marks the end of symbolic AI's dominance.</p>
+        <p>&rarr; Notice that the connectionist revival did not happen because symbolic AI was defeated in debate. It happened because connectionist systems produced better results on practical tasks. What does this suggest about how scientific paradigm shifts actually occur — is it logical argument or empirical demonstration that drives change?</p>
+        <p><strong>Key insight:</strong> The Fodor-Pylyshyn argument was never formally refuted. Many researchers believe it identified a genuine limitation that modern neural networks still have. Yet neural networks dominate AI in 2025. Scientific fields do not always resolve their foundational debates — they often simply move on when one approach becomes overwhelmingly more productive.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>Hype and Winter.</strong> The second AI winter, like the first, was partly caused by over-promising. Expert systems were sold as general-purpose reasoning engines; they turned out to be narrow, brittle tools that required enormous maintenance. What structural features of the AI research and funding ecosystem made over-promising likely? Do you see the same dynamics in current AI development?</li>
+      <li><strong>The Unresolved Debate.</strong> Fodor and Pylyshyn's systematicity argument was never formally refuted. Some researchers argue that large language models exhibit emergent systematicity that their architects didn't build in. Others argue that apparent systematicity in LLMs is sophisticated pattern matching over a large enough corpus. What evidence would you need to settle this question? Can it be settled empirically?</li>
+      <li><strong>The Quiet Revolution.</strong> LeCun's LeNet was sorting US mail by 1989 while academic AI was still debating symbolic vs. connectionist approaches. The deployment happened quietly, in a domain (postal sorting) that was not considered prestigious AI. What does this suggest about where AI progress actually happens — in academic debate or in applied domains that most researchers don't pay attention to?</li>
+      <li><strong>Japan's Bet.</strong> The Fifth Generation Computer Project was a rational bet given what was known in 1982: symbolic AI was producing results, Prolog was expressive, parallel hardware was coming. The bet failed. In retrospect, what information was available in 1982 that should have made the bet seem riskier? Is there a lesson here about how to evaluate large-scale technology bets?</li>
+      <li><strong>Connection to Era 3.</strong> The statistical learning revolution that dominates Era 3 was, in part, a pragmatic response to the failures of symbolic AI: instead of encoding knowledge, learn from data; instead of brittle rules, use probabilistic models that degrade gracefully. But statistical learning has its own failure modes — distribution shift, spurious correlations, opacity. In what ways does Era 3 repeat the pattern of Era 2 at a higher level of sophistication?</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">AI Winter</span><span class="gloss-abbr">Second: 1987–1993</span></div>
+        <div class="gloss-def">A period of significantly reduced funding, interest, and optimism in AI research following unmet expectations. The second AI winter was triggered by the collapse of the Lisp Machine hardware market (1987), the expert system maintenance crisis (1988), and the failure of Japan's Fifth Generation Project (1991). Contrast with the first AI winter (1969–1986) triggered by the Minsky-Papert critique of perceptrons.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Connectionism</span><span class="gloss-abbr">Neural network paradigm</span></div>
+        <div class="gloss-def">The research program in cognitive science and AI that models cognition using networks of simple, interconnected processing units — artificial neurons. Opposed to the symbolic AI paradigm, which models cognition using explicit rule systems and logical inference. The term was used in the 1980s-90s debate; today "deep learning" is more common but refers to the same lineage.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Systematicity</span><span class="gloss-abbr">Fodor &amp; Pylyshyn, 1988</span></div>
+        <div class="gloss-def">The property of a cognitive system that can think "John loves Mary" if and only if it can also think "Mary loves John" — not because it memorized both, but because it understands relational structure. Fodor and Pylyshyn argued this property is guaranteed by symbolic systems but not by connectionist networks. The argument was central to the 1980s-90s debate and remains influential in discussions of what neural networks can and cannot do.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Fifth Generation Project</span><span class="gloss-abbr">Japan, 1982–1991</span></div>
+        <div class="gloss-def">A Japanese government initiative to build a new generation of computers based on Prolog and parallel processing, aimed at creating AI systems that could translate languages and reason at expert level. Funded at $400M over ten years. Produced useful research but failed to achieve its commercial and technical goals. Its quiet end in 1991 contributed to the collapse of the international funding consensus for symbolic AI.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Lisp Machine</span><span class="gloss-abbr">Symbolic AI hardware</span></div>
+        <div class="gloss-def">Specialized workstation computers designed and optimized for running Lisp and other symbolic AI programs. Built by companies including Symbolics, LMI (Lisp Machine Inc.), and Xerox PARC. Priced at $70,000–$100,000. When general-purpose Unix workstations matched their performance at a fraction of the cost in 1987, the Lisp Machine market collapsed within a year, devastating the companies that had built the symbolic AI hardware ecosystem.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">LeNet</span><span class="gloss-abbr">LeCun, 1989</span></div>
+        <div class="gloss-def">A convolutional neural network developed by Yann LeCun at Bell Labs for recognizing handwritten digits. The first commercially deployed deep learning system — used by the US Postal Service to sort mail by ZIP code. Demonstrated that neural networks could produce commercially valuable results. A direct ancestor of modern convolutional networks used in image recognition.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era2_lesson6_decision_trees.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 2, Lesson 6 — Decision Trees</div></div>
+    </a>
+    <div class="nav-btn" style="opacity:.35;cursor:default">
+      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 2, Lesson 8 — Probabilistic Logic</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+</div>
+<script>
+'use strict';
+
+/* ════════════════════════════════════════════════════
+   DEMO 1 — MAINTENANCE EXPLOSION
+════════════════════════════════════════════════════ */
+(function(){
+  var n=0, conflicts=0;
+  var history=[];
+  var rng=function(){return Math.random();};
+
+  function conflictProb(n){
+    // Probability at least one conflict in n*(n-1)/2 pairs,
+    // each with ~0.3% conflict chance at small n, rising to ~1% at n=100
+    var p=0.003+n*0.00007;
+    return Math.min(0.9,1-Math.pow(1-p,n*(n-1)/2));
+  }
+
+  function d1render(){
+    document.getElementById('d1rcount').textContent=n;
+    var interactions=Math.round(n*(n-1)/2);
+    document.getElementById('d1icount').textContent=interactions.toLocaleString();
+    document.getElementById('d1ccount').textContent=conflicts;
+
+    var note=n===0?'Add rules to begin.':
+      n<10?'Small knowledge base — manageable. '+interactions+' pairwise interactions to check.':
+      n<30?'Growing fast. '+interactions+' interactions. Some conflicts emerging.':
+      n<60?'⚠ Dangerous territory. '+interactions+' interactions. Conflicts accumulating faster than they can be resolved.':
+      '🔴 Unmaintainable. '+interactions.toLocaleString()+' pairwise interactions. This is why XCON required a full-time engineering team.';
+    document.getElementById('d1note').textContent=note;
+
+    // Draw chart
+    var W=460,H=220,PL=44,PR=12,PT=12,PB=36,PW=W-PL-PR,PH=H-PT-PB;
+    var maxN=100, maxI=maxN*(maxN-1)/2;
+
+    function sx(v){return PL+v/maxN*PW;}
+    function sy_rules(v){return PT+PH-v/maxN*PH;}
+    function sy_inter(v){return PT+PH-v/maxI*PH;}
+
+    var svg='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    // Grid
+    [0,25,50,75,100].forEach(function(v){
+      var x=sx(v);
+      svg+='<line x1="'+x.toFixed(0)+'" y1="'+PT+'" x2="'+x.toFixed(0)+'" y2="'+(PT+PH)+'" stroke="#131a2a" stroke-width="1"/>';
+      svg+='<text x="'+x.toFixed(0)+'" y="'+(PT+PH+14)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+v+'</text>';
+    });
+    svg+='<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+PH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+    svg+='<line x1="'+PL+'" y1="'+(PT+PH)+'" x2="'+(PL+PW)+'" y2="'+(PT+PH)+'" stroke="#2d3748" stroke-width="1.2"/>';
+    svg+='<text x="'+(PL+PW/2)+'" y="'+(PT+PH+28)+'" fill="#475569" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">Number of Rules</text>';
+
+    // Rules line (linear) — blue
+    if(n>0){
+      var rd='M'+sx(0)+','+sy_rules(0);
+      history.forEach(function(h){rd+='L'+sx(h.n)+','+sy_rules(h.n);});
+      svg+='<path d="'+rd+'" fill="none" stroke="var(--sky)" stroke-width="2"/>';
+    }
+    // Interactions line (quadratic) — amber
+    var id='M'+sx(0)+','+sy_inter(0);
+    for(var i=1;i<=n;i++) id+='L'+sx(i)+','+sy_inter(i*(i-1)/2);
+    if(n>0) svg+='<path d="'+id+'" fill="none" stroke="var(--amber)" stroke-width="2.5"/>';
+
+    // Legend
+    svg+='<rect x="'+(PL+4)+'" y="'+(PT+4)+'" width="130" height="44" rx="4" fill="rgba(0,0,0,.6)"/>';
+    svg+='<line x1="'+(PL+10)+'" y1="'+(PT+16)+'" x2="'+(PL+22)+'" y2="'+(PT+16)+'" stroke="var(--sky)" stroke-width="2"/>';
+    svg+='<text x="'+(PL+26)+'" y="'+(PT+20)+'" fill="var(--sky)" font-size="8" font-family="Space Mono,monospace">Rules (linear)</text>';
+    svg+='<line x1="'+(PL+10)+'" y1="'+(PT+32)+'" x2="'+(PL+22)+'" y2="'+(PT+32)+'" stroke="var(--amber)" stroke-width="2"/>';
+    svg+='<text x="'+(PL+26)+'" y="'+(PT+36)+'" fill="var(--amber)" font-size="8" font-family="Space Mono,monospace">Interactions (n²)</text>';
+
+    // Current point
+    if(n>0){
+      var cpx=sx(n), cpy=sy_inter(interactions);
+      svg+='<circle cx="'+cpx.toFixed(1)+'" cy="'+cpy.toFixed(1)+'" r="5" fill="var(--amber)" stroke="white" stroke-width="1.5"/>';
+    }
+    document.getElementById('d1svg').innerHTML=svg;
+  }
+
+  window.d1add=function(k){
+    for(var i=0;i<k;i++){
+      n++;
+      history.push({n:n});
+      // Probabilistically add a conflict
+      if(rng()<conflictProb(n)-conflictProb(n-1)+0.02) conflicts++;
+    }
+    d1render();
+  };
+  window.d1reset=function(){n=0;conflicts=0;history=[];d1render();};
+  d1render();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 2 — SYSTEMATICITY TEST
+════════════════════════════════════════════════════ */
+(function(){
+  // Symbolic: genuine Prolog-like resolution on a tiny fact base
+  var FACTS=[
+    {rel:'loves',a:'john',b:'mary'},
+    {rel:'loves',a:'mary',b:'alice'},
+    {rel:'loves',a:'bob',b:'carol'},
+  ];
+
+  function symQuery(q){
+    q=q.trim().replace(/\.$/, '').toLowerCase();
+    // loves_someone(X)
+    var m=q.match(/^loves_someone\((\w+)\)$/);
+    if(m){
+      var x=m[1];
+      var found=FACTS.find(function(f){return f.rel==='loves'&&f.a===x;});
+      return found?'true  ('+x+' loves '+found.b+')':'false';
+    }
+    // loves(X, Y)
+    m=q.match(/^loves\((\w+),\s*(\w+)\)$/);
+    if(m){
+      var a=m[1],b=m[2];
+      if(a==='_'||b==='_'||a===''||b===''){
+        var results=FACTS.filter(function(f){
+          return f.rel==='loves'&&(a==='_'||f.a===a)&&(b==='_'||f.b===b);
+        });
+        return results.length?results.map(function(r){return r.a+', '+r.b;}).join('\n'):'false';
+      }
+      var found=FACTS.find(function(f){return f.rel==='loves'&&f.a===a&&f.b===b;});
+      return found?'true':'false';
+    }
+    return 'ERROR: unrecognised query format';
+  }
+
+  // Pattern matcher: only knows exact seen patterns
+  var PATTERNS={
+    'loves john mary':'true',
+    'loves mary alice':'true',
+    'loves bob carol':'true',
+  };
+  function nnQuery(q){
+    q=q.trim().replace(/\.$/, '').toLowerCase();
+    // Normalise: remove parens and comma
+    var flat=q.replace(/[(),]/g,' ').replace(/\s+/g,' ').trim();
+    if(PATTERNS[flat]!==undefined) return PATTERNS[flat];
+    return 'UNKNOWN  (pattern not seen in training)';
+  }
+
+  function getInsight(q){
+    q=q.trim().replace(/\.$/, '').toLowerCase();
+    var flat=q.replace(/[(),]/g,' ').replace(/\s+/g,' ').trim();
+    var parts=flat.split(' ');
+    if(parts[0]==='loves'&&parts[2]&&parts[1]!==parts[2]){
+      // Check if reversed
+      var rev='loves '+parts[2]+' '+parts[1];
+      if(PATTERNS[rev]) return '⚠ Systematicity failure: the pattern matcher knows "'+flat.replace('loves ','loves(').replace(' ',',' )+')" but fails on the reversal — even though the relation and names are all in its training data. The symbolic system correctly returns false because it knows the relation is not symmetric.';
+    }
+    if(parts[0]==='loves'&&parts[1]&&parts[2]&&!PATTERNS[flat]&&!['john','mary','alice','bob','carol'].includes(parts[1])){
+      return 'Novel name: "'+parts[1]+'" was never in training data. The symbolic system can still answer via its rule structure. The pattern matcher cannot — it has never seen this name.';
+    }
+    return 'Try reversing the names, or use a name not in the knowledge base (e.g., dave, eve).';
+  }
+
+  var SUGGS=['loves(john, mary).','loves(mary, john).','loves(alice, bob).','loves_someone(bob).','loves(dave, carol).'];
+
+  function buildSuggs(){
+    var html=SUGGS.map(function(s){
+      return '<button style="font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer" onclick="d2setQ(\''+s+'\')">'+s+'</button>';
+    }).join('');
+    document.getElementById('d2suggs').innerHTML=html;
+  }
+
+  window.d2setQ=function(q){
+    document.getElementById('d2sym_q').value=q;
+    d2run();
+  };
+
+  window.d2run=function(){
+    var q=document.getElementById('d2sym_q').value;
+    if(!q.trim()) return;
+    var symR=symQuery(q);
+    var nnR=nnQuery(q);
+    var insight=getInsight(q);
+
+    var symCol=symR==='true'||symR.startsWith('true')?'var(--green)':symR==='false'?'var(--red)':'var(--amber)';
+    var nnCol=nnR==='true'?'var(--green)':nnR.startsWith('UNKNOWN')?'var(--red)':'var(--amber)';
+
+    document.getElementById('d2sym_out').innerHTML='<span style="color:'+symCol+'">'+symR.replace(/\n/g,'<br>')+'</span>';
+    document.getElementById('d2nn_out').innerHTML='<span style="color:'+nnCol+'">'+nnR+'</span>';
+    document.getElementById('d2insight').textContent=insight;
+  };
+
+  buildSuggs();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 3 — TIMELINE
+════════════════════════════════════════════════════ */
+(function(){
+  var EVENTS=[
+    {year:1980,y:0,col:'#38bdf8',label:'XCON ships',detail:'Digital Equipment Corporation deploys XCON for VAX configuration. It saves ~$40M/year and becomes the poster child for commercial expert systems. The knowledge engineering era feels unstoppable.'},
+    {year:1982,y:1,col:'#38bdf8',label:'5th Gen starts',detail:'Japan announces the Fifth Generation Computer Project — $400M over 10 years to build Prolog-based AI at national scale. US and UK launch competing programs. Symbolic AI funding reaches its historical peak.'},
+    {year:1984,y:0,col:'#38bdf8',label:'AAAI boom',detail:'The AAAI national conference draws record attendance. AI companies are being founded weekly. The Lisp Machine companies — Symbolics, LMI — are valued at hundreds of millions.'},
+    {year:1986,y:2,col:'#a78bfa',label:'Backprop published',detail:'Rumelhart, Hinton & Williams publish backpropagation in Nature. The training algorithm for multi-layer neural networks is now widely accessible. This is the moment the connectionist revival becomes viable — though few in the symbolic AI community notice yet.'},
+    {year:1987,y:0,col:'#f87171',label:'Lisp crash',detail:'Sun workstations undercut Lisp Machine prices catastrophically. Symbolics files for bankruptcy. The hardware ecosystem built around symbolic AI collapses in a single year. Hundreds of millions in market cap disappears.'},
+    {year:1988,y:1,col:'#f87171',label:'Maintenance crisis',detail:'Internal reports at DEC, American Express, and GE document the expert system maintenance problem. XCON now requires a full-time engineering team just to prevent rule conflicts. The knowledge acquisition bottleneck is now a budget line item.'},
+    {year:1988,y:2,col:'#a78bfa',label:'Fodor-Pylyshyn',detail:'Fodor and Pylyshyn publish "Connectionism and Cognitive Architecture" — the systematicity argument. Neural networks cannot represent structured, compositional thought, they argue. The paper is widely cited. The connectionists have no immediate answer.'},
+    {year:1989,y:2,col:'#4ade80',label:'LeNet deployed',detail:'Yann LeCun trains a convolutional neural network on handwritten digits at Bell Labs. The US Postal Service begins using it to sort mail by ZIP code. The first commercially deployed deep learning system operates quietly while academics debate symbolic vs. connectionist approaches.'},
+    {year:1991,y:1,col:'#f87171',label:'5th Gen ends',detail:'Japan\'s Fifth Generation Project concludes after 10 years and $400M. The results are modest — useful research in parallel processing, but nothing resembling the original vision of Prolog-based AI at scale. The international funding consensus for symbolic AI dissolves.'},
+    {year:1993,y:2,col:'#4ade80',label:'C4.5 & SVMs',detail:'Quinlan publishes C4.5 (successor to ID3). Vapnik develops support vector machines. Statistical learning methods begin producing benchmark results that match or exceed symbolic approaches on standard datasets. The field\'s center of gravity is shifting.'},
+    {year:1995,y:2,col:'#4ade80',label:'Era 3 begins',detail:'By 1995 the statistical learning revolution is clearly underway. Neural networks, SVMs, and ensemble methods dominate ML benchmarks. The language of the field shifts from "knowledge engineering" to "learning from data." Era 3 has arrived.'},
+  ];
+
+  var W=860,H=180,PL=40,PR=20,PY=60,BAND=40;
+  // Year range: 1980-1995
+  function sx(yr){return PL+(yr-1980)/(1995-1980)*(W-PL-PR);}
+
+  var selectedEvent=null;
+
+  function renderTL(){
+    var svg='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+
+    // Bands: symbolic AI (top) and connectionist (bottom)
+    svg+='<rect x="'+PL+'" y="'+(PY-BAND/2)+'" width="'+(W-PL-PR)+'" height="'+BAND+'" fill="rgba(56,189,248,0.04)" rx="3"/>';
+    svg+='<text x="'+(PL+4)+'" y="'+(PY+5)+'" fill="rgba(56,189,248,0.3)" font-size="9" font-family="Space Mono,monospace">Symbolic AI</text>';
+    svg+='<rect x="'+PL+'" y="'+(PY+BAND/2+8)+'" width="'+(W-PL-PR)+'" height="'+BAND+'" fill="rgba(74,222,128,0.04)" rx="3"/>';
+    svg+='<text x="'+(PL+4)+'" y="'+(PY+BAND+16)+'" fill="rgba(74,222,128,0.3)" font-size="9" font-family="Space Mono,monospace">Connectionist</text>';
+
+    // Timeline axis
+    svg+='<line x1="'+PL+'" y1="'+H/2+'" x2="'+(W-PR)+'" y2="'+H/2+'" stroke="#2d3748" stroke-width="1.5"/>';
+    [1980,1982,1984,1986,1988,1990,1992,1994].forEach(function(yr){
+      var x=sx(yr);
+      svg+='<line x1="'+x.toFixed(0)+'" y1="'+(H/2-4)+'" x2="'+x.toFixed(0)+'" y2="'+(H/2+4)+'" stroke="#2d3748" stroke-width="1.5"/>';
+      svg+='<text x="'+x.toFixed(0)+'" y="'+(H-8)+'" fill="#334155" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+yr+'</text>';
+    });
+
+    // Events
+    EVENTS.forEach(function(ev,i){
+      var x=sx(ev.year);
+      // y position: 0=symbolic top, 1=middle, 2=connectionist bottom
+      var ey=ev.y===0?(PY-BAND/2+12):ev.y===2?(PY+BAND/2+20):(H/2);
+      var isSel=(selectedEvent===i);
+      svg+='<circle cx="'+x.toFixed(0)+'" cy="'+ey.toFixed(0)+'" r="'+(isSel?9:6)+'" fill="'+ev.col+'" opacity="'+(isSel?1:0.7)+'" data-i="'+i+'" style="cursor:pointer"/>';
+      svg+='<text x="'+x.toFixed(0)+'" y="'+(ey+(ev.y===0?-12:14))+'" fill="'+ev.col+'" font-size="8" text-anchor="middle" font-family="Space Mono,monospace" style="pointer-events:none">'+ev.label+'</text>';
+    });
+
+    var svgEl=document.getElementById('d3svg');
+    svgEl.innerHTML=svg;
+    svgEl.querySelectorAll('[data-i]').forEach(function(el){
+      el.addEventListener('click',function(){
+        var i=+el.getAttribute('data-i');
+        selectedEvent=(selectedEvent===i?null:i);
+        renderTL();
+        if(selectedEvent!==null){
+          var ev=EVENTS[selectedEvent];
+          document.getElementById('d3detail').innerHTML='<strong style="color:'+ev.col+'">'+ev.year+' — '+ev.label+'</strong><br>'+ev.detail;
+        } else {
+          document.getElementById('d3detail').textContent='Click any event above to read what happened.';
+        }
+      });
+    });
+  }
+
+  renderTL();
+})();
+</script>
+</body>
+</html>
