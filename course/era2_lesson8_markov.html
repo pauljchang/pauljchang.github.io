@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 2, Lesson 8 — Markov Chains &amp; HMMs | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--surface:#161b27;--s2:#1a2035;--border:#1e2d40;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#334155;
+  --ac:#06b6d4;--ac-dim:rgba(6,182,212,.10);--ac-glow:rgba(6,182,212,.25);
+  --green:#4ade80;--red:#f87171;--amber:#f59e0b;--violet:#a78bfa;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;--disp:'Lora',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+.course-nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.era-badge{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em;}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 100px;}
+.hero{padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px;}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.week-badge{background:var(--ac);color:#001a20;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em;}
+.hero h1{font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px;}
+.hero-sub{font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px;}
+.hero-timeline{display:flex;gap:36px;flex-wrap:wrap;}
+.tl-item{display:flex;flex-direction:column;gap:3px;}
+.tl-year{font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.1em;}
+.tl-label{font-size:13px;color:var(--muted);}
+.section{margin-bottom:68px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px;}
+.sec-title{font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.obj-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;}
+.obj-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.obj-list li strong{color:#f1f5f9;}
+.prose p{font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82;}
+.prose p:last-child{margin-bottom:0;}
+.prose p strong{color:#e2e8f0;}
+.prose code{font-family:var(--mono);font-size:12px;background:#0a0d14;padding:2px 6px;border-radius:3px;border:1px solid var(--border);color:#67e8f9;}
+.pullquote{background:linear-gradient(135deg,rgba(6,182,212,.07),rgba(6,182,212,.02));border:1px solid rgba(6,182,212,.2);border-radius:12px;padding:22px 26px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:17px;font-style:italic;color:#67e8f9;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+.demo-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.demo-topbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.demo-tag{font-family:var(--mono);font-size:11px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase;}
+.demo-hint{font-family:var(--mono);font-size:10px;color:var(--muted2);}
+.ctrl-btn{font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ctrl-btn:hover{border-color:var(--ac);color:var(--ac);}
+.ctrl-btn.go{border-color:rgba(6,182,212,.4);color:var(--ac);}
+.ctrl-btn.go:hover{background:var(--ac-dim);}
+.ctrl-btn.active{background:var(--ac-dim);border-color:rgba(6,182,212,.4);color:var(--ac);}
+input[type=range].sl{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,#0a0d14,var(--ac));}
+input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #67e8f9;cursor:pointer;}
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.ex-head{padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border);}
+.ex-num{font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(6,182,212,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.ex-title{font-weight:600;font-size:16px;color:#f1f5f9;}
+.ex-desc{font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6;}
+.ex-body{padding:20px;}
+.ex-body p{font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7;}
+.ex-body p:last-child{margin-bottom:0;}
+.ex-body p strong{color:#e2e8f0;}
+.disc-list{list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px;}
+.disc-list li{counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72;}
+.disc-list li::before{content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(6,182,212,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px;}
+.disc-list li strong{color:#e2e8f0;}
+.gloss-grid{display:flex;flex-direction:column;}
+.gloss-entry{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);padding:18px 0;}
+.gloss-entry:last-child{border-bottom:none;}
+.gloss-term{display:flex;flex-direction:column;gap:5px;padding-right:24px;}
+.gloss-term-name{font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700;}
+.gloss-abbr{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.gloss-def{font-size:14.5px;color:#94a3b8;line-height:1.72;}
+.gloss-def strong{color:#e2e8f0;}
+.gloss-code{font-family:var(--mono);font-size:11px;color:#67e8f9;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:7px 12px;display:block;margin-top:8px;line-height:1.8;}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border);}
+.nav-btn{text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s;}
+.nav-btn:hover{border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow);}
+.nav-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.nav-title{font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px;}
+.nav-arrow{font-size:20px;color:var(--ac);}
+</style>
+</head>
+<body>
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface)" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 2: SYMBOLIC AI</span>
+  <span>›</span><span style="color:#94a3b8">Era 2, Lesson 8 — Markov Chains &amp; HMMs</span>
+</nav>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 2 · LESSON 8</span>
+      <span>1913 – 2000s</span><span>·</span>
+      <span>Sequences, States &amp; the Memoryless Property</span>
+    </div>
+    <h1>The Future<br>Forgets the Past</h1>
+    <p class="hero-sub">A Markov chain is a system that moves between states where tomorrow depends only on today — not yesterday. This single constraint, applied to language and speech, powered two decades of AI applications.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1913</span><span class="tl-label">Markov analyzes letter sequences in Pushkin's <em>Eugene Onegin</em></span></div>
+      <div class="tl-item"><span class="tl-year">1960s</span><span class="tl-label">HMMs developed for speech recognition research</span></div>
+      <div class="tl-item"><span class="tl-year">1990s</span><span class="tl-label">Dragon Dictate &amp; IBM ViaVoice — HMM-powered dictation software</span></div>
+      <div class="tl-item"><span class="tl-year">1998</span><span class="tl-label">Google PageRank — Markov chain over the web graph</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">🔗</span><div><strong>Define</strong> the Markov property — the memoryless assumption — and explain why it is simultaneously a limitation and a computational superpower.</div></li>
+      <li><span class="obj-icon">🎲</span><div><strong>Apply</strong> a transition matrix to generate sequences and compute state probabilities after n steps.</div></li>
+      <li><span class="obj-icon">🎙️</span><div><strong>Explain</strong> how Hidden Markov Models extend Markov chains to handle unobservable states — and why this made speech recognition tractable.</div></li>
+      <li><span class="obj-icon">🌐</span><div><strong>Identify</strong> Markov chains in unexpected places — PageRank, language models, reinforcement learning — and explain the unifying structure.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">What Pushkin Taught Probability Theory</h2></div>
+    <div class="prose">
+      <p>In 1913, the Russian mathematician Andrey Markov published an analysis of the letter sequences in Pushkin's novel in verse, <em>Eugene Onegin</em>. He was trying to settle a philosophical dispute: could dependent random variables — variables where each outcome influences the next — still be analyzed rigorously using probability theory? Most probabilists of the time worked with independent events. Markov wanted to show that dependence could be handled, provided the dependence had a specific structure.</p>
+      <p>That structure was the <strong>Markov property</strong>: the probability of the next state depends only on the current state, not on any previous states. In Pushkin's text, whether the next letter is a vowel depends on whether the current letter is a vowel — but not on the letter before that, or the one before that. The past is irrelevant; only the present matters. This is the <strong>memoryless property</strong>, and it is simultaneously a severe constraint on what the model can represent and the mathematical property that makes the model tractable.</p>
+      <p>The formal object is a <strong>transition matrix</strong>: a square matrix where entry T[i][j] gives the probability of moving from state i to state j. Each row sums to 1 (you have to go somewhere). Multiply the current state distribution by the transition matrix to get the distribution after one step. Multiply again for two steps. Multiply n times for n steps. For certain matrices — those where every state is reachable from every other state and the chain doesn't get stuck in cycles — the distribution converges to a fixed <strong>stationary distribution</strong> regardless of where you started. This is a remarkable fact: no matter what state you begin in, long-run behavior is determined entirely by the transition matrix.</p>
+    </div>
+
+    <div class="pullquote">
+      <p>"The simplest and most important model in all of applied probability is the Markov chain. Its simplicity is its strength. The memoryless property is not a limitation — it is a choice about what to model, and an extraordinarily productive one."</p>
+      <cite>&mdash; Sheldon Ross, <em>Introduction to Probability Models</em>, paraphrased</cite>
+    </div>
+
+    <div class="prose">
+      <p>The leap to language modeling is immediate. If you treat each word as a state, the transition matrix encodes bigram probabilities: how likely is each word to follow each other word? A Markov chain over words is a bigram language model. You can extend it: a second-order Markov chain uses the last two words to predict the next (a trigram model). A kth-order Markov chain uses the last k words. Every n-gram language model used in natural language processing from the 1980s through the mid-2000s is a Markov chain of some order. When you use autocomplete on your phone and it suggests the next word, it is — at its core — doing Markov chain inference.</p>
+      <div style="background:linear-gradient(135deg,rgba(6,182,212,.08),rgba(139,92,246,.05));border:1px solid rgba(6,182,212,.25);border-radius:12px;padding:22px 26px;margin:28px 0;">
+        <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--ac);margin-bottom:10px;">⟶ Bridge to the Present: Markov Chains &amp; Large Language Models</div>
+        <p style="font-size:14.5px;color:#94a3b8;line-height:1.82;margin-bottom:14px;">The phrase "predicts the next word given the current context" describes both a bigram Markov model and GPT-4. The core task is identical. What separates them is <em>how much context</em> is used and <em>how the prediction is computed</em>.</p>
+        <p style="font-size:14.5px;color:#94a3b8;line-height:1.82;margin-bottom:14px;">A <strong style="color:#e2e8f0">bigram model</strong> predicts the next word from exactly one previous word — a first-order Markov chain. Its entire "knowledge" of language is a lookup table of word-pair frequencies. A trigram model uses two previous words. In practice, n-gram models plateau around n=5: there are so many possible 6-word sequences that most appear zero times in any training corpus, making the probabilities unreliable. The Markov assumption becomes the bottleneck.</p>
+        <p style="font-size:14.5px;color:#94a3b8;line-height:1.82;margin-bottom:14px;">A <strong style="color:#e2e8f0">large language model</strong> like GPT predicts the next token given <em>all previous tokens in the context window</em> — potentially thousands of words. It deliberately violates the Markov property: the future depends on the entire past, not just the most recent state. The transformer architecture (covered in Era 5) achieves this through attention mechanisms that let every position attend to every other position simultaneously. The prediction is computed not by table lookup but by billions of learned weights operating on dense distributed representations.</p>
+        <p style="font-size:14.5px;color:#94a3b8;line-height:1.82;margin-bottom:0;">But the <strong style="color:#e2e8f0">objective is the same</strong>: minimize the probability of being surprised by the next token. Markov chains do this with memory of one step and simple arithmetic. LLMs do it with memory of thousands of steps and enormous parallel computation. The Markov chain is not a failed precursor — it is the ancestor, simplified to the point of tractability in 1913, then scaled and generalized over the following century into one of the most powerful sequence models ever built.</p>
+      </div>
+      <p>The deeper application was <strong>speech recognition</strong>. The problem: given a sequence of acoustic signals (sound waves), what sequence of words was spoken? The difficulty is that the relationship between sounds and words is highly variable — the same word sounds different depending on speaker, accent, speed, surrounding words, and microphone quality. A direct rule-based approach had been tried and failed. The probabilistic approach — formalized as the <strong>Hidden Markov Model</strong> — succeeded.</p>
+      <p>In an HMM, the states are <strong>hidden</strong> — you cannot observe them directly. In speech recognition, the hidden states are phonemes (the basic units of sound). What you observe are acoustic features — measurements of the sound wave. Each hidden state has a probability distribution over observations: the phoneme /b/ produces a characteristic pattern of acoustic features, but with noise and variation. The HMM has two sets of parameters: the <strong>transition probabilities</strong> (how likely is one phoneme to follow another?) and the <strong>emission probabilities</strong> (given a phoneme, how likely is each observation?).</p>
+      <p>Given a sequence of observations, the <strong>Viterbi algorithm</strong> efficiently finds the most probable sequence of hidden states — the most likely sequence of phonemes that could have produced the observed sounds. This is dynamic programming over the trellis of possible state sequences. Dragon Dictate in the early 1990s and IBM ViaVoice later in the decade ran exactly this algorithm on consumer PCs — turning spoken words into text well enough to be commercially useful for the first time.</p>
+      <p>PageRank, introduced by Brin and Page in 1998, is also a Markov chain. The states are web pages. A random web surfer clicks links at random — with some probability of teleporting to a random page. The stationary distribution of this Markov chain assigns high probability to pages that are linked to by many other high-probability pages. That stationary distribution is a page's PageRank score. The entire structure of the early Google search engine was a Markov chain computation on a graph of billions of web pages.</p>
+    </div>
+  </section>
+
+  <!-- 03 DEMOS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — Markov Chain Text Generator.</strong> A bigram transition table built from a small corpus. Click a starting word, then watch the chain generate text one word at a time. Change the corpus to see how the transition probabilities shift.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Bigram Language Model</span>
+        <span class="demo-hint">pick a starting word · generate · change corpus</span>
+      </div>
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">Corpus:</span>
+        <button class="ctrl-btn active" id="c1btn" onclick="d1setCorpus(0)">Science</button>
+        <button class="ctrl-btn" id="c2btn" onclick="d1setCorpus(1)">News</button>
+        <button class="ctrl-btn" id="c3btn" onclick="d1setCorpus(2)">Poetry</button>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:8px">Length:</span>
+        <input type="range" class="sl" id="d1len" min="5" max="30" value="15" style="width:80px">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ac)" id="d1lenval">15 words</span>
+      </div>
+      <div style="display:grid;grid-template-columns:200px 1fr">
+        <div style="padding:14px 16px;border-right:1px solid var(--border)">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Starting Word</div>
+          <div id="d1words" style="display:flex;flex-direction:column;gap:4px"></div>
+        </div>
+        <div style="padding:14px 18px;display:flex;flex-direction:column;gap:12px">
+          <div style="background:#0a0d14;border-radius:8px;padding:14px;font-family:var(--mono);font-size:12px;color:#94a3b8;line-height:2;min-height:80px" id="d1output">
+            <span style="color:var(--muted2)">Pick a starting word →</span>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Next-word probabilities from current word</div>
+            <div id="d1probs" style="display:flex;flex-direction:column;gap:4px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — Hidden Markov Model.</strong> Two hidden states (Sunny / Rainy) emit two observations (Umbrella / No umbrella). Set the observation sequence and watch Viterbi find the most likely hidden state path.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">HMM — Weather &amp; Umbrella</span>
+        <span class="demo-hint">build an observation sequence · run Viterbi · see the hidden path</span>
+      </div>
+      <div style="padding:14px 18px;display:flex;flex-direction:column;gap:14px">
+        <!-- Parameters -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div style="background:#0a0d14;border-radius:8px;padding:12px 14px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Transition Probabilities</div>
+            <div style="font-family:var(--mono);font-size:10px;color:#94a3b8;line-height:2">
+              P(Sunny→Sunny) = <span style="color:var(--amber)">0.7</span><br>
+              P(Sunny→Rainy) = <span style="color:var(--sky)">0.3</span><br>
+              P(Rainy→Sunny) = <span style="color:var(--amber)">0.4</span><br>
+              P(Rainy→Rainy) = <span style="color:var(--sky)">0.6</span>
+            </div>
+          </div>
+          <div style="background:#0a0d14;border-radius:8px;padding:12px 14px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Emission Probabilities</div>
+            <div style="font-family:var(--mono);font-size:10px;color:#94a3b8;line-height:2">
+              P(Umbrella | Sunny) = <span style="color:var(--amber)">0.2</span><br>
+              P(No umbrella | Sunny) = <span style="color:var(--amber)">0.8</span><br>
+              P(Umbrella | Rainy) = <span style="color:var(--sky)">0.9</span><br>
+              P(No umbrella | Rainy) = <span style="color:var(--sky)">0.1</span>
+            </div>
+          </div>
+        </div>
+        <!-- Observation builder -->
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Build Observation Sequence</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <button class="ctrl-btn go" onclick="d2addObs('U')">+ ☂ Umbrella</button>
+            <button class="ctrl-btn go" onclick="d2addObs('N')">+ ☀ No Umbrella</button>
+            <button class="ctrl-btn" onclick="d2clearObs()">↺ Clear</button>
+            <button class="ctrl-btn" style="border-color:rgba(167,139,250,.4);color:var(--violet)" onclick="d2runViterbi()">▶ Run Viterbi</button>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;min-height:32px" id="d2obs"></div>
+        </div>
+        <!-- Viterbi result -->
+        <div id="d2result" style="display:none">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Viterbi — Most Likely Hidden State Path</div>
+          <svg id="d2svg" style="display:block;width:100%"></svg>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);margin-top:8px;line-height:1.65;background:#0a0d14;border-radius:6px;padding:8px 12px" id="d2explain"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">🔗 The Memoryless Property</div>
+        <div class="ex-desc">Explore what the Markov property gains and loses compared to higher-order models.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 1, generate several sequences from the same starting word. Notice that the generated text is locally coherent (adjacent words make sense) but globally incoherent (the overall sentence may be nonsensical). This is exactly what the Markov property predicts: only the current word influences the next, so long-range structure is lost.</p>
+        <p>&rarr; A second-order Markov chain uses the last <em>two</em> words to predict the next. This is a trigram model. Would trigram output be more or less coherent than bigram? What about a 10-gram model trained on the same small corpus? What goes wrong as the order increases?</p>
+        <p><strong>Key question:</strong> A Markov chain over words cannot represent "the cat sat on the mat" differently from "the mat sat on the cat" — both are sequences of the same words. What structural property of language does the Markov model fundamentally fail to capture, and why does this matter for grammar?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">🎙️ Hidden vs. Observed</div>
+        <div class="ex-desc">Use Demo 2 to understand what makes HMMs useful for speech recognition.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 2, build the observation sequence: Umbrella, Umbrella, No Umbrella, Umbrella, No Umbrella. Run Viterbi. Note the most likely hidden path. Now build: No Umbrella, No Umbrella, No Umbrella, No Umbrella. Run Viterbi again. Does the model ever assign a "Rainy" state when nobody brings an umbrella?</p>
+        <p>&rarr; The emission probability P(No umbrella | Rainy) = 0.1. It's unlikely but possible that it rains and nobody carries an umbrella. What observation sequence would force Viterbi to assign "Rainy" even though no umbrella is seen?</p>
+        <p><strong>Key question:</strong> In speech recognition, the hidden states are phonemes and the observations are acoustic features. Why is it useful to separate "what state the system is in" from "what you observe"? What would go wrong if you tried to map directly from acoustic features to words without the hidden state layer?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">🌐 Markov Chains in Disguise</div>
+        <div class="ex-desc">Identify the Markov structure in PageRank and language models.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>PageRank models a random surfer who: with probability 0.85, clicks a random link on the current page; with probability 0.15, teleports to a completely random page. The stationary distribution of this process is each page's PageRank score.</p>
+        <p>&rarr; What are the states in this Markov chain? What determines the transition probabilities? Why does the 0.15 teleportation probability matter — what would happen without it on a page that has no outgoing links?</p>
+        <p><strong>Key insight:</strong> GPT and other transformer language models are not Markov chains — they condition on the entire previous context, not just the last word. But the training objective (predict the next word given all previous words) is structurally similar to Markov chain inference. The Markov model is the historical ancestor of the modern language model. What specifically did transformers add that Markov chains fundamentally cannot do?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>The Power of Wrong Assumptions.</strong> The Markov property is almost certainly wrong for natural language — what you say next depends on much more than just the previous word. Yet bigram and trigram models were surprisingly useful for decades. What does this tell us about the relationship between model assumptions and practical utility? Can you think of other domains where a clearly wrong simplifying assumption nevertheless produces useful models?</li>
+      <li><strong>HMMs vs. Deep Learning for Speech.</strong> HMM-based speech recognition was the dominant approach from the 1980s until roughly 2012, when deep neural networks took over. The neural approach didn't require hand-specifying phoneme states or emission distributions — it learned them from data. What specifically did the neural approach gain, and what did it lose? Is there anything an HMM can do that a neural network cannot?</li>
+      <li><strong>The Stationary Distribution.</strong> A Markov chain with certain properties converges to a stationary distribution regardless of starting state. PageRank exploits this. What does it mean, intuitively, that the long-run behavior of a random walk over the web is independent of where you start? Are there real-world processes you'd model as Markov chains where the stationary distribution is meaningful?</li>
+      <li><strong>Connection to Reinforcement Learning.</strong> Reinforcement learning — which you'll encounter in Era 5 — models sequential decision-making as a Markov Decision Process (MDP): states, actions, transition probabilities, and rewards. The Markov property is baked into the MDP formulation. What does it mean for a reinforcement learning agent to make decisions based only on the current state, not its entire history? When is this a reasonable assumption and when does it fail?</li>
+      <li><strong>Connection to Era 3 — Statistical Learning.</strong> HMMs and Markov chains are probabilistic models with interpretable parameters (transition matrices, emission distributions). Era 3 introduces methods like SVMs and neural networks that learn implicit representations. What's lost when you move from an explicit probabilistic model to an implicit learned representation — and what's gained?</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Markov Property</span><span class="gloss-abbr">The memoryless assumption</span></div>
+        <div class="gloss-def">The future state depends only on the current state, not on any past states. Formally: P(X_{t+1} | X_t, X_{t-1}, ..., X_0) = P(X_{t+1} | X_t). This constraint makes the model mathematically tractable — the joint probability of any sequence factors into a product of single-step transition probabilities.
+          <div class="gloss-code">P(x₁,x₂,...,xₙ) = P(x₁) · P(x₂|x₁) · P(x₃|x₂) · ... · P(xₙ|xₙ₋₁)</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Transition Matrix</span><span class="gloss-abbr">T[i][j] = P(j|i)</span></div>
+        <div class="gloss-def">A square matrix where entry T[i][j] gives the probability of transitioning from state i to state j. Each row sums to 1. Multiplying a state distribution vector by the transition matrix gives the distribution after one step. The stationary distribution π satisfies π = πT — it is the left eigenvector of T corresponding to eigenvalue 1.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Stationary Distribution</span><span class="gloss-abbr">Long-run behavior</span></div>
+        <div class="gloss-def">A probability distribution over states that is unchanged by the transition matrix: π = πT. For ergodic Markov chains (all states reachable from all others, no periodic cycles), the chain converges to the unique stationary distribution regardless of starting state. PageRank scores are the stationary distribution of a random walk over the web graph.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Hidden Markov Model</span><span class="gloss-abbr">HMM</span></div>
+        <div class="gloss-def">A Markov chain with unobservable (hidden) states and observable emissions. Defined by: initial state distribution π, transition matrix A (hidden-to-hidden), and emission matrix B (hidden-to-observed). Three classic problems: evaluation (probability of a sequence), decoding (most likely hidden path — Viterbi), and learning (estimate A, B from data — Baum-Welch).
+          <div class="gloss-code">Hidden: S₁ → S₂ → S₃ → ...  (Markov chain, unobserved)
+Observed: O₁   O₂   O₃  ...  (emissions from hidden states)</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Viterbi Algorithm</span><span class="gloss-abbr">Most likely path</span></div>
+        <div class="gloss-def">A dynamic programming algorithm that finds the most probable sequence of hidden states given a sequence of observations. Time complexity O(T·N²) where T is sequence length and N is number of states — much faster than brute-force enumeration of all N^T possible state sequences. Used in speech recognition (most likely phoneme sequence given acoustic observations) and any sequence decoding problem.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">n-gram Model</span><span class="gloss-abbr">kth-order Markov chain over words</span></div>
+        <div class="gloss-def">A language model based on a kth-order Markov chain: the probability of the next word depends on the previous k words. Bigram (k=1): P(word | previous word). Trigram (k=2): P(word | previous two words). Used in NLP from the 1980s through the mid-2000s. Replaced by neural language models (2000s) and transformers (2017+), which condition on the full context without the Markov assumption.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era2_lesson7_connectionist.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 2, Lesson 7 — The Connectionist Debate</div></div>
+    </a>
+    <a class="nav-btn" href="era2_lesson9_bayesian.html">
+      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 2, Lesson 9 — Bayesian Reasoning</div></div>
+      <span class="nav-arrow">→</span>
+    </a>
+  </nav>
+</div>
+<script>
+'use strict';
+
+/* ════════════════════════════════════════════════════
+   DEMO 1 — BIGRAM LANGUAGE MODEL
+════════════════════════════════════════════════════ */
+(function(){
+  var CORPORA = [
+    // Science
+    "the brain is a complex network of neurons that fire in patterns the patterns encode information and memory the neurons connect through synapses and signals travel across the network the brain learns by strengthening connections between neurons that fire together the network adapts and rewires itself through experience and learning",
+    // News
+    "the government announced a new policy that would affect millions of people the policy was designed to reduce costs and improve services officials said the plan would take effect next year the opposition criticized the proposal saying it would harm vulnerable communities the minister defended the decision at a press conference",
+    // Poetry
+    "the wind blows cold across the empty field the leaves are falling and the sky turns grey the sun has gone and shadows fill the world the river runs and carries time away the night comes softly and the stars appear the moon is rising over distant hills the world is sleeping and the dark is near"
+  ];
+  var LABELS = ['Science','News','Poetry'];
+  var corpusIdx = 0;
+  var bigrams = {}; // word -> {nextWord: count}
+  var words = [];
+  var currentWord = null;
+  var generated = [];
+  var rng = (function(){var s=99;return function(){s=(s*1664525+1013904223)&0xffffffff;return(s>>>0)/4294967295;};})();
+
+  function buildBigrams(text) {
+    bigrams = {};
+    var toks = text.toLowerCase().replace(/[^a-z ]/g,'').split(/\s+/).filter(Boolean);
+    words = [];
+    var seen = {};
+    for(var i=0;i<toks.length-1;i++){
+      var w=toks[i], n=toks[i+1];
+      if(!bigrams[w]) bigrams[w]={};
+      bigrams[w][n]=(bigrams[w][n]||0)+1;
+      if(!seen[w]){seen[w]=1;words.push(w);}
+    }
+    words.sort();
+  }
+
+  function getNextProbs(word) {
+    var b = bigrams[word];
+    if(!b) return [];
+    var total = Object.keys(b).reduce(function(s,k){return s+b[k];},0);
+    return Object.keys(b).map(function(k){return{word:k,p:b[k]/total};})
+      .sort(function(a,b){return b.p-a.p;}).slice(0,5);
+  }
+
+  function sampleNext(word) {
+    var probs = getNextProbs(word);
+    if(!probs.length) return null;
+    var r = rng(), cum = 0;
+    for(var i=0;i<probs.length;i++){
+      cum+=probs[i].p;
+      if(r<cum) return probs[i].word;
+    }
+    return probs[0].word;
+  }
+
+  function renderWordList() {
+    var html = words.map(function(w){
+      var isActive = w===currentWord;
+      return '<button onclick="d1pick(\''+w+'\')" style="font-family:var(--mono);font-size:10px;padding:4px 8px;border-radius:4px;border:1px solid '+(isActive?'rgba(6,182,212,.5)':'var(--border)')+';background:'+(isActive?'var(--ac-dim)':'none')+';color:'+(isActive?'var(--ac)':'var(--muted)')+';cursor:pointer;margin-bottom:3px;width:100%;text-align:left">'+w+'</button>';
+    }).join('');
+    document.getElementById('d1words').innerHTML=html;
+  }
+
+  function renderOutput() {
+    var html = generated.map(function(w,i){
+      var isLast = i===generated.length-1;
+      return '<span style="color:'+(isLast?'var(--ac)':'#94a3b8')+';font-weight:'+(isLast?700:400)+'">'+w+'</span>';
+    }).join(' ');
+    document.getElementById('d1output').innerHTML=html||'<span style="color:var(--muted2)">Pick a starting word →</span>';
+  }
+
+  function renderProbs() {
+    if(!currentWord){document.getElementById('d1probs').innerHTML='';return;}
+    var probs = getNextProbs(currentWord);
+    var html = probs.map(function(p){
+      return '<div style="display:flex;align-items:center;gap:8px">'
+        +'<span style="font-family:var(--mono);font-size:10px;color:#94a3b8;min-width:80px">'+p.word+'</span>'
+        +'<div style="flex:1;background:var(--border);border-radius:2px;height:8px;overflow:hidden">'
+        +'<div style="width:'+Math.round(p.p*100)+'%;height:100%;background:var(--ac);border-radius:2px"></div></div>'
+        +'<span style="font-family:var(--mono);font-size:9px;color:var(--ac);min-width:36px;text-align:right">'+Math.round(p.p*100)+'%</span>'
+        +'</div>';
+    }).join('');
+    document.getElementById('d1probs').innerHTML=html;
+  }
+
+  window.d1pick = function(w) {
+    currentWord = w;
+    var len = +document.getElementById('d1len').value;
+    document.getElementById('d1lenval').textContent = len+' words';
+    generated = [w];
+    var cur = w;
+    for(var i=1;i<len;i++){
+      var next = sampleNext(cur);
+      if(!next) break;
+      generated.push(next);
+      cur = next;
+    }
+    currentWord = cur;
+    renderWordList();
+    renderOutput();
+    renderProbs();
+  };
+
+  window.d1setCorpus = function(idx) {
+    corpusIdx = idx;
+    buildBigrams(CORPORA[idx]);
+    currentWord = null;
+    generated = [];
+    ['c1btn','c2btn','c3btn'].forEach(function(id,i){
+      document.getElementById(id).classList.toggle('active',i===idx);
+    });
+    renderWordList();
+    renderOutput();
+    renderProbs();
+  };
+
+  document.getElementById('d1len').addEventListener('input', function(){
+    document.getElementById('d1lenval').textContent=this.value+' words';
+  });
+
+  buildBigrams(CORPORA[0]);
+  renderWordList();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 2 — HMM VITERBI
+════════════════════════════════════════════════════ */
+(function(){
+  // States: 0=Sunny, 1=Rainy
+  // Observations: 0=Umbrella (U), 1=No Umbrella (N)
+  var A = [[0.7,0.3],[0.4,0.6]]; // transitions
+  var B = [[0.2,0.8],[0.9,0.1]]; // emissions [state][obs]
+  var pi = [0.5, 0.5]; // initial
+  var STATE_NAMES = ['Sunny','Rainy'];
+  var STATE_COLORS = ['#f59e0b','#38bdf8'];
+  var OBS_NAMES = ['☂ Umbrella','☀ No Umbrella'];
+  var observations = [];
+
+  window.d2addObs = function(o) {
+    if(observations.length>=8) return;
+    observations.push(o==='U'?0:1);
+    renderObs();
+    document.getElementById('d2result').style.display='none';
+  };
+
+  window.d2clearObs = function() {
+    observations=[];
+    renderObs();
+    document.getElementById('d2result').style.display='none';
+  };
+
+  function renderObs() {
+    var html = observations.map(function(o,i){
+      return '<div style="background:#0a0d14;border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-family:var(--mono);font-size:11px;color:#94a3b8">'
+        +'<span style="color:var(--muted2);font-size:9px">t='+(i+1)+'</span><br>'
+        +OBS_NAMES[o]+'</div>';
+    }).join('');
+    document.getElementById('d2obs').innerHTML=html||'<span style="font-family:var(--mono);font-size:10px;color:var(--muted2)">No observations yet</span>';
+  }
+
+  window.d2runViterbi = function() {
+    if(!observations.length) return;
+    var T=observations.length, N=2;
+    var delta=[], psi=[];
+    // Init
+    delta[0]=[pi[0]*B[0][observations[0]], pi[1]*B[1][observations[0]]];
+    psi[0]=[0,0];
+    // Recurse
+    for(var t=1;t<T;t++){
+      delta[t]=[];psi[t]=[];
+      for(var j=0;j<N;j++){
+        var best=-1,bestS=0;
+        for(var i=0;i<N;i++){
+          var v=delta[t-1][i]*A[i][j];
+          if(v>best){best=v;bestS=i;}
+        }
+        delta[t][j]=best*B[j][observations[t]];
+        psi[t][j]=bestS;
+      }
+    }
+    // Backtrack
+    var path=new Array(T);
+    path[T-1]=delta[T-1][0]>delta[T-1][1]?0:1;
+    for(var t=T-2;t>=0;t--) path[t]=psi[t+1][path[t+1]];
+
+    renderTrellis(delta,psi,path,observations);
+    document.getElementById('d2result').style.display='block';
+
+    var pathStr=path.map(function(s){return STATE_NAMES[s];}).join(' → ');
+    var prob=delta[T-1][path[T-1]];
+    document.getElementById('d2explain').innerHTML=
+      'Most likely path: <strong style="color:var(--ac)">'+pathStr+'</strong><br>'
+      +'Path probability: '+prob.toExponential(3)+'<br>'
+      +'Interpretation: given the umbrella observations, Viterbi finds the single most probable sequence of weather states. '
+      +(path[0]===1?'Starting rainy and seeing umbrellas is strong evidence for sustained rain.':'Starting sunny suggests the umbrellas may be precautionary or from a weather transition.');
+  };
+
+  function renderTrellis(delta, psi, path, obs) {
+    var T=obs.length, N=2;
+    var W=Math.max(400,T*90+80), H=180;
+    var svg=document.getElementById('d2svg');
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+
+    var xPad=40, yTop=40, yBot=130, xStep=(W-xPad*2)/(T>1?T-1:1);
+    var html='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+
+    // State labels
+    html+='<text x="8" y="'+(yTop+4)+'" fill="'+STATE_COLORS[0]+'" font-size="9" font-family="Space Mono,monospace">Sunny</text>';
+    html+='<text x="8" y="'+(yBot+4)+'" fill="'+STATE_COLORS[1]+'" font-size="9" font-family="Space Mono,monospace">Rainy</text>';
+
+    // Observation labels
+    for(var t=0;t<T;t++){
+      var x=xPad+t*xStep;
+      html+='<text x="'+x.toFixed(0)+'" y="16" fill="#64748b" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+(obs[t]===0?'☂':'☀')+'</text>';
+      html+='<text x="'+x.toFixed(0)+'" y="26" fill="#334155" font-size="7" text-anchor="middle" font-family="Space Mono,monospace">t='+(t+1)+'</text>';
+    }
+
+    // All nodes
+    for(var t=0;t<T;t++){
+      var x=xPad+t*xStep;
+      var ys=[yTop,yBot];
+      // Transition lines to next column
+      if(t<T-1){
+        for(var i=0;i<N;i++){
+          for(var j=0;j<N;j++){
+            var x2=xPad+(t+1)*xStep;
+            var isPath=(path[t]===i&&path[t+1]===j);
+            html+='<line x1="'+x.toFixed(0)+'" y1="'+ys[i]+'" x2="'+x2.toFixed(0)+'" y2="'+ys[j]+'" stroke="'+(isPath?STATE_COLORS[j]:'#1e2d40')+'" stroke-width="'+(isPath?2.5:1)+'" opacity="'+(isPath?1:0.4)+'"/>';
+          }
+        }
+      }
+      // Nodes
+      for(var s=0;s<N;s++){
+        var isPath=(path[t]===s);
+        var norm=Math.max(delta[t][0],delta[t][1]);
+        var r=norm>0?6+Math.round(delta[t][s]/norm*6):6;
+        html+='<circle cx="'+x.toFixed(0)+'" cy="'+ys[s]+'" r="'+r+'" fill="'+(isPath?STATE_COLORS[s]:'#1e2d40')+'" stroke="'+STATE_COLORS[s]+'" stroke-width="1.5" opacity="'+(isPath?1:0.5)+'"/>';
+        if(isPath) html+='<text x="'+x.toFixed(0)+'" y="'+(ys[s]+(s===0?-10:18))+'" fill="'+STATE_COLORS[s]+'" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+STATE_NAMES[s]+'</text>';
+      }
+    }
+
+    svg.innerHTML=html;
+  }
+
+  renderObs();
+})();
+</script>
+</body>
+</html>

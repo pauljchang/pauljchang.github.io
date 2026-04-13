@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 2, Lesson 9 — Bayesian Reasoning | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--surface:#161b27;--s2:#1a2035;--border:#1e2d40;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#334155;
+  --ac:#10b981;--ac-dim:rgba(16,185,129,.10);--ac-glow:rgba(16,185,129,.25);
+  --green:#4ade80;--red:#f87171;--amber:#f59e0b;--sky:#38bdf8;--violet:#a78bfa;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;--disp:'Lora',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+.course-nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.era-badge{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em;}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 100px;}
+.hero{padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px;}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.week-badge{background:var(--ac);color:#001a0d;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em;}
+.hero h1{font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px;}
+.hero-sub{font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px;}
+.hero-timeline{display:flex;gap:36px;flex-wrap:wrap;}
+.tl-item{display:flex;flex-direction:column;gap:3px;}
+.tl-year{font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.1em;}
+.tl-label{font-size:13px;color:var(--muted);}
+.section{margin-bottom:68px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px;}
+.sec-title{font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.obj-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;}
+.obj-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.obj-list li strong{color:#f1f5f9;}
+.prose p{font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82;}
+.prose p:last-child{margin-bottom:0;}
+.prose p strong{color:#e2e8f0;}
+.prose code{font-family:var(--mono);font-size:12px;background:#0a0d14;padding:2px 6px;border-radius:3px;border:1px solid var(--border);color:#6ee7b7;}
+.pullquote{background:linear-gradient(135deg,rgba(16,185,129,.07),rgba(16,185,129,.02));border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:22px 26px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:17px;font-style:italic;color:#6ee7b7;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+.demo-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.demo-topbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.demo-tag{font-family:var(--mono);font-size:11px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase;}
+.demo-hint{font-family:var(--mono);font-size:10px;color:var(--muted2);}
+input[type=range].sl{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,#0a0d14,var(--ac));}
+input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #6ee7b7;cursor:pointer;}
+.ctrl-btn{font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ctrl-btn:hover{border-color:var(--ac);color:var(--ac);}
+.ctrl-btn.go{border-color:rgba(16,185,129,.4);color:var(--ac);}
+.ctrl-btn.go:hover{background:var(--ac-dim);}
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.ex-head{padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border);}
+.ex-num{font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(16,185,129,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.ex-title{font-weight:600;font-size:16px;color:#f1f5f9;}
+.ex-desc{font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6;}
+.ex-body{padding:20px;}
+.ex-body p{font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7;}
+.ex-body p:last-child{margin-bottom:0;}
+.ex-body p strong{color:#e2e8f0;}
+.disc-list{list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px;}
+.disc-list li{counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72;}
+.disc-list li::before{content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(16,185,129,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px;}
+.disc-list li strong{color:#e2e8f0;}
+.gloss-grid{display:flex;flex-direction:column;}
+.gloss-entry{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);padding:18px 0;}
+.gloss-entry:last-child{border-bottom:none;}
+.gloss-term{display:flex;flex-direction:column;gap:5px;padding-right:24px;}
+.gloss-term-name{font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700;}
+.gloss-abbr{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.gloss-def{font-size:14.5px;color:#94a3b8;line-height:1.72;}
+.gloss-def strong{color:#e2e8f0;}
+.gloss-code{font-family:var(--mono);font-size:11px;color:#6ee7b7;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:7px 12px;display:block;margin-top:8px;line-height:1.8;}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border);}
+.nav-btn{text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s;}
+.nav-btn:hover{border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow);}
+.nav-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.nav-title{font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px;}
+.nav-arrow{font-size:20px;color:var(--ac);}
+</style>
+</head>
+<body>
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface)" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 2: SYMBOLIC AI</span>
+  <span>›</span><span style="color:#94a3b8">Era 2, Lesson 9 — Bayesian Reasoning</span>
+</nav>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 2 · LESSON 9</span>
+      <span>1763 – Present</span><span>·</span>
+      <span>Priors, Posteriors &amp; the Base Rate Fallacy</span>
+    </div>
+    <h1>Updating Belief<br>with Evidence</h1>
+    <p class="hero-sub">Bayesian reasoning is the mathematically principled way to change your mind. It requires knowing where you started — the prior — and how much to trust new evidence. Most people ignore the prior. That's where the errors live.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1763</span><span class="tl-label">Bayes' theorem published posthumously by Richard Price</span></div>
+      <div class="tl-item"><span class="tl-year">1988</span><span class="tl-label">Pearl's <em>Probabilistic Reasoning</em> — Bayesian networks formalized</span></div>
+      <div class="tl-item"><span class="tl-year">1996</span><span class="tl-label">Naive Bayes spam filters — first large-scale ML email application</span></div>
+      <div class="tl-item"><span class="tl-year">2002</span><span class="tl-label">Paul Graham's "A Plan for Spam" — Bayesian filtering goes mainstream</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">🔢</span><div><strong>Apply</strong> Bayes' theorem to compute posterior probabilities from prior, likelihood, and evidence — and explain each term in plain language.</div></li>
+      <li><span class="obj-icon">⚠️</span><div><strong>Demonstrate</strong> the base rate fallacy: a highly accurate test for a rare condition is wrong most of the time it returns positive.</div></li>
+      <li><span class="obj-icon">🕸️</span><div><strong>Trace</strong> belief propagation through a small Bayesian network — how evidence at one node changes probabilities at connected nodes.</div></li>
+      <li><span class="obj-icon">📧</span><div><strong>Explain</strong> how Naive Bayes classifies text by treating word presence as independent evidence and multiplying likelihoods.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">The Theorem That Changed How We Think About Evidence</h2></div>
+    <div class="prose">
+      <p>Thomas Bayes was an English minister and mathematician who died in 1761, leaving behind an unpublished manuscript. His friend Richard Price found the manuscript, recognized its significance, and submitted it to the Royal Society in 1763. The paper described a method for updating probability estimates as new evidence arrives — a procedure so simple it fits in one equation, and so deep that it remains actively contested in philosophy of science two and a half centuries later.</p>
+      <p>The theorem states: the probability of a hypothesis given evidence equals the probability of the evidence given the hypothesis, times the prior probability of the hypothesis, divided by the total probability of the evidence. In symbols: <strong>P(H|E) = P(E|H) · P(H) / P(E)</strong>. The terms have names: P(H) is the <em>prior</em> — what you believed before seeing the evidence. P(H|E) is the <em>posterior</em> — what you should believe after. P(E|H) is the <em>likelihood</em> — how probable the evidence would be if the hypothesis were true. P(E) is the <em>marginal likelihood</em> — the total probability of seeing this evidence under all possible hypotheses.</p>
+      <p>The critical insight, and the one most people get wrong in practice, is the role of the prior. The posterior is not determined by the evidence alone — it is determined by the evidence <em>combined with what you already believed</em>. Ignore the prior and you commit the <strong>base rate fallacy</strong>: you treat the likelihood as if it were the posterior. This mistake has real consequences.</p>
+      <p>Consider a disease that affects 1 person in 10,000. A diagnostic test is 99% accurate — it correctly identifies 99% of people who have the disease, and correctly rules out 99% of people who don't. If the test returns positive, what is the probability that you actually have the disease? Most people guess around 99%. The correct answer — from Bayes' theorem — is approximately <strong>1%</strong>. Out of every 10,000 people tested: roughly 1 has the disease and tests positive; roughly 100 don't have the disease but test positive anyway (1% false positive rate × 9,999 healthy people ≈ 100). So a positive result comes from 1 sick person and 100 healthy people — about 1% probability of disease given a positive test. The test is accurate; the disease is rare; the positive is almost certainly a false alarm.</p>
+    </div>
+
+    <div class="pullquote">
+      <p>"The most common mistake in reasoning about probability is ignoring the base rate. The test result feels like information about your specific case. It is actually information about a large population — and the population context dominates."</p>
+      <cite>&mdash; Daniel Kahneman, <em>Thinking, Fast and Slow</em>, paraphrased</cite>
+    </div>
+
+    <div class="prose">
+      <p><strong>Judea Pearl</strong> formalized Bayesian reasoning for AI in his 1988 book <em>Probabilistic Reasoning in Intelligent Systems</em>. His key contribution was the <strong>Bayesian network</strong>: a directed acyclic graph in which nodes represent random variables and edges represent conditional dependencies. The graph encodes which variables directly influence which others, and each node stores a conditional probability table. The structure lets you compute the effect of evidence at any node on beliefs at any other node — not just pairwise, but across a whole network of interacting causes and effects.</p>
+      <p>Bayesian networks were immediately useful in medical diagnosis. A patient presents with dyspnea (difficulty breathing). The network might contain: Smoking → Lung Cancer → Dyspnea, Smoking → Bronchitis → Dyspnea. Observing dyspnea increases the probability of both cancer and bronchitis. Observing that the patient smokes increases it further. Observing a normal chest X-ray decreases the cancer probability while leaving bronchitis unchanged. The network propagates all these constraints simultaneously, maintaining a coherent probability distribution over all variables.</p>
+      <p>The most commercially successful application of Bayesian reasoning in the 1990s was spam filtering. <strong>Naive Bayes</strong> — named for its "naive" assumption that words are conditionally independent given the class — computed P(spam | words) ∝ P(words | spam) · P(spam). Under the independence assumption, P(words | spam) is just the product of individual word likelihoods — a lookup table multiplication. It was fast, it worked on small training sets, and it was surprisingly accurate. Paul Graham's 2002 essay "A Plan for Spam" popularized the approach and triggered a wave of Bayesian spam filters that kept email usable for a decade before adversarial adaptation made it a genuine arms race.</p>
+    </div>
+  </section>
+
+  <!-- 03 DEMOS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — Medical Test &amp; the Base Rate Fallacy.</strong> Drag prevalence, sensitivity, and specificity. Watch the posterior probability of disease given a positive test — and feel how much the rare-disease case surprises you.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Bayes' Theorem — Diagnostic Test</span>
+        <span class="demo-hint">drag sliders · watch posterior update</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 260px">
+        <div style="padding:16px 18px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:12px">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;margin-bottom:4px">
+              <span style="color:var(--muted)">Disease Prevalence (base rate)</span>
+              <span style="color:var(--ac)" id="d1prev">1.00%</span>
+            </div>
+            <input type="range" class="sl" id="d1sl1" min="1" max="500" value="10" oninput="d1update()">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-top:3px">1 in <span id="d1in">100</span> people have this condition</div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;margin-bottom:4px">
+              <span style="color:var(--muted)">Test Sensitivity (true positive rate)</span>
+              <span style="color:var(--ac)" id="d1sens">95%</span>
+            </div>
+            <input type="range" class="sl" id="d1sl2" min="50" max="100" value="95" oninput="d1update()">
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;margin-bottom:4px">
+              <span style="color:var(--muted)">Test Specificity (true negative rate)</span>
+              <span style="color:var(--ac)" id="d1spec">95%</span>
+            </div>
+            <input type="range" class="sl" id="d1sl3" min="50" max="100" value="95" oninput="d1update()">
+          </div>
+          <!-- Confusion matrix -->
+          <div style="background:#0a0d14;border-radius:8px;padding:12px 14px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Out of 10,000 people tested:</div>
+            <div id="d1matrix" style="font-family:var(--mono);font-size:10px;color:#94a3b8;line-height:2"></div>
+          </div>
+        </div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+          <div style="background:#0a0d14;border-radius:8px;padding:16px;text-align:center">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">P(Disease | Positive Test)</div>
+            <div style="font-family:var(--mono);font-size:36px;font-weight:700" id="d1posterior">—</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-top:6px" id="d1verdict"></div>
+          </div>
+          <div style="background:#0a0d14;border-radius:8px;padding:12px;font-family:var(--mono);font-size:10px;color:#94a3b8;line-height:1.8" id="d1formula"></div>
+          <div style="font-size:12px;color:#94a3b8;line-height:1.7;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:10px 12px" id="d1insight"></div>
+        </div>
+      </div>
+    </div>
+
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — Bayesian Network.</strong> A five-node causal graph: Smoking → Cancer, Smoking → Bronchitis, Cancer → Dyspnea, Bronchitis → Dyspnea. Toggle evidence at any node and watch beliefs propagate.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Belief Propagation — Lung Disease Network</span>
+        <span class="demo-hint">click nodes to set evidence · watch probabilities update</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 260px">
+        <div style="padding:16px 18px;border-right:1px solid var(--border)">
+          <svg id="d2svg" viewBox="0 0 420 280" style="display:block;width:100%;cursor:pointer"></svg>
+        </div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Evidence Panel</div>
+          <div id="d2evidence" style="display:flex;flex-direction:column;gap:6px"></div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.65;background:#0a0d14;border-radius:6px;padding:8px 10px;margin-top:4px" id="d2explain">Click a node to set it as observed evidence (TRUE or FALSE). Beliefs in connected nodes will update via Bayes' theorem.</div>
+        </div>
+      </div>
+    </div>
+
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 3 — Naive Bayes Spam Filter.</strong> Type words into the message box. Each word updates the spam probability — see how individual word likelihoods multiply to produce a classification.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Naive Bayes — Spam Filter</span>
+        <span class="demo-hint">click words to add · watch spam probability update</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 260px">
+        <div style="padding:16px 18px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:12px">
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Click words to add to message</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="d3wordbtns"></div>
+          </div>
+          <div style="background:#0a0d14;border-radius:8px;padding:12px 14px;min-height:60px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:6px">Current message:</div>
+            <div id="d3message" style="font-family:var(--mono);font-size:11px;color:#94a3b8;line-height:2;word-break:break-all"></div>
+          </div>
+          <div id="d3wordprobs" style="display:flex;flex-direction:column;gap:4px"></div>
+          <button class="ctrl-btn" onclick="d3clear()" style="width:fit-content">↺ Clear message</button>
+        </div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+          <div style="background:#0a0d14;border-radius:8px;padding:16px;text-align:center">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Spam Probability</div>
+            <div style="font-family:var(--mono);font-size:36px;font-weight:700" id="d3prob">50%</div>
+            <div style="font-family:var(--mono);font-size:10px;font-weight:700;margin-top:6px" id="d3verdict">UNCERTAIN</div>
+          </div>
+          <div style="height:12px;background:var(--border);border-radius:6px;overflow:hidden">
+            <div id="d3bar" style="height:100%;border-radius:6px;background:linear-gradient(to right,var(--green),var(--red));transition:width .3s;width:50%"></div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.65;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d3calc">Add words to see the calculation.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">⚠️ Find the Crossover Point</div>
+        <div class="ex-desc">Use Demo 1 to find when a positive test result is more likely true than false.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Start with prevalence = 1%, sensitivity = 95%, specificity = 95%. The posterior P(Disease | Positive) is low. Slowly increase prevalence. At what prevalence does the posterior cross 50%? This is the point where a positive test is more likely to be correct than incorrect.</p>
+        <p>&rarr; Now try: keep prevalence at 1% and increase specificity toward 99.9%. What happens to the posterior? This is why screening tests for rare diseases need extremely high specificity — even a small false positive rate swamps the true positives when the disease is rare.</p>
+        <p><strong>Key question:</strong> A COVID rapid test has sensitivity ~80% and specificity ~99%. During a wave when prevalence is ~5%, what is P(COVID | Positive)? During a low-prevalence period when prevalence is ~0.1%? Work through the math with Demo 1, then consider: should you interpret a positive test differently depending on whether cases are high or low in your community?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">🕸️ Explaining Away</div>
+        <div class="ex-desc">Use Demo 2 to observe the "explaining away" phenomenon — a counterintuitive Bayesian behavior.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 2, set Dyspnea = TRUE. Note the posterior probabilities of Cancer and Bronchitis. Now, additionally set Bronchitis = TRUE. What happens to the probability of Cancer?</p>
+        <p>&rarr; This is "explaining away" — once we know the dyspnea is explained by bronchitis, the probability of cancer decreases (even though we haven't changed the evidence about cancer directly). The two causes "compete" to explain the shared effect.</p>
+        <p><strong>Key question:</strong> In a court of law, would "explaining away" be considered legitimate reasoning? If a defendant provides an alternative explanation for evidence, should it reduce the probability of the original hypothesis — even if the original hypothesis is still consistent with all observed evidence?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">📧 The Adversarial Spammer</div>
+        <div class="ex-desc">Use Demo 3 to understand why Bayesian spam filters eventually failed.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 3, build a clearly spammy message using several spam words. Note the probability. Now add two or three strong ham words (meeting, report, schedule). Watch the probability change. Can you get a clearly spammy message down below 50% by adding enough ham words?</p>
+        <p>&rarr; This is exactly what adversarial spammers learned to do: add long passages of legitimate text (random words from news articles, stock quotes, random sentences) to spam messages to dilute the spam signal. The Naive Bayes filter had to be extended with additional features (sender reputation, HTML structure, image ratio) to stay ahead.</p>
+        <p><strong>Key insight:</strong> The independence assumption in Naive Bayes is exploitable. If words were truly independent, adding ham words would reduce spam probability. But in a real adversarial setting, the spammer can add any words they want. What would a more robust feature set look like that spammers couldn't easily game?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>Frequentist vs. Bayesian.</strong> There is a longstanding debate in statistics between frequentists (probability is the long-run frequency of events in repeated experiments) and Bayesians (probability is a measure of subjective belief, updated by evidence). Frequentists argue that "P(hypothesis | data)" is meaningless because the hypothesis is either true or false — it doesn't have a probability. Bayesians argue that frequentism can't handle one-off events or scientific hypothesis testing. Which view seems more useful for AI applications, and why?</li>
+      <li><strong>Pearl's Causality.</strong> Judea Pearl's later work went beyond Bayesian networks to formal causal inference — distinguishing "seeing" (observation) from "doing" (intervention). Observing that people with yellow fingers have higher cancer rates is correlation. Painting people's fingers yellow doesn't give them cancer. Pearl's do-calculus formalizes this distinction. Why does it matter for AI systems that make recommendations (e.g., "patients who took this drug had better outcomes")?</li>
+      <li><strong>The Prior Problem.</strong> Bayesian reasoning requires specifying a prior probability before seeing evidence. Where do priors come from? In the spam filter, the prior P(spam) comes from observed email frequencies. In a scientific experiment, the prior P(hypothesis) is often contested. What happens when two Bayesian reasoners start with different priors? Can they converge on the same posterior if they see enough evidence?</li>
+      <li><strong>Naive Bayes and Independence.</strong> The Naive Bayes assumption — that features are conditionally independent given the class — is almost certainly false for text. Words co-occur in patterns that are far from independent. Yet Naive Bayes classifiers outperform more sophisticated models on many text tasks. What does this suggest about the relationship between the correctness of model assumptions and predictive performance?</li>
+      <li><strong>Connection to Era 3.</strong> Era 3 introduces methods like SVMs, random forests, and neural networks that don't explicitly model probability distributions. They produce predictions without telling you how confident they are. Bayesian methods produce calibrated probabilities — they tell you not just what they think but how sure they are. When is calibrated uncertainty more important than raw accuracy, and when does it not matter?</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Bayes' Theorem</span><span class="gloss-abbr">The update rule</span></div>
+        <div class="gloss-def">The fundamental rule for updating probabilities in light of evidence. Prior belief × likelihood of evidence / normalizing constant = posterior belief.
+          <div class="gloss-code">P(H|E) = P(E|H) · P(H) / P(E)
+P(E) = P(E|H)·P(H) + P(E|¬H)·P(¬H)  % law of total probability</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Prior / Posterior</span><span class="gloss-abbr">Before / after evidence</span></div>
+        <div class="gloss-def"><strong>Prior P(H):</strong> probability of hypothesis before seeing evidence — your starting belief, based on background knowledge or base rates. <strong>Posterior P(H|E):</strong> probability of hypothesis after seeing evidence — your updated belief. The posterior from one observation becomes the prior for the next — Bayesian updating is sequential.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Base Rate Fallacy</span><span class="gloss-abbr">Ignoring the prior</span></div>
+        <div class="gloss-def">The error of ignoring the base rate (prior probability) when interpreting evidence, treating P(E|H) as if it were P(H|E). Classic example: a 99%-accurate test for a 1-in-10,000 disease returns positive — the probability of disease is ~1%, not 99%. The test accuracy is high; the disease is rare; the positive is almost always a false alarm.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Bayesian Network</span><span class="gloss-abbr">Pearl, 1988</span></div>
+        <div class="gloss-def">A directed acyclic graph (DAG) in which nodes are random variables and edges encode conditional dependencies. Each node stores a conditional probability table (CPT) given its parent nodes. Supports efficient inference: given observed evidence at some nodes, compute posterior probabilities at all other nodes. Pearl's belief propagation algorithm runs in linear time on trees.
+          <div class="gloss-code">Smoking → Cancer → Dyspnea
+Smoking → Bronchitis → Dyspnea</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Naive Bayes</span><span class="gloss-abbr">Independence assumption</span></div>
+        <div class="gloss-def">A Bayesian classifier that assumes all features are conditionally independent given the class. For text: P(spam | words) ∝ P(spam) · ∏ P(word_i | spam). "Naive" because the independence assumption is almost always wrong — but the classifier works surprisingly well in practice because it only needs to estimate the right class, not the exact probabilities.
+          <div class="gloss-code">P(spam|w₁,w₂,...,wₙ) ∝ P(spam) · P(w₁|spam) · P(w₂|spam) · ... · P(wₙ|spam)</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Explaining Away</span><span class="gloss-abbr">Intercausal reasoning</span></div>
+        <div class="gloss-def">A Bayesian network phenomenon: when two causes compete to explain a shared effect, observing one cause reduces the posterior probability of the other — even without new evidence about the second cause. Example: dyspnea is caused by both cancer and bronchitis. Observing bronchitis "explains" the dyspnea, reducing the posterior probability of cancer. Unique to probabilistic causal models — classical logic cannot represent this.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era2_lesson8_markov.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 2, Lesson 8 — Markov Chains &amp; HMMs</div></div>
+    </a>
+    <div class="nav-btn" style="opacity:.35;cursor:default">
+      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 3 — The Statistical Learning Revolution</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+</div>
+<script>
+'use strict';
+
+/* ════════════════════════════════════════════════════
+   DEMO 1 — BAYES MEDICAL TEST
+════════════════════════════════════════════════════ */
+(function(){
+  function d1update(){
+    var prev = +document.getElementById('d1sl1').value / 10000; // 1-500 → 0.0001-0.05
+    var sens = +document.getElementById('d1sl2').value / 100;
+    var spec = +document.getElementById('d1sl3').value / 100;
+    var fpr = 1 - spec;
+    var pPos = prev * sens + (1-prev) * fpr;
+    var posterior = (sens * prev) / pPos;
+
+    document.getElementById('d1prev').textContent = (prev*100).toFixed(3)+'%';
+    document.getElementById('d1in').textContent = Math.round(1/prev).toLocaleString();
+    document.getElementById('d1sens').textContent = Math.round(sens*100)+'%';
+    document.getElementById('d1spec').textContent = Math.round(spec*100)+'%';
+
+    var col = posterior > 0.5 ? 'var(--green)' : posterior > 0.1 ? 'var(--amber)' : 'var(--red)';
+    document.getElementById('d1posterior').textContent = (posterior*100).toFixed(1)+'%';
+    document.getElementById('d1posterior').style.color = col;
+
+    var verdict = posterior > 0.8 ? 'Strong positive — likely disease' :
+                  posterior > 0.5 ? 'Positive — more likely than not' :
+                  posterior > 0.1 ? 'Weak positive — mostly false alarms' :
+                  'Very weak — almost certainly a false alarm';
+    document.getElementById('d1verdict').textContent = verdict;
+
+    // Out of 10000
+    var N=10000, tp=Math.round(N*prev*sens), fp=Math.round(N*(1-prev)*fpr);
+    var fn=Math.round(N*prev*(1-sens)), tn=Math.round(N*(1-prev)*spec);
+    document.getElementById('d1matrix').innerHTML =
+      '<span style="color:var(--green)">True positives:  '+tp+'</span><br>' +
+      '<span style="color:var(--red)">False positives: '+fp+'</span><br>' +
+      '<span style="color:var(--amber)">False negatives: '+fn+'</span><br>' +
+      '<span style="color:var(--muted)">True negatives:  '+tn+'</span><br>' +
+      '<br><span style="color:var(--muted2)">Of '+(tp+fp)+' positive results, only '+tp+' are real</span>';
+
+    document.getElementById('d1formula').innerHTML =
+      'P(H|E) = '+sens.toFixed(2)+' × '+prev.toFixed(4)+' / '+pPos.toFixed(4)+'\n     = '+(posterior*100).toFixed(2)+'%';
+
+    var insight = posterior < 0.1 ?
+      'The base rate fallacy trap: even with a '+Math.round(sens*100)+'% accurate test, a positive result is only '+Math.round(posterior*100)+'% likely to be real because the disease is so rare (1 in '+Math.round(1/prev).toLocaleString()+'). Most positives are false alarms.' :
+      posterior > 0.8 ?
+      'High prevalence context: with '+Math.round(prev*100)+'% of people having this condition, a positive test is reliable. The base rate supports the test result.' :
+      'Intermediate case: the test provides real information, but significant uncertainty remains. Follow-up testing is warranted.';
+    document.getElementById('d1insight').textContent = insight;
+  }
+  window.d1update = d1update;
+  d1update();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 2 — BAYESIAN NETWORK
+════════════════════════════════════════════════════ */
+(function(){
+  // Nodes: Smoking, Cancer, Bronchitis, Dyspnea, XRay
+  // evidence: null=unknown, true=observed true, false=observed false
+  var NODES = [
+    {id:'S', label:'Smoking',    x:180, y:40,  prior:0.30, parents:[]},
+    {id:'C', label:'Cancer',     x:80,  y:140, prior:null, parents:['S'], cpt:{T:0.06, F:0.005}},
+    {id:'B', label:'Bronchitis', x:280, y:140, prior:null, parents:['S'], cpt:{T:0.46, F:0.09}},
+    {id:'D', label:'Dyspnea',    x:180, y:240, prior:null, parents:['C','B'],
+      cpt:{'TT':0.99,'TF':0.90,'FT':0.70,'FF':0.10}},
+    {id:'X', label:'X-Ray+',    x:20,  y:240, prior:null, parents:['C'],  cpt:{T:0.98, F:0.05}},
+  ];
+  var evidence = {}; // id -> true/false/null
+
+  function getProb(node, ev) {
+    if(ev[node.id] !== undefined && ev[node.id] !== null) return ev[node.id] ? 1 : 0;
+    if(node.parents.length === 0) return node.prior;
+
+    if(node.parents.length === 1) {
+      var pS = ev[node.parents[0]] !== undefined && ev[node.parents[0]] !== null
+        ? (ev[node.parents[0]] ? 1 : 0)
+        : getProb(NODES.find(function(n){return n.id===node.parents[0];}), ev);
+      return node.cpt.T * pS + node.cpt.F * (1-pS);
+    }
+
+    // Two parents: C and B for Dyspnea
+    var pC = ev['C'] !== undefined && ev['C'] !== null ? (ev['C']?1:0) : getProb(NODES.find(function(n){return n.id==='C';}), ev);
+    var pB = ev['B'] !== undefined && ev['B'] !== null ? (ev['B']?1:0) : getProb(NODES.find(function(n){return n.id==='B';}), ev);
+    return node.cpt.TT*pC*pB + node.cpt.TF*pC*(1-pB) + node.cpt.FT*(1-pC)*pB + node.cpt.FF*(1-pC)*(1-pB);
+  }
+
+  function renderNet() {
+    var probs = {};
+    NODES.forEach(function(n){ probs[n.id] = getProb(n, evidence); });
+
+    var W=420, H=280;
+    var EDGES=[['S','C'],['S','B'],['C','D'],['B','D'],['C','X']];
+    var html='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+
+    // Edges
+    EDGES.forEach(function(e){
+      var f=NODES.find(function(n){return n.id===e[0];}), t=NODES.find(function(n){return n.id===e[1];});
+      html+='<line x1="'+f.x+'" y1="'+(f.y+22)+'" x2="'+t.x+'" y2="'+(t.y-22)+'" stroke="#2d3748" stroke-width="1.5" marker-end="url(#arr)"/>';
+    });
+    html+='<defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2d3748"/></marker></defs>';
+
+    // Nodes
+    NODES.forEach(function(n){
+      var ev=evidence[n.id];
+      var p=probs[n.id];
+      var isEv=ev!==undefined&&ev!==null;
+      var col=isEv?(ev?'var(--green)':'var(--red)'):'var(--ac)';
+      var bg=isEv?(ev?'rgba(74,222,128,.12)':'rgba(248,113,113,.1)'):'rgba(16,185,129,.08)';
+      html+='<rect x="'+(n.x-50)+'" y="'+(n.y-20)+'" width="100" height="44" rx="8" fill="'+bg+'" stroke="'+col+'" stroke-width="1.5" data-nid="'+n.id+'" style="cursor:pointer"/>';
+      html+='<text x="'+n.x+'" y="'+(n.y-3)+'" fill="'+col+'" font-size="10" text-anchor="middle" font-family="Space Mono,monospace" pointer-events="none">'+n.label+'</text>';
+      html+='<text x="'+n.x+'" y="'+(n.y+14)+'" fill="'+(isEv?col:'#94a3b8')+'" font-size="11" font-weight="700" text-anchor="middle" font-family="Space Mono,monospace" pointer-events="none">'+(isEv?(ev?'TRUE':'FALSE'):Math.round(p*100)+'%')+'</text>';
+    });
+
+    var svg=document.getElementById('d2svg');
+    svg.innerHTML=html;
+    svg.querySelectorAll('[data-nid]').forEach(function(el){
+      el.addEventListener('click',function(){
+        var id=el.getAttribute('data-nid');
+        var cur=evidence[id];
+        if(cur===undefined||cur===null) evidence[id]=true;
+        else if(cur===true) evidence[id]=false;
+        else evidence[id]=null;
+        renderNet();
+        renderEvPanel(probs);
+      });
+    });
+    renderEvPanel(probs);
+  }
+
+  function renderEvPanel(probs) {
+    var evHtml=NODES.map(function(n){
+      var ev=evidence[n.id];
+      var p=probs[n.id];
+      var isEv=ev!==undefined&&ev!==null;
+      return '<div style="display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:10px;padding:5px 8px;background:#0a0d14;border-radius:4px;border:1px solid '+(isEv?'rgba(16,185,129,.3)':'var(--border)')+';">'
+        +'<span style="color:'+(isEv?'var(--ac)':'#94a3b8')+'">'+n.label+'</span>'
+        +'<span style="color:'+(isEv?'var(--green)':'#64748b')+'">'+
+          (isEv?(ev?'✓ TRUE':'✗ FALSE'):Math.round(p*100)+'%')+
+        '</span></div>';
+    }).join('');
+    document.getElementById('d2evidence').innerHTML=evHtml;
+
+    var evKeys=Object.keys(evidence).filter(function(k){return evidence[k]!==null;});
+    if(evKeys.length===0){
+      document.getElementById('d2explain').textContent='Click a node to set it as observed evidence. The number in each node shows its prior or posterior probability.';
+    } else {
+      var notes=[];
+      if(evidence['D']===true) notes.push('Observing Dyspnea raises probability of both Cancer and Bronchitis.');
+      if(evidence['D']===true&&evidence['B']===true) notes.push('With Bronchitis confirmed, Cancer probability drops — the dyspnea is "explained away" by Bronchitis.');
+      if(evidence['S']===true) notes.push('Smoking raises both Cancer and Bronchitis probabilities.');
+      if(evidence['X']===true) notes.push('Positive X-Ray strongly increases Cancer probability.');
+      document.getElementById('d2explain').textContent=notes.length?notes.join(' '):
+        'Evidence set. Node probabilities have updated via belief propagation.';
+    }
+  }
+
+  renderNet();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 3 — NAIVE BAYES SPAM FILTER
+════════════════════════════════════════════════════ */
+(function(){
+  var VOCAB = [
+    {word:'free',      pSpam:0.92, pHam:0.04, isSpam:true},
+    {word:'winner',    pSpam:0.88, pHam:0.02, isSpam:true},
+    {word:'click',     pSpam:0.82, pHam:0.10, isSpam:true},
+    {word:'offer',     pSpam:0.79, pHam:0.08, isSpam:true},
+    {word:'urgent',    pSpam:0.76, pHam:0.06, isSpam:true},
+    {word:'prize',     pSpam:0.85, pHam:0.01, isSpam:true},
+    {word:'guaranteed',pSpam:0.80, pHam:0.05, isSpam:true},
+    {word:'cash',      pSpam:0.74, pHam:0.07, isSpam:true},
+    {word:'meeting',   pSpam:0.04, pHam:0.82, isSpam:false},
+    {word:'report',    pSpam:0.05, pHam:0.78, isSpam:false},
+    {word:'project',   pSpam:0.06, pHam:0.75, isSpam:false},
+    {word:'schedule',  pSpam:0.03, pHam:0.80, isSpam:false},
+    {word:'review',    pSpam:0.08, pHam:0.70, isSpam:false},
+    {word:'team',      pSpam:0.05, pHam:0.72, isSpam:false},
+    {word:'budget',    pSpam:0.09, pHam:0.65, isSpam:false},
+    {word:'update',    pSpam:0.20, pHam:0.45, isSpam:false},
+  ];
+
+  var message = [];
+  var pSpamPrior = 0.5;
+
+  function calcSpam() {
+    if(!message.length) return 0.5;
+    var logSpam = Math.log(pSpamPrior), logHam = Math.log(1-pSpamPrior);
+    message.forEach(function(w){
+      var v=VOCAB.find(function(v){return v.word===w;});
+      if(v){logSpam+=Math.log(v.pSpam);logHam+=Math.log(v.pHam);}
+    });
+    var maxLog=Math.max(logSpam,logHam);
+    var eS=Math.exp(logSpam-maxLog), eH=Math.exp(logHam-maxLog);
+    return eS/(eS+eH);
+  }
+
+  function render() {
+    var p=calcSpam();
+    var col=p>0.7?'var(--red)':p<0.3?'var(--green)':'var(--amber)';
+    document.getElementById('d3prob').textContent=Math.round(p*100)+'%';
+    document.getElementById('d3prob').style.color=col;
+    document.getElementById('d3verdict').textContent=p>0.7?'🔴 SPAM':p<0.3?'✅ HAM':'⚠ UNCERTAIN';
+    document.getElementById('d3verdict').style.color=col;
+    document.getElementById('d3bar').style.width=Math.round(p*100)+'%';
+
+    document.getElementById('d3message').innerHTML=message.length?
+      message.map(function(w){
+        var v=VOCAB.find(function(v){return v.word===w;});
+        var wCol=v?(v.isSpam?'var(--red)':'var(--green)'):'#94a3b8';
+        return'<span style="color:'+wCol+'">'+w+'</span>';
+      }).join(' '):
+      '<span style="color:var(--muted2)">empty</span>';
+
+    // Word probability bars
+    var unique=[...new Set(message)];
+    var wpHtml=unique.map(function(w){
+      var v=VOCAB.find(function(v){return v.word===w;});
+      if(!v) return '';
+      var ratio=v.pSpam/(v.pSpam+v.pHam);
+      return '<div style="display:flex;align-items:center;gap:8px">'
+        +'<span style="font-family:var(--mono);font-size:10px;color:'+(v.isSpam?'var(--red)':'var(--green)')+';min-width:90px">'+w+'</span>'
+        +'<div style="flex:1;background:var(--border);border-radius:3px;height:8px;overflow:hidden">'
+        +'<div style="width:'+Math.round(ratio*100)+'%;height:100%;background:'+(v.isSpam?'var(--red)':'var(--green)')+'"></div></div>'
+        +'<span style="font-family:var(--mono);font-size:9px;color:var(--muted2);min-width:70px">S:'+Math.round(v.pSpam*100)+'% H:'+Math.round(v.pHam*100)+'%</span>'
+        +'</div>';
+    }).join('');
+    document.getElementById('d3wordprobs').innerHTML=wpHtml;
+
+    if(message.length) {
+      document.getElementById('d3calc').innerHTML=
+        'P(spam|words) ∝ '+message.slice(0,3).map(function(w){
+          var v=VOCAB.find(function(v){return v.word===w;});
+          return v?'P('+w+'|spam)='+v.pSpam:'?';
+        }).join(' × ')+(message.length>3?' × ...':'')+
+        '<br>Result: '+Math.round(p*100)+'% spam probability';
+    }
+  }
+
+  // Build word buttons
+  var btnHtml=VOCAB.map(function(v){
+    return '<button onclick="d3add(\''+v.word+'\')" style="font-family:var(--mono);font-size:10px;padding:4px 8px;border-radius:4px;border:1px solid '+(v.isSpam?'rgba(248,113,113,.3)':'rgba(74,222,128,.3)')+';background:none;color:'+(v.isSpam?'var(--red)':'var(--green)')+';cursor:pointer">'+v.word+'</button>';
+  }).join('');
+  document.getElementById('d3wordbtns').innerHTML=btnHtml;
+
+  window.d3add=function(w){message.push(w);render();};
+  window.d3clear=function(){message=[];render();};
+  render();
+})();
+</script>
+</body>
+</html>
