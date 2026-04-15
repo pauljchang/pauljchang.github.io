@@ -287,6 +287,35 @@ input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;he
     </div>
   </section>
 
+  <!-- Double descent callout -->
+  <div style="background:linear-gradient(135deg,rgba(99,102,241,.07),rgba(139,92,246,.05));border:1px solid rgba(99,102,241,.3);border-radius:14px;padding:26px 30px;margin-bottom:48px;">
+    <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--ac);margin-bottom:12px;">⟶ The Classical Picture Has a Sequel</div>
+    <p style="font-size:15px;color:#94a3b8;line-height:1.82;margin-bottom:14px;">The U-shaped test error curve in Demo 2 was taken as a fundamental law of machine learning for nearly two decades — and within the compute regimes of the 1990s, it was correct. Every experiment confirmed it: push model complexity past the sweet spot and test error rises. Researchers who tried to scale neural networks simply observed more overfitting and concluded that bigger models were worse models. This conclusion was <em>reasonable given the evidence they could collect.</em></p>
+    <p style="font-size:15px;color:#94a3b8;line-height:1.82;margin-bottom:14px;">The critical missing variable was <strong style="color:#e2e8f0">compute</strong>. A 1990s neural network trained on a 1990s workstation could not be pushed far enough past the interpolation threshold — the point where the model can exactly fit its training data — to see what happened on the other side. The experiment was never run at sufficient scale. The conclusion was correct within the accessible regime, but extrapolated into a regime nobody had explored.</p>
+    <p style="font-size:15px;color:#94a3b8;line-height:1.82;margin-bottom:14px;">When GPU compute made it possible to train neural networks with orders of magnitude more parameters than training examples, something unexpected happened: <strong style="color:#e2e8f0">test error fell again</strong>. Not to the same minimum as before — often well below it. The U-shaped curve has a second descent on the far right, accessible only at scales that were computationally unthinkable in the 1990s. This phenomenon is called <strong style="color:#e2e8f0">double descent</strong>.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
+      <div style="background:#0a0d14;border-radius:8px;padding:14px 16px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Classical picture (1990s–2000s)</div>
+        <div style="font-family:var(--mono);font-size:10px;color:#94a3b8;line-height:1.9;">
+          Low complexity → high bias (underfit)<br>
+          Sweet spot → minimum test error<br>
+          High complexity → high variance (overfit)<br>
+          <span style="color:var(--muted2)">Conclusion: bigger models always overfit</span>
+        </div>
+      </div>
+      <div style="background:#0a0d14;border-radius:8px;padding:14px 16px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ac);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Double descent (2019 onwards)</div>
+        <div style="font-family:var(--mono);font-size:10px;color:#94a3b8;line-height:1.9;">
+          Classical U-curve holds up to threshold<br>
+          At interpolation threshold: peak error<br>
+          <strong style="color:var(--ac)">Far beyond threshold: error falls again</strong><br>
+          <span style="color:var(--ac)">Emergent behaviour at massive scale</span>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:14px;color:#94a3b8;line-height:1.75;margin-bottom:0;">Why this happens is one of the genuinely open questions of modern machine learning. The bias-variance tradeoff does not disappear — it becomes more complicated in ways that classical theory did not predict. In Era 5 you will study scaling laws, the bitter lesson, and the conditions under which scaling neural networks massively produces emergent capabilities rather than runaway overfitting. The lesson here — that the classical picture is real and important — is not invalidated. It is the foundation you need to understand why the double descent result was so surprising.</p>
+  </div>
+
   <!-- 05 DISCUSSION -->
   <section class="section">
     <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
