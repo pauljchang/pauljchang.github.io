@@ -116,6 +116,37 @@ input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;he
       <p><strong>Variance</strong> is the error introduced by sensitivity to the specific training set. A degree-12 polynomial trained on 15 data points has high variance — change a few data points and the fitted curve changes dramatically. Different training sets produce very different models, even though they're all drawn from the same distribution. A high-variance model <em>overfits</em>: it captures the signal but also learns the noise, and the noise is different every time.</p>
     </div>
 
+    <!-- Overfitting / Underfitting callout -->
+    <div style="background:#0a0d14;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:28px 0;">
+      <div style="display:grid;grid-template-columns:1fr 1fr">
+        <div style="padding:20px 22px;border-right:1px solid var(--border)">
+          <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--red);margin-bottom:10px;">Underfitting — High Bias</div>
+          <p style="font-size:14px;color:#94a3b8;line-height:1.75;margin-bottom:10px;">The model is too simple to capture the real pattern. It performs poorly on <em>both</em> training and test data. Adding more training data does not help — the model family itself is the problem.</p>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.8;background:var(--surface);border-radius:6px;padding:8px 10px;">
+            Training error: HIGH<br>
+            Test error: HIGH<br>
+            Gap (train vs test): small<br>
+            Fix: more complex model
+          </div>
+          <div style="margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--muted2);">Example: fitting a straight line to data that follows a curve. No matter how much data you add, the line never fits the curve.</div>
+        </div>
+        <div style="padding:20px 22px">
+          <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--amber);margin-bottom:10px;">Overfitting — High Variance</div>
+          <p style="font-size:14px;color:#94a3b8;line-height:1.75;margin-bottom:10px;">The model is too complex — it has memorized the training data, including its noise. It performs well on training data but poorly on new data it hasn't seen.</p>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.8;background:var(--surface);border-radius:6px;padding:8px 10px;">
+            Training error: LOW<br>
+            Test error: HIGH<br>
+            Gap (train vs test): LARGE ← the diagnostic<br>
+            Fix: simpler model, more data, regularization
+          </div>
+          <div style="margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--muted2);">Example: a degree-12 polynomial through 15 noisy points. Training error is zero. The curve wiggles wildly between points and predicts nonsense on new inputs.</div>
+        </div>
+      </div>
+      <div style="padding:12px 22px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.65;">
+        <strong style="color:#e2e8f0">The diagnostic:</strong> a large gap between training error and test error is the signature of overfitting. Training error alone tells you nothing — a model with 100% training accuracy and 60% test accuracy is severely overfit. The three practical fixes — use a simpler model, collect more training data, or apply regularization (Lesson 3.5) — all work by reducing variance. Era 3 is largely a catalog of techniques for controlling this gap.
+      </div>
+    </div>
+
     <div class="pullquote">
       <p>"There is no free lunch. A model flexible enough to fit any training set is a model that provides no information about the underlying function. The art of machine learning is choosing the right amount of flexibility."</p>
       <cite>&mdash; Paraphrase of Wolpert's No Free Lunch theorem, 1997</cite>
@@ -299,6 +330,17 @@ input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;he
       <div class="gloss-entry">
         <div class="gloss-term"><span class="gloss-term-name">Cross-Validation</span><span class="gloss-abbr">Estimating test error without a test set</span></div>
         <div class="gloss-def">A technique for estimating a model's test error using only training data. In k-fold cross-validation: split training data into k folds, train on k-1 folds and evaluate on the held-out fold, repeat k times and average. The average held-out error estimates test error. Used to select model complexity (the sweet spot) without touching the test set.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Overfitting</span><span class="gloss-abbr">High variance failure</span></div>
+        <div class="gloss-def">When a model performs well on training data but poorly on new data — it has memorized the training examples, including their noise, rather than learning the underlying pattern. <strong>Diagnostic:</strong> large gap between training error and test error. Caused by excessive model complexity relative to the amount of training data. Fixed by simpler models, more data, or regularization.
+          <div class="gloss-code">Overfit model:  train error = 0.02,  test error = 0.74  ← large gap
+Good model:     train error = 0.18,  test error = 0.21  ← small gap</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Underfitting</span><span class="gloss-abbr">High bias failure</span></div>
+        <div class="gloss-def">When a model is too simple to capture the real pattern in the data — it performs poorly on both training and test data. More training data does not help because the model family itself lacks the capacity to represent the true function. Fixed by increasing model complexity or choosing a more expressive model class.</div>
       </div>
     </div>
   </section>
