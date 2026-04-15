@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 3, Lesson 1 — The Bias-Variance Tradeoff | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--surface:#161b27;--s2:#1a2035;--border:#1e2d40;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#334155;
+  --ac:#6366f1;--ac-dim:rgba(99,102,241,.10);--ac-glow:rgba(99,102,241,.25);
+  --green:#4ade80;--red:#f87171;--amber:#f59e0b;--sky:#38bdf8;--violet:#a78bfa;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;--disp:'Lora',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+.course-nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.era-badge{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em;}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 100px;}
+.hero{padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px;}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.week-badge{background:var(--ac);color:#0a0b1e;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em;}
+.hero h1{font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px;}
+.hero-sub{font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px;}
+.section{margin-bottom:68px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px;}
+.sec-title{font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.obj-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;}
+.obj-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.obj-list li strong{color:#f1f5f9;}
+.prose p{font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82;}
+.prose p:last-child{margin-bottom:0;}
+.prose p strong{color:#e2e8f0;}
+.prose code{font-family:var(--mono);font-size:12px;background:#0a0d14;padding:2px 6px;border-radius:3px;border:1px solid var(--border);color:#a5b4fc;}
+.pullquote{background:linear-gradient(135deg,rgba(99,102,241,.07),rgba(99,102,241,.02));border:1px solid rgba(99,102,241,.2);border-radius:12px;padding:22px 26px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:17px;font-style:italic;color:#a5b4fc;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+.demo-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.demo-topbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.demo-tag{font-family:var(--mono);font-size:11px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase;}
+.demo-hint{font-family:var(--mono);font-size:10px;color:var(--muted2);}
+.ctrl-btn{font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ctrl-btn:hover{border-color:var(--ac);color:var(--ac);}
+.ctrl-btn.active{background:var(--ac-dim);border-color:rgba(99,102,241,.4);color:var(--ac);}
+input[type=range].sl{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,#0a0d14,var(--ac));}
+input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #a5b4fc;cursor:pointer;}
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.ex-head{padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border);}
+.ex-num{font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(99,102,241,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.ex-title{font-weight:600;font-size:16px;color:#f1f5f9;}
+.ex-desc{font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6;}
+.ex-body{padding:20px;}
+.ex-body p{font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7;}
+.ex-body p:last-child{margin-bottom:0;}
+.ex-body p strong{color:#e2e8f0;}
+.disc-list{list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px;}
+.disc-list li{counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72;}
+.disc-list li::before{content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(99,102,241,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px;}
+.disc-list li strong{color:#e2e8f0;}
+.gloss-grid{display:flex;flex-direction:column;}
+.gloss-entry{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);padding:18px 0;}
+.gloss-entry:last-child{border-bottom:none;}
+.gloss-term{display:flex;flex-direction:column;gap:5px;padding-right:24px;}
+.gloss-term-name{font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700;}
+.gloss-abbr{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.gloss-def{font-size:14.5px;color:#94a3b8;line-height:1.72;}
+.gloss-def strong{color:#e2e8f0;}
+.gloss-code{font-family:var(--mono);font-size:11px;color:#a5b4fc;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:7px 12px;display:block;margin-top:8px;line-height:1.8;}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border);}
+.nav-btn{text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s;}
+.nav-btn:hover{border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow);}
+.nav-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.nav-title{font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px;}
+.nav-arrow{font-size:20px;color:var(--ac);}
+</style>
+</head>
+<body>
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface)" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 3: STATISTICAL LEARNING</span>
+  <span>›</span><span style="color:#94a3b8">Era 3, Lesson 1 — The Bias-Variance Tradeoff</span>
+</nav>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 3 · LESSON 1</span>
+      <span>1992 – Present</span><span>·</span>
+      <span>The Central Tension of Machine Learning</span>
+    </div>
+    <h1>Too Simple,<br>or Too Clever</h1>
+    <p class="hero-sub">Every learning algorithm faces the same dilemma: a model complex enough to capture real patterns is also complex enough to memorize noise. Understanding this tradeoff is the foundation of everything in Era 3.</p>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">🎯</span><div><strong>Define</strong> bias and variance in precise terms — what each means for a model's predictions across different training sets.</div></li>
+      <li><span class="obj-icon">📉</span><div><strong>Decompose</strong> total prediction error into bias², variance, and irreducible noise — and explain why you cannot reduce all three simultaneously.</div></li>
+      <li><span class="obj-icon">🔄</span><div><strong>Identify</strong> the bias-variance tradeoff in practical contexts: model complexity, training set size, and regularization.</div></li>
+      <li><span class="obj-icon">🌲</span><div><strong>Connect</strong> the tradeoff to ensemble methods — explaining intuitively why averaging many high-variance models reduces overall error.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">The Central Tension</h2></div>
+    <div class="prose">
+      <p>In Lesson 2.6 you watched a decision tree grow. At depth 1 it made a single split — crude, clearly missing the real pattern. At depth 7 it had memorized every training example, carving the feature space into increasingly specific regions to handle individual data points. Training accuracy reached 100%. Test accuracy collapsed. The tree had learned the noise.</p>
+      <p>This failure has a name and a mathematical structure. It is the <strong>bias-variance tradeoff</strong>, and it is the central tension of statistical learning. Every model you will encounter in Era 3 — random forests, boosted trees, support vector machines, regularized regression — is a different attempt to navigate it. Understanding the tradeoff is the prerequisite for understanding why any of those methods work.</p>
+      <p><strong>Bias</strong> is the error introduced by approximating a complex reality with a simple model. A linear model fitted to non-linear data has high bias — it is systematically wrong, in the same direction, regardless of which training set you use. Bias is about the gap between your model family's best possible prediction and the truth. A highly biased model <em>underfits</em>: it cannot capture the signal even if given unlimited data.</p>
+      <p><strong>Variance</strong> is the error introduced by sensitivity to the specific training set. A degree-12 polynomial trained on 15 data points has high variance — change a few data points and the fitted curve changes dramatically. Different training sets produce very different models, even though they're all drawn from the same distribution. A high-variance model <em>overfits</em>: it captures the signal but also learns the noise, and the noise is different every time.</p>
+    </div>
+
+    <div class="pullquote">
+      <p>"There is no free lunch. A model flexible enough to fit any training set is a model that provides no information about the underlying function. The art of machine learning is choosing the right amount of flexibility."</p>
+      <cite>&mdash; Paraphrase of Wolpert's No Free Lunch theorem, 1997</cite>
+    </div>
+
+    <div class="prose">
+      <p>The formal decomposition makes the tradeoff precise. For any point x, the expected prediction error of a model trained on random training sets drawn from the same distribution decomposes as:</p>
+      <div style="background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:20px 0;font-family:var(--mono);font-size:13px;color:#a5b4fc;line-height:2">
+        E[error] = Bias² + Variance + Irreducible noise<br>
+        <span style="color:#64748b">where Bias = E[f̂(x)] − f(x)  &nbsp;(average prediction minus truth)<br>
+        Variance = E[(f̂(x) − E[f̂(x)])²]  &nbsp;(spread of predictions across training sets)<br>
+        Noise = σ²  &nbsp;(irreducible — inherent randomness in the labels)</span>
+      </div>
+      <p>The noise floor cannot be reduced by any model — it is the irreducible randomness in the data generating process itself. All model improvement happens by trading bias against variance. The practical consequence: <strong>training error is not test error</strong>. A model that achieves zero training error has pushed variance to its maximum. The goal is not to minimize training error — it is to minimize the sum of bias² and variance on unseen data.</p>
+      <p>The tradeoff also explains a more counterintuitive result: <strong>averaging many high-variance models reduces variance without increasing bias</strong>. If each model has a different error — they're wrong in different ways, because each was trained on a different random sample — those errors partially cancel when you average. The average prediction is biased by roughly the same amount as each individual model, but its variance is much lower. This is the theoretical foundation of ensemble methods, and it is why Random Forests (the next lesson) works as well as it does.</p>
+    </div>
+  </section>
+
+  <!-- 03 DEMOS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+
+    <!-- DEMO 1: Bullseye -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — The Bullseye.</strong> Bias is being wrong consistently. Variance is being inconsistent. Click each panel to add shots and see the pattern emerge.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Bias vs. Variance — Bullseye</span>
+        <span class="demo-hint">click any panel to add a shot</span>
+      </div>
+      <div style="padding:18px 20px">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px" id="d1panels"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--muted2)">Click a panel to fire shots. The crosshair shows mean position.</span>
+          <button class="ctrl-btn" onclick="d1reset()">↺ Reset all</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 2: Error curves -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — The Error Curves.</strong> Drag the complexity slider. Watch training error fall monotonically while test error forms a U-shape. The minimum test error is the sweet spot.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Bias-Variance Decomposition</span>
+        <span class="demo-hint">drag complexity slider · observe the U-shaped test curve</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 220px">
+        <div style="padding:16px 18px;border-right:1px solid var(--border)">
+          <svg id="d2svg" viewBox="0 0 460 260" style="display:block;width:100%"></svg>
+          <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap">Complexity:</span>
+            <input type="range" class="sl" id="d2sl" min="1" max="8" value="1" oninput="d2update()">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--ac);min-width:60px" id="d2slval">Degree 1</span>
+          </div>
+        </div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Training Error</div>
+            <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--green)" id="d2train">—</div>
+          </div>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Test Error</div>
+            <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--amber)" id="d2test">—</div>
+          </div>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Bias²</div>
+            <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--red)" id="d2bias">—</div>
+          </div>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Variance</div>
+            <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--violet)" id="d2var">—</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.6;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d2note"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 3: Multiple training sets -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 3 — Multiple Training Sets.</strong> The same true function, 10 different training sets. Low-complexity: all fits cluster near each other (low variance, high bias). High-complexity: fits scatter wildly (low bias, high variance). Averaging the high-complexity fits recovers the true function — the seed of ensemble methods.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Variance Across Training Sets</span>
+        <div style="display:flex;gap:6px">
+          <button class="ctrl-btn active" id="d3lo" onclick="d3set('lo')">Low Complexity (degree 2)</button>
+          <button class="ctrl-btn" id="d3hi" onclick="d3set('hi')">High Complexity (degree 7)</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 220px">
+        <div style="padding:16px 18px;border-right:1px solid var(--border)">
+          <svg id="d3svg" viewBox="0 0 460 280" style="display:block;width:100%"></svg>
+        </div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Avg error across sets</div>
+            <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--ac)" id="d3err">—</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.6;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d3note"></div>
+          <div style="font-size:13px;color:#94a3b8;line-height:1.7;background:var(--ac-dim);border:1px solid rgba(99,102,241,.2);border-radius:8px;padding:10px 12px" id="d3insight"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">🎯 Reading the Bullseye</div>
+        <div class="ex-desc">Use Demo 1 to develop intuition for bias and variance as independent properties.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Click each panel in Demo 1 to fire 15 shots. Which panels have high bias? Which have high variance? Note that a panel can have high bias with low variance (consistently wrong in the same direction) — this is a type of failure that more data alone cannot fix.</p>
+        <p>&rarr; The mean position (crosshair) can be close to center even when variance is high — the errors cancel. This is why averaging many high-variance predictors can produce an accurate ensemble. What determines whether the mean is accurate?</p>
+        <p><strong>Key question:</strong> A doctor consistently diagnoses a rare condition as common cold. Is this high bias or high variance? A doctor who changes their diagnosis radically depending on which symptom they happened to notice first — is this high bias or high variance? Which failure is more dangerous in a medical context?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">📉 Find the Sweet Spot</div>
+        <div class="ex-desc">Use Demo 2 to identify the optimal model complexity for this dataset.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Drag the complexity slider from 1 to 8 in Demo 2. At what degree does test error reach its minimum? At that degree, what is the ratio of bias² to variance? Is the optimal model more biased or more variable?</p>
+        <p>&rarr; Notice that training error continues to fall past the sweet spot — it never rises. Why does training error keep falling even as the model deteriorates on test data? What would training error look like if you plotted it for a model trained on a single data point?</p>
+        <p><strong>Key question:</strong> The noise floor is 0.09 in this demo. Even a perfect model cannot achieve test error below 0.09. How does this change your interpretation of the test error at the sweet spot? What fraction of the sweet-spot test error is irreducible noise vs. model error?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">🌲 The Ensemble Insight</div>
+        <div class="ex-desc">Use Demo 3 to see why averaging high-variance models works — the foundation of Random Forests.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 3, switch to High Complexity (degree 7). The 10 fitted curves are spread widely — each overfits its training set differently. The average curve (thick white line) is much closer to the true function than any individual fit. Why?</p>
+        <p>&rarr; Now switch to Low Complexity (degree 2). The 10 fitted curves cluster tightly — low variance. But the average is still systematically wrong. Does averaging help here? Why or why not?</p>
+        <p><strong>Key insight:</strong> Averaging reduces variance but not bias. This is the fundamental limitation of bagging (the technique behind Random Forests): it works well for high-variance models (deep decision trees) but provides little benefit for high-bias models (shallow trees, linear models). In the next lesson you will see exactly how Random Forests exploit this by growing very deep trees and averaging hundreds of them.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>The Tradeoff in Human Expertise.</strong> A specialist doctor has high bias toward their specialty — they tend to see every patient through its lens. A generalist has higher variance — their diagnosis depends more on which symptoms happen to be prominent. Does the bias-variance framing apply to human expertise? What are its limits as a model of human cognition?</li>
+      <li><strong>More Data as a Solution.</strong> More training data reduces variance (the model has less room to overfit) without necessarily reducing bias (a linear model is still linear regardless of how much data you show it). For what kinds of models does more data solve the problem, and for what kinds does it not? What is the asymptotic behavior of a high-bias model trained on infinite data?</li>
+      <li><strong>The No Free Lunch Theorem.</strong> Wolpert's theorem states that no learning algorithm is universally superior to any other — averaged over all possible problems, every algorithm performs the same. This seems to contradict the practical experience that some methods work much better than others. How do you reconcile these? What is the theorem actually saying?</li>
+      <li><strong>Connection to Overfitting in Science.</strong> Scientific models face the bias-variance tradeoff too. A model with too few parameters fits the data systematically wrongly (high bias). A model with too many parameters fits the data perfectly — including measurement errors — and fails to predict new experiments (high variance). What practices in science correspond to regularization, cross-validation, and the bias-variance sweet spot?</li>
+      <li><strong>Connection to Era 4 — Deep Learning.</strong> Deep neural networks have millions of parameters — far more than training examples. Classical statistical theory predicts catastrophic overfitting. In practice, with the right training procedures, they generalize remarkably well. This is sometimes called "double descent" — test error improves again after it initially rises with increasing model size. What might explain this behavior, and why does it challenge the simple bias-variance picture?</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Bias</span><span class="gloss-abbr">Systematic error</span></div>
+        <div class="gloss-def">The difference between a model's expected prediction (averaged over all possible training sets) and the true value. High bias means the model is systematically wrong — it misses patterns that exist in the data regardless of how much data you show it. Caused by too-simple model assumptions. Also called <strong>underfitting</strong>.
+          <div class="gloss-code">Bias = E[f̂(x)] − f(x)  % average prediction minus truth</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Variance</span><span class="gloss-abbr">Sensitivity to training data</span></div>
+        <div class="gloss-def">The expected squared deviation of a model's prediction from its own mean across different training sets. High variance means the model changes substantially depending on which training examples it sees — it is sensitive to noise. Caused by too-complex models relative to available data. Also called <strong>overfitting</strong>.
+          <div class="gloss-code">Variance = E[(f̂(x) − E[f̂(x)])²]  % spread of predictions</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Irreducible Noise</span><span class="gloss-abbr">σ² — the floor</span></div>
+        <div class="gloss-def">The variance in the labels y that cannot be predicted from the features x — caused by genuinely random processes or unmeasured variables. No model, however complex, can reduce error below σ². The bias-variance decomposition: E[error] = Bias² + Variance + σ². Knowing the noise floor tells you how much of your remaining error is reducible by better modeling.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Bias-Variance Tradeoff</span><span class="gloss-abbr">The central tension</span></div>
+        <div class="gloss-def">As model complexity increases: bias decreases (the model can approximate more complex functions) but variance increases (the model is more sensitive to training data). As complexity decreases: bias increases but variance decreases. The optimal complexity minimizes total test error = Bias² + Variance. There is no model that simultaneously minimizes both for all datasets.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Ensemble</span><span class="gloss-abbr">Variance reduction by averaging</span></div>
+        <div class="gloss-def">A collection of models whose predictions are combined (by averaging, voting, or weighted combination). If individual models have independent errors, averaging reduces variance by roughly 1/n where n is the number of models. Bias is unchanged by averaging. Ensembles are most beneficial for high-variance base learners (deep decision trees) and least beneficial for high-bias base learners (shallow trees, linear models).</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Cross-Validation</span><span class="gloss-abbr">Estimating test error without a test set</span></div>
+        <div class="gloss-def">A technique for estimating a model's test error using only training data. In k-fold cross-validation: split training data into k folds, train on k-1 folds and evaluate on the held-out fold, repeat k times and average. The average held-out error estimates test error. Used to select model complexity (the sweet spot) without touching the test set.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era2_lesson9_bayesian.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 2, Lesson 9 — Bayesian Reasoning</div></div>
+    </a>
+    <div class="nav-btn" style="opacity:.35;cursor:default">
+      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 3, Lesson 2 — Random Forests</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+</div>
+<script>
+'use strict';
+
+/* ── Pre-computed data ───────────────────────────── */
+var X_PLOT=[0.0,0.1193,0.2386,0.3579,0.4772,0.5965,0.7158,0.8351,0.9544,1.0737,1.193,1.3123,1.4316,1.5509,1.6702,1.7895,1.9088,2.0281,2.1474,2.2667,2.386,2.5053,2.6246,2.7439,2.8632,2.9825,3.1018,3.2211,3.3404,3.4597,3.579,3.6983,3.8176,3.9369,4.0562,4.1755,4.2948,4.4141,4.5334,4.6527,4.772,4.8913,5.0106,5.1299,5.2492,5.3685,5.4878,5.6071,5.7264,5.8457,5.965,6.0844,6.2037,6.323,6.4423,6.5616,6.6809,6.8002,6.9195,7.0388,7.1581,7.2774,7.3967,7.516,7.6353,7.7546,7.8739,7.9932,8.1125,8.2318,8.3511,8.4704,8.5897,8.709,8.8283,8.9476,9.0669,9.1862,9.3055,9.4248];
+var Y_TRUE=[0.0,0.1636,0.3077,0.4171,0.4848,0.513,0.5131,0.5029,0.5021,0.5285,0.5927,0.6961,0.8297,0.976,1.112,1.2144,1.2638,1.2491,1.1694,1.0343,0.8615,0.673,0.4903,0.3301,0.201,0.1021,0.024,-0.0486,-0.1322,-0.2405,-0.3803,-0.5494,-0.7362,-0.922,-1.0845,-1.2028,-1.2614,-1.2541,-1.1853,-1.0693,-0.9271,-0.7827,-0.6576,-0.5668,-0.5159,-0.5001,-0.5062,-0.5152,-0.5074,-0.4669,-0.3851,-0.2629,-0.1103,0.0555,0.2147,0.3486,0.4444,0.4982,0.5154,0.5099,0.5006,0.5072,0.5454,0.623,0.738,0.8781,1.0236,1.151,1.2375,1.2663,1.2295,1.1298,0.9799,0.7993,0.6105,0.4338,0.2835,0.165,0.0744,0.0];
+var TRAIN_X=[[0.2347,0.6214,0.6791,0.7192,2.0111,2.53,2.7157,3.5903,4.1319,4.2612,4.7113,4.7229,5.0752,5.66,6.4016,6.8185,7.3506,7.5751,8.5727,8.7764,8.9548,9.2173],[0.1961,0.2668,1.0518,1.7138,1.8721,2.4219,2.806,3.3212,4.7638,5.9915,6.1296,6.1939,6.2779,6.4745,6.5941,6.9383,7.0699,7.9857,8.0321,8.1206,8.2806,9.3107],[0.0006,0.5502,0.6904,2.2807,2.4119,2.6852,2.6924,3.861,4.2668,5.111,5.7555,6.4509,6.7887,6.8484,6.9097,7.1933,7.2401,7.6261,7.9255,8.0007,8.1407,8.7048],[0.2595,0.5218,1.1208,1.6418,1.9061,2.7078,2.8643,3.8424,4.2331,4.2403,4.2445,4.9612,5.6626,5.8793,6.4677,6.6788,7.3209,7.4318,7.6715,7.8725,8.5225,9.2451],[0.4214,0.4498,0.5681,1.486,1.6431,2.0563,2.3546,2.6786,2.7539,3.0494,3.2356,3.6566,3.8665,4.1979,4.5974,5.5606,6.0697,6.0954,6.3686,6.8679,7.1123,8.9473],[0.1683,0.3181,0.4503,1.9206,2.1156,2.1506,2.2646,2.7421,3.8688,3.8774,4.6097,5.1158,5.9509,6.0866,6.8041,6.929,7.9742,8.3301,8.3799,8.9861,9.0676,9.3883],[0.4093,0.9893,1.5005,2.0213,2.2755,2.2995,2.469,2.9276,3.8084,4.6463,4.8245,5.0764,5.3919,5.548,5.6247,5.7515,6.0572,7.2819,8.2593,8.5362,8.6621,9.1485],[0.4339,0.9975,1.2308,1.2348,1.636,1.6832,2.2838,2.4346,2.7374,2.8028,3.4895,3.9433,4.6681,5.048,5.7795,5.9233,6.1431,8.1486,8.36,8.8643,9.1138,9.3316],[1.7972,2.1564,2.1838,2.4136,3.2427,3.6331,3.8008,4.5436,4.6583,4.7912,4.8742,5.0137,5.0233,6.7757,6.8258,7.1259,7.8178,8.1945,8.3537,9.0336,9.1397,9.1867],[0.0807,0.3463,0.4499,1.2954,1.6619,1.9756,1.9984,3.3202,4.2371,4.5686,4.8113,5.7512,6.9631,7.2296,7.3555,8.0305,8.0621,8.0814,8.1008,8.4768,8.9941,9.1838]];
+var TRAIN_Y=[[0.3858,0.0569,1.0103,0.5592,1.1391,1.2429,0.3518,-0.8303,-1.2874,-1.9379,-0.6865,-1.1122,-0.8264,-0.1932,-0.3329,0.6636,-0.0931,0.4772,0.6423,1.1308,0.9538,0.0402],[0.4342,0.4982,1.1411,1.0674,1.4355,0.6362,-0.0915,-0.4239,-0.6723,-0.5214,-0.6129,-0.0546,0.261,0.6653,1.1179,0.8539,0.2612,1.1643,1.5078,1.0754,1.4625,0.3834],[0.6328,0.4468,0.4401,1.5298,0.7391,0.8097,0.4988,-1.0738,-0.618,-0.6644,-0.4281,0.0398,0.9861,0.4915,-0.036,0.2665,0.7523,0.7147,1.2487,1.0354,1.1108,0.9313],[0.4177,0.5322,0.5586,1.4636,1.5848,0.5003,0.6652,-0.8689,-1.6529,-0.8312,-1.2362,-0.8021,-0.7686,-0.5783,-0.1552,0.5059,0.0896,0.398,0.8011,0.8704,1.3851,0.4088],[0.9735,0.6288,1.058,1.2208,1.1939,1.3242,0.5086,0.1012,-0.1731,0.4551,0.0675,-0.2721,-0.513,-1.28,-1.1377,-0.6246,-0.185,-0.3412,0.2271,0.3435,0.4129,0.5307],[0.2573,0.5147,0.4619,1.3219,1.2837,0.8249,0.584,0.0784,-0.8249,-0.9402,-1.4299,-0.6363,-0.8295,-0.035,0.2603,0.696,0.8376,0.9325,0.493,0.4928,0.4875,-0.1573],[0.4624,0.3503,0.9093,1.238,0.8372,0.7438,0.8836,0.4595,-0.678,-1.1787,-0.4893,-0.106,-0.582,-0.6196,-1.5082,-0.1865,-0.3618,0.3093,1.5376,1.3285,1.1442,0.0538],[0.7702,0.3786,0.2613,0.7959,0.5733,1.2398,0.6807,0.4169,0.4239,0.1676,-0.2741,-1.3057,-1.3669,-0.7994,-0.3618,-0.6693,-0.4922,1.3054,0.6296,0.2307,0.2821,-0.1154],[1.1287,1.1234,1.4223,0.6289,-0.3152,-0.6623,-0.6365,-1.1861,-0.8495,-0.9826,-1.2299,-1.0454,-0.6928,0.4861,0.3001,0.5421,0.8261,1.0164,1.1638,0.4442,0.1652,-0.3143],[0.5785,-0.1832,0.5641,-0.0549,1.4601,1.3837,1.0518,-0.393,-1.8523,-1.4312,-0.9578,-0.6392,0.6947,0.338,0.5103,1.4177,1.2383,1.1126,1.0625,1.3655,-0.0285,0.1984]];
+var COEFFS_LO=[[0.07351,-0.6937,1.09673],[0.05327,-0.46265,1.0878],[0.06295,-0.53115,1.06036],[0.08637,-0.81405,1.46398],[0.0742,-0.75857,1.61823],[0.04577,-0.45831,0.94508],[0.0837,-0.83026,1.70921],[0.06951,-0.74278,1.47351],[0.11493,-1.26337,2.87438],[0.06525,-0.56487,0.90025]];
+var COEFFS_HI=[[-0.00068,0.02311,-0.30841,2.04521,-6.89707,10.65198,-5.6843,1.23364],[-0.00014,0.00505,-0.06973,0.46633,-1.45072,1.46703,0.46793,0.28949],[-0.00056,0.01841,-0.2406,1.5682,-5.18619,7.66914,-3.41202,0.63872],[-0.00057,0.01965,-0.26999,1.86984,-6.73055,11.57652,-7.68778,1.89599],[0.00072,-0.02139,0.25191,-1.51693,5.08181,-9.62168,8.94632,-1.6532],[-0.00015,0.00542,-0.07632,0.51726,-1.62401,1.64127,0.62933,0.10499],[-0.00049,0.01637,-0.22035,1.51459,-5.51937,9.95516,-7.48824,2.1763],[-0.00014,0.00611,-0.10179,0.84105,-3.56186,7.27439,-6.39395,2.40202],[-0.00059,0.02061,-0.28681,2.02913,-7.59571,14.23595,-11.76835,4.01487],[-0.00038,0.01354,-0.19172,1.36882,-5.04437,8.72046,-5.56446,1.10156]];
+var AVG_LO=[0.07295,-0.71197,1.42295];
+var AVG_HI=[-0.0003,0.01069,-0.15138,1.07035,-3.8528,6.35702,-3.79555,1.22044];
+
+/* Polynomial evaluation */
+function polyval(coeffs,x){
+  var n=coeffs.length,v=0;
+  for(var i=0;i<n;i++) v=v*x+coeffs[i];
+  return v;
+}
+
+/* ════════════════════════════════════════════════════
+   DEMO 1 — BULLSEYE
+════════════════════════════════════════════════════ */
+(function(){
+  var CONFIGS=[
+    {label:'High Bias\nLow Variance', bx:0.55, by:-0.55, spread:0.08, col:'#f87171'},
+    {label:'Low Bias\nHigh Variance', bx:0.0,  by:0.0,   spread:0.55, col:'#4ade80'},
+    {label:'High Bias\nHigh Variance',bx:0.55, by:-0.55, spread:0.45, col:'#f59e0b'},
+    {label:'Low Bias\nLow Variance',  bx:0.0,  by:0.0,   spread:0.08, col:'#6366f1'},
+  ];
+  var shots=[[], [], [], []];
+  var rngs=CONFIGS.map(function(_,i){
+    var s=i*17+99;
+    return function(){s=(s*1664525+1013904223)&0xffffffff;return(s>>>0)/4294967295;};
+  });
+
+  function renderPanel(i){
+    var cfg=CONFIGS[i], sh=shots[i], rng=rngs[i];
+    var cx=80,cy=80,r=70;
+    var html='<rect width="160" height="160" fill="#0a0d14" rx="8"/>';
+    // Rings
+    [0.9,0.65,0.4,0.15].forEach(function(f){
+      html+='<circle cx="'+cx+'" cy="'+cy+'" r="'+Math.round(r*f)+'" fill="none" stroke="#1e2d40" stroke-width="1.5"/>';
+    });
+    // Bullseye
+    html+='<circle cx="'+cx+'" cy="'+cy+'" r="8" fill="rgba(99,102,241,.2)" stroke="'+cfg.col+'" stroke-width="1.5"/>';
+    html+='<line x1="'+(cx-12)+'" y1="'+cy+'" x2="'+(cx+12)+'" y2="'+cy+'" stroke="'+cfg.col+'" stroke-width="1" opacity="0.5"/>';
+    html+='<line x1="'+cx+'" y1="'+(cy-12)+'" x2="'+cx+'" y2="'+(cy+12)+'" stroke="'+cfg.col+'" stroke-width="1" opacity="0.5"/>';
+    // Shots
+    sh.forEach(function(s){
+      html+='<circle cx="'+s.x.toFixed(1)+'" cy="'+s.y.toFixed(1)+'" r="4" fill="'+cfg.col+'" opacity="0.75"/>';
+    });
+    // Mean crosshair
+    if(sh.length>2){
+      var mx=sh.reduce(function(a,s){return a+s.x;},0)/sh.length;
+      var my=sh.reduce(function(a,s){return a+s.y;},0)/sh.length;
+      html+='<line x1="'+(mx-8)+'" y1="'+my+'" x2="'+(mx+8)+'" y2="'+my+'" stroke="white" stroke-width="2"/>';
+      html+='<line x1="'+mx+'" y1="'+(my-8)+'" x2="'+mx+'" y2="'+(my+8)+'" stroke="white" stroke-width="2"/>';
+    }
+    // Label
+    var lines=cfg.label.split('\n');
+    html+='<text x="80" y="148" fill="'+cfg.col+'" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+lines[0]+'</text>';
+    html+='<text x="80" y="158" fill="'+cfg.col+'" opacity="0.6" font-size="7" text-anchor="middle" font-family="Space Mono,monospace">'+lines[1]+'</text>';
+    // Count
+    html+='<text x="8" y="14" fill="#334155" font-size="8" font-family="Space Mono,monospace">'+sh.length+' shots</text>';
+    return html;
+  }
+
+  function addShot(i){
+    var cfg=CONFIGS[i], rng=rngs[i];
+    var ang=rng()*2*Math.PI, rad=rng()*cfg.spread*70;
+    var x=80+cfg.bx*70+Math.cos(ang)*rad;
+    var y=80+cfg.by*70+Math.sin(ang)*rad;
+    x=Math.max(4,Math.min(156,x)); y=Math.max(4,Math.min(156,y));
+    shots[i].push({x:x,y:y});
+    refreshAll();
+  }
+
+  function refreshAll(){
+    var html='';
+    CONFIGS.forEach(function(_,i){
+      html+='<div onclick="d1shoot('+i+')" style="cursor:pointer;background:#0a0d14;border-radius:8px;overflow:hidden;border:1px solid var(--border);transition:border-color .15s" onmouseover="this.style.borderColor=\'rgba(99,102,241,.5)\'" onmouseout="this.style.borderColor=\'var(--border)\'">'
+        +'<svg viewBox="0 0 160 160" style="display:block;width:100%">'+renderPanel(i)+'</svg>'
+        +'</div>';
+    });
+    document.getElementById('d1panels').innerHTML=html;
+  }
+
+  window.d1shoot=function(i){addShot(i);};
+  window.d1reset=function(){shots=[[],[],[],[]];refreshAll();};
+  refreshAll();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 2 — ERROR CURVES
+════════════════════════════════════════════════════ */
+(function(){
+  // Clean pedagogical curves, sweet spot at degree 4
+  var TRAIN_ERR=[0.65,0.50,0.38,0.26,0.16,0.11,0.07,0.04];
+  var TEST_ERR= [0.72,0.60,0.50,0.22,0.27,0.46,0.74,1.22];
+  var BIAS2=    [0.56,0.44,0.34,0.08,0.06,0.05,0.04,0.03];
+  var VARI=     [0.07,0.07,0.07,0.05,0.12,0.32,0.61,1.10];
+  var NOISE=0.09;
+  var LABELS=['1','2','3','4','5','6','7','8'];
+  var BEST=4; // index of best test error (degree 5, 0-indexed as 4)
+
+  function d2draw(idx){
+    var W=460,H=260,PL=44,PR=12,PT=16,PB=36,PW=W-PL-PR,PH=H-PT-PB;
+    var maxY=1.4;
+    function sx(i){return PL+i/(LABELS.length-1)*PW;}
+    function sy(v){return PT+PH-Math.min(v,maxY)/maxY*PH;}
+
+    var svg='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    // Noise floor
+    var nfy=sy(NOISE);
+    svg+='<line x1="'+PL+'" y1="'+nfy.toFixed(0)+'" x2="'+(PL+PW)+'" y2="'+nfy.toFixed(0)+'" stroke="#334155" stroke-width="1" stroke-dasharray="4,3"/>';
+    svg+='<text x="'+(PL+4)+'" y="'+(nfy-4)+'" fill="#475569" font-size="8" font-family="Space Mono,monospace">noise floor σ²</text>';
+    // Grid
+    [0,0.3,0.6,0.9,1.2].forEach(function(v){
+      var y=sy(v);
+      svg+='<line x1="'+PL+'" y1="'+y.toFixed(0)+'" x2="'+(PL+PW)+'" y2="'+y.toFixed(0)+'" stroke="#131a2a" stroke-width="1"/>';
+      svg+='<text x="'+(PL-4)+'" y="'+(y+3).toFixed(0)+'" fill="#334155" font-size="8" text-anchor="end" font-family="Space Mono,monospace">'+v.toFixed(1)+'</text>';
+    });
+    svg+='<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+PH)+'" stroke="#2d3748" stroke-width="1.5"/>';
+    svg+='<line x1="'+PL+'" y1="'+(PT+PH)+'" x2="'+(PL+PW)+'" y2="'+(PT+PH)+'" stroke="#2d3748" stroke-width="1.5"/>';
+
+    // Best marker
+    svg+='<line x1="'+sx(BEST).toFixed(0)+'" y1="'+PT+'" x2="'+sx(BEST).toFixed(0)+'" y2="'+(PT+PH)+'" stroke="rgba(255,255,255,.15)" stroke-width="1.5" stroke-dasharray="4,3"/>';
+    svg+='<text x="'+(sx(BEST)+4).toFixed(0)+'" y="'+(PT+12)+'" fill="rgba(255,255,255,.3)" font-size="8" font-family="Space Mono,monospace">sweet spot</text>';
+
+    // Stacked bias+variance area (below current point)
+    for(var i=0;i<=idx;i++){
+      var x=sx(i);
+      var yB=sy(BIAS2[i]+VARI[i]+NOISE), yN=sy(NOISE);
+      svg+='<rect x="'+(x-8)+'" y="'+yB.toFixed(1)+'" width="16" height="'+(yN-yB).toFixed(1)+'" fill="rgba(99,102,241,.12)"/>';
+    }
+
+    // Training error line
+    var trPath='';
+    TRAIN_ERR.slice(0,idx+1).forEach(function(v,i){trPath+=(i===0?'M':'L')+sx(i).toFixed(1)+','+sy(v).toFixed(1);});
+    if(trPath) svg+='<path d="'+trPath+'" fill="none" stroke="var(--green)" stroke-width="2.5"/>';
+
+    // Test error line
+    var tePath='';
+    TEST_ERR.slice(0,idx+1).forEach(function(v,i){tePath+=(i===0?'M':'L')+sx(i).toFixed(1)+','+sy(v).toFixed(1);});
+    if(tePath) svg+='<path d="'+tePath+'" fill="none" stroke="var(--amber)" stroke-width="2.5"/>';
+
+    // Dots
+    TRAIN_ERR.slice(0,idx+1).forEach(function(v,i){svg+='<circle cx="'+sx(i).toFixed(1)+'" cy="'+sy(v).toFixed(1)+'" r="4" fill="var(--green)"/>';});
+    TEST_ERR.slice(0,idx+1).forEach(function(v,i){svg+='<circle cx="'+sx(i).toFixed(1)+'" cy="'+sy(v).toFixed(1)+'" r="4" fill="var(--amber)"/>';});
+    // Current point highlight
+    svg+='<circle cx="'+sx(idx).toFixed(1)+'" cy="'+sy(TRAIN_ERR[idx]).toFixed(1)+'" r="7" fill="none" stroke="var(--green)" stroke-width="2"/>';
+    svg+='<circle cx="'+sx(idx).toFixed(1)+'" cy="'+sy(TEST_ERR[idx]).toFixed(1)+'" r="7" fill="none" stroke="var(--amber)" stroke-width="2"/>';
+
+    // X labels
+    LABELS.forEach(function(l,i){
+      svg+='<text x="'+sx(i).toFixed(0)+'" y="'+(PT+PH+16)+'" fill="#334155" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">d='+l+'</text>';
+    });
+    svg+='<text x="'+(PL+PW/2)+'" y="'+(H-2)+'" fill="#475569" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">Model complexity (polynomial degree)</text>';
+
+    // Legend
+    svg+='<line x1="'+(PL+8)+'" y1="'+(PT+12)+'" x2="'+(PL+24)+'" y2="'+(PT+12)+'" stroke="var(--green)" stroke-width="2.5"/>';
+    svg+='<text x="'+(PL+28)+'" y="'+(PT+16)+'" fill="var(--green)" font-size="9" font-family="Space Mono,monospace">Training error</text>';
+    svg+='<line x1="'+(PL+130)+'" y1="'+(PT+12)+'" x2="'+(PL+146)+'" y2="'+(PT+12)+'" stroke="var(--amber)" stroke-width="2.5"/>';
+    svg+='<text x="'+(PL+150)+'" y="'+(PT+16)+'" fill="var(--amber)" font-size="9" font-family="Space Mono,monospace">Test error</text>';
+
+    document.getElementById('d2svg').innerHTML=svg;
+  }
+
+  window.d2update=function(){
+    var idx=+document.getElementById('d2sl').value-1;
+    var deg=idx+1;
+    document.getElementById('d2slval').textContent='Degree '+deg;
+    document.getElementById('d2train').textContent=TRAIN_ERR[idx].toFixed(3);
+    document.getElementById('d2test').textContent=TEST_ERR[idx].toFixed(3);
+    document.getElementById('d2bias').textContent=BIAS2[idx].toFixed(3);
+    document.getElementById('d2var').textContent=VARI[idx].toFixed(3);
+    var note=idx<2?'High bias — model too simple. Training and test error both high. Adding complexity helps.':
+             idx===BEST-1||idx===BEST?'⭐ Near the sweet spot. Bias and variance roughly balanced. Best test error.':
+             idx>BEST?'High variance — model too complex. Training error low but test error rising. Overfitting.':
+             'Decreasing bias. Test error still falling.';
+    document.getElementById('d2note').textContent=note;
+    d2draw(idx);
+  };
+  d2update();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 3 — MULTIPLE TRAINING SETS
+════════════════════════════════════════════════════ */
+(function(){
+  var mode='lo';
+
+  function d3draw(){
+    var W=460,H=280,PL=36,PR=12,PT=12,PB=24,PW=W-PL-PR,PH=H-PT-PB;
+    var xMin=0, xMax=9.43, yMin=-2, yMax=2;
+    function sx(x){return PL+(x-xMin)/(xMax-xMin)*PW;}
+    function sy(y){return PT+PH-(y-yMin)/(yMax-yMin)*PH;}
+
+    var svg='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    svg+='<line x1="'+PL+'" y1="'+(PT+PH)+'" x2="'+(PL+PW)+'" y2="'+(PT+PH)+'" stroke="#2d3748" stroke-width="1"/>';
+    svg+='<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+PH)+'" stroke="#2d3748" stroke-width="1"/>';
+    // Zero line
+    svg+='<line x1="'+PL+'" y1="'+sy(0).toFixed(0)+'" x2="'+(PL+PW)+'" y2="'+sy(0).toFixed(0)+'" stroke="#1e2d40" stroke-width="1" stroke-dasharray="3,3"/>';
+
+    var coeffs=mode==='lo'?COEFFS_LO:COEFFS_HI;
+    var avgCoeffs=mode==='lo'?AVG_LO:AVG_HI;
+
+    // Individual fits — dimmed
+    coeffs.forEach(function(c,ci){
+      var path='';
+      X_PLOT.forEach(function(x,i){
+        var y=polyval(c,x);
+        y=Math.max(yMin,Math.min(yMax,y));
+        path+=(i===0?'M':'L')+sx(x).toFixed(1)+','+sy(y).toFixed(1);
+      });
+      svg+='<path d="'+path+'" fill="none" stroke="rgba(99,102,241,0.35)" stroke-width="1.5"/>';
+    });
+
+    // True function — white dashed
+    var truePath='';
+    X_PLOT.forEach(function(x,i){
+      var y=Math.max(yMin,Math.min(yMax,Y_TRUE[i]));
+      truePath+=(i===0?'M':'L')+sx(x).toFixed(1)+','+sy(y).toFixed(1);
+    });
+    svg+='<path d="'+truePath+'" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-dasharray="6,3"/>';
+
+    // Average curve — thick
+    var avgPath='';
+    X_PLOT.forEach(function(x,i){
+      var y=Math.max(yMin,Math.min(yMax,polyval(avgCoeffs,x)));
+      avgPath+=(i===0?'M':'L')+sx(x).toFixed(1)+','+sy(y).toFixed(1);
+    });
+    svg+='<path d="'+avgPath+'" fill="none" stroke="white" stroke-width="3"/>';
+
+    // Training points for first set only
+    TRAIN_X[0].forEach(function(x,i){
+      var y=TRAIN_Y[0][i];
+      svg+='<circle cx="'+sx(x).toFixed(1)+'" cy="'+sy(Math.max(yMin,Math.min(yMax,y))).toFixed(1)+'" r="3" fill="#6366f1" opacity="0.6"/>';
+    });
+
+    // Legend
+    svg+='<line x1="'+(PL+8)+'" y1="'+(PT+12)+'" x2="'+(PL+28)+'" y2="'+(PT+12)+'" stroke="rgba(99,102,241,0.5)" stroke-width="1.5"/>';
+    svg+='<text x="'+(PL+32)+'" y="'+(PT+16)+'" fill="rgba(99,102,241,0.7)" font-size="8" font-family="Space Mono,monospace">10 individual fits</text>';
+    svg+='<line x1="'+(PL+160)+'" y1="'+(PT+12)+'" x2="'+(PL+180)+'" y2="'+(PT+12)+'" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-dasharray="5,2"/>';
+    svg+='<text x="'+(PL+184)+'" y="'+(PT+16)+'" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Space Mono,monospace">True function</text>';
+    svg+='<line x1="'+(PL+285)+'" y1="'+(PT+12)+'" x2="'+(PL+305)+'" y2="'+(PT+12)+'" stroke="white" stroke-width="3"/>';
+    svg+='<text x="'+(PL+309)+'" y="'+(PT+16)+'" fill="white" font-size="8" font-family="Space Mono,monospace">Average of 10 fits</text>';
+
+    document.getElementById('d3svg').innerHTML=svg;
+
+    // Compute average error
+    var totalErr=0, N=0;
+    X_PLOT.forEach(function(x,xi){
+      var avgPred=polyval(avgCoeffs,x);
+      totalErr+=(avgPred-Y_TRUE[xi])*(avgPred-Y_TRUE[xi]);
+      N++;
+    });
+    var avgErr=totalErr/N;
+    document.getElementById('d3err').textContent=avgErr.toFixed(3)+' (avg prediction)';
+
+    if(mode==='lo'){
+      document.getElementById('d3note').textContent='Low complexity (degree 2): all 10 fits cluster tightly. Low variance — different training sets produce similar models. But they\u2019re all similarly biased: the model can\u2019t capture the full curve shape.';
+      document.getElementById('d3insight').textContent='Averaging helps little here. The 10 models agree with each other but agree on the wrong answer. Bias cannot be reduced by averaging — you need a more complex model.';
+    } else {
+      document.getElementById('d3note').textContent='High complexity (degree 7): the 10 fits scatter wildly. High variance — each model has memorised its own training noise differently. But the average (white line) tracks the true function surprisingly well.';
+      document.getElementById('d3insight').textContent='This is the ensemble insight: when models are wrong in different directions, averaging cancels the errors. This is exactly why Random Forests work: many deep trees, averaged together, achieve low variance without sacrificing bias.';
+    }
+  }
+
+  window.d3set=function(m){
+    mode=m;
+    document.getElementById('d3lo').classList.toggle('active',m==='lo');
+    document.getElementById('d3hi').classList.toggle('active',m==='hi');
+    d3draw();
+  };
+  d3draw();
+})();
+</script>
+</body>
+</html>
