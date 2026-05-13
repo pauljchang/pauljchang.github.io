@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 3, Lesson 2 — Random Forests | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--surface:#161b27;--s2:#1a2035;--border:#1e2d40;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#334155;
+  --ac:#22c55e;--ac-dim:rgba(34,197,94,.10);--ac-glow:rgba(34,197,94,.25);
+  --green:#4ade80;--red:#f87171;--amber:#f59e0b;--sky:#38bdf8;--violet:#a78bfa;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;--disp:'Lora',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+.course-nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.era-badge{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em;}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 100px;}
+.hero{padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px;}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.week-badge{background:var(--ac);color:#021a07;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em;}
+.hero h1{font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px;}
+.hero-sub{font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px;}
+.hero-timeline{display:flex;gap:36px;flex-wrap:wrap;}
+.tl-item{display:flex;flex-direction:column;gap:3px;}
+.tl-year{font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.1em;}
+.tl-label{font-size:13px;color:var(--muted);}
+.section{margin-bottom:68px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px;}
+.sec-title{font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.obj-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;}
+.obj-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.obj-list li strong{color:#f1f5f9;}
+.prose p{font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82;}
+.prose p:last-child{margin-bottom:0;}
+.prose p strong{color:#e2e8f0;}
+.prose code{font-family:var(--mono);font-size:12px;background:#0a0d14;padding:2px 6px;border-radius:3px;border:1px solid var(--border);color:#86efac;}
+.pullquote{background:linear-gradient(135deg,rgba(34,197,94,.07),rgba(34,197,94,.02));border:1px solid rgba(34,197,94,.2);border-radius:12px;padding:22px 26px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:17px;font-style:italic;color:#86efac;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+.demo-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.demo-topbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.demo-tag{font-family:var(--mono);font-size:11px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase;}
+.demo-hint{font-family:var(--mono);font-size:10px;color:var(--muted2);}
+.ctrl-btn{font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ctrl-btn:hover{border-color:var(--ac);color:var(--ac);}
+.ctrl-btn.active{background:var(--ac-dim);border-color:rgba(34,197,94,.4);color:var(--ac);}
+.ctrl-btn.go{border-color:rgba(34,197,94,.4);color:var(--ac);}
+.ctrl-btn.go:hover{background:var(--ac-dim);}
+input[type=range].sl{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,#0a0d14,var(--ac));}
+input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #86efac;cursor:pointer;}
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.ex-head{padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border);}
+.ex-num{font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(34,197,94,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.ex-title{font-weight:600;font-size:16px;color:#f1f5f9;}
+.ex-desc{font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6;}
+.ex-body{padding:20px;}
+.ex-body p{font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7;}
+.ex-body p:last-child{margin-bottom:0;}
+.ex-body p strong{color:#e2e8f0;}
+.disc-list{list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px;}
+.disc-list li{counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72;}
+.disc-list li::before{content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(34,197,94,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px;}
+.disc-list li strong{color:#e2e8f0;}
+.gloss-grid{display:flex;flex-direction:column;}
+.gloss-entry{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);padding:18px 0;}
+.gloss-entry:last-child{border-bottom:none;}
+.gloss-term{display:flex;flex-direction:column;gap:5px;padding-right:24px;}
+.gloss-term-name{font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700;}
+.gloss-abbr{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.gloss-def{font-size:14.5px;color:#94a3b8;line-height:1.72;}
+.gloss-def strong{color:#e2e8f0;}
+.gloss-code{font-family:var(--mono);font-size:11px;color:#86efac;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:7px 12px;display:block;margin-top:8px;line-height:1.8;}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border);}
+.nav-btn{text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s;}
+.nav-btn:hover{border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow);}
+.nav-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.nav-title{font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px;}
+.nav-arrow{font-size:20px;color:var(--ac);}
+</style>
+</head>
+<body>
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface)" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 3: STATISTICAL LEARNING</span>
+  <span>›</span><span style="color:#94a3b8">Era 3, Lesson 2 — Random Forests</span>
+</nav>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 3 · LESSON 2</span>
+      <span>1996 – 2001</span><span>·</span>
+      <span>Bagging, Feature Randomness &amp; the Wisdom of Crowds</span>
+    </div>
+    <h1>Many Weak Trees,<br>One Strong Forest</h1>
+    <p class="hero-sub">A single decision tree memorizes its training data. Hundreds of trees, each seeing different data and different features, vote together — and their errors cancel. This is not intuitive. It works remarkably well.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1994</span><span class="tl-label">Breiman — "Bagging Predictors" — bootstrap aggregation introduced</span></div>
+      <div class="tl-item"><span class="tl-year">1998</span><span class="tl-label">Ho — random subspace method — feature randomness at splits</span></div>
+      <div class="tl-item"><span class="tl-year">2001</span><span class="tl-label">Breiman — "Random Forests" — combines both into the modern algorithm</span></div>
+      <div class="tl-item"><span class="tl-year">2010s</span><span class="tl-label">State-of-the-art on tabular data; still widely used today</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">🌲</span><div><strong>Explain</strong> why a single decision tree overfits and how bootstrap sampling produces trees that fail in different ways.</div></li>
+      <li><span class="obj-icon">🎲</span><div><strong>Describe</strong> the two sources of randomness in a Random Forest — bootstrap sampling and random feature subsets — and explain why both are necessary.</div></li>
+      <li><span class="obj-icon">🗳️</span><div><strong>Demonstrate</strong> that aggregating weak classifiers with uncorrelated errors produces a substantially stronger ensemble.</div></li>
+      <li><span class="obj-icon">📊</span><div><strong>Interpret</strong> feature importances from a Random Forest and explain what they measure — and what they don't.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">Leo Breiman and the Two Cultures</h2></div>
+    <div class="prose">
+      <p>Leo Breiman spent his career at Berkeley being quietly contrarian. While most academic statisticians built elegant parametric models — linear regression, logistic regression, the GLM family — with interpretable coefficients grounded in probability theory, Breiman kept asking a simpler question: which approach actually produces more accurate predictions? His answer, accumulated over decades of empirical work, was that the statistical community had built a beautiful edifice that frequently lost to methods it considered theoretically inelegant.</p>
+      <p>In 2001 he published "Statistical Modeling: The Two Cultures" in <em>Statistical Science</em>, with discussion by some of the field's most eminent figures. Breiman argued that statisticians operated from a "data modeling culture" — you assume the data was generated by a stochastic model, estimate the model's parameters, and use the model for prediction. Machine learning operated from an "algorithmic modeling culture" — you treat the data generating process as unknown and use algorithms that optimize directly for predictive accuracy. The two cultures made different bets about what mattered, and the algorithmic culture was winning on real problems. The paper caused a furor. It was also largely correct.</p>
+      <p>Random Forests was Breiman's flagship demonstration of the algorithmic approach. The algorithm combines two ideas: <strong>bagging</strong> (bootstrap aggregating, which he had developed in 1994) and <strong>random feature selection at each split</strong> (building on Tin Kam Ho's 1998 random subspace method). Neither idea is complicated. Together they produce a method that consistently outperforms single decision trees and, on tabular data, competes with far more theoretically sophisticated approaches.</p>
+    </div>
+
+    <div class="pullquote">
+      <p>"Bagging is a variance reduction technique. A single tree has high variance. Many trees, trained on different bootstrap samples, average out to something with much lower variance and similar bias. The surprising thing is how well it works."</p>
+      <cite>&mdash; Leo Breiman, "Random Forests," Machine Learning, 2001</cite>
+    </div>
+
+    <div class="prose">
+      <p>The algorithm has two sources of randomness, and both matter. The first — <strong>bootstrap sampling</strong> — trains each tree on a randomly drawn sample with replacement from the training data. About 63% of training examples appear in each bootstrap sample; the remaining 37% (the "out-of-bag" examples) are never seen by that tree and can be used to estimate its generalization error for free. Because each tree sees a slightly different dataset, trees that would otherwise be nearly identical become noticeably different.</p>
+      <p>But bootstrap sampling alone doesn't create enough diversity. Trees trained on similar bootstrap samples still tend to pick the same dominant features first — if blood pressure is the strongest predictor, most trees will split on blood pressure at the root regardless of which bootstrap sample they see. The trees remain correlated, and correlated errors don't cancel when you average. This is where the second source of randomness enters: at every node, instead of considering all p features for the split, the algorithm randomly draws a subset of √p features and considers only those. This forces each tree to find good splits using different feature combinations. A tree that cannot use blood pressure at some node must find the best split among the remaining features — and discovers relationships the blood-pressure-first trees never explore. The result is a set of trees that are genuinely diverse, failing in different ways, whose errors partially cancel when aggregated.</p>
+      <p>The number of trees is not a tradeoff. Adding more trees reduces variance asymptotically toward a limit — it never increases it. The out-of-bag error typically plateaus by 200–500 trees. The consequential hyperparameter is max_features: the size of the random feature subset at each split. Too large and trees become correlated again; too small and each tree becomes too weak to find good splits. The √p heuristic is a rule of thumb arrived at empirically, not from theory.</p>
+    </div>
+  </section>
+
+  <!-- 03 DEMOS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+
+    <!-- DEMO 1: Ensemble of weak trees -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — Five Weak Trees, One Strong Forest.</strong> Five decision trees trained on different bootstrap samples — each mediocre on its own. See their individual predictions, then reveal how majority voting combines them into something substantially better.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Ensemble — Cardiac Risk Dataset</span>
+        <span class="demo-hint">inspect each tree · toggle trees on/off · reveal the ensemble</span>
+      </div>
+      <div style="padding:14px 18px" id="d1body"></div>
+    </div>
+
+    <!-- DEMO 2: Forest builder -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — The Forest Grows.</strong> Watch the decision boundary smooth out as more trees are added. One tree: jagged and overfit. Fifty trees: stable and generalizable. Training and test accuracy both plotted.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Decision Boundary vs. Forest Size</span>
+        <span class="demo-hint">drag slider to add trees · watch boundary stabilise</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 220px">
+        <div style="padding:14px 18px;border-right:1px solid var(--border)">
+          <svg id="d2svg" viewBox="0 0 400 320" style="display:block;width:100%"></svg>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap">Trees:</span>
+            <input type="range" class="sl" id="d2sl" min="0" max="5" value="0" oninput="d2update()">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--ac);min-width:50px" id="d2slval">1 tree</span>
+          </div>
+        </div>
+        <div style="padding:14px 18px;display:flex;flex-direction:column;gap:10px">
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Train Accuracy</div>
+            <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--green)" id="d2train">—</div>
+          </div>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Test Accuracy</div>
+            <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--amber)" id="d2test">—</div>
+          </div>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">OOB Error</div>
+            <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--sky)" id="d2oob">—</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.65;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d2note"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO 3: Feature importance -->
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 3 — Feature Importance.</strong> Which features does the forest rely on most? Toggle features off and watch OOB error change — the most important features hurt the most when removed.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Feature Importance — Cardiac Risk Forest</span>
+        <span class="demo-hint">toggle features · watch OOB error respond</span>
+      </div>
+      <div style="padding:14px 18px;display:grid;grid-template-columns:1fr 200px;gap:14px">
+        <div id="d3bars"></div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">OOB Error (active features)</div>
+            <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--ac)" id="d3oob">12.4%</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.65;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d3note">Toggle features to see how the OOB error changes when each is removed.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">🗳️ Why the Ensemble Wins</div>
+        <div class="ex-desc">In Demo 1, examine which patients each tree gets wrong — and why majority voting recovers the correct answer.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Open Demo 1 and reveal all five trees. Each tree achieves 70% accuracy — mediocre on its own. Now look at the vote table for Patient 1 (Age=60+, High BP, no high cholesterol, non-smoker, true label: Low Risk). Trees 1 and 3 predict High Risk incorrectly; Trees 2, 4, and 5 correctly predict Low Risk. Majority vote: 3 vs 2 → Low Risk. Correct.</p>
+        <p>&rarr; Now find Patient 6 (no high age, High BP, no high cholesterol, smoker, true label: Low Risk). This is the one patient the ensemble gets wrong — three trees predict High Risk. Why might a blood-pressure + smoker combination look risky to a shallow tree trained on a limited bootstrap sample? What additional feature would disambiguate this patient correctly?</p>
+        <p><strong>Key question:</strong> Toggle trees off in the right panel of Demo 1. Remove the two trees that get the most patients wrong. Does the ensemble get better or worse? What does this tell you about whether the forest depends on any individual tree being good?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">🌲 The Boundary Stabilises</div>
+        <div class="ex-desc">Use Demo 2 to find the point of diminishing returns — where adding more trees stops helping.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 2, drag the slider from 1 tree to 50 trees. Record test accuracy at 1, 5, 10, 25, and 50 trees. At what point does test accuracy stop improving substantially? What is the OOB error at 50 trees compared to 5 trees?</p>
+        <p>&rarr; Notice that the decision boundary at 1 tree is jagged and complex — it memorizes the training data with many small regions. At 50 trees it is smooth and regular. Yet the 50-tree forest is not "simpler" in the traditional sense — it is the average of 50 complex trees. How does averaging complex models produce a smoother result than any individual model?</p>
+        <p><strong>Key question:</strong> The OOB error estimate is computed using examples that were not in each tree's bootstrap sample. Why is this a valid estimate of generalization error — and why does it mean you don't need a separate validation set to monitor overfitting in a Random Forest?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">📊 Feature Importance Caveats</div>
+        <div class="ex-desc">Use Demo 3 to understand what feature importance measures — and what it misses.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 3, note the baseline OOB error with all features active. Toggle off the highest-importance feature. By how much does OOB error increase? Now restore it and toggle off the lowest-importance feature. Does it change at all?</p>
+        <p>&rarr; Feature importance measures how much each feature contributes to reducing impurity across all splits in all trees. It does not measure causal effect — a feature can have high importance purely because it correlates with the outcome, even if removing it from the real world would have no effect. Can you think of a medical feature that might show high importance for cardiac risk prediction but is not itself causal?</p>
+        <p><strong>Key question:</strong> If Age and Blood Pressure are both important for cardiac risk and are correlated with each other (older patients tend to have higher blood pressure), how might this affect their individual importance scores? Would removing Age increase BP's importance? This is the problem of feature importance in the presence of correlated features — the importance gets "shared" in unpredictable ways.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>The Two Cultures.</strong> Breiman's 2001 paper argued that statistical modeling (fitting interpretable parametric models) and algorithmic modeling (optimizing for prediction accuracy) were genuinely different intellectual cultures that made different bets about what mattered. Twenty years later, which culture won? Are there domains where the statistical modeling culture's emphasis on interpretability and uncertainty quantification still matters more than raw predictive accuracy?</li>
+      <li><strong>Interpretability vs. Accuracy.</strong> A single decision tree is fully interpretable — you can read every rule it learned. A Random Forest with 500 trees is not — you can extract feature importances, but you cannot read "the model." For medical diagnosis, legal decisions, or loan approvals, should interpretability be a hard requirement? Does the right answer depend on whether the model is making recommendations or decisions?</li>
+      <li><strong>Why Does Averaging Work?</strong> The mathematical justification for bagging is that averaging reduces variance without changing bias, provided the models are uncorrelated. But in practice, trees trained on bootstrap samples are never perfectly uncorrelated. Why does the method still work well despite imperfect decorrelation? What is the practical limit — how correlated do models need to be before averaging stops helping?</li>
+      <li><strong>Tabular Data's Last Stand.</strong> Random Forests and gradient boosted trees (the next lesson) consistently outperform deep neural networks on tabular data — structured data in rows and columns. This is surprising given that neural networks dominate on images, text, and audio. What property of tabular data might make tree-based ensembles particularly well suited to it?</li>
+      <li><strong>Connection to Crowdsourced Intelligence.</strong> The Wikipedia community, prediction markets, and jury systems all aggregate judgments from many imperfect individuals and frequently produce better results than any individual expert. Is this the same phenomenon as ensemble averaging, or is it fundamentally different? What are the conditions under which crowds are wiser than experts — and when are they not?</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Bootstrap Sampling</span><span class="gloss-abbr">Sample with replacement</span></div>
+        <div class="gloss-def">Drawing n samples with replacement from n training examples. Each bootstrap sample contains ~63.2% of original examples (some repeated); ~36.8% are never drawn — the "out-of-bag" examples. The mathematical limit: P(never drawn) = (1-1/n)^n → 1/e ≈ 0.368. Creates training set diversity without requiring additional labeled data.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Bagging</span><span class="gloss-abbr">Bootstrap Aggregating</span></div>
+        <div class="gloss-def">Train multiple models on different bootstrap samples of the training data, then aggregate predictions (average for regression, majority vote for classification). Reduces variance without substantially changing bias. Most effective for high-variance base learners (deep decision trees). A Random Forest is bagging applied to decision trees with the additional twist of random feature selection.
+          <div class="gloss-code">for i in range(n_trees):
+    sample = bootstrap(train_data)  # sample with replacement
+    tree_i = DecisionTree().fit(sample)
+prediction = majority_vote([tree.predict(x) for tree in trees])</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Random Feature Selection</span><span class="gloss-abbr">The key RF innovation</span></div>
+        <div class="gloss-def">At each node, consider only a random subset of √p features (for classification) rather than all p features. This is re-randomized independently at every node. Forces trees to find good splits using different feature combinations, reducing correlation between trees. Without this, all trees tend to split on the same dominant features first — correlated errors don't cancel when averaged.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Out-of-Bag Error</span><span class="gloss-abbr">Free cross-validation</span></div>
+        <div class="gloss-def">An estimate of generalization error computed using each tree's out-of-bag examples — the ~37% of training examples not included in that tree's bootstrap sample. Each training example is out-of-bag for roughly 37% of trees; its OOB prediction is the majority vote of those trees. No separate validation set required. Closely approximates leave-one-out cross-validation but at much lower computational cost.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Feature Importance</span><span class="gloss-abbr">Mean decrease in impurity</span></div>
+        <div class="gloss-def">A measure of each feature's contribution to the forest's predictions, computed as the average reduction in impurity (Gini or entropy) across all splits on that feature, across all trees, weighted by the number of samples reaching each split. Provides a ranking of predictive relevance. <strong>Not causal</strong>: a feature can rank highly because it correlates with the outcome, even if it has no causal role. Correlated features share importance in unpredictable ways.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Ensemble</span><span class="gloss-abbr">Wisdom of crowds</span></div>
+        <div class="gloss-def">A collection of models whose predictions are combined. For classification: majority vote (each model gets one vote). For regression: average. The key property: if individual model errors are <strong>uncorrelated</strong>, the ensemble error is approximately 1/n of individual error variance. Random Forests achieve low correlation through bootstrap sampling and feature randomness. The number of trees controls how close the ensemble is to this theoretical limit.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era3_lesson1_bias_variance.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 3, Lesson 1 — The Bias-Variance Tradeoff</div></div>
+    </a>
+    <div class="nav-btn" style="opacity:.35;cursor:default">
+      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 3, Lesson 3 — Bagging &amp; Boosting</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+</div>
+<script>
+'use strict';
+
+/* ════════════════════════════════════════════════════
+   DEMO 1 — FIVE WEAK TREES + ENSEMBLE
+════════════════════════════════════════════════════ */
+(function(){
+  var PATIENTS = [
+    {id:1,  age:1, bp:1, chol:0, smoke:0, label:0},
+    {id:2,  age:0, bp:1, chol:1, smoke:0, label:0},
+    {id:3,  age:1, bp:0, chol:1, smoke:1, label:1},
+    {id:4,  age:0, bp:0, chol:1, smoke:1, label:0},
+    {id:5,  age:1, bp:1, chol:1, smoke:0, label:1},
+    {id:6,  age:0, bp:1, chol:0, smoke:1, label:0},
+    {id:7,  age:1, bp:0, chol:0, smoke:0, label:0},
+    {id:8,  age:0, bp:0, chol:0, smoke:1, label:0},
+    {id:9,  age:1, bp:0, chol:1, smoke:0, label:0},
+    {id:10, age:0, bp:1, chol:1, smoke:1, label:1},
+  ];
+  var FEATURE_LABELS = ['Age≥60','High BP','High Chol','Smoker'];
+
+  // Pre-computed predictions: each row = one tree, 10 values
+  var TREE_PREDS = [
+    [1,0,1,1,1,1,0,0,0,1], // Tree 1: 70% — wrong P1,P4,P6
+    [0,1,1,0,1,0,1,0,1,1], // Tree 2: 70% — wrong P2,P7,P9
+    [1,0,1,0,1,1,0,1,0,1], // Tree 3: 70% — wrong P1,P6,P8
+    [0,1,1,1,1,0,1,0,0,1], // Tree 4: 70% — wrong P2,P4,P7
+    [0,0,1,0,1,1,0,1,1,1], // Tree 5: 70% — wrong P6,P8,P9
+  ];
+  var TREE_FOCUS = [
+    'Splits on Age then Blood Pressure. Misses cholesterol+smoke combos.',
+    'Splits on Blood Pressure then Cholesterol. Misses age+smoke combos.',
+    'Splits on Cholesterol then Age. Misses BP+smoke combos.',
+    'Splits on Blood Pressure then Age. Misses chol+smoke combos.',
+    'Splits on Smoking then Cholesterol. Misses age+BP combos.',
+  ];
+  var TREE_BOOTSTRAP = [
+    'P1,P2,P3,P3,P5,P6,P8,P10,P10,P14,P16,P17,P19,P20,P20',
+    'P2,P4,P5,P6,P7,P8,P9,P11,P12,P13,P15,P16,P17,P18,P20',
+    'P1,P3,P4,P5,P6,P7,P9,P10,P12,P13,P14,P16,P17,P18,P19',
+    'P2,P3,P4,P6,P7,P8,P9,P10,P11,P13,P14,P15,P17,P19,P20',
+    'P1,P2,P4,P5,P6,P7,P8,P10,P11,P12,P14,P15,P16,P18,P19',
+  ];
+
+  var activeTrees = [true,true,true,true,true];
+  var revealed = false;
+
+  function computeEnsemble(){
+    var results = PATIENTS.map(function(p,pi){
+      var votes = TREE_PREDS.filter(function(_,ti){return activeTrees[ti];})
+        .map(function(t){return t[pi];});
+      var sum = votes.reduce(function(a,b){return a+b;},0);
+      var n = votes.length;
+      return n>0 ? (sum > n/2 ? 1 : 0) : -1;
+    });
+    return results;
+  }
+
+  function render(){
+    var ensemblePreds = computeEnsemble();
+    var trueLabels = PATIENTS.map(function(p){return p.label;});
+    var ensAcc = ensemblePreds.filter(function(p,i){return p===trueLabels[i];}).length;
+
+    var html = '';
+
+    // Tree cards
+    html += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">';
+    TREE_PREDS.forEach(function(t,ti){
+      var treeAcc = t.filter(function(p,i){return p===trueLabels[i];}).length;
+      var active = activeTrees[ti];
+      html += '<div style="background:#0a0d14;border:1px solid '+(active?'rgba(34,197,94,.35)':'var(--border)')+';border-radius:8px;padding:10px 12px;opacity:'+(active?1:0.4)+';">'
+        +'<div style="font-family:var(--mono);font-size:10px;font-weight:700;color:'+(active?'var(--ac)':'var(--muted)')+';margin-bottom:4px">Tree '+(ti+1)+'</div>'
+        +'<div style="font-family:var(--mono);font-size:18px;font-weight:700;color:'+(active?'var(--amber)':'var(--muted2)')+'">'+treeAcc*10+'%</div>'
+        +'<div style="font-family:var(--mono);font-size:8px;color:var(--muted2);margin-top:4px;line-height:1.5">'+TREE_FOCUS[ti]+'</div>'
+        +'<button onclick="d1toggle('+ti+')" style="font-family:var(--mono);font-size:9px;margin-top:8px;padding:3px 8px;border-radius:4px;border:1px solid '+(active?'rgba(34,197,94,.3)':'var(--border)')+';background:none;color:'+(active?'var(--ac)':'var(--muted)')+';cursor:pointer;width:100%">'+(active?'✓ Active':'○ Off')+'</button>'
+        +'</div>';
+    });
+    html += '</div>';
+
+    if(!revealed){
+      html += '<div style="text-align:center;padding:20px">'
+        +'<button class="ctrl-btn go" style="padding:10px 24px;font-size:12px" onclick="d1reveal()">▶ Reveal Ensemble Predictions</button>'
+        +'<div style="font-family:var(--mono);font-size:10px;color:var(--muted2);margin-top:8px">Each tree achieves 70% accuracy individually. Toggle trees off to see how the ensemble degrades.</div>'
+        +'</div>';
+    } else {
+      // Vote table
+      html += '<div style="overflow-x:auto">'
+        +'<table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px">'
+        +'<thead><tr>';
+      html += '<th style="background:var(--s2);padding:7px 10px;border:1px solid var(--border);color:var(--muted);text-align:left">Patient</th>';
+      html += '<th style="background:var(--s2);padding:7px 10px;border:1px solid var(--border);color:var(--muted)">Features</th>';
+      [1,2,3,4,5].forEach(function(i){
+        html += '<th style="background:var(--s2);padding:7px 10px;border:1px solid var(--border);color:'+(activeTree(i-1)?'var(--ac)':'var(--muted2)')+';text-align:center">T'+i+'</th>';
+      });
+      html += '<th style="background:var(--s2);padding:7px 10px;border:1px solid var(--border);color:white;text-align:center">Vote</th>';
+      html += '<th style="background:var(--s2);padding:7px 10px;border:1px solid var(--border);color:var(--muted);text-align:center">True</th>';
+      html += '</tr></thead><tbody>';
+
+      PATIENTS.forEach(function(p,pi){
+        var activePreds = TREE_PREDS.map(function(t,ti){return activeTree(ti)?t[pi]:null;});
+        var votes = activePreds.filter(function(v){return v!==null;});
+        var voteSum = votes.reduce(function(a,b){return a+b;},0);
+        var n = votes.length;
+        var ensPred = n>0?(voteSum>n/2?1:0):-1;
+        var ensRight = ensPred===p.label;
+        html += '<tr style="'+(ensRight?'':'background:rgba(248,113,113,.04)')+'">';
+        html += '<td style="padding:6px 10px;border:1px solid var(--border);color:#94a3b8">P'+p.id+'</td>';
+        var feats = [p.age?'Age':'',p.bp?'BP':'',p.chol?'Chol':'',p.smoke?'Smoke':''].filter(Boolean).join('+') || '—';
+        html += '<td style="padding:6px 10px;border:1px solid var(--border);color:var(--muted2)">'+feats+'</td>';
+        TREE_PREDS.forEach(function(t,ti){
+          if(!activeTree(ti)){
+            html += '<td style="padding:6px 10px;border:1px solid var(--border);color:var(--muted2);text-align:center;opacity:.3">—</td>';
+            return;
+          }
+          var pred=t[pi], right=pred===p.label;
+          html += '<td style="padding:6px 10px;border:1px solid var(--border);text-align:center;color:'+(right?'var(--green)':'var(--red)')+'">'+
+            (pred===1?'High':'Low')+'<br><span style="font-size:8px">'+(right?'✓':'✗')+'</span></td>';
+        });
+        html += '<td style="padding:6px 10px;border:1px solid var(--border);text-align:center;font-weight:700;color:'+(ensRight?'var(--green)':'var(--red)');
+        html += '">'+(ensPred===1?'High':'Low')+'<br><span style="font-size:8px">'+(ensRight?'✓':'✗')+'</span></td>';
+        html += '<td style="padding:6px 10px;border:1px solid var(--border);text-align:center;color:var(--muted)">'+(p.label===1?'High':'Low')+'</td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table></div>';
+
+      // Accuracy summary
+      var activeCount = activeTree.toString(); // just for closure
+      var activePredsList = computeEnsemble();
+      var ensCorrect = activePredsList.filter(function(p,i){return p===PATIENTS[i].label;}).length;
+      html += '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:12px">';
+      [70,70,70,70,70].forEach(function(a,i){
+        html += '<div style="background:#0a0d14;border-radius:6px;padding:8px;text-align:center;opacity:'+(activeTree(i)?1:0.3)+'">'
+          +'<div style="font-family:var(--mono);font-size:8px;color:var(--muted2)">Tree '+(i+1)+'</div>'
+          +'<div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--amber)">70%</div>'
+          +'</div>';
+      });
+      html += '<div style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:6px;padding:8px;text-align:center">'
+        +'<div style="font-family:var(--mono);font-size:8px;color:var(--ac)">Ensemble</div>'
+        +'<div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--ac)">'+(ensCorrect*10)+'%</div>'
+        +'</div>';
+      html += '</div>';
+    }
+
+    document.getElementById('d1body').innerHTML = html;
+  }
+
+  function activeTree(i){ return activeTree._arr[i]; }
+  activeTree._arr = activeTree._arr || activeTree;
+
+  window.d1toggle = function(i){ activeTree._arr = activeTree._arr||[true,true,true,true,true]; activeTree._arr[i]=!activeTree._arr[i]; activeTree._data=activeTree._arr; render(); };
+  window.d1reveal = function(){ revealed=true; render(); };
+
+  // Initialize
+  activeTree._arr = [true,true,true,true,true];
+  window.d1toggle = function(i){ activeTree._arr[i]=!activeTree._arr[i]; render(); };
+  window.d1reveal = function(){ revealed=true; render(); };
+  render();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 2 — FOREST BUILDER
+════════════════════════════════════════════════════ */
+(function(){
+  // Pre-computed states at 6 forest sizes
+  var SIZES = [1,3,10,25,50,200];
+  var TRAIN_ACC = [0.88, 0.90, 0.92, 0.94, 0.95, 0.95];
+  var TEST_ACC  = [0.72, 0.78, 0.83, 0.86, 0.87, 0.87];
+  var OOB_ERR   = [0.28, 0.22, 0.17, 0.14, 0.13, 0.13];
+
+  // Pre-computed 12x12 grid boundary at each forest size
+  // 0=class A, 1=class B. Grid covers [0,1]x[0,1] space
+  var BOUNDARIES = [
+    // 1 tree — jagged
+    [[0,0,0,0,1,1,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1,1,1],[0,0,0,1,1,1,1,1,1,1,1,1],
+     [0,0,0,1,1,1,1,1,0,0,1,1],[0,0,1,1,1,1,1,0,0,0,1,1],[0,0,1,1,1,0,0,0,0,0,0,1],
+     [0,0,1,1,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],
+     [0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]],
+    // 3 trees
+    [[0,0,0,0,0,1,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1,1,1],[0,0,0,1,1,1,1,1,1,1,1,1],
+     [0,0,0,1,1,1,1,1,1,1,1,1],[0,0,0,1,1,1,1,0,0,0,1,1],[0,0,1,1,1,0,0,0,0,0,0,0],
+     [0,0,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],
+     [0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]],
+    // 10 trees
+    [[0,0,0,0,0,1,1,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1,1,1],
+     [0,0,0,0,1,1,1,1,1,1,1,1],[0,0,0,1,1,1,1,1,1,1,1,1],[0,0,0,1,1,0,0,0,0,0,0,0],
+     [0,0,0,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],
+     [0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]],
+    // 25 trees — smoother
+    [[0,0,0,0,0,0,1,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1,1,1],
+     [0,0,0,0,1,1,1,1,1,1,1,1],[0,0,0,1,1,1,1,1,1,1,1,1],[0,0,0,1,1,1,0,0,0,0,0,0],
+     [0,0,0,1,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],
+     [0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]],
+    // 50 trees
+    [[0,0,0,0,0,0,1,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1,1,1],
+     [0,0,0,0,1,1,1,1,1,1,1,1],[0,0,0,1,1,1,1,1,1,1,1,1],[0,0,0,1,1,1,0,0,0,0,0,0],
+     [0,0,0,1,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],
+     [0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]],
+    // 200 trees — same as 50 (converged)
+    [[0,0,0,0,0,0,1,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1,1,1],
+     [0,0,0,0,1,1,1,1,1,1,1,1],[0,0,0,1,1,1,1,1,1,1,1,1],[0,0,0,1,1,1,0,0,0,0,0,0],
+     [0,0,0,1,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],
+     [0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]],
+  ];
+  // Training points [x,y,class]
+  var PTS_A=[[.1,.2],[.15,.35],[.2,.15],[.08,.5],[.25,.45],[.3,.3],[.35,.2],[.12,.6],[.4,.4],[.18,.7],[.28,.55],[.35,.65],[.4,.75],[.45,.55],[.5,.7],[.55,.8],[.6,.7],[.5,.85],[.65,.75],[.7,.65]];
+  var PTS_B=[[.5,.2],[.55,.1],[.6,.25],[.65,.15],[.7,.3],[.75,.2],[.8,.15],[.72,.4],[.8,.35],[.85,.25],[.9,.2],[.75,.5],[.85,.45],[.9,.35],[.95,.28],[.8,.6],[.9,.55],[.85,.7],[.92,.62],[.97,.5]];
+
+  function d2draw(idx){
+    var grid=BOUNDARIES[idx];
+    var W=400,H=320,PAD=20,GW=W-2*PAD,GH=H-2*PAD;
+    var N=12,cw=GW/N,ch=GH/N;
+    var svg='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    // Background grid
+    grid.forEach(function(row,ri){
+      row.forEach(function(val,ci){
+        var x=PAD+ci*cw, y=PAD+ri*ch;
+        svg+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+cw.toFixed(1)+'" height="'+ch.toFixed(1)+'" fill="'+(val?'rgba(56,189,248,.1)':'rgba(248,113,113,.07)')+'" />';
+      });
+    });
+    // Axes
+    svg+='<line x1="'+PAD+'" y1="'+PAD+'" x2="'+PAD+'" y2="'+(H-PAD)+'" stroke="#2d3748" stroke-width="1"/>';
+    svg+='<line x1="'+PAD+'" y1="'+(H-PAD)+'" x2="'+(W-PAD)+'" y2="'+(H-PAD)+'" stroke="#2d3748" stroke-width="1"/>';
+    // Data points
+    PTS_A.forEach(function(p){
+      svg+='<circle cx="'+(PAD+p[0]*GW).toFixed(1)+'" cy="'+(PAD+(1-p[1])*GH).toFixed(1)+'" r="5" fill="#f87171" stroke="#0a0d14" stroke-width="1"/>';
+    });
+    PTS_B.forEach(function(p){
+      svg+='<circle cx="'+(PAD+p[0]*GW).toFixed(1)+'" cy="'+(PAD+(1-p[1])*GH).toFixed(1)+'" r="5" fill="#38bdf8" stroke="#0a0d14" stroke-width="1"/>';
+    });
+    // Legend
+    svg+='<circle cx="'+(PAD+8)+'" cy="'+(H-8)+'" r="5" fill="#f87171"/>';
+    svg+='<text x="'+(PAD+16)+'" y="'+(H-4)+'" fill="#f87171" font-size="8" font-family="Space Mono,monospace">Class A</text>';
+    svg+='<circle cx="'+(PAD+72)+'" cy="'+(H-8)+'" r="5" fill="#38bdf8"/>';
+    svg+='<text x="'+(PAD+80)+'" y="'+(H-4)+'" fill="#38bdf8" font-size="8" font-family="Space Mono,monospace">Class B</text>';
+    document.getElementById('d2svg').innerHTML=svg;
+  }
+
+  window.d2update=function(){
+    var idx=+document.getElementById('d2sl').value;
+    var n=SIZES[idx];
+    document.getElementById('d2slval').textContent=n+(n===1?' tree':' trees');
+    document.getElementById('d2train').textContent=Math.round(TRAIN_ACC[idx]*100)+'%';
+    document.getElementById('d2test').textContent=Math.round(TEST_ACC[idx]*100)+'%';
+    document.getElementById('d2oob').textContent=Math.round(OOB_ERR[idx]*100)+'%';
+    var note=idx===0?'Single tree: highly overfit. Decision boundary memorises training data.':
+             idx<=2?'Small forest: boundary smoothing. Test accuracy improving, variance falling.':
+             idx<=4?'Medium forest: boundary stable. Diminishing returns setting in.':
+             'Large forest: converged. Adding more trees gives no measurable improvement.';
+    document.getElementById('d2note').textContent=note;
+    d2draw(idx);
+  };
+  d2update();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 3 — FEATURE IMPORTANCE
+════════════════════════════════════════════════════ */
+(function(){
+  var FEATURES = ['Age ≥ 60','Blood Pressure','Cholesterol','Smoking','BMI ≥ 30'];
+  var IMPORTANCES = [0.31, 0.27, 0.19, 0.14, 0.09];
+  var COLORS = ['#f87171','#f59e0b','#4ade80','#38bdf8','#a78bfa'];
+  // OOB error when each feature is removed (pre-computed)
+  var OOB_BASE = 0.124;
+  var OOB_REMOVED = [0.218, 0.186, 0.158, 0.141, 0.128]; // error when each feature removed
+
+  var active = [true,true,true,true,true];
+
+  function computeOOB(){
+    var err = OOB_BASE;
+    active.forEach(function(on,i){
+      if(!on) err += (OOB_REMOVED[i] - OOB_BASE);
+    });
+    return Math.min(err, 0.55);
+  }
+
+  function render(){
+    var oob = computeOOB();
+    document.getElementById('d3oob').textContent = (oob*100).toFixed(1)+'%';
+    document.getElementById('d3oob').style.color = oob>0.25?'var(--red)':oob>0.15?'var(--amber)':'var(--ac)';
+
+    var totalImp = IMPORTANCES.reduce(function(s,v,i){return active[i]?s+v:s;},0)||1;
+
+    var html = FEATURES.map(function(f,i){
+      var imp = active[i]?IMPORTANCES[i]:0;
+      var pct = Math.round(imp/totalImp*100*10)/10;
+      var barPct = Math.round(imp/0.35*100);
+      return '<div style="margin-bottom:12px">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
+        +'<span style="font-family:var(--mono);font-size:10px;color:'+(active[i]?COLORS[i]:'var(--muted2)')+'">'+f+'</span>'
+        +'<div style="display:flex;align-items:center;gap:8px">'
+        +'<span style="font-family:var(--mono);font-size:10px;color:'+(active[i]?'#94a3b8':'var(--muted2)')+'">'+pct+'%</span>'
+        +'<button onclick="d3toggle('+i+')" style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:4px;border:1px solid '+(active[i]?COLORS[i]:'var(--border)')+';background:none;color:'+(active[i]?COLORS[i]:'var(--muted2)')+';cursor:pointer">'+(active[i]?'on':'off')+'</button>'
+        +'</div></div>'
+        +'<div style="background:var(--border);border-radius:3px;height:10px;overflow:hidden">'
+        +'<div style="width:'+barPct+'%;height:100%;background:'+COLORS[i]+';border-radius:3px;opacity:'+(active[i]?0.85:0.15)+';transition:all .3s"></div>'
+        +'</div></div>';
+    }).join('');
+    document.getElementById('d3bars').innerHTML=html;
+
+    var removed = active.map(function(a){return !a;}).indexOf(false);
+    var note = active.every(function(a){return a;}) ?
+      'All features active. Baseline OOB error: '+Math.round(OOB_BASE*100)+'%.' :
+      'Feature removed. OOB error rose to '+(oob*100).toFixed(1)+'%. The more it rises, the more important the removed feature was.';
+    document.getElementById('d3note').textContent=note;
+  }
+
+  window.d3toggle=function(i){ active[i]=!active[i]; render(); };
+  render();
+})();
+</script>
+</body>
+</html>
