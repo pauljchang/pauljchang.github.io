@@ -308,158 +308,195 @@ prediction = majority_vote([tree.predict(x) for tree in trees])</div>
 'use strict';
 
 /* ════════════════════════════════════════════════════
-   DEMO 1 — FIVE WEAK TREES + ENSEMBLE
+   DEMO 1 — VISUAL DECISION TREES + ENSEMBLE
 ════════════════════════════════════════════════════ */
 (function(){
   var PATIENTS = [
-    {id:1,  age:1, bp:1, chol:0, smoke:0, label:0},
-    {id:2,  age:0, bp:1, chol:1, smoke:0, label:0},
-    {id:3,  age:1, bp:0, chol:1, smoke:1, label:1},
-    {id:4,  age:0, bp:0, chol:1, smoke:1, label:0},
-    {id:5,  age:1, bp:1, chol:1, smoke:0, label:1},
-    {id:6,  age:0, bp:1, chol:0, smoke:1, label:0},
-    {id:7,  age:1, bp:0, chol:0, smoke:0, label:0},
-    {id:8,  age:0, bp:0, chol:0, smoke:1, label:0},
-    {id:9,  age:1, bp:0, chol:1, smoke:0, label:0},
-    {id:10, age:0, bp:1, chol:1, smoke:1, label:1},
+    {id:1,  age:1,bp:1,chol:0,smoke:0,label:0},
+    {id:2,  age:0,bp:1,chol:1,smoke:0,label:0},
+    {id:3,  age:1,bp:0,chol:1,smoke:1,label:1},
+    {id:4,  age:0,bp:0,chol:1,smoke:1,label:0},
+    {id:5,  age:1,bp:1,chol:1,smoke:0,label:1},
+    {id:6,  age:0,bp:1,chol:0,smoke:1,label:0},
+    {id:7,  age:1,bp:0,chol:0,smoke:0,label:0},
+    {id:8,  age:0,bp:0,chol:0,smoke:1,label:0},
+    {id:9,  age:1,bp:0,chol:1,smoke:0,label:0},
+    {id:10, age:0,bp:1,chol:1,smoke:1,label:1},
   ];
-  var FEATURE_LABELS = ['Age≥60','High BP','High Chol','Smoker'];
 
-  // Pre-computed predictions: each row = one tree, 10 values
+  // Tree structures: each is a depth-2 decision tree
+  // node: {f:feature_key, q:question, yes:node, no:node}  or  {pred:0|1, pl:'Low Risk'|'High Risk'}
+  var TREES = [
+    { acc:60, name:'Tree 1', boot:'Sample A', color:'#f59e0b',
+      f:'chol', q:'Chol High?',
+      yes:{f:'age',  q:'Age ≥ 60?',  yes:{pred:1,pl:'High Risk'}, no:{pred:0,pl:'Low Risk'}},
+      no: {f:'bp',   q:'BP High?',   yes:{pred:1,pl:'High Risk'}, no:{pred:0,pl:'Low Risk'}}
+    },
+    { acc:70, name:'Tree 2', boot:'Sample B', color:'#38bdf8',
+      f:'bp', q:'BP High?',
+      yes:{f:'chol', q:'Chol High?', yes:{pred:1,pl:'High Risk'}, no:{pred:0,pl:'Low Risk'}},
+      no: {f:'age',  q:'Age ≥ 60?',  yes:{pred:1,pl:'High Risk'}, no:{pred:0,pl:'Low Risk'}}
+    },
+    { acc:60, name:'Tree 3', boot:'Sample C', color:'#a78bfa',
+      f:'age', q:'Age ≥ 60?',
+      yes:{f:'chol', q:'Chol High?', yes:{pred:1,pl:'High Risk'}, no:{pred:0,pl:'Low Risk'}},
+      no: {f:'smoke',q:'Smoker?',     yes:{pred:1,pl:'High Risk'}, no:{pred:0,pl:'Low Risk'}}
+    },
+    { acc:70, name:'Tree 4', boot:'Sample D', color:'#4ade80',
+      f:'smoke', q:'Smoker?',
+      yes:{f:'age',  q:'Age ≥ 60?',  yes:{pred:1,pl:'High Risk'}, no:{pred:0,pl:'Low Risk'}},
+      no: {f:'chol', q:'Chol High?', yes:{pred:1,pl:'High Risk'}, no:{pred:0,pl:'Low Risk'}}
+    },
+    { acc:60, name:'Tree 5', boot:'Sample E', color:'#f87171',
+      f:'bp', q:'BP High?',
+      yes:{f:'age',  q:'Age ≥ 60?',  yes:{pred:1,pl:'High Risk'}, no:{pred:0,pl:'Low Risk'}},
+      no: {f:'smoke',q:'Smoker?',     yes:{pred:1,pl:'High Risk'}, no:{pred:0,pl:'Low Risk'}}
+    },
+  ];
+
+  // Pre-computed predictions per tree
   var TREE_PREDS = [
-    [1,0,1,1,1,1,0,0,0,1], // Tree 1: 70% — wrong P1,P4,P6
-    [0,1,1,0,1,0,1,0,1,1], // Tree 2: 70% — wrong P2,P7,P9
-    [1,0,1,0,1,1,0,1,0,1], // Tree 3: 70% — wrong P1,P6,P8
-    [0,1,1,1,1,0,1,0,0,1], // Tree 4: 70% — wrong P2,P4,P7
-    [0,0,1,0,1,1,0,1,1,1], // Tree 5: 70% — wrong P6,P8,P9
+    [1,0,1,0,1,1,0,0,1,0],
+    [0,1,1,0,1,0,1,0,1,1],
+    [0,0,1,1,1,1,0,1,1,1],
+    [0,1,1,0,1,0,0,0,1,0],
+    [1,0,1,1,1,0,0,1,0,0],
   ];
-  var TREE_FOCUS = [
-    'Splits on Age then Blood Pressure. Misses cholesterol+smoke combos.',
-    'Splits on Blood Pressure then Cholesterol. Misses age+smoke combos.',
-    'Splits on Cholesterol then Age. Misses BP+smoke combos.',
-    'Splits on Blood Pressure then Age. Misses chol+smoke combos.',
-    'Splits on Smoking then Cholesterol. Misses age+BP combos.',
-  ];
-  var TREE_BOOTSTRAP = [
-    'P1,P2,P3,P3,P5,P6,P8,P10,P10,P14,P16,P17,P19,P20,P20',
-    'P2,P4,P5,P6,P7,P8,P9,P11,P12,P13,P15,P16,P17,P18,P20',
-    'P1,P3,P4,P5,P6,P7,P9,P10,P12,P13,P14,P16,P17,P18,P19',
-    'P2,P3,P4,P6,P7,P8,P9,P10,P11,P13,P14,P15,P17,P19,P20',
-    'P1,P2,P4,P5,P6,P7,P8,P10,P11,P12,P14,P15,P16,P18,P19',
-  ];
+  var TREE_ACCS = [60,70,60,70,60];
 
-  var activeTrees = [true,true,true,true,true];
-  var revealed = false;
+  var active = [true,true,true,true,true];
+  var showTable = false;
 
-  function computeEnsemble(){
-    var results = PATIENTS.map(function(p,pi){
-      var votes = TREE_PREDS.filter(function(_,ti){return activeTrees[ti];})
-        .map(function(t){return t[pi];});
-      var sum = votes.reduce(function(a,b){return a+b;},0);
-      var n = votes.length;
-      return n>0 ? (sum > n/2 ? 1 : 0) : -1;
-    });
-    return results;
+  // Render a single tree as SVG (280x190)
+  function treeSVG(tree, col){
+    var W=280, H=190;
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    // Node positions
+    var rx=W/2, ry=28; // root
+    var lx=72,  ly=95; // left child (YES)
+    var rx2=W-72,ry2=95; // right child (NO)
+    var ll=30,  lr=114, rl=166, rr=W-30; // leaves y=162
+
+    function nodeBox(x,y,label,col2){
+      var words=label.split(' '),mid=Math.ceil(words.length/2),lines=[words.slice(0,mid).join(' '),words.slice(mid).join(' ')].filter(Boolean),bw=72,bh=26;
+      h+='<rect x="'+(x-bw/2).toFixed(0)+'" y="'+(y-bh/2).toFixed(0)+'" width="'+bw+'" height="'+bh+'" rx="5" fill="rgba(0,0,0,.4)" stroke="'+col2+'" stroke-width="1.5"/>';
+      lines.forEach(function(ln,li){
+        var dy=(li-(lines.length-1)/2)*11;
+        h+='<text x="'+x.toFixed(0)+'" y="'+(y+dy+3.5).toFixed(0)+'" fill="'+col2+'" font-size="8.5" text-anchor="middle" font-family="Space Mono,monospace">'+ln+'</text>';
+      });
+    }
+    function leaf(x,y,label,high){
+      var c=high?'#f87171':'#4ade80';
+      h+='<rect x="'+(x-30).toFixed(0)+'" y="'+(y-12).toFixed(0)+'" width="60" height="24" rx="5" fill="'+(high?'rgba(248,113,113,.2)':'rgba(74,222,128,.15)')+'" stroke="'+c+'" stroke-width="1.5"/>';
+      h+='<text x="'+x.toFixed(0)+'" y="'+(y+4).toFixed(0)+'" fill="'+c+'" font-size="8" text-anchor="middle" font-weight="700" font-family="Space Mono,monospace">'+label+'</text>';
+    }
+    function edge(x1,y1,x2,y2,lbl,side){
+      h+='<line x1="'+x1.toFixed(0)+'" y1="'+y1.toFixed(0)+'" x2="'+x2.toFixed(0)+'" y2="'+y2.toFixed(0)+'" stroke="#2d3748" stroke-width="1.5"/>';
+      var mx=(x1+x2)/2, my=(y1+y2)/2;
+      var ox=side==='l'?-8:8;
+      h+='<text x="'+(mx+ox).toFixed(0)+'" y="'+(my+3).toFixed(0)+'" fill="#64748b" font-size="8" text-anchor="middle" font-family="Space Mono,monospace">'+lbl+'</text>';
+    }
+
+    // Draw edges first (behind nodes)
+    edge(rx,ry+13, lx,ly-13, 'YES','l');
+    edge(rx,ry+13, rx2,ry2-13, 'NO','r');
+    edge(lx,ly+13, ll,162-12, 'YES','l');
+    edge(lx,ly+13, lr,162-12, 'NO','r');
+    edge(rx2,ry2+13, rl,162-12, 'YES','l');
+    edge(rx2,ry2+13, rr,162-12, 'NO','r');
+
+    // Draw nodes
+    nodeBox(rx,ry,tree.q,col);
+    nodeBox(lx,ly,tree.yes.q,col);
+    nodeBox(rx2,ry2,tree.no.q,col);
+    leaf(ll,162,tree.yes.yes.pl,tree.yes.yes.pred===1);
+    leaf(lr,162,tree.yes.no.pl,tree.yes.no.pred===1);
+    leaf(rl,162,tree.no.yes.pl,tree.no.yes.pred===1);
+    leaf(rr,162,tree.no.no.pl,tree.no.no.pred===1);
+
+    return '<svg viewBox="0 0 '+W+' '+H+'" style="display:block;width:100%">'+h+'</svg>';
   }
 
   function render(){
-    var ensemblePreds = computeEnsemble();
     var trueLabels = PATIENTS.map(function(p){return p.label;});
-    var ensAcc = ensemblePreds.filter(function(p,i){return p===trueLabels[i];}).length;
-
-    var html = '';
-
-    // Tree cards
-    html += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">';
-    TREE_PREDS.forEach(function(t,ti){
-      var treeAcc = t.filter(function(p,i){return p===trueLabels[i];}).length;
-      var active = activeTrees[ti];
-      html += '<div style="background:#0a0d14;border:1px solid '+(active?'rgba(34,197,94,.35)':'var(--border)')+';border-radius:8px;padding:10px 12px;opacity:'+(active?1:0.4)+';">'
-        +'<div style="font-family:var(--mono);font-size:10px;font-weight:700;color:'+(active?'var(--ac)':'var(--muted)')+';margin-bottom:4px">Tree '+(ti+1)+'</div>'
-        +'<div style="font-family:var(--mono);font-size:18px;font-weight:700;color:'+(active?'var(--amber)':'var(--muted2)')+'">'+treeAcc*10+'%</div>'
-        +'<div style="font-family:var(--mono);font-size:8px;color:var(--muted2);margin-top:4px;line-height:1.5">'+TREE_FOCUS[ti]+'</div>'
-        +'<button onclick="d1toggle('+ti+')" style="font-family:var(--mono);font-size:9px;margin-top:8px;padding:3px 8px;border-radius:4px;border:1px solid '+(active?'rgba(34,197,94,.3)':'var(--border)')+';background:none;color:'+(active?'var(--ac)':'var(--muted)')+';cursor:pointer;width:100%">'+(active?'✓ Active':'○ Off')+'</button>'
-        +'</div>';
+    var ensemblePreds = PATIENTS.map(function(p,pi){
+      var activePreds=TREE_PREDS.filter(function(_,ti){return active[ti];}).map(function(t){return t[pi];});
+      if(!activePreds.length) return -1;
+      var s=activePreds.reduce(function(a,b){return a+b;},0);
+      return s>activePreds.length/2?1:0;
     });
-    html += '</div>';
+    var ensCorrect=ensemblePreds.filter(function(p,i){return p===trueLabels[i];}).length;
+    var nActive=active.filter(Boolean).length;
 
-    if(!revealed){
-      html += '<div style="text-align:center;padding:20px">'
-        +'<button class="ctrl-btn go" style="padding:10px 24px;font-size:12px" onclick="d1reveal()">▶ Reveal Ensemble Predictions</button>'
-        +'<div style="font-family:var(--mono);font-size:10px;color:var(--muted2);margin-top:8px">Each tree achieves 70% accuracy individually. Toggle trees off to see how the ensemble degrades.</div>'
-        +'</div>';
-    } else {
-      // Vote table
-      html += '<div style="overflow-x:auto">'
-        +'<table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px">'
-        +'<thead><tr>';
-      html += '<th style="background:var(--s2);padding:7px 10px;border:1px solid var(--border);color:var(--muted);text-align:left">Patient</th>';
-      html += '<th style="background:var(--s2);padding:7px 10px;border:1px solid var(--border);color:var(--muted)">Features</th>';
-      [1,2,3,4,5].forEach(function(i){
-        html += '<th style="background:var(--s2);padding:7px 10px;border:1px solid var(--border);color:'+(activeTree(i-1)?'var(--ac)':'var(--muted2)')+';text-align:center">T'+i+'</th>';
+    // Tree SVG cards
+    var treeHtml='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px">';
+    TREES.forEach(function(tree,ti){
+      var on=active[ti];
+      treeHtml+='<div style="border:1px solid '+(on?tree.color+'80':'var(--border)')+';border-radius:8px;overflow:hidden;opacity:'+(on?1:0.35)+';transition:all .2s">'
+        +'<div style="padding:6px 8px;background:'+(on?'rgba(0,0,0,.3)':'#0a0d14')+';display:flex;justify-content:space-between;align-items:center">'
+        +'<span style="font-family:var(--mono);font-size:9px;font-weight:700;color:'+(on?tree.color:'var(--muted2)')+'">'+tree.name+'</span>'
+        +'<span style="font-family:var(--mono);font-size:10px;font-weight:700;color:'+(on?'var(--amber)':'var(--muted2)')+'">'+tree.acc+'%</span>'
+        +'</div>'
+        +treeSVG(tree,on?tree.color:'#334155')
+        +'<div style="padding:4px 8px;background:#0a0d14;border-top:1px solid var(--border)">'
+        +'<button onclick="d1toggle('+ti+')" style="font-family:var(--mono);font-size:8px;padding:3px 0;border:none;background:none;color:'+(on?tree.color:'var(--muted2)')+';cursor:pointer;width:100%">'+(on?'✓ included in forest':'○ excluded — click to add')+'</button>'
+        +'</div></div>';
+    });
+    treeHtml+='</div>';
+
+    // Accuracy summary bar
+    treeHtml+='<div style="background:#0a0d14;border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">'
+      +'<span style="font-family:var(--mono);font-size:10px;color:var(--muted2)">Individual trees:</span>';
+    TREES.forEach(function(t,i){
+      treeHtml+='<span style="font-family:var(--mono);font-size:11px;font-weight:700;color:'+(active[i]?t.color:'var(--muted2)')+';opacity:'+(active[i]?1:0.35)+'">'+t.acc+'%</span>';
+    });
+    treeHtml+='<span style="font-family:var(--mono);font-size:10px;color:var(--muted2);margin-left:8px">→</span>'
+      +'<span style="font-family:var(--mono);font-size:14px;font-weight:700;color:'+( nActive>0?'var(--ac)':'var(--muted2)')+'">Forest: '+(nActive>0?ensCorrect*10+'%':'—')+'</span>'
+      +(nActive>0&&ensCorrect*10>64?'<span style="font-family:var(--mono);font-size:10px;color:var(--ac)">↑ +'+((ensCorrect*10)-64)+'pp above average individual</span>':'')
+      +'</div>';
+
+    // Vote table toggle
+    treeHtml+='<div style="display:flex;gap:8px;margin-bottom:10px">'
+      +'<button class="ctrl-btn '+(showTable?'active':'')+'" onclick="d1toggleTable()">'+( showTable?'Hide':'Show')+' vote table</button>'
+      +'<span style="font-family:var(--mono);font-size:10px;color:var(--muted2);align-self:center">See how individual tree predictions combine via majority vote</span>'
+      +'</div>';
+
+    if(showTable){
+      treeHtml+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:9px"><thead><tr>';
+      treeHtml+='<th style="background:var(--s2);padding:6px 8px;border:1px solid var(--border);color:var(--muted);text-align:left">Patient</th>';
+      treeHtml+='<th style="background:var(--s2);padding:6px 8px;border:1px solid var(--border);color:var(--muted)">Features</th>';
+      TREES.forEach(function(t,ti){
+        treeHtml+='<th style="background:var(--s2);padding:6px 8px;border:1px solid var(--border);color:'+(active[ti]?t.color:'var(--muted2)')+';text-align:center">'+t.name+'</th>';
       });
-      html += '<th style="background:var(--s2);padding:7px 10px;border:1px solid var(--border);color:white;text-align:center">Vote</th>';
-      html += '<th style="background:var(--s2);padding:7px 10px;border:1px solid var(--border);color:var(--muted);text-align:center">True</th>';
-      html += '</tr></thead><tbody>';
-
+      treeHtml+='<th style="background:var(--s2);padding:6px 8px;border:1px solid var(--border);color:white;text-align:center">Vote</th>';
+      treeHtml+='<th style="background:var(--s2);padding:6px 8px;border:1px solid var(--border);color:var(--muted);text-align:center">True</th>';
+      treeHtml+='</tr></thead><tbody>';
       PATIENTS.forEach(function(p,pi){
-        var activePreds = TREE_PREDS.map(function(t,ti){return activeTree(ti)?t[pi]:null;});
-        var votes = activePreds.filter(function(v){return v!==null;});
-        var voteSum = votes.reduce(function(a,b){return a+b;},0);
-        var n = votes.length;
-        var ensPred = n>0?(voteSum>n/2?1:0):-1;
-        var ensRight = ensPred===p.label;
-        html += '<tr style="'+(ensRight?'':'background:rgba(248,113,113,.04)')+'">';
-        html += '<td style="padding:6px 10px;border:1px solid var(--border);color:#94a3b8">P'+p.id+'</td>';
-        var feats = [p.age?'Age':'',p.bp?'BP':'',p.chol?'Chol':'',p.smoke?'Smoke':''].filter(Boolean).join('+') || '—';
-        html += '<td style="padding:6px 10px;border:1px solid var(--border);color:var(--muted2)">'+feats+'</td>';
+        var actPreds=TREE_PREDS.map(function(t,ti){return active[ti]?t[pi]:null;});
+        var votes=actPreds.filter(function(v){return v!==null;});
+        var s=votes.reduce(function(a,b){return a+b;},0);
+        var n=votes.length, pred=n>0?(s>n/2?1:0):-1, ok=pred===p.label;
+        var feats=[p.age?'Age':'',p.bp?'BP':'',p.chol?'Chol':'',p.smoke?'Smoke':''].filter(Boolean).join('+') || '—';
+        treeHtml+='<tr style="'+(ok?'':'background:rgba(248,113,113,.04)')+'">';
+        treeHtml+='<td style="padding:5px 8px;border:1px solid var(--border);color:#94a3b8">P'+p.id+'</td>';
+        treeHtml+='<td style="padding:5px 8px;border:1px solid var(--border);color:var(--muted2)">'+feats+'</td>';
         TREE_PREDS.forEach(function(t,ti){
-          if(!activeTree(ti)){
-            html += '<td style="padding:6px 10px;border:1px solid var(--border);color:var(--muted2);text-align:center;opacity:.3">—</td>';
-            return;
-          }
-          var pred=t[pi], right=pred===p.label;
-          html += '<td style="padding:6px 10px;border:1px solid var(--border);text-align:center;color:'+(right?'var(--green)':'var(--red)')+'">'+
-            (pred===1?'High':'Low')+'<br><span style="font-size:8px">'+(right?'✓':'✗')+'</span></td>';
+          if(!active[ti]){treeHtml+='<td style="padding:5px 8px;border:1px solid var(--border);color:var(--muted2);text-align:center;opacity:.3">—</td>';return;}
+          var v=t[pi],r=v===p.label;
+          treeHtml+='<td style="padding:5px 8px;border:1px solid var(--border);text-align:center;color:'+(r?'var(--green)':'var(--red)')+'">'+( v?'High':'Low')+'<br>'+(r?'✓':'✗')+'</td>';
         });
-        html += '<td style="padding:6px 10px;border:1px solid var(--border);text-align:center;font-weight:700;color:'+(ensRight?'var(--green)':'var(--red)');
-        html += '">'+(ensPred===1?'High':'Low')+'<br><span style="font-size:8px">'+(ensRight?'✓':'✗')+'</span></td>';
-        html += '<td style="padding:6px 10px;border:1px solid var(--border);text-align:center;color:var(--muted)">'+(p.label===1?'High':'Low')+'</td>';
-        html += '</tr>';
+        treeHtml+='<td style="padding:5px 8px;border:1px solid var(--border);text-align:center;font-weight:700;color:'+(ok?'var(--ac)':'var(--red)')+'">'+( pred===1?'High':'Low')+'<br>'+(ok?'✓':'✗')+'</td>';
+        treeHtml+='<td style="padding:5px 8px;border:1px solid var(--border);text-align:center;color:var(--muted)">'+(p.label?'High':'Low')+'</td>';
+        treeHtml+='</tr>';
       });
-      html += '</tbody></table></div>';
-
-      // Accuracy summary
-      var activeCount = activeTree.toString(); // just for closure
-      var activePredsList = computeEnsemble();
-      var ensCorrect = activePredsList.filter(function(p,i){return p===PATIENTS[i].label;}).length;
-      html += '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:12px">';
-      [70,70,70,70,70].forEach(function(a,i){
-        html += '<div style="background:#0a0d14;border-radius:6px;padding:8px;text-align:center;opacity:'+(activeTree(i)?1:0.3)+'">'
-          +'<div style="font-family:var(--mono);font-size:8px;color:var(--muted2)">Tree '+(i+1)+'</div>'
-          +'<div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--amber)">70%</div>'
-          +'</div>';
-      });
-      html += '<div style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:6px;padding:8px;text-align:center">'
-        +'<div style="font-family:var(--mono);font-size:8px;color:var(--ac)">Ensemble</div>'
-        +'<div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--ac)">'+(ensCorrect*10)+'%</div>'
-        +'</div>';
-      html += '</div>';
+      treeHtml+='</tbody></table></div>';
     }
 
-    document.getElementById('d1body').innerHTML = html;
+    document.getElementById('d1body').innerHTML=treeHtml;
   }
 
-  function activeTree(i){ return activeTree._arr[i]; }
-  activeTree._arr = activeTree._arr || activeTree;
-
-  window.d1toggle = function(i){ activeTree._arr = activeTree._arr||[true,true,true,true,true]; activeTree._arr[i]=!activeTree._arr[i]; activeTree._data=activeTree._arr; render(); };
-  window.d1reveal = function(){ revealed=true; render(); };
-
-  // Initialize
-  activeTree._arr = [true,true,true,true,true];
-  window.d1toggle = function(i){ activeTree._arr[i]=!activeTree._arr[i]; render(); };
-  window.d1reveal = function(){ revealed=true; render(); };
+  window.d1toggle=function(i){active[i]=!active[i];render();};
+  window.d1toggleTable=function(){showTable=!showTable;render();};
   render();
 })();
 
