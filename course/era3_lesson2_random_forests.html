@@ -453,7 +453,21 @@ prediction = majority_vote([tree.predict(x) for tree in trees])</div>
     treeHtml+='<span style="font-family:var(--mono);font-size:10px;color:var(--muted2);margin-left:8px">→</span>'
       +'<span style="font-family:var(--mono);font-size:14px;font-weight:700;color:'+( nActive>0?'var(--ac)':'var(--muted2)')+'">Forest: '+(nActive>0?ensCorrect*10+'%':'—')+'</span>'
       +(nActive>0&&ensCorrect*10>64?'<span style="font-family:var(--mono);font-size:10px;color:var(--ac)">↑ +'+((ensCorrect*10)-64)+'pp above average individual</span>':'')
-      +'</div>';
+      +'</div>'
+      // Callout: appears when a subset beats the full forest
+      +(nActive>0&&nActive<5&&ensCorrect*10>80?
+        '<div style="margin-top:10px;background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(245,158,11,.03));border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:14px 16px">'
+        +'<div style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--amber);margin-bottom:8px">⚠ Interesting — a smaller forest is outperforming the full forest</div>'
+        +'<p style="font-size:13px;color:#94a3b8;line-height:1.75;margin-bottom:8px">This subset of '+nActive+' trees achieves '+ensCorrect*10+'% — higher than all 5 trees at 80%. This is <strong style="color:#e2e8f0">real and expected</strong> with small test sets, not a bug. Three reasons this happens:</p>'
+        +'<div style="font-family:var(--mono);font-size:10px;color:#94a3b8;line-height:1.9;background:#0a0d14;border-radius:6px;padding:10px 12px;margin-bottom:8px">'
+        +'1. <strong style="color:#e2e8f0">Small sample variance.</strong> With 10 test patients, one wrong prediction = 10pp. Accuracy estimates on tiny holdout sets swing wildly.<br>'
+        +'2. <strong style="color:#e2e8f0">The guarantee is asymptotic.</strong> "More trees reduces variance" holds in expectation over many possible test sets — not for any specific small sample.<br>'
+        +'3. <strong style="color:#e2e8f0">Lucky error complementarity.</strong> These '+nActive+' trees happen to make errors on almost entirely different patients, producing unusually clean cancellation.'
+        +'</div>'
+        +'<p style="font-size:12px;color:#94a3b8;line-height:1.7;margin-bottom:0">On a real dataset with thousands of patients, this effect disappears — OOB error on the training data would show the full forest winning. The right way to evaluate a Random Forest is OOB error, not a 10-patient holdout. That is why Demo 2 shows OOB error, not test accuracy, stabilising as trees are added.</p>'
+        +'</div>'
+      :'')
+      +''
 
     // Vote table toggle
     treeHtml+='<div style="display:flex;gap:8px;margin-bottom:10px">'
