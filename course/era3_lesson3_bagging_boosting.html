@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 3, Lesson 3 — Bagging &amp; Boosting | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--surface:#161b27;--s2:#1a2035;--border:#1e2d40;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#334155;
+  --ac:#f97316;--ac-dim:rgba(249,115,22,.10);--ac-glow:rgba(249,115,22,.25);
+  --green:#4ade80;--red:#f87171;--amber:#f59e0b;--sky:#38bdf8;--violet:#a78bfa;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;--disp:'Lora',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+.course-nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.era-badge{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em;}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 100px;}
+.hero{padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px;}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.week-badge{background:var(--ac);color:#1a0700;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em;}
+.hero h1{font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px;}
+.hero-sub{font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px;}
+.hero-timeline{display:flex;gap:36px;flex-wrap:wrap;}
+.tl-item{display:flex;flex-direction:column;gap:3px;}
+.tl-year{font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.1em;}
+.tl-label{font-size:13px;color:var(--muted);}
+.section{margin-bottom:68px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px;}
+.sec-title{font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.obj-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;}
+.obj-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.obj-list li strong{color:#f1f5f9;}
+.prose p{font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82;}
+.prose p:last-child{margin-bottom:0;}
+.prose p strong{color:#e2e8f0;}
+.prose code{font-family:var(--mono);font-size:12px;background:#0a0d14;padding:2px 6px;border-radius:3px;border:1px solid var(--border);color:#fdba74;}
+.pullquote{background:linear-gradient(135deg,rgba(249,115,22,.07),rgba(249,115,22,.02));border:1px solid rgba(249,115,22,.2);border-radius:12px;padding:22px 26px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:17px;font-style:italic;color:#fdba74;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+.contrast-box{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:24px 0;}
+.contrast-card{background:#0a0d14;border-radius:10px;padding:16px 18px;}
+.contrast-card h4{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;}
+.contrast-card ul{list-style:none;font-size:13px;color:#94a3b8;line-height:1.9;}
+.contrast-card li::before{content:'→ ';}
+.demo-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.demo-topbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.demo-tag{font-family:var(--mono);font-size:11px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase;}
+.demo-hint{font-family:var(--mono);font-size:10px;color:var(--muted2);}
+.ctrl-btn{font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ctrl-btn:hover{border-color:var(--ac);color:var(--ac);}
+.ctrl-btn.go{border-color:rgba(249,115,22,.4);color:var(--ac);}
+.ctrl-btn.go:hover{background:var(--ac-dim);}
+.ctrl-btn.active{background:var(--ac-dim);border-color:rgba(249,115,22,.4);color:var(--ac);}
+input[type=range].sl{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,#0a0d14,var(--ac));}
+input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #fdba74;cursor:pointer;}
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.ex-head{padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border);}
+.ex-num{font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(249,115,22,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.ex-title{font-weight:600;font-size:16px;color:#f1f5f9;}
+.ex-desc{font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6;}
+.ex-body{padding:20px;}
+.ex-body p{font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7;}
+.ex-body p:last-child{margin-bottom:0;}
+.ex-body p strong{color:#e2e8f0;}
+.disc-list{list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px;}
+.disc-list li{counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72;}
+.disc-list li::before{content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(249,115,22,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px;}
+.disc-list li strong{color:#e2e8f0;}
+.gloss-grid{display:flex;flex-direction:column;}
+.gloss-entry{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);padding:18px 0;}
+.gloss-entry:last-child{border-bottom:none;}
+.gloss-term{display:flex;flex-direction:column;gap:5px;padding-right:24px;}
+.gloss-term-name{font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700;}
+.gloss-abbr{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.gloss-def{font-size:14.5px;color:#94a3b8;line-height:1.72;}
+.gloss-def strong{color:#e2e8f0;}
+.gloss-code{font-family:var(--mono);font-size:11px;color:#fdba74;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:7px 12px;display:block;margin-top:8px;line-height:1.8;}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border);}
+.nav-btn{text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s;}
+.nav-btn:hover{border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow);}
+.nav-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.nav-title{font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px;}
+.nav-arrow{font-size:20px;color:var(--ac);}
+@media(max-width:680px){.contrast-box{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface)" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 3: STATISTICAL LEARNING</span>
+  <span>›</span><span style="color:#94a3b8">Era 3, Lesson 3 — Bagging &amp; Boosting</span>
+</nav>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 3 · LESSON 3</span>
+      <span>1994 – 2016</span><span>·</span>
+      <span>Two Roads to a Better Ensemble</span>
+    </div>
+    <h1>Average Many,<br>or Fix One at a Time</h1>
+    <p class="hero-sub">Bagging and boosting both combine weak learners into a strong ensemble — but they solve completely different problems, work in opposite directions, and fail in opposite ways.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1994</span><span class="tl-label">Breiman — Bagging Predictors</span></div>
+      <div class="tl-item"><span class="tl-year">1995</span><span class="tl-label">Freund &amp; Schapire — AdaBoost (Gödel Prize 2003)</span></div>
+      <div class="tl-item"><span class="tl-year">2001</span><span class="tl-label">Friedman — Gradient Boosting Machines</span></div>
+      <div class="tl-item"><span class="tl-year">2016</span><span class="tl-label">XGBoost — dominates Kaggle tabular competitions</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">🎲</span><div><strong>Explain</strong> how bagging reduces variance by training parallel models on bootstrap samples and averaging their predictions.</div></li>
+      <li><span class="obj-icon">🔁</span><div><strong>Trace</strong> the AdaBoost algorithm — how example weights shift after each round to focus subsequent learners on hard examples.</div></li>
+      <li><span class="obj-icon">📉</span><div><strong>Explain</strong> gradient boosting as sequential residual fitting — each tree approximates the error of the current ensemble.</div></li>
+      <li><span class="obj-icon">⚖️</span><div><strong>Compare</strong> bagging and boosting on variance reduction, overfitting behaviour, and appropriate use cases.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">Two Theories of Weakness</h2></div>
+    <div class="prose">
+      <p>After Leo Breiman introduced bagging in 1994, the machine learning community had a powerful tool for reducing variance — making unstable models stable by averaging many of them. But bagging only works on models that have high variance to begin with. It does nothing for a model that is consistently wrong because it is too simple. That is a bias problem, and bias cannot be averaged away.</p>
+      <p>Yoav Freund and Robert Schapire were working on a different question: can any learning algorithm that does slightly better than random guessing be transformed into an arbitrarily accurate one? Schapire's 1990 boosting-by-filtering paper proved the answer was yes — in polynomial time. The result was surprising enough that many in the community doubted it would translate into a practical algorithm. In 1995, Freund and Schapire published AdaBoost, which did exactly that. It won the Gödel Prize in 2003, given to outstanding papers in theoretical computer science — rare recognition for a machine learning algorithm.</p>
+      <p>AdaBoost's insight is to train weak learners sequentially, with each learner forced to pay attention to the examples the previous learners got wrong. It does this through <strong>example weighting</strong>: each training example has a weight, initially uniform. After each round, misclassified examples have their weight increased; correctly classified examples have their weight decreased. The next learner sees a reweighted dataset where hard examples loom large. The final prediction is a weighted vote of all learners, where learners that performed better on their weighted dataset get more say.</p>
+    </div>
+
+    <div class="pullquote">
+      <p>"The discovery that any weak learning algorithm can be boosted to achieve arbitrary accuracy is one of the most beautiful results in learning theory. AdaBoost made this constructive."</p>
+      <cite>&mdash; Michael Kearns, paraphrased from commentary on the Gödel Prize, 2003</cite>
+    </div>
+
+    <div class="prose">
+      <p>Jerome Friedman's 1999 and 2001 papers reframed boosting as <strong>gradient descent in function space</strong>. Instead of reweighting examples, gradient boosting fits each new tree to the <em>residuals</em> of the current ensemble — the difference between the true values and what the ensemble currently predicts. For squared error loss, the residuals are literally y − ŷ. For other loss functions, the "residuals" are generalized negative gradients. Each tree is a small step in the direction that reduces the ensemble's total loss. A <strong>learning rate</strong> (shrinkage parameter) controls how large each step is: small learning rate means slower learning but better generalization.</p>
+      <p>XGBoost (2016) added regularization terms to the objective function, approximate split-finding algorithms, and better handling of missing values and parallelism. The result dominated Kaggle competitions for years — not because of a new theoretical idea, but because every practical detail was engineered carefully. "When in doubt, use XGBoost" became a running joke in competitive machine learning that contained a lot of truth.</p>
+    </div>
+
+    <div class="contrast-box">
+      <div class="contrast-card" style="border:1px solid rgba(56,189,248,.2)">
+        <h4 style="color:var(--sky)">Bagging</h4>
+        <ul>
+          <li>Parallel — models are independent</li>
+          <li>Reduces variance, bias unchanged</li>
+          <li>Works best on high-variance models</li>
+          <li>Cannot overfit by adding more models</li>
+          <li>All models weighted equally</li>
+          <li>Robust — errors in any one model don't propagate</li>
+        </ul>
+      </div>
+      <div class="contrast-card" style="border:1px solid rgba(249,115,22,.2)">
+        <h4 style="color:var(--ac)">Boosting</h4>
+        <ul>
+          <li>Sequential — each model depends on all previous</li>
+          <li>Reduces bias, some variance reduction too</li>
+          <li>Works best on high-bias models (stumps)</li>
+          <li>Can overfit with too many rounds</li>
+          <li>Models weighted by performance</li>
+          <li>Fragile — early errors can compound</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 DEMOS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — Bagging.</strong> Bootstrap samples drawn from training data. Each produces a slightly different model. Watch predictions aggregate — individual models vary, the average stabilises.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Bagging — Bootstrap &amp; Average</span>
+        <span class="demo-hint">draw samples one at a time · watch the ensemble average stabilise</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 220px">
+        <div style="padding:14px 18px;border-right:1px solid var(--border)">
+          <svg id="d1svg" viewBox="0 0 420 260" style="display:block;width:100%"></svg>
+        </div>
+        <div style="padding:14px 18px;display:flex;flex-direction:column;gap:10px">
+          <button class="ctrl-btn go" style="width:100%;padding:10px" onclick="d1step()">+ Draw Bootstrap Sample</button>
+          <button class="ctrl-btn" style="width:100%" onclick="d1reset()">↺ Reset</button>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Samples drawn</div>
+            <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--ac)" id="d1count">0</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.65;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d1note">Draw samples to see how the average prediction stabilises as more models are added.</div>
+        </div>
+      </div>
+    </div>
+
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — AdaBoost Step by Step.</strong> Watch example weights shift after each round. Misclassified points grow larger — the next stump must focus on them. The ensemble boundary builds from simple stumps.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">AdaBoost — Sequential Reweighting</span>
+        <span class="demo-hint">click Next Round · watch weights shift · see ensemble build</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 220px">
+        <div style="padding:14px 18px;border-right:1px solid var(--border)">
+          <svg id="d2svg" viewBox="0 0 420 280" style="display:block;width:100%"></svg>
+        </div>
+        <div style="padding:14px 18px;display:flex;flex-direction:column;gap:10px">
+          <button class="ctrl-btn go" id="d2btn" style="width:100%;padding:10px" onclick="d2step()">▶ Next Round</button>
+          <button class="ctrl-btn" style="width:100%" onclick="d2reset()">↺ Reset</button>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Round</div>
+            <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--ac)" id="d2round">0 / 5</div>
+          </div>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Stump voting weight α</div>
+            <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--amber)" id="d2alpha">—</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.65;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d2note">Press Next Round to begin. Circle size = example weight.</div>
+        </div>
+      </div>
+    </div>
+
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 3 — Gradient Boosting Residuals.</strong> Each tree fits what the previous ensemble got wrong. Residuals shrink with each round — the ensemble converges on the true function from a sum of stumps.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Gradient Boosting — Residual Fitting</span>
+        <span class="demo-hint">click Add Tree to step through rounds · watch residuals shrink</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 220px">
+        <div style="padding:14px 18px;border-right:1px solid var(--border)">
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            <button class="ctrl-btn active" id="d3btnEns" onclick="d3setView('ensemble')">Ensemble fit</button>
+            <button class="ctrl-btn" id="d3btnRes" onclick="d3setView('residuals')">Residuals</button>
+          </div>
+          <svg id="d3svg" viewBox="0 0 420 220" style="display:block;width:100%"></svg>
+        </div>
+        <div style="padding:14px 18px;display:flex;flex-direction:column;gap:10px">
+          <button class="ctrl-btn go" id="d3btn" style="width:100%;padding:10px" onclick="d3step()">+ Add Tree</button>
+          <button class="ctrl-btn" style="width:100%" onclick="d3reset()">↺ Reset</button>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Trees in ensemble</div>
+            <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--ac)" id="d3count">0</div>
+          </div>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Residual MSE</div>
+            <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--amber)" id="d3mse">—</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.65;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d3note">Each new tree targets the current residuals — what the ensemble still gets wrong.</div>
+        </div>
+      </div>
+    </div>
+
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 4 — Bagging vs. Boosting.</strong> Same dataset, both methods. The slider controls number of trees/rounds. Bagging stays smooth; boosting tightens then memorises noise.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Bagging vs. Boosting — Same Dataset</span>
+        <span class="demo-hint">drag slider · watch boundaries diverge at high complexity</span>
+      </div>
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap">Trees / Rounds:</span>
+        <input type="range" class="sl" id="d4sl" min="0" max="5" value="0" style="flex:1" oninput="d4update()">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ac);min-width:50px" id="d4val">1</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr">
+        <div style="padding:14px 18px;border-right:1px solid var(--border)">
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--sky);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)">Bagging</div>
+          <svg id="d4bag" viewBox="0 0 360 240" style="display:block;width:100%"></svg>
+          <div style="font-family:var(--mono);font-size:10px;margin-top:6px">Test acc: <span id="d4bagacc" style="color:var(--green);font-weight:700">—</span></div>
+        </div>
+        <div style="padding:14px 18px">
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ac);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)">Boosting</div>
+          <svg id="d4boost" viewBox="0 0 360 240" style="display:block;width:100%"></svg>
+          <div style="font-family:var(--mono);font-size:10px;margin-top:6px">Test acc: <span id="d4boostacc" style="color:var(--amber);font-weight:700">—</span></div>
+        </div>
+      </div>
+      <div style="padding:10px 16px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.6" id="d4note"></div>
+    </div>
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">🎲 What Bagging Stabilises</div>
+        <div class="ex-desc">Use Demo 1 to observe variance reduction in action — and identify what bagging cannot fix.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 1, draw the first 3 bootstrap samples one at a time. Note how much the individual model predictions (thin coloured lines) vary from each other. Now add 7 more. Does the ensemble average (thick white line) move much between samples 8, 9, and 10?</p>
+        <p>&rarr; The individual models have high variance — each bootstrap sample produces a noticeably different fit. The ensemble average has much lower variance — it barely moves as you add more samples. This is variance reduction in action.</p>
+        <p><strong>Key question:</strong> If all five individual models are systematically biased in the same direction — say, all of them predict values that are consistently too high on the right side of the chart — will the ensemble average correct this? Why or why not? What does this tell you about when bagging helps and when it doesn't?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">🔁 Tracing AdaBoost</div>
+        <div class="ex-desc">Use Demo 2 to follow the weight update logic and understand why harder examples dominate later rounds.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 2, step through all 5 rounds. After round 1, identify which examples were misclassified (they grow larger). After round 2, do the same examples get misclassified again, or different ones? Why does the algorithm sometimes struggle with the same examples across multiple rounds?</p>
+        <p>&rarr; Note the α (voting weight) for each round. A round with a very high α means the stump was very accurate on the weighted dataset. A round with a low α means the stump barely outperformed random guessing on that weighting. Does α generally increase or decrease over rounds? Why?</p>
+        <p><strong>Key question:</strong> AdaBoost assigns exponentially increasing weight to misclassified examples. What happens if a single example is mislabelled in the training data (a genuine error, not a hard case)? How would this affect the algorithm's behaviour — and what does this reveal about boosting's sensitivity to noisy labels compared to bagging?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">⚖️ The Overfitting Asymmetry</div>
+        <div class="ex-desc">Use Demo 4 to find the round at which boosting starts to overfit — and confirm that bagging never does.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 4, drag the slider from left to right. At what number of rounds does the boosting boundary start memorising individual training points rather than capturing the general pattern? What happens to the test accuracy at that point?</p>
+        <p>&rarr; Now look at the bagging panel at the same slider position. Does the boundary show the same tightening? Does test accuracy fall?</p>
+        <p><strong>Key insight:</strong> Bagging cannot overfit by adding more trees — the ensemble average of a thousand trees is no more overfit than the average of ten. Boosting can overfit because each subsequent tree is deliberately targeting the residuals of an already-overfit ensemble, compounding its errors. The learning rate (shrinkage) is the primary tool for controlling this. A smaller learning rate means each tree contributes less — you need more trees, but you overfit later.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>The Theoretical Surprise.</strong> Schapire's 1990 result — that any weak learner can be boosted to arbitrary accuracy — seemed too good to be true when it was published. The proof assumes unlimited data and a weak learner that can always do slightly better than random on any weighted distribution. In practice, neither assumption holds perfectly. Why does AdaBoost still work so well empirically despite these idealised assumptions?</li>
+      <li><strong>Noise Sensitivity.</strong> Bagging is robust to label noise — a mislabelled example might appear in some bootstrap samples but not others, diluting its effect. Boosting is sensitive to label noise — a mislabelled example gets higher and higher weight as the algorithm keeps failing to classify it correctly. What does this suggest about the right choice of method for a medical dataset where some diagnoses in the training data may be incorrect?</li>
+      <li><strong>XGBoost and the Engineering Lesson.</strong> XGBoost didn't introduce a fundamentally new algorithm — it took gradient boosting and engineered it carefully. Regularisation terms, approximate split finding, column subsampling, handling of missing values. The result was qualitatively better in practice. What does this suggest about the relative importance of algorithmic novelty vs. engineering quality in applied machine learning?</li>
+      <li><strong>Connection to Neural Networks.</strong> Gradient boosting fits residuals iteratively, making each model a small correction to the previous ensemble. Dropout in neural networks randomly drops units during training, producing an ensemble effect similar to bagging. Do you see the same bias/variance distinction in these two regularisation techniques? Can you describe dropout as "neural bagging"?</li>
+      <li><strong>Tabular Data's Persistence.</strong> On structured tabular data, gradient boosted trees (XGBoost, LightGBM, CatBoost) consistently outperform deep neural networks, even with large datasets. On images, text, and audio, deep networks dominate. What property of tabular data might explain why boosted trees remain competitive — and what property of image/text data makes deep networks so dominant there?</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">AdaBoost</span><span class="gloss-abbr">Freund &amp; Schapire, 1995</span></div>
+        <div class="gloss-def">The first practical boosting algorithm. Trains weak classifiers sequentially, reweighting examples after each round so misclassified examples receive higher weight. Final prediction is a weighted majority vote where learner weight α = ½ log((1−err)/err). A learner with 0% error gets infinite weight; one with 50% error (random) gets zero weight.
+          <div class="gloss-code">α_t = ½ · log((1 − err_t) / err_t)
+w_i ← w_i · exp(−α_t · y_i · h_t(x_i))</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Gradient Boosting</span><span class="gloss-abbr">Friedman, 1999–2001</span></div>
+        <div class="gloss-def">Reframes boosting as gradient descent in function space. Each new tree fits the negative gradient of the loss function — the direction that reduces total loss most. For squared error loss this is exactly the residuals y − ŷ. A learning rate η scales each tree's contribution, trading speed for generalization.
+          <div class="gloss-code">F_m(x) = F_{m-1}(x) + η · h_m(x)
+where h_m fits the residuals: r_i = y_i − F_{m-1}(x_i)</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Weak Learner</span><span class="gloss-abbr">Better than random</span></div>
+        <div class="gloss-def">A classifier or regressor that performs only slightly better than chance — for example, a decision stump (single-split tree) that achieves 55% accuracy on a binary classification task. Boosting's theoretical guarantee: any weak learner (better than 50%) can be combined into an ensemble with arbitrary accuracy, given enough data and rounds.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Learning Rate</span><span class="gloss-abbr">Shrinkage — boosting's regulariser</span></div>
+        <div class="gloss-def">A scalar η ∈ (0,1] that scales each tree's contribution in gradient boosting. Small η means each step is small — requires more trees but generalises better (less overfitting). There is a strong empirical trade-off: lower learning rate + more trees ≈ higher learning rate + fewer trees in training accuracy, but the low-rate version almost always generalises better. Typical values: 0.01–0.3.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Residuals</span><span class="gloss-abbr">What the ensemble still gets wrong</span></div>
+        <div class="gloss-def">In gradient boosting, the vector of differences between true labels and the current ensemble's predictions: r_i = y_i − F(x_i). Each new tree fits these residuals, approximating the remaining error. As rounds increase, residuals shrink — the ensemble progressively explains more of the structure in the data. If residuals stop shrinking, the ensemble has converged or begun overfitting.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">XGBoost</span><span class="gloss-abbr">eXtreme Gradient Boosting, 2016</span></div>
+        <div class="gloss-def">An engineered implementation of gradient boosting that adds: L1/L2 regularization on leaf weights, approximate split-finding for large datasets, column subsampling (like Random Forests), efficient handling of missing values, and parallelisation. The engineering improvements — not algorithmic novelty — account for its dominance on tabular data. Won more Kaggle competitions than any other single algorithm.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era3_lesson2_random_forests.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 3, Lesson 2 — Random Forests</div></div>
+    </a>
+    <div class="nav-btn" style="opacity:.35;cursor:default">
+      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 3, Lesson 4 — Support Vector Machines</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+</div>
+<script>
+'use strict';
+
+/* ── shared helpers ──────────────────────────────── */
+function polyval(c,x){var v=0;for(var i=0;i<c.length;i++)v=v*x+c[i];return v;}
+
+/* ════════════════════════════════════════════════════
+   DEMO 1 — BAGGING
+════════════════════════════════════════════════════ */
+(function(){
+  // True function: sin(x) + 0.3*cos(3x) on [0,9]
+  function tf(x){return Math.sin(x)+0.3*Math.cos(3*x);}
+  var XP=[];for(var i=0;i<=80;i++)XP.push(i*9/80);
+  var YT=XP.map(tf);
+
+  // 5 bootstrap sample model coefficients (degree-3 polynomial fits to noisy samples)
+  var MODELS=[
+    [0.00412,-0.0891,0.374,-0.102],
+    [-0.00318,0.0512,-0.112,0.887],
+    [0.00255,-0.0441,0.198,0.312],
+    [-0.00481,0.0782,-0.261,1.143],
+    [0.00319,-0.0601,0.285,0.102],
+  ];
+  // Noisy sample points for each bootstrap (x,y pairs)
+  var SAMPLES=[
+    [[0.3,0.18],[0.8,0.62],[1.4,0.91],[2.1,0.71],[2.9,0.08],[3.5,-0.38],[4.2,-0.78],[5.1,-0.52],[5.9,0.12],[6.8,0.54],[7.4,0.41],[8.6,-0.11]],
+    [[0.5,0.39],[1.1,0.84],[1.9,0.92],[2.5,0.48],[3.2,-0.11],[4.0,-0.62],[4.8,-0.85],[5.5,-0.22],[6.3,0.44],[7.1,0.62],[7.8,0.22],[8.9,-0.28]],
+    [[0.2,0.09],[0.9,0.71],[1.6,0.95],[2.3,0.62],[3.0,-0.02],[3.8,-0.51],[4.5,-0.81],[5.3,-0.44],[6.0,0.14],[6.9,0.57],[7.6,0.38],[8.4,-0.05]],
+    [[0.4,0.31],[1.0,0.81],[1.7,0.97],[2.4,0.55],[3.1,-0.08],[3.9,-0.57],[4.6,-0.83],[5.4,-0.38],[6.1,0.22],[7.0,0.59],[7.7,0.29],[8.7,-0.18]],
+    [[0.6,0.48],[1.2,0.88],[1.8,0.94],[2.6,0.42],[3.3,-0.15],[4.1,-0.65],[4.7,-0.84],[5.6,-0.28],[6.2,0.34],[7.2,0.61],[7.9,0.18],[8.8,-0.22]],
+  ];
+  var COLORS=['#f59e0b','#38bdf8','#a78bfa','#4ade80','#f87171'];
+  var drawn=0;
+
+  function render(){
+    var W=420,H=260,PL=28,PR=12,PT=16,PB=28,PW=W-PL-PR,PH=H-PT-PB;
+    function sx(x){return PL+x/9*PW;}
+    function sy(y){return PT+PH-(y+1.2)/2.4*PH;}
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    h+='<line x1="'+PL+'" y1="'+(PT+PH)+'" x2="'+(PL+PW)+'" y2="'+(PT+PH)+'" stroke="#2d3748" stroke-width="1"/>';
+    h+='<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+PH)+'" stroke="#2d3748" stroke-width="1"/>';
+    h+='<line x1="'+PL+'" y1="'+sy(0).toFixed(0)+'" x2="'+(PL+PW)+'" y2="'+sy(0).toFixed(0)+'" stroke="#1e2d40" stroke-width="1" stroke-dasharray="3,4"/>';
+
+    // True function
+    var tp=''; XP.forEach(function(x,i){tp+=(i===0?'M':'L')+sx(x).toFixed(1)+','+sy(YT[i]).toFixed(1);});
+    h+='<path d="'+tp+'" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" stroke-dasharray="5,3"/>';
+
+    // Individual model predictions
+    for(var m=0;m<drawn;m++){
+      var mp=''; XP.forEach(function(x,i){mp+=(i===0?'M':'L')+sx(x).toFixed(1)+','+sy(polyval(MODELS[m],x)).toFixed(1);});
+      h+='<path d="'+mp+'" fill="none" stroke="'+COLORS[m]+'" stroke-width="1.5" opacity="0.5"/>';
+      // Sample points
+      SAMPLES[m].forEach(function(pt){
+        h+='<circle cx="'+sx(pt[0]).toFixed(1)+'" cy="'+sy(pt[1]).toFixed(1)+'" r="3" fill="'+COLORS[m]+'" opacity="0.6"/>';
+      });
+    }
+
+    // Ensemble average
+    if(drawn>1){
+      var ap=''; XP.forEach(function(x,i){
+        var avg=0;for(var m=0;m<drawn;m++)avg+=polyval(MODELS[m],x);avg/=drawn;
+        ap+=(i===0?'M':'L')+sx(x).toFixed(1)+','+sy(avg).toFixed(1);
+      });
+      h+='<path d="'+ap+'" fill="none" stroke="white" stroke-width="3"/>';
+    }
+
+    // Legend
+    h+='<line x1="'+(PL+4)+'" y1="'+(PT+10)+'" x2="'+(PL+20)+'" y2="'+(PT+10)+'" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" stroke-dasharray="4,2"/>';
+    h+='<text x="'+(PL+24)+'" y="'+(PT+14)+'" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Space Mono,monospace">True function</text>';
+    if(drawn>1){
+      h+='<line x1="'+(PL+120)+'" y1="'+(PT+10)+'" x2="'+(PL+136)+'" y2="'+(PT+10)+'" stroke="white" stroke-width="3"/>';
+      h+='<text x="'+(PL+140)+'" y="'+(PT+14)+'" fill="white" font-size="8" font-family="Space Mono,monospace">Ensemble avg ('+drawn+' models)</text>';
+    }
+
+    document.getElementById('d1svg').innerHTML=h;
+    document.getElementById('d1count').textContent=drawn;
+    var notes=['Draw samples to see how the average prediction stabilises.','One model — high variance. Draw more to see the average stabilise.','Two models averaged. The ensemble begins to smooth out individual variation.','Three models. The average is more stable than any individual.','Four models — the ensemble barely moves when you add the fifth.','All 5 models drawn. The white average line is far more stable than any individual coloured line — this is variance reduction through averaging.'];
+    document.getElementById('d1note').textContent=notes[Math.min(drawn,5)];
+  }
+
+  window.d1step=function(){if(drawn<5){drawn++;render();}};
+  window.d1reset=function(){drawn=0;render();};
+  render();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 2 — ADABOOST
+════════════════════════════════════════════════════ */
+(function(){
+  // 14 pre-positioned training points: [x, y, class (-1 or 1)]
+  var PTS=[
+    [0.15,0.75,1],[0.25,0.55,1],[0.2,0.35,1],[0.35,0.65,1],[0.4,0.8,1],[0.5,0.5,-1],
+    [0.55,0.3,-1],[0.65,0.6,-1],[0.7,0.4,-1],[0.75,0.7,-1],[0.8,0.25,-1],
+    [0.3,0.25,1],[0.6,0.8,-1],[0.45,0.15,1]
+  ];
+
+  // Pre-computed AdaBoost rounds
+  // Each round: {axis:'x'|'y', thresh, dir:1|-1, alpha, misses:[indices]}
+  var ROUNDS=[
+    {axis:'x',thresh:0.47,dir:1, alpha:0.65, misses:[5,11,13],   note:'Stump splits on x=0.47 (vertical line). Left=class +1, right=class -1. Misses 3 examples on wrong side. Those 3 now get higher weight.'},
+    {axis:'y',thresh:0.50,dir:-1,alpha:0.48, misses:[9,12,3,4],  note:'Stump splits on y=0.50. Misses near-boundary examples. The previously misclassified points now dominate — the stump focuses near them.'},
+    {axis:'x',thresh:0.32,dir:1, alpha:0.55, misses:[5,6,10],    note:'Third stump refines the left boundary. Notice: the ensemble is now correctly classifying most of the earlier difficult examples.'},
+    {axis:'y',thresh:0.28,dir:1, alpha:0.44, misses:[7,8,12],    note:'Fourth stump handles the lower-right cluster. Weights are now very uneven — a few hard examples dominate the training distribution.'},
+    {axis:'x',thresh:0.60,dir:1, alpha:0.51, misses:[5,9,12],    note:'Final stump. The ensemble of 5 stumps now classifies most training points correctly — despite each stump being trivially simple on its own.'},
+  ];
+
+  // Pre-computed ensemble grid at each round (10x10 for 2D boundary)
+  // 0=class+1, 1=class-1
+  var GRIDS=[
+    // After round 1
+    [[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1]],
+    // After round 2
+    [[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[1,1,0,0,0,1,1,1,1,1],[1,1,0,0,0,1,1,1,1,1],[1,1,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1]],
+    // After round 3
+    [[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[1,0,0,0,0,1,1,1,1,1],[1,0,0,0,0,0,1,1,1,1],[1,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1]],
+    // After round 4
+    [[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[1,0,0,0,0,0,1,1,1,1],[1,0,0,0,0,0,1,1,1,1],[1,1,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1]],
+    // After round 5
+    [[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[1,0,0,0,0,0,1,1,1,1],[1,0,0,0,0,0,0,1,1,1],[1,1,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1]],
+  ];
+
+  // Weights per round (14 values, index = training point)
+  var WEIGHTS=[
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1], // initial (uniform)
+    [1,1,1,1,1,2.2,1,1,1,1,1,2.2,1,2.2],
+    [1,1,1,2.1,2.1,2.2,1,1,1,2.8,1,2.2,2.8,2.2],
+    [1,1,1,2.1,2.1,3.4,2.8,1,1,2.8,1,2.2,2.8,2.2],
+    [1,1,1,2.1,2.1,3.4,2.8,2.4,2.4,3.5,1,2.2,3.5,2.2],
+    [1,1,1,2.1,2.1,4.1,2.8,2.4,2.4,4.2,1,2.2,4.2,2.2],
+  ];
+
+  var round=0;
+
+  function render(){
+    var W=420,H=280,PAD=20,GW=W-2*PAD,GH=H-2*PAD,N=10,cw=GW/N,ch=GH/N;
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+
+    // Background grid (current boundary)
+    if(round>0){
+      var grid=GRIDS[round-1];
+      grid.forEach(function(row,ri){
+        row.forEach(function(val,ci){
+          var x=PAD+ci*cw, y=PAD+ri*ch;
+          h+='<rect x="'+x.toFixed(0)+'" y="'+y.toFixed(0)+'" width="'+cw.toFixed(0)+'" height="'+ch.toFixed(0)+'" fill="'+(val?'rgba(248,113,113,.1)':'rgba(56,189,248,.08)')+'" />';
+        });
+      });
+    }
+
+    // Data points — sized by weight
+    var weights=WEIGHTS[round];
+    var maxW=Math.max.apply(null,weights);
+    var misses=round>0?ROUNDS[round-1].misses:[];
+    PTS.forEach(function(p,i){
+      var px=PAD+p[0]*GW, py=PAD+(1-p[1])*GH;
+      var r=4+Math.round((weights[i]/maxW)*8);
+      var isMiss=misses.indexOf(i)>=0;
+      var fill=p[2]===1?'#38bdf8':'#f87171';
+      h+='<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="'+r+'" fill="'+fill+'" stroke="'+(isMiss?'white':'none')+'" stroke-width="'+(isMiss?2:0)+'"/>';
+    });
+
+    // Axes
+    h+='<line x1="'+PAD+'" y1="'+(H-PAD)+'" x2="'+(W-PAD)+'" y2="'+(H-PAD)+'" stroke="#2d3748" stroke-width="1"/>';
+    h+='<line x1="'+PAD+'" y1="'+PAD+'" x2="'+PAD+'" y2="'+(H-PAD)+'" stroke="#2d3748" stroke-width="1"/>';
+
+    // Legend
+    h+='<circle cx="'+(PAD+8)+'" cy="'+(H-8)+'" r="4" fill="#38bdf8"/>';
+    h+='<text x="'+(PAD+14)+'" y="'+(H-4)+'" fill="#38bdf8" font-size="8" font-family="Space Mono,monospace">Class +1</text>';
+    h+='<circle cx="'+(PAD+70)+'" cy="'+(H-8)+'" r="4" fill="#f87171"/>';
+    h+='<text x="'+(PAD+76)+'" y="'+(H-4)+'" fill="#f87171" font-size="8" font-family="Space Mono,monospace">Class -1</text>';
+    if(round>0)h+='<text x="'+(PAD+140)+'" y="'+(H-4)+'" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Space Mono,monospace">white ring = misclassified last round</text>';
+
+    document.getElementById('d2svg').innerHTML=h;
+    document.getElementById('d2round').textContent=round+' / 5';
+    document.getElementById('d2alpha').textContent=round>0?ROUNDS[round-1].alpha.toFixed(2):'—';
+    document.getElementById('d2note').textContent=round===0?'Press Next Round to begin. Circle size = example weight.':ROUNDS[round-1].note;
+    document.getElementById('d2btn').style.opacity=round>=5?0.4:1;
+    document.getElementById('d2btn').disabled=round>=5;
+  }
+
+  window.d2step=function(){if(round<5){round++;render();}};
+  window.d2reset=function(){round=0;render();};
+  render();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 3 — GRADIENT BOOSTING RESIDUALS
+════════════════════════════════════════════════════ */
+(function(){
+  function tf(x){return Math.sin(x)+0.4*Math.cos(2.5*x);}
+  var XP=[];for(var i=0;i<=60;i++)XP.push(i*8/60);
+  var YT=XP.map(tf);
+  // Training points
+  var TX=[0.3,0.8,1.4,2.1,2.7,3.3,3.9,4.6,5.2,5.8,6.4,7.1,7.6];
+  var TY=TX.map(function(x){return tf(x);});
+
+  // Pre-computed ensemble predictions at each step (polynomial approx)
+  var ENS_COEFFS=[
+    null,
+    [0,0,0,0.41],                // 1 tree: flat stump
+    [0,-0.022,0.18,0.22],        // 2 trees
+    [0.008,-0.09,0.32,0.14],     // 3 trees
+    [0.006,-0.068,0.29,0.18],    // 4 trees
+    [-0.004,0.02,-0.04,0.58],    // 5 trees
+    [-0.002,0.011,0.082,0.41],   // 6 trees
+    [0.003,-0.038,0.22,0.29],    // 7 trees
+    [0.002,-0.027,0.19,0.34],    // 8 trees — close to true
+  ];
+  var MSE=[null,0.48,0.32,0.22,0.16,0.12,0.09,0.07,0.05];
+
+  var step=0, view='ensemble';
+
+  function render(){
+    var W=420,H=220,PL=28,PR=12,PT=14,PB=24,PW=W-PL-PR,PH=H-PT-PB;
+    function sx(x){return PL+x/8*PW;}
+    function sy(y){return PT+PH-(y+1.5)/3*PH;}
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    h+='<line x1="'+PL+'" y1="'+(PT+PH)+'" x2="'+(PL+PW)+'" y2="'+(PT+PH)+'" stroke="#2d3748" stroke-width="1"/>';
+    h+='<line x1="'+PL+'" y1="'+sy(0).toFixed(0)+'" x2="'+(PL+PW)+'" y2="'+sy(0).toFixed(0)+'" stroke="#1e2d40" stroke-width="1" stroke-dasharray="3,4"/>';
+
+    if(view==='ensemble'){
+      // True function
+      var tp=''; XP.forEach(function(x,i){tp+=(i===0?'M':'L')+sx(x).toFixed(1)+','+sy(YT[i]).toFixed(1);});
+      h+='<path d="'+tp+'" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-dasharray="5,3"/>';
+      // Ensemble prediction
+      if(step>0){
+        var ep=''; XP.forEach(function(x,i){ep+=(i===0?'M':'L')+sx(x).toFixed(1)+','+sy(polyval(ENS_COEFFS[step],x)).toFixed(1);});
+        h+='<path d="'+ep+'" fill="none" stroke="var(--ac)" stroke-width="2.5"/>';
+      }
+      // Training points
+      TX.forEach(function(x,i){h+='<circle cx="'+sx(x).toFixed(1)+'" cy="'+sy(TY[i]).toFixed(1)+'" r="4" fill="white" opacity="0.7"/>';});
+      h+='<text x="'+(PL+4)+'" y="'+(PT+12)+'" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Space Mono,monospace">--- true function</text>';
+      if(step>0)h+='<text x="'+(PL+120)+'" y="'+(PT+12)+'" fill="var(--ac)" font-size="8" font-family="Space Mono,monospace">ensemble ('+step+' trees)</text>';
+    } else {
+      // Residuals view
+      h+='<line x1="'+PL+'" y1="'+sy(0).toFixed(0)+'" x2="'+(PL+PW)+'" y2="'+sy(0).toFixed(0)+'" stroke="rgba(255,255,255,.2)" stroke-width="1"/>';
+      if(step>0){
+        TX.forEach(function(x,i){
+          var res=TY[i]-polyval(ENS_COEFFS[step],x);
+          var px=sx(x).toFixed(1), py=sy(res).toFixed(1), zero=sy(0).toFixed(1);
+          h+='<line x1="'+px+'" y1="'+zero+'" x2="'+px+'" y2="'+py+'" stroke="'+(res>0?'#38bdf8':'#f87171')+'" stroke-width="2"/>';
+          h+='<circle cx="'+px+'" cy="'+py+'" r="4" fill="'+(res>0?'#38bdf8':'#f87171')+'"/>';
+        });
+      }
+      h+='<text x="'+(PL+4)+'" y="'+(PT+12)+'" fill="#94a3b8" font-size="8" font-family="Space Mono,monospace">'+(step===0?'Draw trees to see residuals':'Residuals after '+step+' trees — what the ensemble still gets wrong')+'</text>';
+    }
+
+    document.getElementById('d3svg').innerHTML=h;
+    document.getElementById('d3count').textContent=step;
+    document.getElementById('d3mse').textContent=step>0?MSE[step].toFixed(3):'—';
+    var notes=['Press Add Tree to fit the first stump.','Tree 1: flat stump — captures the rough average. Large residuals remain.',
+      'Tree 2 fits the residuals. Ensemble begins to follow the curve.',
+      'Tree 3: residuals shrinking. The ensemble captures more structure.',
+      'Tree 4: the general shape is emerging.','Tree 5: clear improvement. Switch to Residuals view to see what remains.',
+      'Tree 6: residuals are small — mostly noise remains.',
+      'Tree 7: diminishing returns setting in.','Tree 8: ensemble closely tracks the true function. Adding more trees risks overfitting the noise.'];
+    document.getElementById('d3note').textContent=notes[step];
+    document.getElementById('d3btn').style.opacity=step>=8?0.4:1;
+    document.getElementById('d3btn').disabled=step>=8;
+  }
+
+  window.d3step=function(){if(step<8){step++;render();}};
+  window.d3reset=function(){step=0;render();};
+  window.d3setView=function(v){
+    view=v;
+    document.getElementById('d3btnEns').classList.toggle('active',v==='ensemble');
+    document.getElementById('d3btnRes').classList.toggle('active',v==='residuals');
+    render();
+  };
+  render();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 4 — BAGGING vs BOOSTING
+════════════════════════════════════════════════════ */
+(function(){
+  var SIZES=[1,3,10,25,50,200];
+  var BAG_ACC=['72%','78%','84%','87%','88%','88%'];
+  var BST_ACC=['68%','76%','85%','88%','86%','74%'];
+  var BAG_NOTE=['Single tree. High variance boundary.','3 trees averaged. Boundary smoothing.','10 trees. Stable and generalising well.','25 trees. Minimal change from here.','50 trees. Converged — adding more won\'t overfit.','200 trees. Still stable. Bagging never overfits by adding trees.'];
+  var BST_NOTE=['Single stump. High bias, very simple boundary.','3 rounds. Bias falling, boundary more complex.','10 rounds. Near-optimal generalisation.','25 rounds. Peak generalisation zone.','50 rounds — beginning to memorise noise. Test accuracy falling.','200 rounds — severely overfit. Boundary memorises individual training points.'];
+
+  // Pre-computed 10x10 boundary grids [bagging, boosting] per slider index
+  var BAG_GRIDS=[
+    [[0,0,0,1,1,1,1,1,1,1],[0,0,0,1,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,0,1,1]],
+    [[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,0,1,1]],
+    [[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1]],
+    [[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1]],
+    [[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1]],
+    [[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1]],
+  ];
+  var BST_GRIDS=[
+    [[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1]],
+    [[0,0,0,0,1,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,0,1,1]],
+    [[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1]],
+    [[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1]],
+    [[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,0,1,1,0,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,1,0,1,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,1,0,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,0,0,1]],
+    [[0,0,0,1,0,0,1,0,1,1],[0,0,1,0,0,1,1,0,1,1],[0,0,0,0,0,0,1,1,0,1],[0,1,0,0,0,0,1,1,1,1],[0,0,0,0,0,1,0,1,1,1],[0,0,0,1,1,0,1,0,1,1],[0,0,0,0,0,0,0,1,0,1],[0,0,0,0,0,1,1,0,1,1],[0,0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,1]],
+  ];
+  // Training points for display [x,y,class]
+  var PTS4=[[.1,.8,0],[.2,.6,0],[.15,.4,0],[.3,.7,0],[.25,.5,0],[.4,.85,0],[.35,.3,0],[.45,.6,0],[.55,.2,1],[.6,.5,1],[.65,.7,1],[.7,.35,1],[.75,.55,1],[.8,.8,1],[.85,.4,1],[.9,.65,1],[.5,.9,0],[.5,.1,1]];
+
+  function drawPanel(svgId, grid, pts, accentColor){
+    var W=360,H=240,PAD=16,GW=W-2*PAD,GH=H-2*PAD,N=10,cw=GW/N,ch=GH/N;
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    grid.forEach(function(row,ri){
+      row.forEach(function(val,ci){
+        var x=PAD+ci*cw, y=PAD+ri*ch;
+        h+='<rect x="'+x.toFixed(0)+'" y="'+y.toFixed(0)+'" width="'+cw.toFixed(0)+'" height="'+ch.toFixed(0)+'" fill="'+(val?'rgba(248,113,113,.12)':'rgba(56,189,248,.08)')+'" />';
+      });
+    });
+    pts.forEach(function(p){
+      h+='<circle cx="'+(PAD+p[0]*GW).toFixed(1)+'" cy="'+(PAD+(1-p[1])*GH).toFixed(1)+'" r="5" fill="'+(p[2]?'#f87171':'#38bdf8')+'" stroke="#0a0d14" stroke-width="1"/>';
+    });
+    document.getElementById(svgId).innerHTML=h;
+  }
+
+  window.d4update=function(){
+    var idx=+document.getElementById('d4sl').value;
+    document.getElementById('d4val').textContent=SIZES[idx]+(SIZES[idx]===1?' tree':' trees/rounds');
+    drawPanel('d4bag',BAG_GRIDS[idx],PTS4,'#38bdf8');
+    drawPanel('d4boost',BST_GRIDS[idx],PTS4,'#f97316');
+    document.getElementById('d4bagacc').textContent=BAG_ACC[idx];
+    document.getElementById('d4boostacc').textContent=BST_ACC[idx];
+    document.getElementById('d4boostacc').style.color=idx>=4?'var(--red)':'var(--amber)';
+    document.getElementById('d4note').textContent='Bagging: '+BAG_NOTE[idx]+'   |   Boosting: '+BST_NOTE[idx];
+  };
+  d4update();
+})();
+</script>
+</body>
+</html>
