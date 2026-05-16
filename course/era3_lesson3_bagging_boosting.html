@@ -173,7 +173,62 @@ input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;he
   <section class="section">
     <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
 
-    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — Bagging.</strong> Bootstrap samples drawn from training data. Each produces a slightly different model. Watch predictions aggregate — individual models vary, the average stabilises.</p>
+
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — The Data Mechanism.</strong> Bagging and boosting both modify how models see training data — but in fundamentally different ways. Bagging <em>selects a subset</em>; boosting <em>reweights everything</em>. See both mechanisms on the same 10 patients.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Data Mechanism — Bagging vs. Boosting</span>
+        <span class="demo-hint">draw bootstrap samples · run boosting rounds · see what each model actually trains on</span>
+      </div>
+      <!-- Conceptual contrast header -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)">
+        <div style="padding:12px 16px;background:rgba(56,189,248,.06);border-right:1px solid var(--border)">
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:#38bdf8;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px">🎲 Bagging</div>
+          <div style="font-size:13px;color:#94a3b8;line-height:1.55">Each model trains on a <strong style="color:#e2e8f0">different random subset</strong>. Some rows are duplicated. Some rows are excluded entirely (out-of-bag).</div>
+        </div>
+        <div style="padding:12px 16px;background:rgba(249,115,22,.06)">
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:#f97316;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px">🎯 Boosting</div>
+          <div style="font-size:13px;color:#94a3b8;line-height:1.55">Every model trains on <strong style="color:#e2e8f0">all rows</strong> — but with different weights. Hard examples count more. Easy examples count less.</div>
+        </div>
+      </div>
+      <!-- Controls -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)">
+        <div style="padding:10px 16px;border-right:1px solid var(--border);display:flex;align-items:center;gap:8px">
+          <button class="ctrl-btn" style="border-color:rgba(56,189,248,.4);color:#38bdf8" onclick="dm1drawSample()">🎲 Draw Bootstrap Sample</button>
+          <button class="ctrl-btn" onclick="dm1resetBag()">↺</button>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--muted2)" id="dm1bagcount">Sample 0 of 5</span>
+        </div>
+        <div style="padding:10px 16px;display:flex;align-items:center;gap:8px">
+          <button class="ctrl-btn" style="border-color:rgba(249,115,22,.4);color:#f97316" onclick="dm1runRound()">🎯 Run Boosting Round</button>
+          <button class="ctrl-btn" onclick="dm1resetBoost()">↺</button>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--muted2)" id="dm1boostcount">Round 0 of 4</span>
+        </div>
+      </div>
+      <!-- Tables -->
+      <div style="display:grid;grid-template-columns:1fr 1fr">
+        <div style="padding:12px 16px;border-right:1px solid var(--border)">
+          <!-- Legend -->
+          <div style="display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap">
+            <span style="font-family:var(--mono);font-size:9px;display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:12px;height:12px;background:rgba(56,189,248,.25);border:1px solid #38bdf8;border-radius:2px"></span><span style="color:#38bdf8">selected</span></span>
+            <span style="font-family:var(--mono);font-size:9px;display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:12px;height:12px;background:rgba(56,189,248,.4);border:2px solid #38bdf8;border-radius:2px"></span><span style="color:#7dd3fc">×2 duplicate</span></span>
+            <span style="font-family:var(--mono);font-size:9px;display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:12px;height:12px;background:#0a0d14;border:1px solid #1e2d40;border-radius:2px;opacity:.4"></span><span style="color:var(--muted2)">out-of-bag</span></span>
+          </div>
+          <div id="dm1bagtable"></div>
+        </div>
+        <div style="padding:12px 16px">
+          <!-- Legend -->
+          <div style="display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap">
+            <span style="font-family:var(--mono);font-size:9px;display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:24px;height:8px;background:#f97316;border-radius:2px"></span><span style="color:#f97316">high weight</span></span>
+            <span style="font-family:var(--mono);font-size:9px;display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:12px;height:8px;background:#f97316;border-radius:2px;opacity:.4"></span><span style="color:var(--muted2)">low weight</span></span>
+            <span style="font-family:var(--mono);font-size:9px;display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:10px;background:rgba(248,113,113,.2);border:1px solid #f87171;border-radius:50%"></span><span style="color:#f87171">misclassified last round</span></span>
+          </div>
+          <div id="dm1boosttable"></div>
+        </div>
+      </div>
+      <div style="padding:8px 16px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.6" id="dm1note">Draw a bootstrap sample (left) or run a boosting round (right) to see how each method transforms the training data.</div>
+    </div>
+
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — Bagging.</strong> Bootstrap samples drawn from training data. Each produces a slightly different model. Watch predictions aggregate — individual models vary, the average stabilises.</p>
     <div class="demo-wrap" style="margin-bottom:28px">
       <div class="demo-topbar">
         <span class="demo-tag">Bagging — Bootstrap &amp; Average</span>
@@ -195,7 +250,7 @@ input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;he
       </div>
     </div>
 
-    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — AdaBoost Step by Step.</strong> Watch example weights shift after each round. Misclassified points grow larger — the next stump must focus on them. The ensemble boundary builds from simple stumps.</p>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 3 — AdaBoost Step by Step.</strong> Watch example weights shift after each round. Misclassified points grow larger — the next stump must focus on them. The ensemble boundary builds from simple stumps.</p>
     <div class="demo-wrap" style="margin-bottom:28px">
       <div class="demo-topbar">
         <span class="demo-tag">AdaBoost — Sequential Reweighting</span>
@@ -221,7 +276,7 @@ input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;he
       </div>
     </div>
 
-    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 3 — Gradient Boosting Residuals.</strong> Each tree fits what the previous ensemble got wrong. Residuals shrink with each round — the ensemble converges on the true function from a sum of stumps.</p>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 4 — Gradient Boosting Residuals.</strong> Each tree fits what the previous ensemble got wrong. Residuals shrink with each round — the ensemble converges on the true function from a sum of stumps.</p>
     <div class="demo-wrap" style="margin-bottom:28px">
       <div class="demo-topbar">
         <span class="demo-tag">Gradient Boosting — Residual Fitting</span>
@@ -251,7 +306,7 @@ input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;he
       </div>
     </div>
 
-    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 4 — Bagging vs. Boosting.</strong> Same dataset, both methods. The slider controls number of trees/rounds. Bagging stays smooth; boosting tightens then memorises noise.</p>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 5 — Bagging vs. Boosting.</strong> Same dataset, both methods. The slider controls number of trees/rounds. Bagging stays smooth; boosting tightens then memorises noise.</p>
     <div class="demo-wrap">
       <div class="demo-topbar">
         <span class="demo-tag">Bagging vs. Boosting — Same Dataset</span>
@@ -379,7 +434,159 @@ where h_m fits the residuals: r_i = y_i − F_{m-1}(x_i)</div>
 <script>
 'use strict';
 
-/* ── shared helpers ──────────────────────────────── */
+/* ════════════════════════════════════════════════════
+   DEMO 1 — DATA MECHANISM: BAGGING vs BOOSTING
+════════════════════════════════════════════════════ */
+(function(){
+  var PATIENTS = [
+    {id:1,  feats:'Age, BP',       label:'High', risk:1},
+    {id:2,  feats:'BP, Chol',      label:'Low',  risk:0},
+    {id:3,  feats:'Age, Chol, Smoke', label:'High', risk:1},
+    {id:4,  feats:'Chol, Smoke',   label:'Low',  risk:0},
+    {id:5,  feats:'Age, BP, Chol', label:'High', risk:1},
+    {id:6,  feats:'BP, Smoke',     label:'Low',  risk:0},
+    {id:7,  feats:'Age',           label:'Low',  risk:0},
+    {id:8,  feats:'Smoke',         label:'Low',  risk:0},
+    {id:9,  feats:'Age, Chol',     label:'Low',  risk:0},
+    {id:10, feats:'BP, Chol, Smoke',label:'High', risk:1},
+  ];
+
+  // Pre-computed bootstrap samples: array of 10 indices (1-based, with repeats)
+  var SAMPLES = [
+    [1,1,3,4,5,6,8,9,10,10],   // P2,P7 OOB; P1,P10 appear twice
+    [1,2,3,5,5,6,7,8,9,10],    // P4 OOB; P5 appears twice
+    [2,2,3,4,5,7,8,9,9,10],    // P1,P6 OOB; P2,P9 appear twice
+    [1,3,4,4,5,6,7,9,10,10],   // P2,P8 OOB; P4,P10 appear twice
+    [1,2,4,5,6,7,7,8,9,10],    // P3 OOB; P7 appears twice
+  ];
+
+  // Pre-computed boosting rounds: which patients are misclassified each round
+  // Weights start at 1.0 for all; misclassified get multiplied by ~1.8
+  var BOOST_MISSES = [
+    [1,6,9],      // Round 1 misses
+    [2,4,7],      // Round 2 misses
+    [5,6,10],     // Round 3 misses
+    [1,3,9],      // Round 4 misses
+  ];
+  var BOOST_NOTES = [
+    'Round 1: stump split on Cholesterol. Misclassified P1 (Age+BP looks risky but is not), P6 (BP+Smoke pattern), P9 (Age+Chol not enough). These three now count ~1.8× more.',
+    'Round 2: stump focused on the newly heavy patients. Misclassified P2, P4, P7. Weights shifting — the hard boundary cases dominate.',
+    'Round 3: the high-weight patients from round 1 are still causing trouble. P6 misclassified again — its weight is now very high. The distribution is becoming uneven.',
+    'Round 4 complete. A few patients now have very high weights (P1, P6, P9 from multiple misclassifications). The ensemble has learned to focus intensely on these difficult cases.',
+  ];
+
+  var bagIdx = 0;
+  var boostRound = 0;
+  var weights = [1,1,1,1,1,1,1,1,1,1];
+
+  function rowStyle(state){
+    if(state==='in1')   return 'background:rgba(56,189,248,.18);border-bottom:1px solid rgba(56,189,248,.2)';
+    if(state==='in2')   return 'background:rgba(56,189,248,.32);border-bottom:1px solid rgba(56,189,248,.3)';
+    if(state==='oob')   return 'background:#0a0d14;opacity:0.35;border-bottom:1px solid var(--border)';
+    return 'background:#0a0d14;border-bottom:1px solid var(--border)';
+  }
+
+  function renderBag(){
+    if(bagIdx===0){
+      // Initial state: all rows neutral
+      var rows = PATIENTS.map(function(p){
+        return '<div style="display:grid;grid-template-columns:36px 1fr 80px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--border)">'
+          +'<span style="font-family:var(--mono);font-size:10px;color:var(--muted2)">P'+p.id+'</span>'
+          +'<span style="font-family:var(--mono);font-size:10px;color:#94a3b8">'+p.feats+'</span>'
+          +'<span style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-align:right">not drawn</span>'
+          +'</div>';
+      }).join('');
+      document.getElementById('dm1bagtable').innerHTML=rows;
+      document.getElementById('dm1bagcount').textContent='Sample 0 of 5 — draw a sample';
+      return;
+    }
+    var sample = SAMPLES[bagIdx-1];
+    // Count appearances
+    var counts = new Array(11).fill(0);
+    sample.forEach(function(id){counts[id]++;});
+
+    var rows = PATIENTS.map(function(p){
+      var c = counts[p.id];
+      var state = c===0?'oob':c===1?'in1':'in2';
+      var badge = c===0?'<span style="font-family:var(--mono);font-size:9px;color:#475569">OOB</span>'
+                : c===1?'<span style="font-family:var(--mono);font-size:9px;color:#38bdf8">✓ in</span>'
+                : '<span style="font-family:var(--mono);font-size:9px;font-weight:700;color:#7dd3fc;background:rgba(56,189,248,.2);padding:1px 6px;border-radius:3px;border:1px solid rgba(56,189,248,.4)">×'+c+'</span>';
+      return '<div style="display:grid;grid-template-columns:36px 1fr 64px;align-items:center;padding:6px 8px;'+rowStyle(state)+'">'
+        +(c>1?'<div style="position:relative">'
+            +'<div style="position:absolute;top:2px;left:2px;width:26px;height:18px;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.3);border-radius:3px"></div>'
+            +'<span style="position:relative;font-family:var(--mono);font-size:10px;color:#38bdf8">P'+p.id+'</span>'
+            +'</div>'
+          :'<span style="font-family:var(--mono);font-size:10px;color:'+(c===0?'#334155':'#38bdf8')+'">P'+p.id+'</span>')
+        +'<span style="font-family:var(--mono);font-size:10px;color:'+(c===0?'#334155':'#94a3b8')+'">'+p.feats+'</span>'
+        +'<div style="text-align:right">'+badge+'</div>'
+        +'</div>';
+    }).join('');
+    document.getElementById('dm1bagtable').innerHTML=rows;
+    document.getElementById('dm1bagcount').textContent='Sample '+bagIdx+' of 5';
+
+    var oobCount = counts.slice(1).filter(function(c){return c===0;}).length;
+    var dupCount = counts.slice(1).filter(function(c){return c>1;}).length;
+    document.getElementById('dm1note').textContent='Bagging sample '+bagIdx+': '+oobCount+' patients excluded (OOB), '+dupCount+' patients duplicated. The model trained on this sample sees a genuinely different dataset.';
+  }
+
+  function renderBoost(){
+    var maxW = Math.max.apply(null,weights);
+    var misses = boostRound>0 ? BOOST_MISSES[boostRound-1] : [];
+    var rows = PATIENTS.map(function(p,i){
+      var w = weights[i];
+      var pct = Math.round(w/maxW*100);
+      var isMiss = misses.indexOf(p.id)>=0;
+      var barColor = w > 1.5 ? '#f97316' : w > 1.1 ? '#fb923c' : '#94521a';
+      var rowBg = isMiss ? 'background:rgba(248,113,113,.1);border-bottom:1px solid rgba(248,113,113,.2)'
+                         : 'background:#0a0d14;border-bottom:1px solid var(--border)';
+      return '<div style="display:grid;grid-template-columns:36px 1fr 90px;align-items:center;padding:6px 8px;'+rowBg+'">'
+        +'<span style="font-family:var(--mono);font-size:10px;color:'+(isMiss?'#f87171':'#94a3b8')+'">P'+p.id+'</span>'
+        +'<span style="font-family:var(--mono);font-size:10px;color:'+(isMiss?'#fca5a5':'#94a3b8')+'">'+p.feats+'</span>'
+        +'<div style="display:flex;align-items:center;gap:4px">'
+          +'<div style="flex:1;background:#1e2d40;border-radius:2px;height:10px;overflow:hidden">'
+            +'<div style="width:'+pct+'%;height:100%;background:'+barColor+';border-radius:2px;transition:width .4s"></div>'
+          +'</div>'
+          +'<span style="font-family:var(--mono);font-size:9px;color:'+barColor+';min-width:28px;text-align:right">'+w.toFixed(1)+'</span>'
+          +(isMiss?'<span style="font-size:9px;color:#f87171">▲</span>':'')
+        +'</div>'
+        +'</div>';
+    }).join('');
+    document.getElementById('dm1boosttable').innerHTML=rows;
+    document.getElementById('dm1boostcount').textContent='Round '+boostRound+' of 4';
+
+    if(boostRound===0){
+      document.getElementById('dm1note').textContent='Boosting: all 10 patients are present with equal weight (1.0). No patient is excluded. Run Round 1 to see weights shift after misclassification.';
+    } else {
+      document.getElementById('dm1note').textContent='Boosting — '+BOOST_NOTES[boostRound-1];
+    }
+  }
+
+  window.dm1drawSample = function(){
+    if(bagIdx<5){ bagIdx++; renderBag(); }
+  };
+  window.dm1resetBag = function(){ bagIdx=0; renderBag(); };
+
+  window.dm1runRound = function(){
+    if(boostRound>=4) return;
+    var misses = BOOST_MISSES[boostRound];
+    misses.forEach(function(id){ weights[id-1] = Math.round(weights[id-1]*1.8*10)/10; });
+    // Slightly reduce correctly classified
+    PATIENTS.forEach(function(p,i){
+      if(misses.indexOf(p.id)<0) weights[i]=Math.max(0.4,Math.round(weights[i]*0.85*10)/10);
+    });
+    boostRound++;
+    renderBoost();
+  };
+  window.dm1resetBoost = function(){
+    boostRound=0;
+    weights=[1,1,1,1,1,1,1,1,1,1];
+    renderBoost();
+  };
+
+  renderBag(); renderBoost();
+})();
+
+/* ── shared helpers  ──────────────────────────────── */
 function polyval(c,x){var v=0;for(var i=0;i<c.length;i++)v=v*x+c[i];return v;}
 
 /* ════════════════════════════════════════════════════
