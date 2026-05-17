@@ -354,10 +354,10 @@ RBF:         K(x,x') = exp(−γ‖x−x'‖²)</div>
       <span class="nav-arrow">←</span>
       <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 3, Lesson 3 — Bagging &amp; Boosting</div></div>
     </a>
-    <div class="nav-btn" style="opacity:.35;cursor:default">
+    <a class="nav-btn" href="era3_lesson5_regularization.html">
       <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 3, Lesson 5 — Regularization</div></div>
       <span class="nav-arrow">→</span>
-    </div>
+    </a>
   </nav>
 </div>
 <script>
@@ -484,13 +484,16 @@ RBF:         K(x,x') = exp(−γ‖x−x'‖²)</div>
     'Projecting the 3D plane back to 2D: it becomes a circle — a nonlinear decision boundary. The SVM found this without ever explicitly computing the 3D coordinates.',
   ];
 
-  function project3D(x,y,W,H){
-    // Isometric-ish projection
+  function project3D(x,y){
+    // Isometric projection — z = normalised radius.
+    // Outer ring radius ~165px so z ∈ [0.4, 1.0] for our points.
+    // Gentler scaling (z*20 x, z*44 y) keeps all points in the 420×300 frame.
+    // +28 y-offset gives headroom at the top for the highest lifted points.
     var cx=210,cy=150;
-    var dx=x-cx,dy=y-cy;
-    var z=(dx*dx+dy*dy)/3000; // normalised z
-    var iso_x=cx+dx*0.7-z*40;
-    var iso_y=cy+dy*0.7-z*80;
+    var dx=x-cx, dy=y-cy;
+    var z=Math.sqrt(dx*dx+dy*dy)/165;
+    var iso_x=cx+dx*0.72-z*20;
+    var iso_y=cy+dy*0.72-z*44+28;
     return{x:iso_x,y:iso_y,z:z};
   }
 
@@ -728,5 +731,147 @@ RBF:         K(x,x') = exp(−γ‖x−x'‖²)</div>
   d4update();
 })();
 </script>
+
+<script>
+/* Dynamic nav: grey out links to pages that don't exist yet */
+(function(){
+  document.querySelectorAll('a.nav-btn').forEach(function(btn){
+    var href = btn.getAttribute('href');
+    if(!href) return;
+    fetch(href, {method:'HEAD'})
+      .then(function(r){
+        if(!r.ok){
+          btn.style.opacity='0.35';
+          btn.style.cursor='default';
+          btn.style.pointerEvents='none';
+          btn.style.boxShadow='none';
+        }
+      })
+      .catch(function(){
+        btn.style.opacity='0.35';
+        btn.style.cursor='default';
+        btn.style.pointerEvents='none';
+        btn.style.boxShadow='none';
+      });
+  });
+})();
+</script>
 </body>
-</html>
+</html>/* ════════════════════════════════════════════════════
+   DEMO 1 — MAXIMUM MARGIN (draggable points)
+════════════════════════════════════════════════════ */
+(function(){
+  var W=420,H=300,PAD=28;
+  // Two blue SVs on the LEFT margin line, one red SV on the RIGHT margin line.
+  // Boundary is vertical at x=210. Blue margin at x=160. Red margin at x=260.
+  // Both blue SVs share x=160, clearly showing they lie on the SAME margin line
+  // (a line parallel to the boundary), not just pointing toward it.
+  var INIT_PTS = [
+    {x:80, y:90,  cls:0, sv:false},
+    {x:65, y:170, cls:0, sv:false},
+    {x:95, y:248, cls:0, sv:false},
+    {x:110,y:130, cls:0, sv:false},
+    {x:75, y:50,  cls:0, sv:false},
+    {x:160,y:95,  cls:0, sv:true},
+    {x:160,y:215, cls:0, sv:true},
+    {x:340,y:80,  cls:1, sv:false},
+    {x:360,y:195, cls:1, sv:false},
+    {x:320,y:248, cls:1, sv:false},
+    {x:380,y:140, cls:1, sv:false},
+    {x:260,y:155, cls:1, sv:true},
+  ];
+  var pts = INIT_PTS.map(function(p){return Object.assign({},p);});
+  var drag = null;
+
+  function computeBoundary(){
+    var sv0s = pts.filter(function(p){return p.cls===0 && p.sv;});
+    var sv1s = pts.filter(function(p){return p.cls===1 && p.sv;});
+    if(!sv0s.length || !sv1s.length) return null;
+    var c0x=sv0s.reduce(function(a,p){return a+p.x;},0)/sv0s.length;
+    var c0y=sv0s.reduce(function(a,p){return a+p.y;},0)/sv0s.length;
+    var c1x=sv1s.reduce(function(a,p){return a+p.x;},0)/sv1s.length;
+    var c1y=sv1s.reduce(function(a,p){return a+p.y;},0)/sv1s.length;
+    var mx=(c0x+c1x)/2, my=(c0y+c1y)/2;
+    var dx=c1x-c0x, dy=c1y-c0y;
+    var len=Math.sqrt(dx*dx+dy*dy);
+    if(len<1) return null;
+    var nx=dx/len, ny=dy/len;
+    var tx=-ny, ty=nx;
+    var sc=500;
+    return {
+      bx1:mx+tx*sc, by1:my+ty*sc, bx2:mx-tx*sc, by2:my-ty*sc,
+      m0x1:c0x+tx*sc, m0y1:c0y+ty*sc, m0x2:c0x-tx*sc, m0y2:c0y-ty*sc,
+      m1x1:c1x+tx*sc, m1y1:c1y+ty*sc, m1x2:c1x-tx*sc, m1y2:c1y-ty*sc,
+      c0x:c0x, c0y:c0y, c1x:c1x, c1y:c1y,
+      margin:len/2, nx:nx, ny:ny, tx:tx, ty:ty
+    };
+  }
+
+  function render(){
+    var b = computeBoundary();
+    var svg = document.getElementById('d1svg');
+    var h = '<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+
+    if(b){
+      // Margin lines — same colour as their class, dashed, clearly parallel to boundary
+      h += '<line x1="'+b.m0x1.toFixed(0)+'" y1="'+b.m0y1.toFixed(0)+'" x2="'+b.m0x2.toFixed(0)+'" y2="'+b.m0y2.toFixed(0)+'" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="7,4" opacity="0.6"/>';
+      h += '<line x1="'+b.m1x1.toFixed(0)+'" y1="'+b.m1y1.toFixed(0)+'" x2="'+b.m1x2.toFixed(0)+'" y2="'+b.m1y2.toFixed(0)+'" stroke="#f87171" stroke-width="1.5" stroke-dasharray="7,4" opacity="0.6"/>';
+      // Decision boundary
+      h += '<line x1="'+b.bx1.toFixed(0)+'" y1="'+b.by1.toFixed(0)+'" x2="'+b.bx2.toFixed(0)+'" y2="'+b.by2.toFixed(0)+'" stroke="#8b5cf6" stroke-width="2.5"/>';
+      // Margin width arrow between centroids
+      var arrowX = ((b.c0x+b.c1x)/2+8).toFixed(0);
+      var arrowY = ((b.c0y+b.c1y)/2-8).toFixed(0);
+      h += '<line x1="'+b.c0x.toFixed(0)+'" y1="'+b.c0y.toFixed(0)+'" x2="'+b.c1x.toFixed(0)+'" y2="'+b.c1y.toFixed(0)+'" stroke="rgba(139,92,246,.45)" stroke-width="1.5" stroke-dasharray="3,3"/>';
+      h += '<text x="'+arrowX+'" y="'+arrowY+'" fill="rgba(139,92,246,.65)" font-size="9" font-family="Space Mono,monospace">margin</text>';
+      document.getElementById('d1margin').textContent = Math.round(b.margin*2)+'px';
+
+      // Labels on margin lines
+      h += '<text x="28" y="18" fill="rgba(56,189,248,.65)" font-size="8" font-family="Space Mono,monospace">← class A margin line</text>';
+      h += '<text x="210" y="18" fill="rgba(248,113,113,.65)" font-size="8" font-family="Space Mono,monospace">class B margin line →</text>';
+      h += '<text x="'+(W/2-30)+'" y="'+(H-6)+'" fill="rgba(139,92,246,.6)" font-size="8" font-family="Space Mono,monospace">— decision boundary —</text>';
+    }
+
+    // Points
+    pts.forEach(function(p,i){
+      var col = p.cls===0 ? '#38bdf8' : '#f87171';
+      if(p.sv){
+        // Outer rings to mark SVs
+        h += '<circle cx="'+p.x.toFixed(0)+'" cy="'+p.y.toFixed(0)+'" r="14" fill="none" stroke="'+col+'" stroke-width="1" opacity="0.35"/>';
+        h += '<circle cx="'+p.x.toFixed(0)+'" cy="'+p.y.toFixed(0)+'" r="11" fill="none" stroke="'+col+'" stroke-width="1.5" opacity="0.65"/>';
+      }
+      h += '<circle cx="'+p.x.toFixed(0)+'" cy="'+p.y.toFixed(0)+'" r="8" fill="'+col+'" stroke="#0a0d14" stroke-width="1.5" data-i="'+i+'" style="cursor:grab"/>';
+    });
+
+    var svCount = pts.filter(function(p){return p.sv;}).length;
+    document.getElementById('d1svcount').textContent = svCount+' points';
+    document.getElementById('d1note').textContent = drag!==null
+      ? (pts[drag].sv
+          ? 'Dragging a support vector — both margin lines and the boundary move.'
+          : 'Dragging a non-support vector — boundary unchanged. This point is irrelevant.')
+      : 'Both blue SVs lie on the same dashed blue margin line — parallel to the boundary. The red SV lies on the red margin line. Drag any point to explore.';
+
+    svg.innerHTML = h;
+    svg.querySelectorAll('[data-i]').forEach(function(el){
+      el.addEventListener('pointerdown', function(e){
+        drag = +el.getAttribute('data-i');
+        svg.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      });
+    });
+  }
+
+  var svg = document.getElementById('d1svg');
+  svg.addEventListener('pointermove', function(e){
+    if(drag===null) return;
+    var r=svg.getBoundingClientRect(), vb=svg.viewBox.baseVal;
+    pts[drag].x = Math.max(PAD, Math.min(W-PAD, ((e.clientX-r.left)/r.width)*vb.width));
+    pts[drag].y = Math.max(PAD, Math.min(H-PAD, ((e.clientY-r.top)/r.height)*vb.height));
+    render();
+  });
+  svg.addEventListener('pointerup', function(){drag=null; render();});
+  window.d1reset = function(){pts=INIT_PTS.map(function(p){return Object.assign({},p);}); render();};
+  render();
+})();
+
+
+
