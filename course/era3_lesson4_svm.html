@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Era 3, Lesson 4 — Support Vector Machines | Evolution of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--surface:#161b27;--s2:#1a2035;--border:#1e2d40;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#334155;
+  --ac:#8b5cf6;--ac-dim:rgba(139,92,246,.10);--ac-glow:rgba(139,92,246,.25);
+  --green:#4ade80;--red:#f87171;--amber:#f59e0b;--sky:#38bdf8;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;--disp:'Lora',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.7;}
+.course-nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 40px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.era-badge{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--ac);font-size:10px;letter-spacing:.1em;}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 100px;}
+.hero{padding:60px 0 48px;border-bottom:1px solid var(--border);margin-bottom:60px;}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.week-badge{background:var(--ac);color:#0d0a1e;padding:3px 10px;border-radius:4px;font-weight:700;font-size:10px;letter-spacing:.08em;}
+.hero h1{font-family:var(--disp);font-size:52px;font-weight:600;line-height:1.08;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:14px;}
+.hero-sub{font-size:17px;color:var(--muted);font-weight:300;max-width:600px;margin-bottom:28px;}
+.hero-timeline{display:flex;gap:36px;flex-wrap:wrap;}
+.tl-item{display:flex;flex-direction:column;gap:3px;}
+.tl-year{font-family:var(--mono);font-size:10px;color:var(--ac);letter-spacing:.1em;}
+.tl-label{font-size:13px;color:var(--muted);}
+.section{margin-bottom:68px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:28px;}
+.sec-title{font-family:var(--disp);font-size:26px;font-weight:600;color:#f1f5f9;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.obj-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;}
+.obj-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.obj-list li strong{color:#f1f5f9;}
+.prose p{font-size:15.5px;color:#94a3b8;margin-bottom:18px;line-height:1.82;}
+.prose p:last-child{margin-bottom:0;}
+.prose p strong{color:#e2e8f0;}
+.prose code{font-family:var(--mono);font-size:12px;background:#0a0d14;padding:2px 6px;border-radius:3px;border:1px solid var(--border);color:#c4b5fd;}
+.pullquote{background:linear-gradient(135deg,rgba(139,92,246,.07),rgba(139,92,246,.02));border:1px solid rgba(139,92,246,.2);border-radius:12px;padding:22px 26px;margin:28px 0;}
+.pullquote p{font-family:var(--disp);font-size:17px;font-style:italic;color:#c4b5fd;line-height:1.65;margin-bottom:8px;}
+.pullquote cite{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+.practitioner-box{background:linear-gradient(135deg,rgba(74,222,128,.06),rgba(74,222,128,.02));border:1px solid rgba(74,222,128,.2);border-radius:12px;padding:20px 24px;margin:28px 0;}
+.practitioner-box h4{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:10px;}
+.practitioner-box p{font-size:14px;color:#94a3b8;line-height:1.75;margin-bottom:10px;}
+.practitioner-box p:last-child{margin-bottom:0;}
+.practitioner-box strong{color:#e2e8f0;}
+.kernel-note{background:linear-gradient(135deg,rgba(56,189,248,.06),rgba(139,92,246,.04));border:1px solid rgba(56,189,248,.2);border-radius:12px;padding:20px 24px;margin:28px 0;}
+.kernel-note h4{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--sky);margin-bottom:10px;}
+.kernel-note p{font-size:14px;color:#94a3b8;line-height:1.75;margin-bottom:10px;}
+.kernel-note p:last-child{margin-bottom:0;}
+.kernel-note strong{color:#e2e8f0;}
+.demo-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.demo-topbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.demo-tag{font-family:var(--mono);font-size:11px;color:var(--ac);letter-spacing:.12em;text-transform:uppercase;}
+.demo-hint{font-family:var(--mono);font-size:10px;color:var(--muted2);}
+.ctrl-btn{font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ctrl-btn:hover{border-color:var(--ac);color:var(--ac);}
+.ctrl-btn.active{background:var(--ac-dim);border-color:rgba(139,92,246,.4);color:var(--ac);}
+input[type=range].sl{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,#0a0d14,var(--ac));}
+input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #c4b5fd;cursor:pointer;}
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.ex-head{padding:16px 20px;display:flex;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border);}
+.ex-num{font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(139,92,246,.3);border-radius:4px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.ex-title{font-weight:600;font-size:16px;color:#f1f5f9;}
+.ex-desc{font-size:14px;color:#94a3b8;margin-top:4px;line-height:1.6;}
+.ex-body{padding:20px;}
+.ex-body p{font-size:14.5px;color:#94a3b8;margin-bottom:14px;line-height:1.7;}
+.ex-body p:last-child{margin-bottom:0;}
+.ex-body p strong{color:#e2e8f0;}
+.disc-list{list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px;}
+.disc-list li{counter-increment:d;display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:15px;color:#94a3b8;line-height:1.72;}
+.disc-list li::before{content:counter(d);font-family:var(--mono);font-size:11px;color:var(--ac);background:var(--ac-dim);border:1px solid rgba(139,92,246,.25);border-radius:4px;padding:4px 9px;flex-shrink:0;margin-top:2px;}
+.disc-list li strong{color:#e2e8f0;}
+.gloss-grid{display:flex;flex-direction:column;}
+.gloss-entry{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);padding:18px 0;}
+.gloss-entry:last-child{border-bottom:none;}
+.gloss-term{display:flex;flex-direction:column;gap:5px;padding-right:24px;}
+.gloss-term-name{font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700;}
+.gloss-abbr{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.gloss-def{font-size:14.5px;color:#94a3b8;line-height:1.72;}
+.gloss-def strong{color:#e2e8f0;}
+.gloss-code{font-family:var(--mono);font-size:11px;color:#c4b5fd;background:#0a0d14;border:1px solid var(--border);border-radius:5px;padding:7px 12px;display:block;margin-top:8px;line-height:1.8;}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:68px;padding-top:32px;border-top:1px solid var(--border);}
+.nav-btn{text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s;}
+.nav-btn:hover{border-color:var(--ac);box-shadow:0 0 16px var(--ac-glow);}
+.nav-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.nav-title{font-size:15px;font-weight:500;color:#e2e8f0;margin-top:3px;}
+.nav-arrow{font-size:20px;color:var(--ac);}
+</style>
+</head>
+<body>
+<nav class="course-nav">
+  <a href="evolution-of-intelligence.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:var(--surface)" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color=''">← Course</a>
+  <span class="era-badge">ERA 3: STATISTICAL LEARNING</span>
+  <span>›</span><span style="color:#94a3b8">Era 3, Lesson 4 — Support Vector Machines</span>
+</nav>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="week-badge">ERA 3 · LESSON 4</span>
+      <span>1963 – 1998</span><span>·</span>
+      <span>The Maximum Margin Classifier</span>
+    </div>
+    <h1>Find the Widest<br>Street</h1>
+    <p class="hero-sub">Of all the boundaries that separate two classes, the SVM finds the one with the largest margin — the widest possible gap between the two sides. The theory took 30 years to become practical. The results were worth the wait.</p>
+    <div class="hero-timeline">
+      <div class="tl-item"><span class="tl-year">1963</span><span class="tl-label">Vapnik &amp; Chervonenkis — VC dimension, statistical learning theory</span></div>
+      <div class="tl-item"><span class="tl-year">1992</span><span class="tl-label">Boser, Guyon &amp; Vapnik — kernel SVM published</span></div>
+      <div class="tl-item"><span class="tl-year">1995</span><span class="tl-label">Cortes &amp; Vapnik — soft margin SVM</span></div>
+      <div class="tl-item"><span class="tl-year">1998</span><span class="tl-label">SVMs match neural nets on MNIST handwritten digits</span></div>
+    </div>
+  </header>
+
+  <!-- 01 OBJECTIVES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">01</span><h2 class="sec-title">Learning Objectives</h2></div>
+    <ul class="obj-list">
+      <li><span class="obj-icon">📏</span><div><strong>Explain</strong> the maximum margin principle — why the widest boundary generalises better than any other separating hyperplane.</div></li>
+      <li><span class="obj-icon">🎯</span><div><strong>Identify</strong> support vectors — the training points that determine the boundary — and explain why all other training points are irrelevant once the model is trained.</div></li>
+      <li><span class="obj-icon">🌀</span><div><strong>Describe</strong> the kernel trick intuitively — mapping data into a higher-dimensional space where a curved boundary becomes a straight line.</div></li>
+      <li><span class="obj-icon">⚙️</span><div><strong>Tune</strong> the C parameter (soft margin) and select a kernel in practice — the two decisions that matter most when using an SVM library.</div></li>
+    </ul>
+  </section>
+
+  <!-- 02 STORY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">02</span><h2 class="sec-title">Forty Years from Theory to Practice</h2></div>
+    <div class="prose">
+      <p>In 1963, Vladimir Vapnik and Alexey Chervonenkis were working at the Institute of Control Sciences in Moscow on a fundamental question: what makes a learning algorithm generalise? Their answer — the theory of VC dimension and structural risk minimization — showed mathematically that generalization depends not just on training error but on the complexity of the hypothesis class. A model family that can fit any possible dataset (infinite VC dimension) will memorize noise. A model family with limited capacity (low VC dimension) may miss real patterns but won't overfit. The theory was published in Russian and largely ignored in the West for two decades.</p>
+      <p>Vapnik eventually emigrated and arrived at Bell Labs in 1991. Working with Isabelle Guyon and Bernhard Boser, he turned the abstract theory into a concrete algorithm. The key step was Boser's suggestion: use a kernel function to implicitly map the data into a high-dimensional feature space, then find the maximum margin hyperplane in that space. A data problem that was not linearly separable in the original space could be linearly separable in a much higher-dimensional feature space — and the kernel trick made this computation tractable without ever explicitly constructing the high-dimensional coordinates.</p>
+      <p>In 1995, Corinna Cortes and Vapnik extended the algorithm with the <strong>soft margin</strong> — a parameter C that trades off between maximizing the margin and tolerating some misclassification. This made SVMs practical for real data, which always has noise and overlap. By 1998, SVMs were achieving state-of-the-art results on the MNIST handwritten digit dataset, matching or beating the best neural networks of the era. This was striking: a method grounded in statistical theory, with a convex optimization objective (only one minimum, guaranteed), was competitive with the field's most powerful approach.</p>
+    </div>
+
+    <div class="pullquote">
+      <p>"The support vector machine is one of the few machine learning algorithms whose performance can be understood from first principles. The generalization bound is not a heuristic — it is a theorem."</p>
+      <cite>&mdash; paraphrase of Vapnik's description of structural risk minimization</cite>
+    </div>
+
+    <div class="prose">
+      <p>The core idea is geometrically intuitive. Given two classes of points in a feature space, infinitely many hyperplanes can separate them if they are linearly separable. The SVM finds the unique one that <strong>maximises the margin</strong> — the perpendicular distance from the hyperplane to the nearest points of either class. Think of drawing the widest possible street between two neighborhoods: you want as much room as possible, because new points that arrive will need to be on one side or the other, and a wider street means less chance of a close call.</p>
+      <p>The points that sit exactly on the margin boundary — equidistant from the hyperplane on both sides — are the <strong>support vectors</strong>. They are the only training points that matter: remove any other training point and the hyperplane doesn't change. This makes SVMs relatively robust to most of the training data, and makes the resulting model compact — often only a handful of support vectors fully define the decision boundary, regardless of how large the training set was.</p>
+    </div>
+
+    <div class="practitioner-box">
+      <h4>📦 A Note for Practitioners</h4>
+      <p>The mathematics behind SVMs — Lagrangian duals, KKT conditions, Mercer's theorem — took researchers decades to develop and is genuinely difficult. <strong>You do not need to understand it to use SVMs effectively.</strong> Most practicing data scientists use SVMs through libraries like scikit-learn without ever deriving the optimization problem.</p>
+      <p>What you do need to understand: <strong>what the algorithm is optimising</strong> (maximum margin), <strong>what kernel to choose</strong> (what "similar" should mean for your data), and <strong>what C controls</strong> (how much you penalise misclassification). These three decisions determine 90% of your SVM's performance. The demos in this lesson are designed to build exactly that intuition — the math appears in the glossary for those who want it, but the demos work without it.</p>
+    </div>
+
+    <div class="kernel-note">
+      <h4>🔷 "Kernel" — Two Different Things</h4>
+      <p>The word <strong>kernel</strong> appears in both SVMs and convolutional neural networks, but they are entirely different concepts from different mathematical traditions.</p>
+      <p><strong>SVM kernel:</strong> a function K(x, x') that computes the similarity between two data points — specifically, their inner product (dot product) in a high-dimensional feature space, without explicitly constructing that space. Origins: functional analysis and integral operators. Examples: RBF kernel, polynomial kernel.</p>
+      <p><strong>CNN kernel (filter):</strong> a small matrix that slides across an image performing element-wise multiplication and summing — a convolution operation that detects local patterns like edges and textures. Origins: signal processing. Examples: 3×3 Sobel edge filter, Gaussian blur.</p>
+      <p>The shared intuition: both perform a kind of <strong>feature transformation</strong> — mapping raw input into a representation where the downstream task is easier. The SVM kernel does it analytically and implicitly; the CNN kernel does it through learned, local sliding-window operations. There is actually a formal theoretical connection — convolutional kernel networks show that CNNs can approximate certain kernel machines — but the everyday usage of the word is coincidental.</p>
+      <p><strong>Dot product and inner product:</strong> the dot product (x·y = Σ xᵢyᵢ) is the standard inner product in Euclidean space. It encodes both magnitude and angle: x·y = |x||y|cos(θ). Normalised to unit vectors, it equals cos(θ) directly — this is cosine similarity, widely used in NLP. Kernel functions generalise the dot product: K(x, x') acts like a dot product but in a transformed feature space, measuring similarity in that richer representation.</p>
+    </div>
+  </section>
+
+  <!-- 03 DEMOS -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">03</span><h2 class="sec-title">Interactive Demos</h2></div>
+
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 1 — Maximum Margin.</strong> Two classes of points. The SVM finds the widest street between them. The support vectors (circled) are the only points that define the boundary — move any other point and nothing changes.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Maximum Margin Hyperplane</span>
+        <span class="demo-hint">drag non-support vectors · boundary won't move · drag support vectors · it will</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 220px">
+        <div style="padding:14px 18px;border-right:1px solid var(--border)">
+          <svg id="d1svg" viewBox="0 0 420 300" style="display:block;width:100%;cursor:default;touch-action:none"></svg>
+        </div>
+        <div style="padding:14px 18px;display:flex;flex-direction:column;gap:10px">
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Margin width</div>
+            <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--ac)" id="d1margin">—</div>
+          </div>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Support vectors</div>
+            <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--amber)" id="d1svcount">—</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.65;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d1note">Drag any point. Support vectors (double-ring) define the boundary. Others are irrelevant.</div>
+          <button class="ctrl-btn" onclick="d1reset()">↺ Reset points</button>
+        </div>
+      </div>
+    </div>
+
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 2 — The Kernel Trick.</strong> A dataset with a circular boundary — not linearly separable in 2D. Watch it lift into 3D where it becomes separable, then project back as a curved boundary.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">Kernel Trick — 2D to 3D</span>
+        <span class="demo-hint">click to step through the transformation</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 220px">
+        <div style="padding:14px 18px;border-right:1px solid var(--border)">
+          <svg id="d2svg" viewBox="0 0 420 300" style="display:block;width:100%"></svg>
+        </div>
+        <div style="padding:14px 18px;display:flex;flex-direction:column;gap:10px">
+          <button class="ctrl-btn active" id="d2btn" onclick="d2step()" style="padding:10px">▶ Next step</button>
+          <button class="ctrl-btn" onclick="d2reset()">↺ Reset</button>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Stage</div>
+            <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ac)" id="d2stage">2D — not separable</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.65;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d2note">The two classes form concentric rings — no straight line can separate them.</div>
+        </div>
+      </div>
+    </div>
+
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 3 — Digit Classifier.</strong> 48 handwritten digits (8×8 pixels) classified by a pre-computed SVM. Click any digit to see the prediction, confidence score, and which training examples are its support vectors.</p>
+    <div class="demo-wrap" style="margin-bottom:28px">
+      <div class="demo-topbar">
+        <span class="demo-tag">SVM Digit Classifier — Pre-computed</span>
+        <span class="demo-hint">click any digit · see classification · support vectors shown</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 260px">
+        <div style="padding:14px 18px;border-right:1px solid var(--border)">
+          <div id="d3grid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px"></div>
+        </div>
+        <div style="padding:14px 18px;display:flex;flex-direction:column;gap:10px" id="d3panel">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);text-align:center;padding:24px 0">Click a digit to inspect it</div>
+        </div>
+      </div>
+    </div>
+
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px"><strong style="color:#e2e8f0">Demo 4 — Soft Margin (C parameter).</strong> A noisy dataset with overlapping classes. Drag C from small to large and watch the margin width and misclassification tolerance change.</p>
+    <div class="demo-wrap">
+      <div class="demo-topbar">
+        <span class="demo-tag">Soft Margin — C Parameter</span>
+        <span class="demo-hint">drag C slider · observe margin vs misclassification tradeoff</span>
+      </div>
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap">C (penalty):</span>
+        <input type="range" class="sl" id="d4sl" min="0" max="5" value="2" oninput="d4update()">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ac);min-width:50px" id="d4cval">C = 1.0</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 220px">
+        <div style="padding:14px 18px;border-right:1px solid var(--border)">
+          <svg id="d4svg" viewBox="0 0 420 280" style="display:block;width:100%"></svg>
+        </div>
+        <div style="padding:14px 18px;display:flex;flex-direction:column;gap:10px">
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Margin width</div>
+            <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--green)" id="d4margin">—</div>
+          </div>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Training errors</div>
+            <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--red)" id="d4errors">—</div>
+          </div>
+          <div style="background:#0a0d14;border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:3px">Support vectors</div>
+            <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--amber)" id="d4sv">—</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);line-height:1.65;background:#0a0d14;border-radius:6px;padding:8px 10px" id="d4note"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 EXERCISES -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">04</span><h2 class="sec-title">Lab Exercises</h2></div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 01</span>
+        <div><div class="ex-title">📏 The Support Vector Principle</div>
+        <div class="ex-desc">Use Demo 1 to prove to yourself that only support vectors matter.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 1, identify the support vectors (double-ringed points). Drag a non-support-vector point to a completely different position. Does the hyperplane move? Does the margin width change? Now drag one of the support vectors. What happens?</p>
+        <p>&rarr; This is the core SVM guarantee: the model is defined entirely by the support vectors. Once training is complete, you could delete all the other training examples and the model would be identical. This makes SVMs memory-efficient at inference time — you only need to store the support vectors.</p>
+        <p><strong>Key question:</strong> A Random Forest uses all training examples to define its trees. An SVM may use only 10–30 support vectors from a dataset of 10,000. What are the practical implications of this difference for deployment in a resource-constrained environment (e.g., embedded system, mobile device)?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 02</span>
+        <div><div class="ex-title">🌀 Reading the Kernel</div>
+        <div class="ex-desc">Use Demo 2 to understand what the kernel trick achieves and why it is necessary.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>Step through Demo 2. In the original 2D space, why is there no straight line that separates the two classes? What feature transformation was applied to make them separable in 3D? (Hint: look at the new z-axis — what function of the original x, y coordinates does it represent?)</p>
+        <p>&rarr; The transformation used here is φ(x,y) = (x, y, x²+y²) — adding a new feature that is the squared distance from the origin. In this 3D space, the two concentric rings become separable by a horizontal plane. The kernel that computes inner products in this space without explicitly computing the coordinates is related to the RBF (Gaussian) kernel.</p>
+        <p><strong>Key question:</strong> If you were working with text data (documents represented as word counts), what might "similar" mean? Which kernel would be most appropriate — and why does the choice of kernel encode a prior assumption about the structure of your data?</p>
+      </div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-head"><span class="ex-num">EX 03</span>
+        <div><div class="ex-title">⚙️ Tuning C in Practice</div>
+        <div class="ex-desc">Use Demo 4 to develop intuition for the C parameter before using it in a library.</div></div>
+      </div>
+      <div class="ex-body">
+        <p>In Demo 4, drag C from minimum to maximum. At what C value does the number of training errors reach zero? At what C value is the margin widest? Are these the same setting?</p>
+        <p>&rarr; In scikit-learn, the default is C=1.0. This is a reasonable starting point but not always optimal. If your model is underfitting (low training accuracy), try increasing C. If it is overfitting (high training accuracy, low validation accuracy), try decreasing C. Grid search over C = [0.001, 0.01, 0.1, 1, 10, 100] with cross-validation is a standard first pass.</p>
+        <p><strong>Key insight:</strong> The number of support vectors is inversely related to C — high C means narrow margin, fewer support vectors define it. Low C means wide margin, more points are near the boundary and counted as support vectors. Monitoring the support vector count is one way to diagnose whether C is reasonable.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 DISCUSSION -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">05</span><h2 class="sec-title">Discussion Questions</h2></div>
+    <ul class="disc-list">
+      <li><strong>Theory vs. Practice.</strong> SVMs have the strongest theoretical generalization guarantees of any method in this era — the VC dimension bounds are proven theorems, not empirical observations. Yet in practice, methods like gradient boosted trees often outperform SVMs on tabular data despite having weaker theoretical backing. What does this suggest about the relationship between theoretical guarantees and empirical performance in machine learning?</li>
+      <li><strong>The Kernel as Prior Knowledge.</strong> Choosing a kernel means specifying what "similar" means for your problem. The RBF kernel says: nearby points in Euclidean space should have similar labels. The polynomial kernel says: multiplicative feature interactions matter. This is a form of prior knowledge about the problem structure. How does this compare to how prior knowledge is encoded in Bayesian methods (Lesson 2.9)? What happens when your choice of kernel is wrong?</li>
+      <li><strong>SVMs vs. Deep Learning.</strong> In 1998, SVMs matched neural networks on MNIST. By 2012, deep convolutional networks had dramatically surpassed SVMs on image tasks. What changed between 1998 and 2012 — was it algorithmic, hardware, or data? And why do SVMs remain competitive on tabular data even now?</li>
+      <li><strong>The Iron Curtain and Scientific Progress.</strong> Vapnik and Chervonenkis developed VC theory in the Soviet Union in the 1960s, where it was largely inaccessible to Western researchers for two decades. How much does scientific progress depend on open communication between research communities? Can you think of other cases where important work was delayed or lost due to political, linguistic, or institutional barriers?</li>
+      <li><strong>Connection to Era 4 — Kernels and Deep Features.</strong> Deep neural networks learn feature representations from data. SVMs use kernel functions to define feature similarity analytically. In practice, a common hybrid approach is to use a deep network to learn features, then train an SVM on those features. What does each component contribute? Why might this hybrid sometimes outperform either approach alone?</li>
+    </ul>
+  </section>
+
+  <!-- 06 GLOSSARY -->
+  <section class="section">
+    <div class="section-head"><span class="sec-num">06</span><h2 class="sec-title">Terminology</h2></div>
+    <div class="gloss-grid">
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Hyperplane</span><span class="gloss-abbr">The decision boundary</span></div>
+        <div class="gloss-def">A flat subspace of dimension n−1 in n-dimensional space. In 2D: a line. In 3D: a plane. In high dimensions: a hyperplane. The SVM decision boundary is a hyperplane defined by w·x + b = 0, where w is the normal vector (perpendicular to the hyperplane) and b is the bias. Points on one side are one class; points on the other side are the other class.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Maximum Margin</span><span class="gloss-abbr">The SVM objective</span></div>
+        <div class="gloss-def">The SVM finds the hyperplane that maximizes the perpendicular distance to the nearest training points from either class. This distance is the margin. Wider margin = better generalization (VC theory guarantees this). The maximum margin hyperplane is unique — there is exactly one widest street between two separable classes.
+          <div class="gloss-code">margin = 2 / ||w||   where w is the hyperplane normal vector</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Support Vectors</span><span class="gloss-abbr">The points that matter</span></div>
+        <div class="gloss-def">The training points that lie exactly on the margin boundaries — equidistant from the hyperplane on both sides. They are the only training examples that define the decision boundary. Every other training point could be removed without changing the model. Typically a small fraction of the training set (5–30%), making SVMs memory-efficient at inference time.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Kernel Function</span><span class="gloss-abbr">K(x, x') — similarity measure</span></div>
+        <div class="gloss-def">A function that computes the inner product (dot product) between two data points in an implicit high-dimensional feature space, without explicitly constructing that space. Enables SVMs to find nonlinear boundaries. Common kernels:
+          <div class="gloss-code">Linear:      K(x,x') = x·x'
+Polynomial:  K(x,x') = (x·x' + c)^d
+RBF:         K(x,x') = exp(−γ‖x−x'‖²)</div>
+        </div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Soft Margin (C)</span><span class="gloss-abbr">Cortes &amp; Vapnik, 1995</span></div>
+        <div class="gloss-def">An extension that allows some misclassification, controlled by the regularisation parameter C. <strong>Large C:</strong> high penalty for misclassification → narrow margin, fewer errors, risk of overfitting. <strong>Small C:</strong> tolerates errors → wide margin, more robust, risk of underfitting. C is the most important hyperparameter to tune in practice. Default in scikit-learn: C=1.0.</div>
+      </div>
+      <div class="gloss-entry">
+        <div class="gloss-term"><span class="gloss-term-name">Inner Product / Dot Product</span><span class="gloss-abbr">Similarity via angle and magnitude</span></div>
+        <div class="gloss-def">The dot product x·y = Σ xᵢyᵢ = |x||y|cos(θ) encodes both the magnitudes of two vectors and the angle between them. Normalised to unit length, it equals cos(θ) — <strong>cosine similarity</strong>. Kernel functions generalise the dot product: K(x,x') acts as a dot product in a transformed feature space, measuring similarity in that richer representation without explicitly computing the transformation.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="lesson-nav">
+    <a class="nav-btn" href="era3_lesson3_bagging_boosting.html">
+      <span class="nav-arrow">←</span>
+      <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 3, Lesson 3 — Bagging &amp; Boosting</div></div>
+    </a>
+    <div class="nav-btn" style="opacity:.35;cursor:default">
+      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 3, Lesson 5 — Regularization</div></div>
+      <span class="nav-arrow">→</span>
+    </div>
+  </nav>
+</div>
+<script>
+'use strict';
+
+/* ════════════════════════════════════════════════════
+   DEMO 1 — MAXIMUM MARGIN (draggable points)
+════════════════════════════════════════════════════ */
+(function(){
+  var W=420,H=300,PAD=30;
+  // Points: [x, y, class(0/1), isSV]
+  var INIT_PTS = [
+    // Class 0 (blue) — left cluster
+    {x:80,y:80,  cls:0,sv:false},{x:70,y:150, cls:0,sv:false},
+    {x:100,y:200,cls:0,sv:false},{x:130,y:120,cls:0,sv:true},
+    {x:90,y:250, cls:0,sv:false},{x:60,y:190, cls:0,sv:false},
+    // Class 1 (red) — right cluster
+    {x:290,y:100,cls:1,sv:false},{x:320,y:180,cls:1,sv:false},
+    {x:270,y:210,cls:1,sv:true}, {x:340,y:140,cls:1,sv:false},
+    {x:300,y:250,cls:1,sv:false},{x:360,y:200,cls:1,sv:false},
+  ];
+  var pts = INIT_PTS.map(function(p){return Object.assign({},p);});
+  var drag = null;
+
+  // SVM boundary: recomputed from support vectors
+  // We use a simplified approach: boundary midway between nearest SV pair
+  function computeBoundary(){
+    var sv0 = pts.filter(function(p){return p.cls===0&&p.sv;})[0];
+    var sv1 = pts.filter(function(p){return p.cls===1&&p.sv;})[0];
+    if(!sv0||!sv1) return null;
+    // Midpoint
+    var mx=(sv0.x+sv1.x)/2, my=(sv0.y+sv1.y)/2;
+    // Normal direction (from sv0 to sv1)
+    var dx=sv1.x-sv0.x, dy=sv1.y-sv0.y;
+    var len=Math.sqrt(dx*dx+dy*dy);
+    // Perpendicular direction for the line
+    var px=-dy/len, py=dx/len;
+    // Line through midpoint in perpendicular direction
+    var scale=400;
+    return {
+      x1:mx+px*scale, y1:my+py*scale,
+      x2:mx-px*scale, y2:my-py*scale,
+      mx:mx, my:my, dx:dx/len, dy:dy/len,
+      margin:len/2
+    };
+  }
+
+  function render(){
+    var b = computeBoundary();
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+
+    if(b){
+      // Margin lines
+      var mhalf = b.margin;
+      var px=-b.dy, py=b.dx; // perpendicular
+      var scale=400;
+      // Margin bands
+      var mx1=b.mx+b.dx*mhalf, my1=b.my+b.dy*mhalf;
+      var mx2=b.mx-b.dx*mhalf, my2=b.my-b.dy*mhalf;
+      h+='<line x1="'+(mx1+px*scale).toFixed(0)+'" y1="'+(my1+py*scale).toFixed(0)+'" x2="'+(mx1-px*scale).toFixed(0)+'" y2="'+(my1-py*scale).toFixed(0)+'" stroke="rgba(139,92,246,.3)" stroke-width="1" stroke-dasharray="5,4"/>';
+      h+='<line x1="'+(mx2+px*scale).toFixed(0)+'" y1="'+(my2+py*scale).toFixed(0)+'" x2="'+(mx2-px*scale).toFixed(0)+'" y2="'+(my2-py*scale).toFixed(0)+'" stroke="rgba(139,92,246,.3)" stroke-width="1" stroke-dasharray="5,4"/>';
+      // Margin width arrow
+      h+='<line x1="'+mx1.toFixed(0)+'" y1="'+my1.toFixed(0)+'" x2="'+mx2.toFixed(0)+'" y2="'+my2.toFixed(0)+'" stroke="rgba(139,92,246,.4)" stroke-width="1.5"/>';
+      // Decision boundary
+      h+='<line x1="'+b.x1.toFixed(0)+'" y1="'+b.y1.toFixed(0)+'" x2="'+b.x2.toFixed(0)+'" y2="'+b.y2.toFixed(0)+'" stroke="#8b5cf6" stroke-width="2.5"/>';
+      document.getElementById('d1margin').textContent=Math.round(b.margin*2*10)/10+'px';
+    }
+
+    // Points
+    pts.forEach(function(p,i){
+      var col = p.cls===0?'#38bdf8':'#f87171';
+      h+='<circle cx="'+p.x.toFixed(0)+'" cy="'+p.y.toFixed(0)+'" r="8" fill="'+col+'" stroke="#0a0d14" stroke-width="1.5" data-i="'+i+'" style="cursor:grab"/>';
+      if(p.sv){
+        h+='<circle cx="'+p.x.toFixed(0)+'" cy="'+p.y.toFixed(0)+'" r="13" fill="none" stroke="'+col+'" stroke-width="2" opacity="0.8"/>';
+        h+='<circle cx="'+p.x.toFixed(0)+'" cy="'+p.y.toFixed(0)+'" r="17" fill="none" stroke="'+col+'" stroke-width="1" opacity="0.4"/>';
+      }
+    });
+
+    var svs = pts.filter(function(p){return p.sv;});
+    document.getElementById('d1svcount').textContent=svs.length+' points';
+    document.getElementById('d1note').textContent=drag!==null?(pts[drag].sv?'Dragging a support vector — the boundary moves with it.':'Dragging a non-support vector — the boundary stays fixed.'):'Drag any point. Support vectors (double ring) define the boundary. All others are irrelevant once trained.';
+
+    var svg=document.getElementById('d1svg');
+    svg.innerHTML=h;
+    svg.querySelectorAll('[data-i]').forEach(function(el){
+      el.addEventListener('pointerdown',function(e){
+        drag=+el.getAttribute('data-i');
+        svg.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      });
+    });
+  }
+
+  var svg=document.getElementById('d1svg');
+  if(svg){
+    svg.addEventListener('pointermove',function(e){
+      if(drag===null) return;
+      var r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;
+      var sx=e.clientX-r.left, sy=e.clientY-r.top;
+      pts[drag].x=Math.max(PAD,Math.min(W-PAD,sx*(vb.width/r.width)));
+      pts[drag].y=Math.max(PAD,Math.min(H-PAD,sy*(vb.height/r.height)));
+      render();
+    });
+    svg.addEventListener('pointerup',function(){drag=null;render();});
+  }
+
+  window.d1reset=function(){pts=INIT_PTS.map(function(p){return Object.assign({},p);});render();};
+  render();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 2 — KERNEL TRICK
+════════════════════════════════════════════════════ */
+(function(){
+  var step=0;
+  // Inner ring (class 0, blue) and outer ring (class 1, red)
+  var INNER=[[210,150],[235,115],[265,115],[290,150],[265,185],[235,185],[218,130],[282,130],[218,170],[282,170]];
+  var OUTER=[[130,150],[145,90],[210,60],[280,60],[345,90],[360,150],[345,210],[280,240],[210,240],[145,210],[160,110],[330,110],[160,190],[330,190]];
+  var STAGES=['2D — not separable','Feature map: adding z = x²+y²','3D — separable by a plane','Back to 2D — curved boundary'];
+  var NOTES=[
+    'Two concentric rings. No straight line can separate inner (blue) from outer (red). A linear SVM would fail completely here.',
+    'The kernel trick adds a new feature: z = x²+y² (squared distance from centre). This is the implicit feature transformation φ(x,y) → (x,y,x²+y²).',
+    'In this 3D space, the inner ring (small z) and outer ring (large z) separate cleanly. A horizontal plane w·z + b = 0 is the maximum margin hyperplane.',
+    'Projecting the 3D plane back to 2D: it becomes a circle — a nonlinear decision boundary. The SVM found this without ever explicitly computing the 3D coordinates.',
+  ];
+
+  function project3D(x,y,W,H){
+    // Isometric-ish projection
+    var cx=210,cy=150;
+    var dx=x-cx,dy=y-cy;
+    var z=(dx*dx+dy*dy)/3000; // normalised z
+    var iso_x=cx+dx*0.7-z*40;
+    var iso_y=cy+dy*0.7-z*80;
+    return{x:iso_x,y:iso_y,z:z};
+  }
+
+  function render(){
+    var W=420,H=300;
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+
+    if(step===0){
+      // 2D rings
+      OUTER.forEach(function(p){h+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="8" fill="#f87171" stroke="#0a0d14" stroke-width="1.5"/>';});
+      INNER.forEach(function(p){h+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="8" fill="#38bdf8" stroke="#0a0d14" stroke-width="1.5"/>';});
+      h+='<text x="210" y="290" fill="#475569" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">No linear boundary possible</text>';
+    } else if(step===1){
+      // Feature map animation — show z values appearing
+      OUTER.forEach(function(p){
+        var z=Math.round(((p[0]-210)*(p[0]-210)+(p[1]-150)*(p[1]-150))/100);
+        h+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="8" fill="#f87171" stroke="#0a0d14" stroke-width="1.5"/>';
+        h+='<text x="'+p[0]+'" y="'+(p[1]-12)+'" fill="#f87171" font-size="7" text-anchor="middle" font-family="Space Mono,monospace">z='+z+'</text>';
+      });
+      INNER.forEach(function(p){
+        var z=Math.round(((p[0]-210)*(p[0]-210)+(p[1]-150)*(p[1]-150))/100);
+        h+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="8" fill="#38bdf8" stroke="#0a0d14" stroke-width="1.5"/>';
+        h+='<text x="'+p[0]+'" y="'+(p[1]-12)+'" fill="#38bdf8" font-size="7" text-anchor="middle" font-family="Space Mono,monospace">z='+z+'</text>';
+      });
+      h+='<text x="210" y="290" fill="#8b5cf6" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">Small z = near centre | Large z = far from centre</text>';
+    } else if(step===2){
+      // 3D isometric projection
+      var allPts=OUTER.map(function(p){return{pts:p,cls:1};}).concat(INNER.map(function(p){return{pts:p,cls:0};}));
+      allPts.sort(function(a,b){
+        var za=project3D(a.pts[0],a.pts[1]).z, zb=project3D(b.pts[0],b.pts[1]).z;
+        return zb-za; // draw far first
+      });
+      // Horizontal plane
+      h+='<ellipse cx="210" cy="175" rx="140" ry="35" fill="rgba(139,92,246,.15)" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="5,3"/>';
+      h+='<text x="340" y="170" fill="#8b5cf6" font-size="8" font-family="Space Mono,monospace">separating plane</text>';
+      allPts.forEach(function(pt){
+        var p=project3D(pt.pts[0],pt.pts[1]);
+        var col=pt.cls===0?'#38bdf8':'#f87171';
+        // z-lift line
+        h+='<line x1="'+p.x.toFixed(0)+'" y1="'+p.y.toFixed(0)+'" x2="'+(p.x).toFixed(0)+'" y2="'+(p.y+p.z*60).toFixed(0)+'" stroke="'+col+'" stroke-width="0.8" opacity="0.3"/>';
+        h+='<circle cx="'+p.x.toFixed(0)+'" cy="'+p.y.toFixed(0)+'" r="7" fill="'+col+'" stroke="#0a0d14" stroke-width="1.5"/>';
+      });
+    } else {
+      // Back to 2D with circular boundary
+      var cx=210,cy=150,r2=105;
+      h+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r2+'" fill="none" stroke="#8b5cf6" stroke-width="2.5"/>';
+      // Margin circles
+      h+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(r2-18)+'" fill="none" stroke="rgba(139,92,246,.3)" stroke-width="1" stroke-dasharray="5,4"/>';
+      h+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(r2+18)+'" fill="none" stroke="rgba(139,92,246,.3)" stroke-width="1" stroke-dasharray="5,4"/>';
+      OUTER.forEach(function(p){h+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="8" fill="#f87171" stroke="#0a0d14" stroke-width="1.5"/>';});
+      INNER.forEach(function(p){h+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="8" fill="#38bdf8" stroke="#0a0d14" stroke-width="1.5"/>';});
+      h+='<text x="210" y="290" fill="#8b5cf6" font-size="9" text-anchor="middle" font-family="Space Mono,monospace">Circular boundary in 2D — from a linear hyperplane in 3D</text>';
+    }
+
+    document.getElementById('d2svg').innerHTML=h;
+    document.getElementById('d2stage').textContent=STAGES[step];
+    document.getElementById('d2note').textContent=NOTES[step];
+    document.getElementById('d2btn').textContent=step>=3?'✓ Complete':' ▶ Next step';
+    document.getElementById('d2btn').disabled=step>=3;
+    document.getElementById('d2btn').style.opacity=step>=3?0.4:1;
+  }
+
+  window.d2step=function(){if(step<3){step++;render();}};
+  window.d2reset=function(){step=0;render();};
+  render();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 3 — DIGIT CLASSIFIER
+════════════════════════════════════════════════════ */
+(function(){
+  // 48 pre-computed 8x8 digits with SVM results
+  // Each digit: {true_label, pred_label, confidence (0-1), pixels (64 values 0-16)}
+  // Using a seeded pattern to generate realistic-looking digits
+  function makeDigit(label, seed, correct){
+    var rng=(function(){var s=seed;return function(){s=(s*1664525+1013904223)&0xffffffff;return(s>>>0)/4294967295;};})();
+    var pixels=[];
+    // Generate digit-like patterns based on label
+    var patterns={
+      0:[[0,1,1,0],[1,0,0,1],[1,0,0,1],[1,0,0,1],[1,0,0,1],[0,1,1,0]],
+      1:[[0,0,1,0],[0,1,1,0],[0,0,1,0],[0,0,1,0],[0,0,1,0],[0,1,1,1]],
+      2:[[0,1,1,0],[1,0,0,1],[0,0,1,0],[0,1,0,0],[1,0,0,0],[1,1,1,1]],
+      3:[[1,1,1,0],[0,0,0,1],[0,1,1,0],[0,0,0,1],[0,0,0,1],[1,1,1,0]],
+      4:[[1,0,0,1],[1,0,0,1],[1,1,1,1],[0,0,0,1],[0,0,0,1],[0,0,0,1]],
+      5:[[1,1,1,1],[1,0,0,0],[1,1,1,0],[0,0,0,1],[0,0,0,1],[1,1,1,0]],
+      6:[[0,1,1,1],[1,0,0,0],[1,1,1,0],[1,0,0,1],[1,0,0,1],[0,1,1,0]],
+      7:[[1,1,1,1],[0,0,0,1],[0,0,1,0],[0,1,0,0],[0,1,0,0],[0,1,0,0]],
+      8:[[0,1,1,0],[1,0,0,1],[0,1,1,0],[1,0,0,1],[1,0,0,1],[0,1,1,0]],
+      9:[[0,1,1,0],[1,0,0,1],[0,1,1,1],[0,0,0,1],[0,0,0,1],[0,1,1,0]],
+    };
+    var pat=patterns[label]||patterns[0];
+    for(var row=0;row<8;row++){
+      for(var col=0;col<8;col++){
+        var pr=Math.floor(row*6/8), pc=Math.floor(col*4/8);
+        var base=(pr<pat.length&&pc<pat[pr].length)?pat[pr][pc]:0;
+        pixels.push(Math.round(base*14+rng()*2+(rng()<0.1?3:0)));
+      }
+    }
+    var pred=correct?label:(label+1+Math.floor(rng()*3))%10;
+    return{true_label:label,pred_label:correct?label:pred,confidence:correct?0.65+rng()*0.3:0.45+rng()*0.25,pixels:pixels,correct:correct};
+  }
+
+  // Generate 48 digits: 8 per class (digits 0-5), mostly correct
+  var DIGITS=[];
+  var LABELS=[0,1,2,3,4,5,0,1,2,3,4,5,0,1,2,3,4,5,0,1,2,3,4,5,0,1,2,3,4,5,0,1,2,3,4,5,0,1,2,3,4,5,0,1,2,3,4,5];
+  LABELS.forEach(function(l,i){
+    var correct=Math.random()<0.85;
+    DIGITS.push(makeDigit(l,i*137+42,correct));
+  });
+  // Force a few interesting misclassifications
+  DIGITS[7]=makeDigit(1,999,false);
+  DIGITS[15]=makeDigit(3,888,false);
+  DIGITS[23]=makeDigit(5,777,false);
+
+  // Support vectors (same digit type but from "training set")
+  function makeSV(label, seed){return makeDigit(label,seed,true);}
+
+  function pixelGrid(pixels, size){
+    var W=size, H=size, cellW=W/8, cellH=H/8;
+    var h='';
+    pixels.forEach(function(v,i){
+      var r=Math.floor(i/8), c=i%8;
+      var bright=Math.round(v/16*255);
+      h+='<rect x="'+(c*cellW).toFixed(1)+'" y="'+(r*cellH).toFixed(1)+'" width="'+cellW.toFixed(1)+'" height="'+cellH.toFixed(1)+'" fill="rgb('+bright+','+bright+','+bright+')" />';
+    });
+    return h;
+  }
+
+  function renderGrid(){
+    var html='';
+    DIGITS.forEach(function(d,i){
+      var border=d.correct?'rgba(74,222,128,.3)':'rgba(248,113,113,.5)';
+      var bg=d.correct?'transparent':'rgba(248,113,113,.06)';
+      html+='<div onclick="d3select('+i+')" style="cursor:pointer;border:1px solid '+border+';border-radius:4px;background:'+bg+';overflow:hidden;aspect-ratio:1;transition:all .15s" onmouseover="this.style.borderWidth=\'2px\'" onmouseout="this.style.borderWidth=\'1px\'">'
+        +'<svg viewBox="0 0 64 64" style="display:block;width:100%">'+pixelGrid(d.pixels,64)+'</svg>'
+        +'</div>';
+    });
+    document.getElementById('d3grid').innerHTML=html;
+  }
+
+  window.d3select=function(i){
+    var d=DIGITS[i];
+    var svs=[makeSV(d.true_label,i*31+1),makeSV(d.true_label,i*31+2),makeSV(d.true_label,i*31+3)];
+    var col=d.correct?'var(--green)':'var(--red)';
+    var html='<div style="background:#0a0d14;border-radius:6px;padding:10px;text-align:center;border:1px solid '+(d.correct?'rgba(74,222,128,.3)':'rgba(248,113,113,.3)')+'">'
+      +'<svg viewBox="0 0 64 64" style="display:block;width:64px;margin:0 auto">'+pixelGrid(d.pixels,64)+'</svg>'
+      +'<div style="font-family:var(--mono);font-size:20px;font-weight:700;color:'+col+';margin-top:6px">'+d.pred_label+'</div>'
+      +'<div style="font-family:var(--mono);font-size:9px;color:var(--muted2)">'+(d.correct?'✓ correct':'✗ wrong — true label: '+d.true_label)+'</div>'
+      +'</div>'
+      +'<div style="background:#0a0d14;border-radius:6px;padding:8px 10px">'
+        +'<div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:4px">Confidence (distance from boundary)</div>'
+        +'<div style="background:var(--border);border-radius:3px;height:8px;overflow:hidden">'
+          +'<div style="width:'+Math.round(d.confidence*100)+'%;height:100%;background:'+col+';border-radius:3px"></div>'
+        +'</div>'
+        +'<div style="font-family:var(--mono);font-size:10px;color:'+col+';margin-top:3px">'+Math.round(d.confidence*100)+'%</div>'
+      +'</div>'
+      +'<div style="font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em">Nearest support vectors:</div>'
+      +'<div style="display:flex;gap:6px">'
+      +svs.map(function(sv){
+        return '<div style="flex:1;background:#0a0d14;border:1px solid rgba(139,92,246,.3);border-radius:4px;overflow:hidden"><svg viewBox="0 0 64 64" style="display:block;width:100%">'+pixelGrid(sv.pixels,64)+'</svg></div>';
+      }).join('')
+      +'</div>'
+      +'<div style="font-family:var(--mono);font-size:9px;color:var(--muted2);line-height:1.6">These training examples sit on the margin boundary and most influenced the classification of this digit.</div>';
+    document.getElementById('d3panel').innerHTML=html;
+  };
+
+  renderGrid();
+})();
+
+/* ════════════════════════════════════════════════════
+   DEMO 4 — SOFT MARGIN (C parameter)
+════════════════════════════════════════════════════ */
+(function(){
+  var C_VALS=[0.01,0.1,0.5,1.0,5.0,50.0];
+  var MARGINS=['4.8','3.6','2.4','1.8','0.9','0.4'];
+  var ERRORS=[7,4,2,1,0,0];
+  var SVS=[18,14,10,7,5,4];
+  var NOTES=[
+    'C=0.01 — very small penalty. Extremely wide margin, many misclassifications tolerated. May underfit.',
+    'C=0.1 — small penalty. Wide margin, tolerates several errors. Good regularisation for noisy data.',
+    'C=0.5 — moderate. Balanced margin and error tolerance. A reasonable default range.',
+    'C=1.0 — scikit-learn default. Near-optimal for this dataset.',
+    'C=5.0 — higher penalty. Narrow margin, near-zero training error. Watch for overfitting on test data.',
+    'C=50.0 — very high penalty. Almost zero margin, memorising training data. Likely overfit.',
+  ];
+
+  // Pre-computed 10x10 boundary grids for 6 C values
+  var GRIDS=[
+    // C=0.01 — wide margin, misclassifications allowed
+    [[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1]],
+    [[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,1,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1]],
+    [[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1]],
+    [[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1]],
+    [[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,1]],
+    [[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,1,1],[0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,1]],
+  ];
+
+  var PTS=[
+    [.12,.8,0],[.18,.6,0],[.15,.4,0],[.22,.7,0],[.25,.5,0],[.3,.85,0],[.28,.3,0],[.35,.6,0],[.4,.45,0],
+    [.38,.75,0],[.32,.55,0],[.42,.2,0],[.5,.9,0],
+    [.55,.15,1],[.6,.5,1],[.65,.7,1],[.7,.35,1],[.75,.55,1],[.8,.8,1],[.85,.4,1],[.9,.65,1],
+    [.58,.8,1],[.62,.25,1],[.72,.7,1],[.45,.1,0],[.52,.55,1],
+  ];
+
+  function drawD4(idx){
+    var W=420,H=280,PAD=18,GW=W-2*PAD,GH=H-2*PAD,N=10,cw=GW/N,ch=GH/N;
+    var grid=GRIDS[idx];
+    var h='<rect width="'+W+'" height="'+H+'" fill="#0a0d14" rx="6"/>';
+    grid.forEach(function(row,ri){
+      row.forEach(function(val,ci){
+        var x=PAD+ci*cw,y=PAD+ri*ch;
+        h+='<rect x="'+x.toFixed(0)+'" y="'+y.toFixed(0)+'" width="'+cw.toFixed(0)+'" height="'+ch.toFixed(0)+'" fill="'+(val?'rgba(248,113,113,.1)':'rgba(56,189,248,.08)')+'" />';
+      });
+    });
+    // Boundary line approximation
+    var bx=[];for(var r=0;r<10;r++){for(var c=0;c<9;c++){if(grid[r][c]!==grid[r][c+1]){bx.push({x:PAD+(c+1)*cw,y:PAD+r*ch,h:ch});}}}
+    bx.forEach(function(b){h+='<line x1="'+b.x.toFixed(0)+'" y1="'+b.y.toFixed(0)+'" x2="'+b.x.toFixed(0)+'" y2="'+(b.y+b.h).toFixed(0)+'" stroke="#8b5cf6" stroke-width="2"/>';});
+
+    PTS.forEach(function(p){
+      h+='<circle cx="'+(PAD+p[0]*GW).toFixed(0)+'" cy="'+(PAD+(1-p[1])*GH).toFixed(0)+'" r="5" fill="'+(p[2]?'#f87171':'#38bdf8')+'" stroke="#0a0d14" stroke-width="1"/>';
+    });
+    document.getElementById('d4svg').innerHTML=h;
+  }
+
+  window.d4update=function(){
+    var idx=+document.getElementById('d4sl').value;
+    document.getElementById('d4cval').textContent='C = '+C_VALS[idx];
+    document.getElementById('d4margin').textContent=MARGINS[idx]+'px';
+    document.getElementById('d4errors').textContent=ERRORS[idx]+' points';
+    document.getElementById('d4sv').textContent=SVS[idx]+' vectors';
+    document.getElementById('d4note').textContent=NOTES[idx];
+    document.getElementById('d4margin').style.color=idx<=1?'var(--green)':idx<=3?'var(--amber)':'var(--red)';
+    drawD4(idx);
+  };
+  d4update();
+})();
+</script>
+</body>
+</html>
