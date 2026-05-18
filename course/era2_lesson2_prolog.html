@@ -1122,5 +1122,27 @@ var D3_LISP_SRC =
   document.getElementById('d3LQ').value="(classify 'robin)";
 })();
 </script>
+
+<script>
+/* Dynamic nav: grey out links to pages that don't exist yet.
+   Only grey on explicit 404 — if fetch fails for any other reason
+   (network error, CORS, sandbox) leave the link active. */
+(function(){
+  document.querySelectorAll('a.nav-btn').forEach(function(btn){
+    var href = btn.getAttribute('href');
+    if(!href) return;
+    fetch(href, {method:'HEAD'})
+      .then(function(r){
+        if(r.status === 404){
+          btn.style.opacity='0.35';
+          btn.style.cursor='default';
+          btn.style.pointerEvents='none';
+          btn.style.boxShadow='none';
+        }
+      });
+      /* No catch — if fetch fails, leave link active */
+  });
+})();
+</script>
 </body>
 </html>

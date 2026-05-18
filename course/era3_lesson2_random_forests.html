@@ -298,10 +298,10 @@ prediction = majority_vote([tree.predict(x) for tree in trees])</div>
       <span class="nav-arrow">←</span>
       <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 3, Lesson 1 — The Bias-Variance Tradeoff</div></div>
     </a>
-    <div class="nav-btn" style="opacity:.35;cursor:default">
+    <a class="nav-btn" href="era3_lesson3_bagging_boosting.html">
       <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 3, Lesson 3 — Bagging &amp; Boosting</div></div>
       <span class="nav-arrow">→</span>
-    </div>
+    </a>
   </nav>
 </div>
 <script>
@@ -663,6 +663,28 @@ prediction = majority_vote([tree.predict(x) for tree in trees])</div>
 
   window.d3toggle=function(i){ active[i]=!active[i]; render(); };
   render();
+})();
+</script>
+
+<script>
+/* Dynamic nav: grey out links to pages that don't exist yet.
+   Only grey on explicit 404 — if fetch fails for any other reason
+   (network error, CORS, sandbox) leave the link active. */
+(function(){
+  document.querySelectorAll('a.nav-btn').forEach(function(btn){
+    var href = btn.getAttribute('href');
+    if(!href) return;
+    fetch(href, {method:'HEAD'})
+      .then(function(r){
+        if(r.status === 404){
+          btn.style.opacity='0.35';
+          btn.style.cursor='default';
+          btn.style.pointerEvents='none';
+          btn.style.boxShadow='none';
+        }
+      });
+      /* No catch — if fetch fails, leave link active */
+  });
 })();
 </script>
 </body>

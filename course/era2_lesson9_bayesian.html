@@ -337,10 +337,10 @@ Smoking → Bronchitis → Dyspnea</div>
       <span class="nav-arrow">←</span>
       <div><div class="nav-lbl">← Previous</div><div class="nav-title">Era 2, Lesson 8 — Markov Chains &amp; HMMs</div></div>
     </a>
-    <div class="nav-btn" style="opacity:.35;cursor:default">
-      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 3 — The Statistical Learning Revolution</div></div>
+    <a class="nav-btn" href="era3_lesson1_bias_variance.html">
+      <div><div class="nav-lbl">Next →</div><div class="nav-title">Era 3, Lesson 1 — The Bias-Variance Tradeoff</div></div>
       <span class="nav-arrow">→</span>
-    </div>
+    </a>
   </nav>
 </div>
 <script>
@@ -592,6 +592,28 @@ Smoking → Bronchitis → Dyspnea</div>
   window.d3add=function(w){message.push(w);render();};
   window.d3clear=function(){message=[];render();};
   render();
+})();
+</script>
+
+<script>
+/* Dynamic nav: grey out links to pages that don't exist yet.
+   Only grey on explicit 404 — if fetch fails for any other reason
+   (network error, CORS, sandbox) leave the link active. */
+(function(){
+  document.querySelectorAll('a.nav-btn').forEach(function(btn){
+    var href = btn.getAttribute('href');
+    if(!href) return;
+    fetch(href, {method:'HEAD'})
+      .then(function(r){
+        if(r.status === 404){
+          btn.style.opacity='0.35';
+          btn.style.cursor='default';
+          btn.style.pointerEvents='none';
+          btn.style.boxShadow='none';
+        }
+      });
+      /* No catch — if fetch fails, leave link active */
+  });
 })();
 </script>
 </body>
