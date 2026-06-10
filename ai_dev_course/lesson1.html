@@ -338,6 +338,31 @@
     color: var(--ink-light);
   }
 
+  .screenshot-img {
+    margin: 24px 0;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .screenshot-img-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    padding: 8px 14px;
+    background: var(--white);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .screenshot-img img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
   /* ── Code inline ─────────────────────────────────────────── */
   code {
     font-family: 'IBM Plex Mono', monospace;
@@ -661,6 +686,12 @@ Use clean, readable CSS. Generate the complete index.html file and nothing else.
     </div>
 
     <h3 class="section-head">Save and open the file</h3>
+
+    <div class="screenshot-img">
+      <div class="screenshot-img-label">What your prompt looks like in Claude</div>
+      <img src="lesson1_part2_prompt1a.png" alt="Prompt 1 typed into Claude's chat interface">
+    </div>
+
     <ol>
       <li>Copy the AI's entire output</li>
       <li>Open a plain text editor (Notepad on Windows, TextEdit on Mac in plain-text mode)</li>
@@ -668,9 +699,9 @@ Use clean, readable CSS. Generate the complete index.html file and nothing else.
       <li>Double-click the file to open it in your browser</li>
     </ol>
 
-    <div class="screenshot-slot">
-      <div class="screenshot-slot-label">Screenshot</div>
-      <div class="screenshot-slot-desc">The app running in a browser after Prompt 1 — form, empty state message visible</div>
+    <div class="screenshot-img">
+      <div class="screenshot-img-label">Claude's output — prompt summary on the left, live preview on the right</div>
+      <img src="lesson1_part2_prompt1b.png" alt="Claude's rendered expense tracker showing the form and empty state">
     </div>
 
     <h3 class="section-head">Read the code before you do anything else</h3>
@@ -700,9 +731,12 @@ Use clean, readable CSS. Generate the complete index.html file and nothing else.
 
     <p>Write down anything that looks wrong or feels missing. You'll need that list in Part 3.</p>
 
-    <div class="screenshot-slot">
-      <div class="screenshot-slot-label">Screenshot</div>
-      <div class="screenshot-slot-desc">The app with several expenses added — table, category summary, and pie chart all visible</div>
+    <div class="screenshot-img">
+      <div class="screenshot-img-label">The working app — form and expense table (scroll down to see the chart)</div>
+      <div style="display:flex; gap:0; flex-wrap:wrap;">
+        <img src="lesson1_part2_test1a.png" alt="Expense tracker showing the form and expense table with sample data" style="width:50%; min-width:280px; flex:1;">
+        <img src="lesson1_part2_test1b.png" alt="Expense tracker showing spending by category table and doughnut chart" style="width:50%; min-width:280px; flex:1; border-left:1px solid var(--rule);">
+      </div>
     </div>
   </section>
 
