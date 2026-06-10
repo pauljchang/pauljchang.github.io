@@ -846,12 +846,39 @@ Show me only the new HTML to insert and the JavaScript changes needed. Do not re
       <div class="prompt-note">After applying this change, add a few expenses dated in prior months and confirm they're excluded from the monthly total.</div>
     </div>
 
-    <div class="screenshot-slot">
-      <div class="screenshot-slot-label">Screenshot</div>
-      <div class="screenshot-slot-desc">The monthly total displayed between the form and the expense table</div>
+    <div class="screenshot-img">
+      <div class="screenshot-img-label">Prompt 3 — sent to Claude</div>
+      <img src="lesson1_part4_feature1a.png" alt="Prompt 3 asking for a This Month summary card">
     </div>
 
+    <p>Claude responds by splitting the work clearly into an HTML block to insert and a JavaScript function to add — exactly what was asked for. Read both before touching your file.</p>
+
+    <div class="screenshot-img">
+      <div class="screenshot-img-label">Claude's response — HTML block and new JavaScript function</div>
+      <div style="display:flex; gap:0; flex-wrap:wrap;">
+        <img src="lesson1_part4_feature1b.png" alt="Claude provides the HTML card to insert between the form and expense table" style="width:50%; min-width:280px; flex:1;">
+        <img src="lesson1_part4_feature1c.png" alt="Claude provides the renderThisMonth function and updated render() call, with explanation" style="width:50%; min-width:280px; flex:1; border-left:1px solid var(--rule);">
+      </div>
+    </div>
+
+    <p>Notice the explanation at the bottom of the response: <em>"Why no other changes are needed — <code>render()</code> is already called on every add and delete, so <code>renderThisMonth</code> rides along for free."</em> This is Claude demonstrating genuine understanding of the existing code structure. It's worth reading — not just applying the diff.</p>
+
+    <p>Once you've reviewed the changes, ask Claude to apply them and produce an updated file:</p>
+
+    <div class="screenshot-img">
+      <div class="screenshot-img-label">Asking Claude to apply the changes — and the result in the preview</div>
+      <img src="lesson1_part4_feature1d.png" alt="Claude confirms changes applied; preview shows the June 2026 / $0.00 summary card between the form and expense table">
+    </div>
+
+    <p>The preview on the right shows the "June 2026 / $0.00" card sitting exactly where it was specified — between the form and the expense table. Add a few expenses and confirm the total updates. Then add an expense with a date from a prior month and confirm it's <em>not</em> included in the monthly total.</p>
+
     <div class="key-point">We added a real feature in one focused prompt. But we decided what the feature was, what its edge case was (prior months), and how to test it. The AI executed our decision — it didn't make it.</div>
+
+    <div class="callout">
+      <div class="callout-label">Example Output</div>
+      <p>Want to see what the finished app looks like? <a href="lesson1_generated_example.html" target="_blank" style="color: var(--warn); font-weight: 600;">View the generated example →</a></p>
+      <p style="margin-top: 8px;">Keep in mind: your output will likely look different. AI generation is <strong>non-deterministic</strong> — the same prompt can produce different code depending on the model, the version, the temperature setting, and even the time of day. That's not a bug; it's how these systems work. What matters is whether the result meets the spec, not whether it matches this example pixel-for-pixel.</p>
+    </div>
   </section>
 
   <hr class="divider">
