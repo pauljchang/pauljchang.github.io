@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 1 — Building a Web App with AI</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Serif:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  /* ── Tokens ─────────────────────────────────────────────── */
+  :root {
+    --ink:        #1a1a2e;
+    --ink-mid:    #4a4a6a;
+    --ink-light:  #8888aa;
+    --page:       #f7f7fb;
+    --white:      #ffffff;
+    --accent:     #2d6be4;
+    --accent-dim: #dce8fb;
+    --warn:       #e47c2d;
+    --warn-dim:   #fdf0e2;
+    --code-bg:    #1a1a2e;
+    --code-fg:    #c8d8f8;
+    --rule:       #dddde8;
+    --prompt-bg:  #f0f4ff;
+    --prompt-border: #2d6be4;
+    --note-bg:    #fffbf0;
+    --note-border: #e4b82d;
+    --step-num:   #2d6be4;
+  }
+
+  /* ── Reset ──────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 17px; scroll-behavior: smooth; }
+
+  body {
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    background: var(--page);
+    color: var(--ink);
+    line-height: 1.7;
+  }
+
+  /* ── Layout ─────────────────────────────────────────────── */
+  .page-wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ── Header ─────────────────────────────────────────────── */
+  .lesson-header {
+    border-bottom: 3px solid var(--accent);
+    padding: 52px 0 32px;
+    margin-bottom: 52px;
+  }
+
+  .lesson-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .lesson-title {
+    font-family: 'IBM Plex Serif', serif;
+    font-size: 2.4rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+
+  .lesson-subtitle {
+    font-size: 1.05rem;
+    color: var(--ink-mid);
+    max-width: 600px;
+    margin-bottom: 28px;
+  }
+
+  .meta-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-top: 20px;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .meta-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+  }
+
+  .meta-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  /* ── Objectives box ──────────────────────────────────────── */
+  .objectives {
+    background: var(--accent-dim);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 24px 28px;
+    margin-bottom: 56px;
+  }
+
+  .objectives h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .objectives ol {
+    padding-left: 20px;
+  }
+
+  .objectives li {
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+
+  /* ── Part sections ───────────────────────────────────────── */
+  .part {
+    margin-bottom: 64px;
+  }
+
+  .part-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .part-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .part-title {
+    font-family: 'IBM Plex Serif', serif;
+    font-size: 1.45rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .part-duration {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--ink-light);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* ── Body text ───────────────────────────────────────────── */
+  h3.section-head {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 32px 0 10px;
+  }
+
+  p {
+    margin-bottom: 14px;
+    font-size: 0.97rem;
+    color: var(--ink);
+  }
+
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+
+  ul, ol {
+    padding-left: 22px;
+    margin-bottom: 16px;
+  }
+
+  li {
+    margin-bottom: 6px;
+    font-size: 0.97rem;
+  }
+
+  /* ── Prompt block ────────────────────────────────────────── */
+  .prompt-block {
+    margin: 24px 0;
+    border: 1.5px solid var(--prompt-border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--white);
+  }
+
+  .prompt-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--prompt-border);
+    padding: 8px 16px;
+  }
+
+  .prompt-block-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .copy-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 4px;
+    padding: 3px 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .copy-btn:hover { background: rgba(255,255,255,0.35); }
+  .copy-btn.copied { background: rgba(255,255,255,0.5); }
+
+  .prompt-text {
+    padding: 18px 20px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--ink);
+    white-space: pre-wrap;
+  }
+
+  .prompt-note {
+    padding: 0 20px 16px;
+    font-size: 0.82rem;
+    color: var(--ink-mid);
+    font-style: italic;
+    border-top: 1px solid var(--rule);
+    padding-top: 10px;
+  }
+
+  /* ── Callout / instructor note ───────────────────────────── */
+  .callout {
+    background: var(--note-bg);
+    border-left: 4px solid var(--warn);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin: 20px 0;
+  }
+
+  .callout-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--warn);
+    margin-bottom: 6px;
+  }
+
+  .callout p {
+    font-size: 0.92rem;
+    margin-bottom: 0;
+    color: var(--ink);
+  }
+
+  /* ── Key point ───────────────────────────────────────────── */
+  .key-point {
+    background: var(--accent-dim);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: 0.92rem;
+    font-style: italic;
+    color: var(--ink);
+  }
+
+  .key-point::before {
+    content: "Key point — ";
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-style: normal;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* ── Screenshot placeholder ──────────────────────────────── */
+  .screenshot-slot {
+    border: 2px dashed var(--rule);
+    border-radius: 8px;
+    padding: 36px 20px;
+    text-align: center;
+    margin: 24px 0;
+    background: var(--white);
+  }
+
+  .screenshot-slot-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 4px;
+  }
+
+  .screenshot-slot-desc {
+    font-size: 0.85rem;
+    color: var(--ink-light);
+  }
+
+  /* ── Code inline ─────────────────────────────────────────── */
+  code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.84em;
+    background: var(--accent-dim);
+    color: var(--accent);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ── Code block ──────────────────────────────────────────── */
+  pre {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    padding: 20px 22px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 16px 0;
+  }
+
+  pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  /* ── Diagram ─────────────────────────────────────────────── */
+  pre.diagram {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 24px;
+    margin: 20px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--ink-mid);
+    overflow-x: auto;
+  }
+
+  /* ── Exercise box ────────────────────────────────────────── */
+  .exercise {
+    background: var(--white);
+    border: 1.5px solid var(--rule);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin: 24px 0;
+  }
+
+  .exercise-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 10px;
+  }
+
+  /* ── Takeaways ───────────────────────────────────────────── */
+  .takeaways {
+    background: var(--ink);
+    color: var(--white);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin: 32px 0;
+  }
+
+  .takeaways h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--code-fg);
+    margin-bottom: 16px;
+  }
+
+  .takeaways ol {
+    padding-left: 20px;
+  }
+
+  .takeaways li {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+    color: #dde;
+  }
+
+  .takeaways strong {
+    color: #fff;
+  }
+
+  /* ── What comes next ─────────────────────────────────────── */
+  .next-lessons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .next-lesson-card {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+
+  .next-lesson-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .next-lesson-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .next-lesson-desc {
+    font-size: 0.8rem;
+    color: var(--ink-mid);
+  }
+
+  /* ── Divider ─────────────────────────────────────────────── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 40px 0;
+  }
+
+  /* ── Responsive ──────────────────────────────────────────── */
+  @media (max-width: 600px) {
+    .lesson-title { font-size: 1.8rem; }
+    .part-header { flex-wrap: wrap; gap: 6px; }
+    .part-duration { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- ── Breadcrumb ──────────────────────────────────────── -->
+  <nav style="padding: 20px 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; color: var(--ink-light);">
+    <a href="ai_dev_course.html" style="color: var(--accent); text-decoration: none;">← Course Index</a>
+  </nav>
+
+  <!-- ── Header ──────────────────────────────────────────── -->
+  <header class="lesson-header">
+    <div class="lesson-eyebrow">AI Engineering — Lesson 1</div>
+    <h1 class="lesson-title">Building a Web App with AI</h1>
+    <p class="lesson-subtitle">A hands-on walkthrough of the real AI-assisted development workflow — iterative, critical, and always engineer-led.</p>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <span class="meta-label">Duration</span>
+        <span class="meta-value">~90 minutes</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">What you'll build</span>
+        <span class="meta-value">Expense Tracker with live chart</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Stack</span>
+        <span class="meta-value">HTML · JavaScript · localStorage · Chart.js</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">AI tool</span>
+        <span class="meta-value">Claude, ChatGPT, or Gemini</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Prerequisites</span>
+        <span class="meta-value">A browser. Nothing else.</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Objectives ───────────────────────────────────────── -->
+  <div class="objectives">
+    <h3>Learning Objectives</h3>
+    <ol>
+      <li>Explain why AI-assisted development is <strong>iterative</strong>, not single-shot</li>
+      <li>Write a clear, scoped prompt that produces useful code</li>
+      <li>Read and critically evaluate AI-generated code <em>before</em> running it</li>
+      <li>Recognize what HTML, CSS, JavaScript, and localStorage each do</li>
+      <li>Use follow-up prompts to extend a working app without breaking it</li>
+    </ol>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PART 0                                                 -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <section class="part">
+    <div class="part-header">
+      <span class="part-number">Part 0</span>
+      <h2 class="part-title">What AI Coding Actually Looks Like</h2>
+      <span class="part-duration">10 min</span>
+    </div>
+
+    <p>Before writing a single prompt, let's set expectations.</p>
+
+    <p>Most people imagine using AI to write code goes like this: <em>describe the app → AI builds it → done.</em> That's not what happens. The reality is closer to <strong>pair programming with a very fast, sometimes overconfident collaborator.</strong> You drive. It codes. You review everything. You catch its mistakes. You decide what to ask for next.</p>
+
+    <p>The skill being developed today isn't prompting tricks. It's <strong>engineering judgment applied to an AI workflow</strong> — knowing what to ask for, reading what comes back critically, and knowing when something is wrong even before you run it. That judgment is what separates someone who uses AI well from someone who just runs whatever it produces.</p>
+
+    <h3 class="section-head">The stack — all in one file</h3>
+
+    <p>The app we're building lives entirely in a single file called <code>index.html</code>. Open it in a browser and it runs. No installation, no server, no terminal.</p>
+
+    <pre class="diagram">index.html
+├── HTML         — the structure of the page (form, table, headings)
+├── CSS          — how it looks (colors, layout, spacing)
+└── JavaScript   — what it does (respond to clicks, do math, update the page)
+         │
+         └── localStorage   — the browser's built-in storage
+                              survives page refresh; lives on this computer</pre>
+
+    <p>You don't need to fully understand this stack before we start. You'll see it emerge from the AI output, and we'll explain each piece as it appears.</p>
+
+    <h3 class="section-head">How to run it</h3>
+    <ol>
+      <li>Save the AI's output as a file named <code>index.html</code> on your Desktop</li>
+      <li>Double-click the file — it opens in your browser</li>
+      <li>After any change, save the file and refresh the browser tab (<code>Ctrl+R</code> / <code>Cmd+R</code>)</li>
+    </ol>
+
+    <p>That's the entire development loop for today.</p>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PART 1                                                 -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <section class="part">
+    <div class="part-header">
+      <span class="part-number">Part 1</span>
+      <h2 class="part-title">Design Before You Prompt</h2>
+      <span class="part-duration">15 min</span>
+    </div>
+
+    <p>The single biggest mistake beginners make with AI coding tools is jumping straight to a prompt without knowing what they want. The AI will fill every gap you leave — sometimes sensibly, often not. <strong>Your spec is your steering wheel.</strong></p>
+
+    <div class="exercise">
+      <div class="exercise-label">Exercise — Write the spec first</div>
+      <p>Before touching any AI tool, answer these four questions in writing:</p>
+      <ol>
+        <li>What can a user <em>do</em> with this app? List every action.</li>
+        <li>What information does the app need to store for each expense?</li>
+        <li>What should the page always show the user?</li>
+        <li>What should happen if a user submits the form with a missing or invalid field?</li>
+      </ol>
+      <p style="margin-top:12px; margin-bottom:0;"><em>Take 8 minutes. Write it down before reading ahead.</em></p>
+    </div>
+
+    <p>Compare your answers to the spec below. These should be close — and if they're not, that difference is worth discussing.</p>
+
+    <div class="callout">
+      <div class="callout-label">Agreed Spec</div>
+      <p>
+        A user can add an expense (amount, category, description, date) and delete any existing expense.
+        Each expense is saved to localStorage so data survives a page refresh.
+        The page always shows: a form to add expenses, a table of all expenses, a summary of total spending per category, and a pie chart of that breakdown.
+        Empty fields and non-positive amounts must be caught before saving.
+      </p>
+    </div>
+
+    <div class="key-point">This spec is your first prompt. You wrote it in plain English before touching the AI. That order matters — the thinking was yours, not the AI's.</div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PART 2                                                 -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <section class="part">
+    <div class="part-header">
+      <span class="part-number">Part 2</span>
+      <h2 class="part-title">Iteration 1 — Scaffold the App</h2>
+      <span class="part-duration">20 min</span>
+    </div>
+
+    <h3 class="section-head">What makes a good first prompt</h3>
+
+    <p>Compare these two prompts for the same task:</p>
+
+    <p><strong>Weak:</strong> <em>"Build me an expense tracker in HTML."</em><br>
+    No stack specified, no data model, no behaviors defined. The AI will make every decision. You'll spend more time untangling its assumptions than you saved.</p>
+
+    <p><strong>Strong:</strong> everything below. Notice that it specifies the technology, names each field, describes each behavior, and asks for a single complete file.</p>
+
+    <p>Use this prompt exactly as written. You're welcome to read it first and modify it — but try it as-is at least once so you can compare.</p>
+
+    <div class="prompt-block">
+      <div class="prompt-block-header">
+        <span class="prompt-block-label">Prompt 1 — Paste into Claude / ChatGPT / Gemini</span>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+      </div>
+      <div class="prompt-text" data-prompt>Build a single-file expense tracker web app using only HTML, CSS, and JavaScript — no frameworks, no libraries except Chart.js, no backend. Everything goes in one file called index.html.
+
+The app should:
+- Have a form at the top with four fields: Amount (number input), Category (text input), Description (text input), and Date (date input that defaults to today)
+- Validate on submit: Amount must be a positive number, Category must not be empty. Show a clear error message if validation fails — do not save the expense.
+- Save each valid expense to localStorage as a JSON array so data survives page refresh
+- Display all saved expenses in a table below the form with columns: Date, Category, Description, Amount, and a Delete button per row
+- Compute and display a summary table showing total spending per category, sorted highest to lowest
+- Load Chart.js from the jsDelivr CDN and render a pie chart of spending by category, placed below the summary table
+- Normalize all category names to Title Case before saving (so "food" and "Food" both become "Food")
+- When there are no expenses yet, show a friendly message in place of the table and chart
+
+Use clean, readable CSS. Generate the complete index.html file and nothing else.</div>
+      <div class="prompt-note">If the AI asks clarifying questions instead of generating code, reply: "Go ahead and make reasonable choices — generate the full file."</div>
+    </div>
+
+    <h3 class="section-head">Save and open the file</h3>
+    <ol>
+      <li>Copy the AI's entire output</li>
+      <li>Open a plain text editor (Notepad on Windows, TextEdit on Mac in plain-text mode)</li>
+      <li>Paste and save as <code>index.html</code></li>
+      <li>Double-click the file to open it in your browser</li>
+    </ol>
+
+    <div class="screenshot-slot">
+      <div class="screenshot-slot-label">Screenshot</div>
+      <div class="screenshot-slot-desc">The app running in a browser after Prompt 1 — form, empty state message visible</div>
+    </div>
+
+    <h3 class="section-head">Read the code before you do anything else</h3>
+
+    <p>Do not add an expense yet. Read the code first.</p>
+
+    <p>Skim through the file and find answers to these questions:</p>
+    <ul>
+      <li>Where does the app load expenses from localStorage on startup?</li>
+      <li>What happens step-by-step when the Add button is clicked?</li>
+      <li>Where does the category summary get calculated?</li>
+      <li>Where does Chart.js get told what to draw?</li>
+      <li>What does the AI do when there are no expenses — is it what you expected?</li>
+    </ul>
+
+    <div class="key-point">We haven't written a line of code, but we just read all of it. That's not optional — that's the job. If you can't explain what this code does, you don't own it yet, and you can't responsibly build on top of it.</div>
+
+    <h3 class="section-head">Now test it</h3>
+    <p>Add a few expenses across two or three categories. Confirm:</p>
+    <ul>
+      <li>Expenses appear in the table immediately</li>
+      <li>The category summary updates</li>
+      <li>The pie chart renders</li>
+      <li>Refreshing the page keeps your data</li>
+      <li>The Delete button removes a row</li>
+    </ul>
+
+    <p>Write down anything that looks wrong or feels missing. You'll need that list in Part 3.</p>
+
+    <div class="screenshot-slot">
+      <div class="screenshot-slot-label">Screenshot</div>
+      <div class="screenshot-slot-desc">The app with several expenses added — table, category summary, and pie chart all visible</div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PART 3                                                 -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <section class="part">
+    <div class="part-header">
+      <span class="part-number">Part 3</span>
+      <h2 class="part-title">Iteration 2 — Fix and Tighten</h2>
+      <span class="part-duration">15 min</span>
+    </div>
+
+    <p>Something in the app is probably slightly off. That is not a failure — it's the lesson. The first output is never the final output.</p>
+
+    <p>Common things AI gets wrong on the first pass:</p>
+    <ul>
+      <li>Deleting an expense doesn't update the chart</li>
+      <li>Category totals display too many decimal places (e.g. $12.300000000001)</li>
+      <li>The pie chart crashes or looks odd when only one category exists</li>
+      <li>The empty state message doesn't disappear after the first expense is added</li>
+      <li>Error messages don't clear after a successful submission</li>
+    </ul>
+
+    <p>Look at your list from Part 2 and pick the most important issue. Then use the prompt below, editing the bracketed section to describe your specific problem.</p>
+
+    <div class="prompt-block">
+      <div class="prompt-block-header">
+        <span class="prompt-block-label">Prompt 2 — Follow-up fix (edit before sending)</span>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+      </div>
+      <div class="prompt-text" data-prompt>In the expense tracker we just built, I found this issue:
+
+[DESCRIBE THE PROBLEM HERE — be specific about what you did and what happened]
+
+Please fix it. Show me only the JavaScript functions that need to change, not the entire file. Explain briefly why the bug occurred.</div>
+      <div class="prompt-note">Replace the bracketed section with your actual problem before sending. The more specific you are, the better the fix will be.</div>
+    </div>
+
+    <p>When you receive the fix, <strong>read it before applying it.</strong> Do you understand what changed and why? If not, ask the AI to explain it.</p>
+
+    <p>To apply a partial fix: find the function in your <code>index.html</code>, select it, and replace it with the AI's updated version. Save and refresh.</p>
+
+    <h3 class="section-head">Two things to watch out for</h3>
+
+    <p><strong>Ask for diffs, not rewrites.</strong> Once you have a working base, asking for targeted changes is safer than regenerating the whole file. Regenerating risks losing your edits and introducing new problems.</p>
+
+    <p><strong>The AI can drift.</strong> In a long conversation, the AI may subtly forget earlier constraints. This is why you read every output, not just the first one.</p>
+
+    <div class="key-point">A good follow-up prompt is specific about what broke, references "the existing app," and asks for the minimum change needed — not a full rewrite.</div>
+
+    <div class="screenshot-slot">
+      <div class="screenshot-slot-label">Screenshot</div>
+      <div class="screenshot-slot-desc">The fixed behavior — e.g. chart updating correctly after a delete, or currency formatted cleanly</div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PART 4                                                 -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <section class="part">
+    <div class="part-header">
+      <span class="part-number">Part 4</span>
+      <h2 class="part-title">Iteration 3 — Add a Feature</h2>
+      <span class="part-duration">15 min</span>
+    </div>
+
+    <p>The app works correctly now. This iteration adds one new feature: a running monthly total displayed prominently above the expense table.</p>
+
+    <p>Notice how this prompt is scoped differently from Prompt 1. It's smaller and more specific because we have more to protect. As an app matures, prompts should get narrower — not broader.</p>
+
+    <div class="prompt-block">
+      <div class="prompt-block-header">
+        <span class="prompt-block-label">Prompt 3 — Add a monthly total</span>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+      </div>
+      <div class="prompt-text" data-prompt>Add a "This Month" summary to the existing expense tracker. It should:
+- Display the total amount spent in the current calendar month
+- Appear between the form and the expense table
+- Update automatically when expenses are added or deleted
+- Show $0.00 when there are no expenses this month
+
+Show me only the new HTML to insert and the JavaScript changes needed. Do not regenerate the whole file.</div>
+      <div class="prompt-note">After applying this change, add a few expenses dated in prior months and confirm they're excluded from the monthly total.</div>
+    </div>
+
+    <div class="screenshot-slot">
+      <div class="screenshot-slot-label">Screenshot</div>
+      <div class="screenshot-slot-desc">The monthly total displayed between the form and the expense table</div>
+    </div>
+
+    <div class="key-point">We added a real feature in one focused prompt. But we decided what the feature was, what its edge case was (prior months), and how to test it. The AI executed our decision — it didn't make it.</div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PART 5                                                 -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <section class="part">
+    <div class="part-header">
+      <span class="part-number">Part 5</span>
+      <h2 class="part-title">Reflection</h2>
+      <span class="part-duration">10 min</span>
+    </div>
+
+    <p>Discuss these questions:</p>
+
+    <ol>
+      <li>What decisions did the AI make that you never explicitly asked for? Were they good decisions?</li>
+      <li>At what point in the lesson did you feel most like an engineer? When did you feel like a typist?</li>
+      <li>What would have happened if you'd submitted the first output without reading it?</li>
+      <li>Right now, your data lives only in <em>your</em> browser. What breaks when two people need to share the same expense list?</li>
+    </ol>
+
+    <p>That last question doesn't have an answer today. It's the question that motivates Lesson 2.</p>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── Takeaways ─────────────────────────────────────────── -->
+  <div class="takeaways">
+    <h3>Five Takeaways</h3>
+    <ol>
+      <li><strong>Design first.</strong> A good prompt starts with a spec. The spec comes from thinking, not from the AI.</li>
+      <li><strong>Iteration is the workflow.</strong> One shot never gets you there. Budget for three to five rounds.</li>
+      <li><strong>Read everything.</strong> You are responsible for the code. The AI doesn't have bugs — you do.</li>
+      <li><strong>Scope your follow-up prompts.</strong> "Fix this one thing" beats "rewrite it all." Smaller prompts mean more control.</li>
+      <li><strong>AI raises your floor.</strong> What once took a day now takes an hour. But your ceiling is still your engineering judgment.</li>
+    </ol>
+  </div>
+
+  <!-- ── Take-home ─────────────────────────────────────────── -->
+  <hr class="divider">
+
+  <section class="part">
+    <div class="part-header">
+      <span class="part-number">Take-Home</span>
+      <h2 class="part-title">Extend the App on Your Own</h2>
+    </div>
+
+    <p>Choose one of the following features and add it using the AI. <strong>You must write a one-paragraph spec before writing each prompt.</strong> Both the spec and the prompt must be included in your submission.</p>
+
+    <ul>
+      <li><strong>Monthly filter</strong> — a dropdown that shows only expenses from a selected month</li>
+      <li><strong>Spending limit</strong> — set a per-category budget; show a warning when a category exceeds it</li>
+      <li><strong>Edit button</strong> — click to modify a saved expense in place</li>
+      <li><strong>CSV export</strong> — a button that downloads all expenses as a <code>.csv</code> file</li>
+    </ul>
+
+    <div class="callout">
+      <div class="callout-label">Submit</div>
+      <p>Your spec paragraph · your prompts · a short description of what you had to fix after each AI response · your final <code>index.html</code></p>
+    </div>
+  </section>
+
+  <!-- ── What comes next ───────────────────────────────────── -->
+  <hr class="divider">
+
+  <h3 class="section-head" style="margin-top:0;">What Comes Next</h3>
+  <div class="next-lessons">
+    <div class="next-lesson-card">
+      <div class="next-lesson-num">Lesson 2</div>
+      <div class="next-lesson-title">Adding a Backend</div>
+      <div class="next-lesson-desc">Share data across devices with Python + Flask. localStorage becomes a server.</div>
+    </div>
+    <div class="next-lesson-card">
+      <div class="next-lesson-num">Lesson 3</div>
+      <div class="next-lesson-title">Test-Driven Development</div>
+      <div class="next-lesson-desc">Write the tests first, then prompt the AI to make them pass.</div>
+    </div>
+    <div class="next-lesson-card">
+      <div class="next-lesson-num">Lesson 4</div>
+      <div class="next-lesson-title">Security Review</div>
+      <div class="next-lesson-desc">Prompt the AI to find vulnerabilities in its own output.</div>
+    </div>
+    <div class="next-lesson-card">
+      <div class="next-lesson-num">Lesson 5</div>
+      <div class="next-lesson-title">Refactoring</div>
+      <div class="next-lesson-desc">From one file to a layered architecture — with AI doing the heavy lifting.</div>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script>
+  function copyPrompt(btn) {
+    const block = btn.closest('.prompt-block');
+    const text = block.querySelector('[data-prompt]').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+</script>
+</body>
+</html>

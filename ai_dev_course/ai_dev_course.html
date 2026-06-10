@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-Assisted Development — Course Index</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Serif:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #1a1a2e;
+    --ink-mid:    #4a4a6a;
+    --ink-light:  #8888aa;
+    --page:       #f7f7fb;
+    --white:      #ffffff;
+    --accent:     #2d6be4;
+    --accent-dim: #dce8fb;
+    --rule:       #dddde8;
+    --coming-bg:  #f3f3f7;
+    --coming-fg:  #aaaacc;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 17px; scroll-behavior: smooth; }
+
+  body {
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    background: var(--page);
+    color: var(--ink);
+    line-height: 1.7;
+  }
+
+  .page-wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ── Header ─────────────────────────────────────────────── */
+  .course-header {
+    border-bottom: 3px solid var(--accent);
+    padding: 52px 0 32px;
+    margin-bottom: 52px;
+  }
+
+  .course-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .course-title {
+    font-family: 'IBM Plex Serif', serif;
+    font-size: 2.4rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+
+  .course-desc {
+    font-size: 1.05rem;
+    color: var(--ink-mid);
+    max-width: 600px;
+  }
+
+  /* ── Section heading ─────────────────────────────────────── */
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 16px;
+  }
+
+  /* ── Lesson list ─────────────────────────────────────────── */
+  .lesson-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 56px;
+  }
+
+  /* Available lesson card */
+  .lesson-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--white);
+    border: 1.5px solid var(--rule);
+    border-radius: 10px;
+    padding: 20px 24px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .lesson-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 2px 12px rgba(45, 107, 228, 0.1);
+  }
+
+  .lesson-card:hover .lesson-num {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .lesson-num {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .lesson-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .lesson-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+
+  .lesson-desc {
+    font-size: 0.88rem;
+    color: var(--ink-mid);
+  }
+
+  .lesson-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .lesson-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .lesson-duration {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--ink-light);
+    white-space: nowrap;
+  }
+
+  .lesson-arrow {
+    font-size: 1.1rem;
+    color: var(--ink-light);
+    flex-shrink: 0;
+    transition: color 0.15s, transform 0.15s;
+  }
+
+  .lesson-card:hover .lesson-arrow {
+    color: var(--accent);
+    transform: translateX(3px);
+  }
+
+  /* Coming soon card */
+  .lesson-card-soon {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--coming-bg);
+    border: 1.5px solid var(--rule);
+    border-radius: 10px;
+    padding: 20px 24px;
+    cursor: default;
+  }
+
+  .lesson-card-soon .lesson-num {
+    background: var(--rule);
+    color: var(--coming-fg);
+  }
+
+  .lesson-card-soon .lesson-title {
+    color: var(--ink-mid);
+  }
+
+  .lesson-card-soon .lesson-desc {
+    color: var(--coming-fg);
+  }
+
+  .soon-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--coming-fg);
+    background: var(--rule);
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  /* ── About section ───────────────────────────────────────── */
+  .about {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 28px 32px;
+  }
+
+  .about h2 {
+    font-family: 'IBM Plex Serif', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+
+  .about p {
+    font-size: 0.93rem;
+    color: var(--ink-mid);
+    margin-bottom: 10px;
+  }
+
+  .about p:last-child { margin-bottom: 0; }
+
+  /* ── Responsive ──────────────────────────────────────────── */
+  @media (max-width: 600px) {
+    .course-title { font-size: 1.8rem; }
+    .lesson-meta { display: none; }
+    .lesson-card, .lesson-card-soon { padding: 16px 18px; gap: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <header class="course-header">
+    <div class="course-eyebrow">Course</div>
+    <h1 class="course-title">AI-Assisted Development</h1>
+    <p class="course-desc">A practical, hands-on course for early-career developers on using AI coding tools the way professionals actually do — iteratively, critically, and with sound engineering judgment.</p>
+  </header>
+
+  <div class="section-label">Lessons</div>
+  <div class="lesson-list">
+
+    <!-- Lesson 1 — available -->
+    <a class="lesson-card" href="lesson1.html">
+      <div class="lesson-num">01</div>
+      <div class="lesson-body">
+        <div class="lesson-title">Building a Web App with AI</div>
+        <div class="lesson-desc">Scaffold, fix, and extend an expense tracker — all in one HTML file, no backend required.</div>
+      </div>
+      <div class="lesson-meta">
+        <span class="lesson-tag">Available</span>
+        <span class="lesson-duration">~90 min</span>
+      </div>
+      <span class="lesson-arrow">→</span>
+    </a>
+
+    <!-- Lesson 2 — coming soon -->
+    <div class="lesson-card-soon">
+      <div class="lesson-num">02</div>
+      <div class="lesson-body">
+        <div class="lesson-title">Adding a Backend</div>
+        <div class="lesson-desc">Share data across devices with Python and Flask. localStorage becomes a real server.</div>
+      </div>
+      <div class="lesson-meta">
+        <span class="soon-badge">Coming Soon</span>
+      </div>
+    </div>
+
+    <!-- Lesson 3 — coming soon -->
+    <div class="lesson-card-soon">
+      <div class="lesson-num">03</div>
+      <div class="lesson-body">
+        <div class="lesson-title">Test-Driven Development</div>
+        <div class="lesson-desc">Write the tests first, then prompt the AI to make them pass.</div>
+      </div>
+      <div class="lesson-meta">
+        <span class="soon-badge">Coming Soon</span>
+      </div>
+    </div>
+
+    <!-- Lesson 4 — coming soon -->
+    <div class="lesson-card-soon">
+      <div class="lesson-num">04</div>
+      <div class="lesson-body">
+        <div class="lesson-title">Security Review</div>
+        <div class="lesson-desc">Prompt the AI to find vulnerabilities in its own output.</div>
+      </div>
+      <div class="lesson-meta">
+        <span class="soon-badge">Coming Soon</span>
+      </div>
+    </div>
+
+    <!-- Lesson 5 — coming soon -->
+    <div class="lesson-card-soon">
+      <div class="lesson-num">05</div>
+      <div class="lesson-body">
+        <div class="lesson-title">Refactoring</div>
+        <div class="lesson-desc">From one file to a layered architecture — with AI doing the heavy lifting.</div>
+      </div>
+      <div class="lesson-meta">
+        <span class="soon-badge">Coming Soon</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- About -->
+  <div class="about">
+    <h2>About this course</h2>
+    <p>This course teaches AI-assisted development as a real engineering workflow — not a shortcut. Each lesson is built around a working app that grows in complexity, and every prompt is provided so students can focus on reading and evaluating the output rather than guessing how to phrase requests.</p>
+    <p>The course assumes no prior web development experience. A browser and a free account on Claude, ChatGPT, or Gemini are the only requirements.</p>
+  </div>
+
+</div>
+</body>
+</html>
