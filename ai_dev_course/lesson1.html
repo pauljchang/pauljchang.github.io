@@ -756,14 +756,38 @@ Use clean, readable CSS. Generate the complete index.html file and nothing else.
 
     <p>Common things AI gets wrong on the first pass:</p>
     <ul>
+      <li>Dates displayed as "Jun 9, 2026" instead of MM/DD/YYYY to match the input format</li>
+      <li>Dollar signs appearing in the amount column when the column header already says "Amount ($)"</li>
+      <li>Negative amounts not visually distinguished from positive ones</li>
       <li>Deleting an expense doesn't update the chart</li>
-      <li>Category totals display too many decimal places (e.g. $12.300000000001)</li>
-      <li>The pie chart crashes or looks odd when only one category exists</li>
-      <li>The empty state message doesn't disappear after the first expense is added</li>
       <li>Error messages don't clear after a successful submission</li>
     </ul>
 
-    <p>Look at your list from Part 2 and pick the most important issue. Then use the prompt below, editing the bracketed section to describe your specific problem.</p>
+    <p>Here's the issue found during testing of this lesson — date formatting and amount display both needed fixing. Notice how the prompt describes exactly what was observed and what the desired behavior is:</p>
+
+    <div class="screenshot-img">
+      <div class="screenshot-img-label">Prompt 2 — describing the specific issues found during testing</div>
+      <img src="lesson1_part3_fix1a.png" alt="Follow-up prompt describing date format and currency display issues">
+    </div>
+
+    <p>Claude responds with a root cause explanation before showing any code — this is useful. Read it. Understanding <em>why</em> something broke is more valuable than just applying the fix.</p>
+
+    <div class="screenshot-img">
+      <div class="screenshot-img-label">Claude's response — root cause analysis and replacement functions</div>
+      <div style="display:flex; gap:0; flex-wrap:wrap;">
+        <img src="lesson1_part3_fix1b.png" alt="Claude explains the root cause and provides formatDate and formatAmount functions" style="width:50%; min-width:280px; flex:1;">
+        <img src="lesson1_part3_fix1c.png" alt="Claude provides the remaining call-site changes and tooltip fix" style="width:50%; min-width:280px; flex:1; border-left:1px solid var(--rule);">
+      </div>
+    </div>
+
+    <p>Notice that Claude returned <em>only the functions that needed changing</em> — exactly what we asked for. It also caught that <code>formatCurrency</code> was referenced in multiple places (the table, the summary, and the chart tooltip) and addressed all of them. This is the AI being genuinely helpful — but only because the prompt was specific enough to give it the right target.</p>
+
+    <p>When the fix spans multiple functions, you can ask Claude to apply them all and produce a new downloadable file. That's what happened here:</p>
+
+    <div class="screenshot-img">
+      <div class="screenshot-img-label">Claude applies all patches and delivers an updated file</div>
+      <img src="lesson1_part3_fix1d.png" alt="Claude confirms all five call sites patched and offers a download of the fixed index.html">
+    </div>
 
     <div class="prompt-block">
       <div class="prompt-block-header">
@@ -789,11 +813,6 @@ Please fix it. Show me only the JavaScript functions that need to change, not th
     <p><strong>The AI can drift.</strong> In a long conversation, the AI may subtly forget earlier constraints. This is why you read every output, not just the first one.</p>
 
     <div class="key-point">A good follow-up prompt is specific about what broke, references "the existing app," and asks for the minimum change needed — not a full rewrite.</div>
-
-    <div class="screenshot-slot">
-      <div class="screenshot-slot-label">Screenshot</div>
-      <div class="screenshot-slot-desc">The fixed behavior — e.g. chart updating correctly after a delete, or currency formatted cleanly</div>
-    </div>
   </section>
 
   <hr class="divider">
