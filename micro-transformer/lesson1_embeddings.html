@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lesson 1 — Embeddings</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #14171c;
+    --panel: #1c2027;
+    --panel-2: #20242c;
+    --border: #2c313a;
+    --text: #e9e6df;
+    --muted: #8b919c;
+    --warm: #e3a857;
+    --warm-dim: #8a6a3f;
+    --cool: #4c8ca6;
+    --cool-dim: #375f6e;
+    --neutral: #363b44;
+    --good: #7fae6e;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 28px;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  header { margin-bottom: 22px; }
+  .backlink {
+    display: inline-block;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 11.5px;
+    margin-bottom: 14px;
+    transition: color 0.15s;
+  }
+  .backlink:hover { color: var(--warm); }
+  .eyebrow {
+    color: var(--warm);
+    letter-spacing: 0.14em;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  h1 {
+    font-size: 25px;
+    font-weight: 700;
+    margin: 6px 0 8px;
+    letter-spacing: -0.01em;
+  }
+  .lede {
+    color: var(--muted);
+    max-width: 760px;
+    font-size: 13.5px;
+  }
+  .lede b { color: var(--text); font-weight: 600; }
+
+  .roadmap {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0 18px;
+    padding: 10px 12px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .rm-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .rm-item.active { color: var(--warm); font-weight: 600; }
+  .rm-n {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    font-size: 9.5px;
+  }
+  .rm-item.active .rm-n { border-color: var(--warm); color: var(--warm); }
+  .rm-arrow { color: var(--border); font-size: 11px; }
+
+  .arch {
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 0;
+    margin: 18px 0 8px;
+    padding: 16px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .arch-box {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 10px 12px;
+    min-width: 108px;
+    text-align: center;
+  }
+  .arch-box.highlight { border-color: var(--warm-dim); }
+  .arch-title { font-size: 12px; font-weight: 600; color: var(--text); }
+  .arch-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+  .arch-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    font-size: 15px;
+    color: var(--warm-dim);
+    min-width: 92px;
+  }
+  .arch-arrow span { font-size: 9.5px; color: var(--muted); display: block; text-align: center; margin-top: 2px; }
+  .arch-arrow span.arch-dim { color: var(--warm-dim); }
+
+  .arch-note { font-size: 12px; color: var(--muted); max-width: 780px; }
+  .curious-toggle {
+    display: inline-block;
+    margin-left: 6px;
+    color: var(--cool);
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: var(--cool-dim);
+  }
+  .curious-toggle:hover { color: var(--text); }
+  .curious-box {
+    display: none;
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-left: 2px solid var(--cool-dim);
+    background: var(--panel);
+  }
+  .curious-box.show { display: block; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+    margin-top: 24px;
+    align-items: start;
+  }
+
+  @media (max-width: 880px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+  }
+
+  .panel + .panel { margin-top: 16px; }
+
+  .panel h2 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+
+  table.tok { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.tok td { padding: 3px 4px; border-bottom: 1px solid var(--border); }
+  table.tok td.id { color: var(--warm); text-align: right; width: 28px; }
+
+  .sentlist { font-size: 12px; color: var(--muted); max-height: 190px; overflow-y: auto; }
+  .sentlist div { padding: 3px 0; border-bottom: 1px solid var(--border); }
+  .sentlist div:last-child { border-bottom: none; }
+  .sentlist .tk { color: var(--text); }
+
+  .controls { display: flex; flex-direction: column; gap: 10px; }
+  .btnrow { display: flex; gap: 8px; }
+
+  button {
+    font-family: inherit;
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 9px 12px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    flex: 1;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  button:hover { border-color: var(--warm-dim); color: var(--warm); }
+  button:active { transform: translateY(1px); }
+  button.primary { border-color: var(--warm-dim); color: var(--warm); }
+  button.primary:hover { border-color: var(--warm); }
+  button:disabled { opacity: 0.4; cursor: default; }
+  button:disabled:hover { border-color: var(--border); color: var(--text); }
+
+  .lr-row { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+  .lr-row input[type=range] { flex: 1; accent-color: var(--warm); }
+  .lr-val { color: var(--warm); width: 34px; text-align: right; }
+
+  .stats { display: flex; gap: 18px; margin-top: 4px; }
+  .stat { flex: 1; }
+  .stat .label { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat .value { font-size: 20px; font-weight: 700; color: var(--text); margin-top: 2px; }
+  .stat .value.warm { color: var(--warm); }
+
+  canvas#lossChart { width: 100%; height: 60px; display: block; margin-top: 10px; }
+
+  .heatmap-wrap { display: flex; flex-direction: column; align-items: flex-start; }
+  .heatmap-grid { display: grid; gap: 2px; }
+  .hcell {
+    width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 3px;
+    font-size: 9px;
+    color: rgba(0,0,0,0.55);
+    transition: background-color 0.35s ease;
+    position: relative;
+  }
+  .hcell.diag { background: var(--panel-2) !important; color: var(--muted) !important; }
+  .hlabel {
+    font-size: 10px;
+    color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hlabel.row { justify-content: flex-end; padding-right: 6px; }
+  .hlabel.col {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    justify-content: flex-start;
+    padding-bottom: 4px;
+  }
+  .group-tag { font-size: 9px; color: var(--warm-dim); text-align: center; }
+
+  .legend { display: flex; align-items: center; gap: 10px; margin-top: 16px; font-size: 11px; color: var(--muted); }
+  .legend-bar { width: 140px; height: 10px; border-radius: 3px;
+    background: linear-gradient(90deg, var(--cool), var(--neutral), var(--warm)); }
+
+  .caption { font-size: 12px; color: var(--muted); margin-top: 16px; max-width: 640px; }
+  .caption b { color: var(--text); }
+
+  .hint-toggle { margin-top: 14px; }
+  .hint-box {
+    display: none;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    border-left: 2px solid var(--warm-dim);
+    padding-left: 10px;
+  }
+  .hint-box.show { display: block; }
+  .hint-box b { color: var(--warm); }
+
+  .pad-note { color: var(--cool); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a href="../index.html" class="backlink">&larr; pauljchang.github.io</a>
+    <div class="eyebrow">Micro-Transformer &middot; Lesson 1 of 6</div>
+    <h1>What do embeddings actually learn?</h1>
+
+    <div class="roadmap">
+      <div class="rm-item active"><span class="rm-n">1</span>Embeddings</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item"><span class="rm-n">2</span>Position</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item"><span class="rm-n">3</span>Attention &amp; routing</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item"><span class="rm-n">4</span>Training &amp; generalization</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item"><span class="rm-n">5</span>Chatbot</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item"><span class="rm-n">6</span>Judgment vs. retrieval</div>
+    </div>
+
+    <p class="lede">
+      This is the first lesson in a hands-on course that builds a working language
+      model from scratch, one real concept at a time, using a tiny invented
+      "caveperson" language instead of English — a stripped-down grammar of about
+      a dozen words is small enough that you can read the <i>entire</i> training set
+      in one glance, which is exactly the point: at this scale, nothing is hidden
+      from you. Later lessons add position, attention, and a real training loop;
+      everything you learn here about a 12-word toy still describes, mechanically,
+      what happens inside a billion-parameter model — just at a size you can hold
+      in your head.
+    </p>
+    <p class="lede">
+      <b>What are we actually training?</b> Next-word prediction — the same core
+      task every GPT-style model is trained on: given the words so far, predict
+      what comes next. Concretely, this model predicts each word from the
+      <i>average</i> of every embedding before it in the sentence. That's a
+      deliberate simplification — a real transformer would <i>learn</i> which
+      earlier words matter most (that's attention, arriving in Lesson 3); here,
+      every earlier word counts equally. It's just enough machinery to make
+      embeddings do real work.
+    </p>
+
+    <div class="arch">
+      <div class="arch-box"><div class="arch-title">token id</div><div class="arch-sub">e.g. "bear" → 2</div></div>
+      <div class="arch-arrow">→<span>embedding lookup</span><span class="arch-dim">12 × 16 table</span></div>
+      <div class="arch-box"><div class="arch-title">16-d vector</div><div class="arch-sub">one per word so far</div></div>
+      <div class="arch-arrow">→<span>mean pool</span><span class="arch-dim">unweighted average</span></div>
+      <div class="arch-box"><div class="arch-title">context vector</div><div class="arch-sub">16 numbers</div></div>
+      <div class="arch-arrow">→<span>linear layer</span><span class="arch-dim">16 × 12 weights + 12 bias</span></div>
+      <div class="arch-box"><div class="arch-title">logits</div><div class="arch-sub">one score per word</div></div>
+      <div class="arch-arrow">→<span>softmax</span><span class="arch-dim">scores → probabilities</span></div>
+      <div class="arch-box highlight"><div class="arch-title">prediction</div><div class="arch-sub">probability of each next word</div></div>
+    </div>
+    <p class="arch-note">
+      This is a genuine (tiny) neural network, not a precomputed lookup table —
+      the embedding table and the linear layer are both matrices of trainable
+      numbers, adjusted by gradient descent every time you click "Step." There's
+      no separate giant word-by-word co-occurrence matrix being filled in behind
+      the scenes.
+      <span class="curious-toggle" id="curiousToggle">Curious how those two ideas relate anyway? ▾</span>
+      <span class="curious-box" id="curiousBox">
+        They're more related than they look. Classical distributional-semantics
+        methods (like GloVe) take the opposite approach: build an explicit
+        word × word co-occurrence matrix — literally vocab-size × vocab-size —
+        counting how often each pair of words appears near each other, then
+        factor that matrix directly with linear algebra (no sentences, no
+        gradient steps). It's a well-known result that this and the neural
+        training you're doing here tend to land on very similar embeddings —
+        two different routes to close to the same destination. The neural
+        route is the one that scales to modern models; the matrix route is
+        mostly of historical and theoretical interest today.
+      </span>
+    </p>
+    <p class="lede">
+      Right now, every word below has a random 16-dimensional vector — at this
+      instant <b>hunter</b> and <b>berry</b> are exactly as "related" as any other
+      two tokens: not at all. Step through training below and watch the heatmap
+      reorganize itself as words that keep appearing in similar company get
+      pulled toward each other.
+    </p>
+  </header>
+
+  <div class="layout">
+    <div>
+      <div class="panel">
+        <h2>Tokenizer</h2>
+        <table class="tok" id="tokTable"></table>
+      </div>
+      <div class="panel">
+        <h2>Training sentences (9)</h2>
+        <div class="sentlist" id="sentList"></div>
+      </div>
+      <div class="panel">
+        <h2>Train</h2>
+        <div class="controls">
+          <div class="btnrow">
+            <button id="btnStep">Step +1</button>
+            <button id="btnStep10" class="primary">Train 10 steps</button>
+          </div>
+          <div class="btnrow">
+            <button id="btnReset">Re-randomize embeddings</button>
+          </div>
+          <div class="lr-row">
+            <span>learning rate</span>
+            <input type="range" id="lrSlider" min="0.05" max="1" step="0.05" value="0.4">
+            <span class="lr-val" id="lrVal">0.40</span>
+          </div>
+          <div class="stats">
+            <div class="stat">
+              <div class="label">Step</div>
+              <div class="value" id="stepCount">0</div>
+            </div>
+            <div class="stat">
+              <div class="label">Avg loss</div>
+              <div class="value warm" id="lossVal">—</div>
+            </div>
+          </div>
+          <canvas id="lossChart" width="268" height="60"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Cosine similarity between every pair of trained vectors</h2>
+      <div class="heatmap-wrap" id="heatmapWrap"></div>
+      <div class="legend">
+        <span>−1</span>
+        <div class="legend-bar"></div>
+        <span>+1</span>
+        <span style="margin-left:8px;">more different&nbsp;&nbsp;→&nbsp;&nbsp;more similar</span>
+      </div>
+      <div class="caption">
+        Watch the <b>hunter / wolf / bear</b> block in the top-left — they all show up
+        with <b>"eats meat"</b> and <b>"drinks water"</b> in the training data. <b>deer</b> only
+        partly overlaps (it drinks water too, but eats berry instead of meat), so expect
+        it to drift less far into that cluster. The <b class="pad-note">&lt;PAD&gt;</b> row/column
+        never appears in any training sentence — no matter how long you train, it stays
+        essentially random. That's not a bug: a token with zero context never gets a
+        training signal.
+      </div>
+      <div class="hint-toggle">
+        <button id="btnHint" style="flex:none; width:auto; padding:7px 12px;">Show what to expect</button>
+        <div class="hint-box" id="hintBox">
+          Prediction: <b>hunter, wolf, bear</b> converge into one visibly warmer block.
+          <b>deer</b> sits nearby but noticeably less similar to that block. <b>meat, fish,
+          berry, water</b> may also drift toward each other a little — they all have to
+          predict "." as the next token, which is a shared signal too, just a different
+          kind (what comes <i>after</i> them, not what they follow).
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------------
+// Stage 0 data, exactly as generated by the corpus pipeline.
+// ---------------------------------------------------------------------
+const VOCAB = ["<PAD>", ".", "bear", "berry", "deer", "drinks", "eats", "fish", "hunter", "meat", "water", "wolf"];
+const TOK2ID = Object.fromEntries(VOCAB.map((w, i) => [w, i]));
+const V = VOCAB.length;
+const DIM = 16;
+
+const SENTENCES = [
+  "bear eats meat .",
+  "wolf drinks water .",
+  "bear drinks water .",
+  "bear eats fish .",
+  "deer drinks water .",
+  "deer eats berry .",
+  "hunter drinks water .",
+  "hunter eats meat .",
+  "wolf eats meat ."
+];
+
+// display order for the heatmap: subjects, verbs, objects, structural
+const DISPLAY_ORDER = ["hunter", "wolf", "bear", "deer", "eats", "drinks", "meat", "fish", "berry", "water", ".", "<PAD>"];
+const GROUPS = [
+  { label: "subjects", words: ["hunter", "wolf", "bear", "deer"] },
+  { label: "verbs", words: ["eats", "drinks"] },
+  { label: "objects", words: ["meat", "fish", "berry", "water"] },
+  { label: "struct", words: [".", "<PAD>"] }
+];
+
+// training examples: predict token at position t from the MEAN of every
+// embedding at positions 0..t-1 in the same sentence. A pure bigram
+// (predict-from-just-the-previous-token) model was tried first and found to
+// NOT reproduce the hunter/wolf/bear-vs-deer clustering the corpus was
+// designed around -- because in a strict bigram, a subject's embedding only
+// ever gets gradient from the verb immediately after it (eats/drinks), and
+// every subject has nearly the same eats/drinks split. The diet information
+// (meat vs berry) sits two tokens away and never reaches back that far.
+// Averaging all preceding embeddings lets that signal flow back to the
+// subject -- still zero attention weights, just an unweighted mean, but
+// enough to let "what comes later in the sentence" shape the embedding.
+const EXAMPLES = [];
+for (const s of SENTENCES) {
+  const ids = s.split(" ").map(w => TOK2ID[w]);
+  for (let t = 1; t < ids.length; t++) EXAMPLES.push([ids.slice(0, t), ids[t]]);
+}
+
+// ---------------------------------------------------------------------
+// Tiny hand-rolled model: embedding table E (V x DIM) + linear head W,b
+// ---------------------------------------------------------------------
+let E, W, b, stepCount, lossHistory;
+
+function randMat(rows, cols, scale) {
+  return Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, () => (Math.random() * 2 - 1) * scale));
+}
+
+function initModel() {
+  E = randMat(V, DIM, 0.6);
+  W = randMat(DIM, V, 0.4);
+  b = new Array(V).fill(0);
+  stepCount = 0;
+  lossHistory = [];
+}
+
+function softmax(logits) {
+  const m = Math.max(...logits);
+  const exps = logits.map(x => Math.exp(x - m));
+  const sum = exps.reduce((a, c) => a + c, 0);
+  return exps.map(x => x / sum);
+}
+
+function trainStep(lr) {
+  const dE = Array.from({ length: V }, () => new Array(DIM).fill(0));
+  const dW = Array.from({ length: DIM }, () => new Array(V).fill(0));
+  const db = new Array(V).fill(0);
+  let totalLoss = 0;
+
+  for (const [ctxIds, j] of EXAMPLES) {
+    const m = ctxIds.length;
+    const ctx = new Array(DIM).fill(0);
+    for (const cid of ctxIds) for (let d = 0; d < DIM; d++) ctx[d] += E[cid][d] / m;
+
+    const logits = new Array(V).fill(0);
+    for (let k = 0; k < V; k++) {
+      let s = b[k];
+      for (let d = 0; d < DIM; d++) s += ctx[d] * W[d][k];
+      logits[k] = s;
+    }
+    const probs = softmax(logits);
+    totalLoss += -Math.log(Math.max(probs[j], 1e-9));
+
+    const dlogits = probs.slice();
+    dlogits[j] -= 1;
+
+    for (let k = 0; k < V; k++) db[k] += dlogits[k];
+    const dctx = new Array(DIM).fill(0);
+    for (let d = 0; d < DIM; d++) {
+      let s = 0;
+      for (let k = 0; k < V; k++) {
+        dW[d][k] += ctx[d] * dlogits[k];
+        s += W[d][k] * dlogits[k];
+      }
+      dctx[d] = s;
+    }
+    for (const cid of ctxIds) for (let d = 0; d < DIM; d++) dE[cid][d] += dctx[d] / m;
+  }
+
+  const n = EXAMPLES.length;
+  for (let i = 0; i < V; i++)
+    for (let d = 0; d < DIM; d++)
+      E[i][d] -= lr * (dE[i][d] / n);
+  for (let d = 0; d < DIM; d++)
+    for (let k = 0; k < V; k++)
+      W[d][k] -= lr * (dW[d][k] / n);
+  for (let k = 0; k < V; k++) b[k] -= lr * (db[k] / n);
+
+  stepCount++;
+  const avgLoss = totalLoss / n;
+  lossHistory.push(avgLoss);
+  return avgLoss;
+}
+
+function cosSim(u, v) {
+  let dot = 0, nu = 0, nv = 0;
+  for (let d = 0; d < u.length; d++) { dot += u[d] * v[d]; nu += u[d] * u[d]; nv += v[d] * v[d]; }
+  return dot / (Math.sqrt(nu) * Math.sqrt(nv) + 1e-9);
+}
+
+// ---------------------------------------------------------------------
+// Rendering
+// ---------------------------------------------------------------------
+function lerp(a, b, t) { return a + (b - a) * t; }
+function hexToRgb(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+function colorForSim(t) {
+  // t in [-1,1] -> cool ... neutral ... warm
+  const cool = hexToRgb("#4c8ca6"), neutral = hexToRgb("#363b44"), warm = hexToRgb("#e3a857");
+  let c;
+  if (t <= 0) {
+    const f = t + 1; // 0..1 across [-1,0]
+    c = cool.map((v, i) => lerp(v, neutral[i], f));
+  } else {
+    const f = t; // 0..1 across [0,1]
+    c = neutral.map((v, i) => lerp(v, warm[i], f));
+  }
+  return `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
+}
+
+function buildTokTable() {
+  const tbl = document.getElementById("tokTable");
+  tbl.innerHTML = VOCAB.map(w => `<tr><td>${w}</td><td class="id">${TOK2ID[w]}</td></tr>`).join("");
+}
+
+function buildSentList() {
+  const el = document.getElementById("sentList");
+  el.innerHTML = SENTENCES.map(s => `<div><span class="tk">${s}</span></div>`).join("");
+}
+
+function buildHeatmap() {
+  const wrap = document.getElementById("heatmapWrap");
+  wrap.innerHTML = "";
+  const n = DISPLAY_ORDER.length;
+  const grid = document.createElement("div");
+  grid.className = "heatmap-grid";
+  grid.style.gridTemplateColumns = `70px repeat(${n}, 34px)`;
+  grid.style.gridTemplateRows = `50px repeat(${n}, 34px)`;
+
+  // corner
+  grid.appendChild(document.createElement("div"));
+  // column labels
+  for (const w of DISPLAY_ORDER) {
+    const d = document.createElement("div");
+    d.className = "hlabel col";
+    d.textContent = w;
+    grid.appendChild(d);
+  }
+  // rows
+  for (const rw of DISPLAY_ORDER) {
+    const rl = document.createElement("div");
+    rl.className = "hlabel row";
+    rl.textContent = rw;
+    grid.appendChild(rl);
+    for (const cw of DISPLAY_ORDER) {
+      const cell = document.createElement("div");
+      cell.className = "hcell";
+      cell.id = `cell-${rw}-${cw}`;
+      if (rw === cw) cell.classList.add("diag");
+      grid.appendChild(cell);
+    }
+  }
+  wrap.appendChild(grid);
+}
+
+function updateHeatmap() {
+  for (const rw of DISPLAY_ORDER) {
+    for (const cw of DISPLAY_ORDER) {
+      const cell = document.getElementById(`cell-${rw}-${cw}`);
+      if (rw === cw) continue;
+      const sim = cosSim(E[TOK2ID[rw]], E[TOK2ID[cw]]);
+      cell.style.backgroundColor = colorForSim(sim);
+      cell.title = `${rw} · ${cw}: ${sim.toFixed(2)}`;
+    }
+  }
+}
+
+function drawLossChart() {
+  const canvas = document.getElementById("lossChart");
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  if (lossHistory.length < 2) return;
+  const maxLoss = Math.max(...lossHistory);
+  const minLoss = Math.min(...lossHistory);
+  const range = Math.max(maxLoss - minLoss, 0.01);
+  ctx.beginPath();
+  ctx.strokeStyle = "#e3a857";
+  ctx.lineWidth = 1.5;
+  lossHistory.forEach((v, i) => {
+    const x = (i / (lossHistory.length - 1)) * (w - 4) + 2;
+    const y = h - 4 - ((v - minLoss) / range) * (h - 8);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+}
+
+function updateStats(avgLoss) {
+  document.getElementById("stepCount").textContent = stepCount;
+  document.getElementById("lossVal").textContent = avgLoss === null ? "—" : avgLoss.toFixed(3);
+  drawLossChart();
+}
+
+// ---------------------------------------------------------------------
+// Controls
+// ---------------------------------------------------------------------
+let lr = 0.4;
+let training = false;
+
+function doSteps(n, cb) {
+  if (training) return;
+  training = true;
+  setButtonsDisabled(true);
+  let done = 0;
+  function tick() {
+    const avgLoss = trainStep(lr);
+    updateHeatmap();
+    updateStats(avgLoss);
+    done++;
+    if (done < n) {
+      setTimeout(tick, 90);
+    } else {
+      training = false;
+      setButtonsDisabled(false);
+      if (cb) cb();
+    }
+  }
+  tick();
+}
+
+function setButtonsDisabled(v) {
+  document.getElementById("btnStep").disabled = v;
+  document.getElementById("btnStep10").disabled = v;
+  document.getElementById("btnReset").disabled = v;
+}
+
+document.getElementById("btnStep").addEventListener("click", () => doSteps(1));
+document.getElementById("btnStep10").addEventListener("click", () => doSteps(10));
+document.getElementById("btnReset").addEventListener("click", () => {
+  initModel();
+  updateHeatmap();
+  updateStats(null);
+});
+document.getElementById("lrSlider").addEventListener("input", (e) => {
+  lr = parseFloat(e.target.value);
+  document.getElementById("lrVal").textContent = lr.toFixed(2);
+});
+document.getElementById("btnHint").addEventListener("click", () => {
+  document.getElementById("hintBox").classList.toggle("show");
+});
+document.getElementById("curiousToggle").addEventListener("click", () => {
+  document.getElementById("curiousBox").classList.toggle("show");
+});
+
+// ---------------------------------------------------------------------
+// Boot
+// ---------------------------------------------------------------------
+buildTokTable();
+buildSentList();
+buildHeatmap();
+initModel();
+updateHeatmap();
+updateStats(null);
+</script>
+</body>
+</html>
