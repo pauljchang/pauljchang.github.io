@@ -79,6 +79,78 @@
   .rm-item.done .rm-n { border-color: var(--cool); color: var(--cool); }
   .rm-arrow { color: var(--border); font-size: 11px; }
 
+  .orderdiagram {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 20px 0;
+  }
+  @media (max-width: 720px) { .orderdiagram { grid-template-columns: 1fr; } }
+
+  .od-col {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .od-heading {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .od-heading.bad { color: var(--bad); }
+  .od-heading.good { color: #7fae6e; }
+
+  .od-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .od-tok {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 9px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text);
+    text-align: center;
+    line-height: 1.3;
+  }
+  .od-tok span { display: block; font-size: 9px; font-weight: 400; color: var(--muted); margin-top: 1px; }
+  .od-tok.alt { border-color: var(--cool-dim); }
+  .od-op { font-size: 12px; color: var(--muted); flex-shrink: 0; }
+  .od-op.arrow { color: var(--warm-dim); font-size: 10.5px; }
+
+  .od-result {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 7px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .od-result.diffA { background: #241f16; border-color: var(--warm-dim); color: var(--warm); }
+  .od-result.diffB { background: #182a1e; border-color: #4d7a5a; color: #7fae6e; }
+
+  .od-merge {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0 10px;
+  }
+  .od-result.shared {
+    background: #2a1c18;
+    border-color: var(--bad);
+    color: var(--bad);
+    text-align: center;
+  }
+
+  .od-note { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
   .arch {
     display: flex; align-items: stretch; flex-wrap: wrap; gap: 0;
     margin: 18px 0 8px; padding: 16px;
@@ -247,6 +319,47 @@
       tell which word came first. Toggle between the two below and watch it happen.
     </p>
 
+    <div class="orderdiagram">
+      <div class="od-col">
+        <div class="od-heading bad">Mean pooling — both orders collapse</div>
+        <div class="od-row">
+          <div class="od-tok">hunter<span>pos 0</span></div>
+          <div class="od-op">+</div>
+          <div class="od-tok">likes<span>pos 1</span></div>
+          <div class="od-op arrow">÷2 →</div>
+        </div>
+        <div class="od-row">
+          <div class="od-tok alt">likes<span>pos 0</span></div>
+          <div class="od-op">+</div>
+          <div class="od-tok alt">hunter<span>pos 1</span></div>
+          <div class="od-op arrow">÷2 →</div>
+        </div>
+        <div class="od-merge">
+          <div class="od-result shared">same context vector</div>
+        </div>
+        <div class="od-note">Both rows funnel into the <i>same</i> box — addition can't remember which token had which position.</div>
+      </div>
+
+      <div class="od-col">
+        <div class="od-heading good">Concatenation — order survives</div>
+        <div class="od-row">
+          <div class="od-tok">hunter<span>slot 0</span></div>
+          <div class="od-op">+</div>
+          <div class="od-tok">likes<span>slot 1</span></div>
+          <div class="od-op arrow">concat →</div>
+          <div class="od-result diffA">[ hunter &nbsp;|&nbsp; likes ]</div>
+        </div>
+        <div class="od-row">
+          <div class="od-tok alt">likes<span>slot 0</span></div>
+          <div class="od-op">+</div>
+          <div class="od-tok alt">hunter<span>slot 1</span></div>
+          <div class="od-op arrow">concat →</div>
+          <div class="od-result diffB">[ likes &nbsp;|&nbsp; hunter ]</div>
+        </div>
+        <div class="od-note">Each row keeps its own slots, so the two results stay <i>visibly different</i> — nothing merges them.</div>
+      </div>
+    </div>
+
     <div class="arch">
       <div class="arch-box"><div class="arch-title">token id</div><div class="arch-sub">e.g. "hunter" → 9</div></div>
       <div class="arch-arrow">→<span>word + position lookup</span></div>
@@ -366,10 +479,32 @@
         the real grammatical pair (<b>hunter likes / dog likes</b>), the predictions
         become meaningfully different too — correctly landing on <b>dog</b> and
         <b>hunter</b> respectively, matching what's actually true in the corpus.
-        For the reversed nonsense pair (<b>likes hunter</b>), the representation is
-        still different, but the prediction isn't "correct" in any meaningful sense —
-        the model was never trained on that word order, so it's just extrapolating,
-        the same way it would for any other input it's never seen.
+      </p>
+      <p class="caption">
+        <b>The reversed nonsense pair is more interesting than it looks.</b>
+        <b>"likes hunter"</b> is confused for a precise, checkable reason: every
+        training sentence puts a <i>subject</i> in slot 0 and a <i>verb</i> in
+        slot 1 — never the other way around. So slot 0's weights have only ever
+        learned to interpret subject-shaped input, and slot 1's weights have only
+        ever learned to interpret verb-shaped input. Feed it <b>likes</b> in slot 0
+        and <b>hunter</b> in slot 1, and both weight blocks are reading a word-type
+        they've never once seen in that position — the prediction (typically
+        <b>water</b> or <b>fish</b>, an object a verb might produce) isn't
+        "wrong" so much as <i>ungrounded</i>: fixed slots don't just fail on word
+        order, they rigidly bind each position to one grammatical role.
+      </p>
+      <p class="caption">
+        One thing the model gets <i>right</i> even here, though: it almost never
+        predicts <b>"."</b> — checking the numbers, it assigns period under 2%
+        probability for this pair, correctly near the bottom of the ranking. That's
+        not a coincidence. Every one of the 13 training sentences is exactly four
+        tokens — <b>Subject Verb Object .</b> — with zero exceptions, so a 2-word
+        context has <i>never once</i> been followed by punctuation in training; the
+        third word is always some object. The model has learned that pattern with
+        total confidence, and correctly applies it even to an input it's never seen.
+        So "likes hunter" reveals two different kinds of learned structure at once:
+        rigid (and here, <i>wrong</i>) slot-to-role binding, alongside a rigid (and
+        here, still <i>correct</i>) sense of how many words precede a period.
       </p>
     </div>
   </div>
@@ -402,9 +537,9 @@ for (const s of SENTENCES) {
 }
 
 const PAIR_PRESETS = [
-  { label: "hunter likes / likes hunter", a: ["hunter", "likes"], b: ["likes", "hunter"] },
-  { label: "hunter likes / dog likes", a: ["hunter", "likes"], b: ["dog", "likes"] },
-  { label: "dog eats / eats dog", a: ["dog", "eats"], b: ["eats", "dog"] },
+  { label: "hunter likes / dog likes — both real sentences", a: ["hunter", "likes"], b: ["dog", "likes"] },
+  { label: "hunter likes / likes hunter — reversed, never trained", a: ["hunter", "likes"], b: ["likes", "hunter"] },
+  { label: "dog eats / eats dog — reversed, never trained", a: ["dog", "eats"], b: ["eats", "dog"] },
 ];
 let activePair = 0;
 const PAD_ID = TOK2ID["<PAD>"];
