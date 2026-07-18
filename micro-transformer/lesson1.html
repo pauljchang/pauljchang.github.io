@@ -332,6 +332,21 @@
       every earlier word counts equally. It's just enough machinery to make
       embeddings do real work.
     </p>
+    <p class="lede">
+      <b>There is only one loss function here, and it isn't "make similar words
+      similar."</b> The model is never told which words are related — it's only
+      ever graded on next-word prediction accuracy. The clustering you're about
+      to watch happen is a <i>side effect</i>, not a second goal: <b>hunter</b>,
+      <b>wolf</b>, and <b>bear</b> end up with similar vectors because they tend to
+      predict the same next words in the same proportions, and giving them similar
+      vectors is simply an efficient way for the network to solve that one
+      prediction task — it can reuse the same downstream behavior instead of
+      learning it three separate times. The vectors converging is the model
+      discovering a shortcut, not chasing a similarity target. This is sometimes
+      called the <i>distributional hypothesis</i>: a word's meaning is reflected
+      in the company it tends to keep, so a model that only ever learns to
+      predict company ends up encoding something that looks a lot like meaning.
+    </p>
 
     <div class="arch">
       <div class="arch-box"><div class="arch-title">token id</div><div class="arch-sub">e.g. "bear" → 2</div></div>
