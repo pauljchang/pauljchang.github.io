@@ -268,6 +268,23 @@
     padding-left: 10px;
   }
   .hint-box.show { display: block; }
+
+  .lesson-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+  .lesson-nav-link {
+    font-size: 12.5px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .lesson-nav-link:hover { color: var(--warm); }
+  .lesson-nav-link.next { color: var(--warm); font-weight: 600; }
   .hint-box b { color: var(--warm); }
 
   .pad-note { color: var(--cool); }
@@ -425,6 +442,11 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="lesson-nav">
+    <a href="../index.html" class="lesson-nav-link back">&larr; All projects</a>
+    <a href="lesson2.html" class="lesson-nav-link next">Lesson 2: Position &rarr;</a>
   </div>
 </div>
 

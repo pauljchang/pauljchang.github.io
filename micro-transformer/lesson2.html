@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lesson 2 — Position</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #14171c;
+    --panel: #1c2027;
+    --panel-2: #20242c;
+    --border: #2c313a;
+    --text: #e9e6df;
+    --muted: #8b919c;
+    --warm: #e3a857;
+    --warm-dim: #8a6a3f;
+    --cool: #4c8ca6;
+    --cool-dim: #375f6e;
+    --neutral: #363b44;
+    --bad: #c96a5a;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 28px;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  .backlink {
+    display: inline-block;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 11.5px;
+    margin-bottom: 14px;
+    transition: color 0.15s;
+  }
+  .backlink:hover { color: var(--warm); }
+
+  header { margin-bottom: 22px; }
+  .eyebrow {
+    color: var(--warm);
+    letter-spacing: 0.14em;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  h1 {
+    font-size: 25px;
+    font-weight: 700;
+    margin: 6px 0 8px;
+    letter-spacing: -0.01em;
+  }
+  .lede { color: var(--muted); max-width: 780px; font-size: 13.5px; }
+  .lede b { color: var(--text); font-weight: 600; }
+  .lede + .lede { margin-top: 10px; }
+
+  .roadmap {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+    margin: 16px 0 18px; padding: 10px 12px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+  }
+  .rm-item { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+  .rm-item.active { color: var(--warm); font-weight: 600; }
+  .rm-item.done { color: var(--cool); }
+  .rm-n {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--border); font-size: 9.5px;
+  }
+  .rm-item.active .rm-n { border-color: var(--warm); color: var(--warm); }
+  .rm-item.done .rm-n { border-color: var(--cool); color: var(--cool); }
+  .rm-arrow { color: var(--border); font-size: 11px; }
+
+  .arch {
+    display: flex; align-items: stretch; flex-wrap: wrap; gap: 0;
+    margin: 18px 0 8px; padding: 16px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+  }
+  .arch-box { background: var(--panel-2); border: 1px solid var(--border); border-radius: 5px; padding: 10px 12px; min-width: 100px; text-align: center; }
+  .arch-box.new { border-color: var(--warm-dim); background: #241f16; }
+  .arch-title { font-size: 12px; font-weight: 600; color: var(--text); }
+  .arch-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+  .arch-box.new .arch-sub { color: var(--warm); }
+  .arch-plus {
+    display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--warm); padding: 0 6px;
+  }
+  .arch-arrow {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 0 10px; font-size: 15px; color: var(--warm-dim); min-width: 84px;
+  }
+  .arch-arrow span { font-size: 9.5px; color: var(--muted); display: block; text-align: center; margin-top: 2px; }
+
+  .layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; margin-top: 24px; align-items: start; }
+  @media (max-width: 880px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
+  .panel + .panel { margin-top: 16px; }
+  .panel h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin: 0 0 12px; font-weight: 600; }
+
+  table.tok { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.tok td { padding: 2.5px 4px; border-bottom: 1px solid var(--border); }
+  table.tok td.id { color: var(--warm); text-align: right; width: 24px; }
+
+  .sentlist { font-size: 12px; color: var(--muted); max-height: 170px; overflow-y: auto; }
+  .sentlist div { padding: 3px 0; border-bottom: 1px solid var(--border); }
+  .sentlist div:last-child { border-bottom: none; }
+
+  .btnrow { display: flex; gap: 8px; }
+  button {
+    font-family: inherit; background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 4px; padding: 9px 12px;
+    font-size: 12.5px; font-weight: 500; cursor: pointer; flex: 1;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  button:hover { border-color: var(--warm-dim); color: var(--warm); }
+  button:active { transform: translateY(1px); }
+  button.primary { border-color: var(--warm-dim); color: var(--warm); }
+  button:disabled { opacity: 0.4; cursor: default; }
+  button:disabled:hover { border-color: var(--border); color: var(--text); }
+
+  .controls { display: flex; flex-direction: column; gap: 10px; }
+  .lr-row { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+  .lr-row input[type=range] { flex: 1; accent-color: var(--warm); }
+  .lr-val { color: var(--warm); width: 34px; text-align: right; }
+
+  .stats { display: flex; gap: 14px; margin-top: 4px; }
+  .stat { flex: 1; }
+  .stat .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat .value { font-size: 17px; font-weight: 700; color: var(--text); margin-top: 2px; }
+  .stat .value.cool { color: var(--cool); }
+  .stat .value.warm { color: var(--warm); }
+  canvas.lossChart { width: 100%; height: 40px; display: block; margin-top: 6px; }
+
+  /* order test panel */
+  .pairpicker { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .pairpicker button { flex: none; }
+  .pairpicker button.active { border-color: var(--warm); color: var(--warm); background: #241f16; }
+
+  .toggle-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 12px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; }
+  .toggle-label { font-size: 12.5px; color: var(--text); font-weight: 600; }
+  .toggle-sub { font-size: 11px; color: var(--muted); }
+  .switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; inset: 0; background: var(--neutral); border-radius: 24px; transition: 0.2s; border: 1px solid var(--border); }
+  .slider::before { content: ""; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px; background: var(--muted); border-radius: 50%; transition: 0.2s; }
+  input:checked + .slider { background: #241f16; border-color: var(--warm-dim); }
+  input:checked + .slider::before { transform: translateX(20px); background: var(--warm); }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 640px) { .compare-grid { grid-template-columns: 1fr; } }
+  .seq-card { border: 1px solid var(--border); border-radius: 6px; padding: 14px; background: var(--panel-2); }
+  .seq-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .seq-sub { font-size: 10.5px; color: var(--muted); margin-bottom: 12px; }
+
+  .fingerprint { display: flex; align-items: flex-end; gap: 2px; height: 46px; margin-bottom: 12px; }
+  .fbar { flex: 1; border-radius: 1px; transition: height 0.35s ease, background-color 0.35s ease; background: var(--neutral); align-self: center; }
+
+  .predlist { font-size: 12px; }
+  .predrow { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid var(--border); }
+  .predrow:last-child { border-bottom: none; }
+  .predrow .w { color: var(--text); }
+  .predrow .p { color: var(--warm); }
+
+  .identical-banner {
+    margin-top: 16px; padding: 12px 14px; border-radius: 6px; font-size: 13px; text-align: center; font-weight: 600;
+    border: 1px solid var(--border);
+  }
+  .identical-banner.same { background: #2a1c18; border-color: var(--bad); color: var(--bad); }
+  .identical-banner.diff { background: #182a1e; border-color: #6ea87f; color: #7fae6e; }
+
+  .posgrid-wrap { margin-top: 18px; }
+  .posgrid { display: grid; grid-template-columns: 44px repeat(16, 1fr); gap: 2px; max-width: 560px; }
+  .posgrid .plabel { font-size: 10px; color: var(--muted); display: flex; align-items: center; }
+  .pcell { height: 16px; border-radius: 2px; background: var(--neutral); transition: background-color 0.35s ease; }
+
+  .caption { font-size: 12px; color: var(--muted); margin-top: 16px; max-width: 680px; }
+  .caption b { color: var(--text); }
+
+  .curious-toggle { display: inline-block; margin-left: 6px; color: var(--cool); cursor: pointer; text-decoration: underline; text-decoration-color: var(--cool-dim); }
+  .curious-toggle:hover { color: var(--text); }
+  .curious-box { display: none; margin-top: 8px; padding: 10px 12px; border-left: 2px solid var(--cool-dim); background: var(--panel); font-size: 12px; color: var(--muted); }
+  .curious-box.show { display: block; }
+
+  .lesson-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+  .lesson-nav-link {
+    font-size: 12.5px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .lesson-nav-link:hover { color: var(--warm); }
+  .lesson-nav-link.back { color: var(--warm); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a href="../index.html" class="backlink">&larr; pauljchang.github.io</a>
+    <div class="eyebrow">Micro-Transformer &middot; Lesson 2 of 6</div>
+
+    <div class="roadmap">
+      <div class="rm-item done"><span class="rm-n">1</span>Embeddings</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item active"><span class="rm-n">2</span>Position</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item"><span class="rm-n">3</span>Attention &amp; routing</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item"><span class="rm-n">4</span>Training &amp; generalization</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item"><span class="rm-n">5</span>Chatbot</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item"><span class="rm-n">6</span>Judgment vs. retrieval</div>
+    </div>
+
+    <h1>Why does word order matter?</h1>
+    <p class="lede">
+      Lesson 1's model predicted each word from the <i>average</i> of every embedding
+      before it. Averaging has a hidden problem: <b>mean(a, b)</b> is mathematically
+      identical to <b>mean(b, a)</b> — addition doesn't care what order you add things
+      in. That means, as far as this model is concerned, <b>"hunter likes"</b> and
+      <b>"likes hunter"</b> look <i>exactly</i> the same.
+    </p>
+    <p class="lede">
+      The obvious fix — give every position its own extra vector and add it in before
+      averaging — <b>doesn't actually work</b>, and it's worth seeing why: mean(A+P0,
+      B+P1) still equals (A+P0+B+P1)/2, which is the same four numbers added together
+      no matter which token got paired with which position. Averaging erases that
+      pairing regardless of what you add beforehand. The real fix has to stop
+      averaging: instead of blending every position into one vector, we
+      <b>concatenate</b> them into fixed slots — position 0's contribution and
+      position 1's contribution stay in separate places, so the model can finally
+      tell which word came first. Toggle between the two below and watch it happen.
+    </p>
+
+    <div class="arch">
+      <div class="arch-box"><div class="arch-title">token id</div><div class="arch-sub">e.g. "hunter" → 9</div></div>
+      <div class="arch-arrow">→<span>word + position lookup</span></div>
+      <div class="arch-box"><div class="arch-title">per-slot vector</div><div class="arch-sub">16-d each</div></div>
+      <div class="arch-arrow">→<span id="archModeLabel">mean pool (broken)</span></div>
+      <div class="arch-box" id="archCtxBox"><div class="arch-title">context</div></div>
+      <div class="arch-arrow">→<span>linear + softmax</span></div>
+      <div class="arch-box highlight"><div class="arch-title">prediction</div></div>
+    </div>
+    <p class="caption">
+      Real transformers avoid this whole problem differently: they still add
+      position vectors to token vectors, but instead of averaging afterward, they
+      feed everything into <b>attention</b> — which combines positions with
+      content-dependent weights instead of a flat average. Fixed-slot concatenation
+      is the version of "don't average" simple enough to build before Lesson 3
+      introduces that properly.
+      <span class="curious-toggle" id="curiousToggle">Why not just always concatenate, forever? ▾</span>
+      <span class="curious-box" id="curiousBox">
+        Because concatenation needs a fixed maximum length — every extra position
+        means a bigger weight matrix, and sentences longer than that maximum simply
+        don't fit. That's fine for a toy world capped at 3-word contexts, but it
+        doesn't scale to real sentences of wildly varying length. Attention solves
+        both problems at once: it uses position information without pooling, and
+        without needing a fixed-size slot for every possible position.
+      </span>
+    </p>
+  </header>
+
+  <div class="layout">
+    <div>
+      <div class="panel">
+        <h2>Tokenizer (14 words)</h2>
+        <table class="tok" id="tokTable"></table>
+      </div>
+      <div class="panel">
+        <h2>Training sentences (13)</h2>
+        <div class="sentlist" id="sentList"></div>
+      </div>
+      <div class="panel">
+        <h2>Train both models</h2>
+        <div class="controls">
+          <div class="btnrow">
+            <button id="btnStep">Step +1</button>
+            <button id="btnStep10" class="primary">Train 10 steps</button>
+          </div>
+          <div class="btnrow">
+            <button id="btnReset">Re-randomize embeddings</button>
+          </div>
+          <div class="lr-row">
+            <span>learning rate</span>
+            <input type="range" id="lrSlider" min="0.05" max="1" step="0.05" value="0.4">
+            <span class="lr-val" id="lrVal">0.40</span>
+          </div>
+          <div class="stats">
+            <div class="stat">
+              <div class="label">Step</div>
+              <div class="value" id="stepCount">0</div>
+            </div>
+            <div class="stat">
+              <div class="label">Loss (no pos)</div>
+              <div class="value cool" id="lossValA">—</div>
+            </div>
+            <div class="stat">
+              <div class="label">Loss (w/ pos)</div>
+              <div class="value warm" id="lossValB">—</div>
+            </div>
+          </div>
+          <canvas class="lossChart" id="lossChart" width="268" height="40"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Order test</h2>
+
+      <div class="pairpicker" id="pairPicker"></div>
+
+      <div class="toggle-row">
+        <label class="switch">
+          <input type="checkbox" id="posToggle">
+          <span class="slider"></span>
+        </label>
+        <div>
+          <div class="toggle-label" id="toggleLabel">Position-aware architecture: OFF (Lesson 1's mean pooling)</div>
+          <div class="toggle-sub">Flip this to switch from pooling to fixed-slot concatenation.</div>
+        </div>
+      </div>
+
+      <div class="compare-grid">
+        <div class="seq-card">
+          <div class="seq-title" id="seqATitle">—</div>
+          <div class="seq-sub" id="seqASub">representation</div>
+          <div class="fingerprint" id="fingerprintA"></div>
+          <div class="predlist" id="predA"></div>
+        </div>
+        <div class="seq-card">
+          <div class="seq-title" id="seqBTitle">—</div>
+          <div class="seq-sub" id="seqBSub">representation</div>
+          <div class="fingerprint" id="fingerprintB"></div>
+          <div class="predlist" id="predB"></div>
+        </div>
+      </div>
+
+      <div class="identical-banner" id="identBanner">—</div>
+
+      <div class="posgrid-wrap" id="posGridWrap" style="display:none;">
+        <h2 style="margin-top:18px;">Position embedding table (4 slots × 16 dims)</h2>
+        <div class="posgrid" id="posGrid"></div>
+      </div>
+
+      <p class="caption">
+        Pick a pair above, then flip the switch. With the architecture <b>OFF</b>
+        (Lesson 1's pooling), the two representations — and the model's predictions —
+        are <i>identical</i> for every pair here, down to floating-point noise, because
+        averaging can't see order no matter how long you train. With it <b>ON</b>, the
+        fingerprints are always different once concatenation preserves each slot. For
+        the real grammatical pair (<b>hunter likes / dog likes</b>), the predictions
+        become meaningfully different too — correctly landing on <b>dog</b> and
+        <b>hunter</b> respectively, matching what's actually true in the corpus.
+        For the reversed nonsense pair (<b>likes hunter</b>), the representation is
+        still different, but the prediction isn't "correct" in any meaningful sense —
+        the model was never trained on that word order, so it's just extrapolating,
+        the same way it would for any other input it's never seen.
+      </p>
+    </div>
+  </div>
+
+  <div class="lesson-nav">
+    <a href="lesson1.html" class="lesson-nav-link back">&larr; Lesson 1: Embeddings</a>
+    <a href="../index.html" class="lesson-nav-link">All projects</a>
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------------
+// Stage 1 data, exactly as generated by the corpus pipeline.
+// ---------------------------------------------------------------------
+const VOCAB = ["<PAD>", ".", "bear", "berry", "deer", "dog", "drinks", "eats", "fish", "hunter", "likes", "meat", "water", "wolf"];
+const TOK2ID = Object.fromEntries(VOCAB.map((w, i) => [w, i]));
+const V = VOCAB.length;
+const DIM = 16;
+
+const SENTENCES = [
+  "dog eats meat .", "bear eats fish .", "deer eats berry .", "bear eats meat .",
+  "deer drinks water .", "dog likes hunter .", "wolf drinks water .", "hunter eats meat .",
+  "hunter drinks water .", "wolf eats meat .", "bear drinks water .", "hunter likes dog .", "dog drinks water ."
+];
+
+const EXAMPLES = [];
+for (const s of SENTENCES) {
+  const ids = s.split(" ").map(w => TOK2ID[w]);
+  for (let t = 1; t < ids.length; t++) EXAMPLES.push([ids.slice(0, t), ids[t]]);
+}
+
+const PAIR_PRESETS = [
+  { label: "hunter likes / likes hunter", a: ["hunter", "likes"], b: ["likes", "hunter"] },
+  { label: "hunter likes / dog likes", a: ["hunter", "likes"], b: ["dog", "likes"] },
+  { label: "dog eats / eats dog", a: ["dog", "eats"], b: ["eats", "dog"] },
+];
+let activePair = 0;
+const PAD_ID = TOK2ID["<PAD>"];
+const MAXCTX = 3; // longest prefix in this stage's data (sentences are 4 tokens)
+
+// ---------------------------------------------------------------------
+// Two parallel models trained side by side on identical data:
+//   modelA: Lesson 1's architecture exactly -- mean-pool token embeddings,
+//           no position information at all.
+//   modelB: token+position vectors CONCATENATED into fixed slots (padded
+//           with <PAD> up to MAXCTX) instead of pooled -- see the header
+//           for why pooling-with-position doesn't work.
+// ---------------------------------------------------------------------
+function randMat(rows, cols, scale) {
+  return Array.from({ length: rows }, () => Array.from({ length: cols }, () => (Math.random() * 2 - 1) * scale));
+}
+
+function makeModel(concatMode) {
+  return {
+    concatMode,
+    E: randMat(V, DIM, 0.6),
+    P: concatMode ? randMat(MAXCTX, DIM, 0.6) : null,
+    W: concatMode ? randMat(MAXCTX * DIM, V, 0.3) : randMat(DIM, V, 0.4),
+    b: new Array(V).fill(0),
+  };
+}
+
+let modelA, modelB, stepCount, lossHistoryA, lossHistoryB;
+
+function initModels() {
+  modelA = makeModel(false);
+  modelB = makeModel(true);
+  stepCount = 0;
+  lossHistoryA = [];
+  lossHistoryB = [];
+}
+
+function softmax(logits) {
+  const m = Math.max(...logits);
+  const exps = logits.map(x => Math.exp(x - m));
+  const sum = exps.reduce((a, c) => a + c, 0);
+  return exps.map(x => x / sum);
+}
+
+// Returns the model's internal representation of a context: a pooled
+// 16-d vector for modelA, or a flat (MAXCTX*DIM)-d concatenated vector
+// for modelB. Different lengths on purpose -- see caption in the UI.
+function representationFor(model, ctxIds) {
+  if (!model.concatMode) {
+    const m = ctxIds.length;
+    const ctx = new Array(DIM).fill(0);
+    for (const cid of ctxIds) for (let d = 0; d < DIM; d++) ctx[d] += model.E[cid][d] / m;
+    return ctx;
+  }
+  const flat = new Array(MAXCTX * DIM).fill(0);
+  for (let p = 0; p < MAXCTX; p++) {
+    const tid = p < ctxIds.length ? ctxIds[p] : PAD_ID;
+    for (let d = 0; d < DIM; d++) flat[p * DIM + d] = model.E[tid][d] + model.P[p][d];
+  }
+  return flat;
+}
+
+function trainStepFor(model, lr, lossHistory) {
+  const dE = Array.from({ length: V }, () => new Array(DIM).fill(0));
+  const dP = model.concatMode ? Array.from({ length: MAXCTX }, () => new Array(DIM).fill(0)) : null;
+  const repLen = model.concatMode ? MAXCTX * DIM : DIM;
+  const dW = Array.from({ length: repLen }, () => new Array(V).fill(0));
+  const db = new Array(V).fill(0);
+  let totalLoss = 0;
+
+  for (const [ctxIds, j] of EXAMPLES) {
+    const rep = representationFor(model, ctxIds);
+    const logits = new Array(V).fill(0);
+    for (let k = 0; k < V; k++) {
+      let s = model.b[k];
+      for (let f = 0; f < repLen; f++) s += rep[f] * model.W[f][k];
+      logits[k] = s;
+    }
+    const probs = softmax(logits);
+    totalLoss += -Math.log(Math.max(probs[j], 1e-9));
+
+    const dlogits = probs.slice();
+    dlogits[j] -= 1;
+    for (let k = 0; k < V; k++) db[k] += dlogits[k];
+
+    const drep = new Array(repLen).fill(0);
+    for (let f = 0; f < repLen; f++) {
+      let s = 0;
+      for (let k = 0; k < V; k++) {
+        dW[f][k] += rep[f] * dlogits[k];
+        s += model.W[f][k] * dlogits[k];
+      }
+      drep[f] = s;
+    }
+
+    if (!model.concatMode) {
+      const m = ctxIds.length;
+      for (const cid of ctxIds) for (let d = 0; d < DIM; d++) dE[cid][d] += drep[d] / m;
+    } else {
+      for (let p = 0; p < MAXCTX; p++) {
+        const tid = p < ctxIds.length ? ctxIds[p] : PAD_ID;
+        for (let d = 0; d < DIM; d++) {
+          dE[tid][d] += drep[p * DIM + d];
+          dP[p][d] += drep[p * DIM + d];
+        }
+      }
+    }
+  }
+
+  const n = EXAMPLES.length;
+  for (let i = 0; i < V; i++) for (let d = 0; d < DIM; d++) model.E[i][d] -= lr * (dE[i][d] / n);
+  if (model.concatMode) for (let p = 0; p < MAXCTX; p++) for (let d = 0; d < DIM; d++) model.P[p][d] -= lr * (dP[p][d] / n);
+  for (let f = 0; f < repLen; f++) for (let k = 0; k < V; k++) model.W[f][k] -= lr * (dW[f][k] / n);
+  for (let k = 0; k < V; k++) model.b[k] -= lr * (db[k] / n);
+
+  const avgLoss = totalLoss / n;
+  lossHistory.push(avgLoss);
+  return avgLoss;
+}
+
+function predictFor(model, tokens) {
+  const ids = tokens.map(w => TOK2ID[w]);
+  const rep = representationFor(model, ids);
+  const repLen = rep.length;
+  const logits = new Array(V).fill(0);
+  for (let k = 0; k < V; k++) {
+    let s = model.b[k];
+    for (let f = 0; f < repLen; f++) s += rep[f] * model.W[f][k];
+    logits[k] = s;
+  }
+  const probs = softmax(logits);
+  return { rep, ranked: VOCAB.map((w, i) => [w, probs[i]]).sort((a, b) => b[1] - a[1]).slice(0, 3) };
+}
+
+// ---------------------------------------------------------------------
+// Rendering
+// ---------------------------------------------------------------------
+function lerp(a, b, t) { return a + (b - a) * t; }
+function hexToRgb(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function colorForVal(t, maxAbs) {
+  const cool = hexToRgb("#4c8ca6"), neutral = hexToRgb("#363b44"), warm = hexToRgb("#e3a857");
+  const norm = maxAbs > 0 ? Math.max(-1, Math.min(1, t / maxAbs)) : 0;
+  let c;
+  if (norm <= 0) { const f = norm + 1; c = cool.map((v, i) => lerp(v, neutral[i], f)); }
+  else { c = neutral.map((v, i) => lerp(v, warm[i], norm)); }
+  return `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
+}
+
+function buildTokTable() {
+  document.getElementById("tokTable").innerHTML =
+    VOCAB.map(w => `<tr><td>${w}</td><td class="id">${TOK2ID[w]}</td></tr>`).join("");
+}
+function buildSentList() {
+  document.getElementById("sentList").innerHTML =
+    SENTENCES.map(s => `<div>${s}</div>`).join("");
+}
+function buildPairPicker() {
+  const el = document.getElementById("pairPicker");
+  el.innerHTML = "";
+  PAIR_PRESETS.forEach((p, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = p.label;
+    btn.className = i === activePair ? "active" : "";
+    btn.addEventListener("click", () => { activePair = i; renderCompare(); buildPairPicker(); });
+    el.appendChild(btn);
+  });
+}
+
+function renderFingerprint(elId, vec) {
+  const el = document.getElementById(elId);
+  el.innerHTML = "";
+  const maxAbs = Math.max(0.05, ...vec.map(Math.abs));
+  for (const v of vec) {
+    const bar = document.createElement("div");
+    bar.className = "fbar";
+    const h = Math.max(4, Math.round((Math.abs(v) / maxAbs) * 40));
+    bar.style.height = h + "px";
+    bar.style.backgroundColor = colorForVal(v, maxAbs);
+    el.appendChild(bar);
+  }
+}
+
+function renderPreds(elId, ranked) {
+  document.getElementById(elId).innerHTML = ranked.map(([w, p]) =>
+    `<div class="predrow"><span class="w">${w}</span><span class="p">${(p*100).toFixed(1)}%</span></div>`
+  ).join("");
+}
+
+function renderCompare() {
+  const useFix = document.getElementById("posToggle").checked;
+  const model = useFix ? modelB : modelA;
+  const pair = PAIR_PRESETS[activePair];
+
+  document.getElementById("seqATitle").textContent = pair.a.join(" ");
+  document.getElementById("seqBTitle").textContent = pair.b.join(" ");
+  const subText = useFix ? "flat concatenated representation (48 dims)" : "pooled context vector (16 dims)";
+  document.getElementById("seqASub").textContent = subText;
+  document.getElementById("seqBSub").textContent = subText;
+
+  const resA = predictFor(model, pair.a);
+  const resB = predictFor(model, pair.b);
+
+  renderFingerprint("fingerprintA", resA.rep);
+  renderFingerprint("fingerprintB", resB.rep);
+  renderPreds("predA", resA.ranked);
+  renderPreds("predB", resB.ranked);
+
+  let maxDiff = 0;
+  for (let i = 0; i < resA.rep.length; i++) maxDiff = Math.max(maxDiff, Math.abs(resA.rep[i] - resB.rep[i]));
+  const identical = maxDiff < 1e-9;
+  const banner = document.getElementById("identBanner");
+  if (identical) {
+    banner.className = "identical-banner same";
+    banner.textContent = "Representations are IDENTICAL (to floating-point precision) — the model literally cannot tell these two sequences apart.";
+  } else {
+    banner.className = "identical-banner diff";
+    banner.textContent = "Representations are DIFFERENT (max difference: " + maxDiff.toFixed(3) + ") — the model can now tell these sequences apart.";
+  }
+
+  document.getElementById("archModeLabel").textContent = useFix ? "concatenate into fixed slots (fixed)" : "mean pool (broken)";
+  document.getElementById("archCtxBox").innerHTML = useFix
+    ? '<div class="arch-title">flat context</div><div class="arch-sub">3 slots × 16-d, concatenated</div>'
+    : '<div class="arch-title">context vector</div><div class="arch-sub">16-d, order erased</div>';
+
+  document.getElementById("posGridWrap").style.display = useFix ? "block" : "none";
+  if (useFix) renderPosGrid(model.P);
+}
+
+function renderPosGrid(P) {
+  const grid = document.getElementById("posGrid");
+  grid.innerHTML = "";
+  const maxAbs = Math.max(0.05, ...P.flat().map(Math.abs));
+  for (let p = 0; p < MAXCTX; p++) {
+    const label = document.createElement("div");
+    label.className = "plabel";
+    label.textContent = "pos " + p;
+    grid.appendChild(label);
+    for (let d = 0; d < DIM; d++) {
+      const cell = document.createElement("div");
+      cell.className = "pcell";
+      cell.style.backgroundColor = colorForVal(P[p][d], maxAbs);
+      cell.title = `pos ${p}, dim ${d}: ${P[p][d].toFixed(3)}`;
+      grid.appendChild(cell);
+    }
+  }
+}
+
+function drawLossChart() {
+  const canvas = document.getElementById("lossChart");
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  if (lossHistoryA.length < 2) return;
+  function line(hist, color) {
+    const maxL = Math.max(...hist), minL = Math.min(...hist);
+    const range = Math.max(maxL - minL, 0.01);
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    hist.forEach((v, i) => {
+      const x = (i / (hist.length - 1)) * (w - 4) + 2;
+      const y = h - 4 - ((v - minL) / range) * (h - 8);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  }
+  line(lossHistoryA, "#4c8ca6");
+  line(lossHistoryB, "#e3a857");
+}
+
+function updateStats(lossA, lossB) {
+  document.getElementById("stepCount").textContent = stepCount;
+  document.getElementById("lossValA").textContent = lossA === null ? "—" : lossA.toFixed(3);
+  document.getElementById("lossValB").textContent = lossB === null ? "—" : lossB.toFixed(3);
+  drawLossChart();
+}
+
+// ---------------------------------------------------------------------
+// Controls
+// ---------------------------------------------------------------------
+let lr = 0.4;
+let training = false;
+
+function doSteps(n) {
+  if (training) return;
+  training = true;
+  setButtonsDisabled(true);
+  let done = 0;
+  function tick() {
+    const lossA = trainStepFor(modelA, lr, lossHistoryA);
+    const lossB = trainStepFor(modelB, lr, lossHistoryB);
+    stepCount++;
+    updateStats(lossA, lossB);
+    renderCompare();
+    done++;
+    if (done < n) setTimeout(tick, 90);
+    else { training = false; setButtonsDisabled(false); }
+  }
+  tick();
+}
+
+function setButtonsDisabled(v) {
+  document.getElementById("btnStep").disabled = v;
+  document.getElementById("btnStep10").disabled = v;
+  document.getElementById("btnReset").disabled = v;
+}
+
+document.getElementById("btnStep").addEventListener("click", () => doSteps(1));
+document.getElementById("btnStep10").addEventListener("click", () => doSteps(10));
+document.getElementById("btnReset").addEventListener("click", () => {
+  initModels();
+  updateStats(null, null);
+  renderCompare();
+});
+document.getElementById("lrSlider").addEventListener("input", (e) => {
+  lr = parseFloat(e.target.value);
+  document.getElementById("lrVal").textContent = lr.toFixed(2);
+});
+document.getElementById("posToggle").addEventListener("change", (e) => {
+  document.getElementById("toggleLabel").textContent = "Position-aware architecture: " + (e.target.checked ? "ON (concatenated slots)" : "OFF (Lesson 1's mean pooling)");
+  renderCompare();
+});
+document.getElementById("curiousToggle").addEventListener("click", () => {
+  document.getElementById("curiousBox").classList.toggle("show");
+});
+
+// ---------------------------------------------------------------------
+// Boot
+// ---------------------------------------------------------------------
+buildTokTable();
+buildSentList();
+buildPairPicker();
+initModels();
+updateStats(null, null);
+renderCompare();
+</script>
+</body>
+</html>

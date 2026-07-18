@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Micro-Transformer — How LLMs Actually Work</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #14171c;
+    --panel: #1c2027;
+    --panel-2: #20242c;
+    --border: #2c313a;
+    --text: #e9e6df;
+    --muted: #8b919c;
+    --warm: #e3a857;
+    --warm-dim: #8a6a3f;
+    --cool: #4c8ca6;
+    --cool-dim: #375f6e;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 28px;
+  }
+
+  .wrap { max-width: 900px; margin: 0 auto; }
+
+  .backlink {
+    display: inline-block;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 11.5px;
+    margin-bottom: 14px;
+    transition: color 0.15s;
+  }
+  .backlink:hover { color: var(--warm); }
+
+  .eyebrow {
+    color: var(--warm);
+    letter-spacing: 0.14em;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  h1 {
+    font-size: 30px;
+    font-weight: 700;
+    margin: 8px 0 14px;
+    letter-spacing: -0.01em;
+  }
+  .lede { color: var(--muted); max-width: 700px; font-size: 13.5px; margin-bottom: 10px; }
+  .lede b { color: var(--text); font-weight: 600; }
+
+  .facts-row {
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+    margin: 22px 0 30px;
+    padding: 14px 16px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .fact { font-size: 11.5px; color: var(--muted); }
+  .fact b { display: block; font-size: 16px; color: var(--warm); font-weight: 700; margin-bottom: 2px; }
+
+  .lessons { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+
+  .lesson-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  a.lesson-card:hover { border-color: var(--warm-dim); background: var(--panel-2); }
+  .lesson-card.soon { opacity: 0.55; cursor: default; }
+
+  .lesson-num {
+    flex-shrink: 0;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: var(--muted);
+  }
+  .lesson-card:not(.soon) .lesson-num { border-color: var(--warm); color: var(--warm); }
+
+  .lesson-body { flex: 1; }
+  .lesson-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .lesson-desc { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+  .lesson-status {
+    flex-shrink: 0;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 4px 9px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .lesson-card:not(.soon) .lesson-status { border-color: var(--cool-dim); color: var(--cool); }
+
+  .lesson-arrow { flex-shrink: 0; font-size: 16px; color: var(--warm); opacity: 0; transition: opacity 0.15s, transform 0.15s; }
+  .lesson-card:not(.soon):hover .lesson-arrow { opacity: 1; transform: translateX(3px); }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    font-size: 10.5px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--warm); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="../index.html" class="backlink">&larr; pauljchang.github.io</a>
+  <div class="eyebrow">Interactive Course &middot; 6 Lessons</div>
+  <h1>Micro-Transformer</h1>
+  <p class="lede">
+    How large language models actually work, taught by building a tiny one from
+    scratch — in the browser, live, no installs, no PyTorch. Every lesson trains a
+    real neural network (hand-rolled forward and backward passes, no libraries) on
+    a made-up "caveperson" language small enough to read the entire training set
+    in one glance.
+  </p>
+  <p class="lede">
+    The same math that runs inside billion-parameter models — embeddings,
+    position, attention, gradient descent, autoregressive generation — shows up
+    here at a scale you can actually hold in your head, watch train step by step,
+    and poke at until it breaks.
+  </p>
+
+  <div class="facts-row">
+    <div class="fact"><b>42</b>words in the whole language</div>
+    <div class="fact"><b>0</b>external ML libraries used</div>
+    <div class="fact"><b>6</b>lessons, cumulative corpus</div>
+    <div class="fact"><b>&lt;1s</b>to train any model here</div>
+  </div>
+
+  <div class="lessons">
+    <a class="lesson-card" href="lesson1.html">
+      <div class="lesson-num">1</div>
+      <div class="lesson-body">
+        <div class="lesson-title">Embeddings</div>
+        <div class="lesson-desc">Watch random word vectors reorganize into meaningful clusters, live, as a tiny model trains on nine sentences.</div>
+      </div>
+      <div class="lesson-status">Available</div>
+      <div class="lesson-arrow">&rarr;</div>
+    </a>
+
+    <a class="lesson-card" href="lesson2.html">
+      <div class="lesson-num">2</div>
+      <div class="lesson-body">
+        <div class="lesson-title">Position</div>
+        <div class="lesson-desc">Prove that averaging embeddings is mathematically blind to word order — then find the fix that actually works (and the obvious one that doesn't).</div>
+      </div>
+      <div class="lesson-status">Available</div>
+      <div class="lesson-arrow">&rarr;</div>
+    </a>
+
+    <div class="lesson-card soon">
+      <div class="lesson-num">3</div>
+      <div class="lesson-body">
+        <div class="lesson-title">Attention &amp; Routing</div>
+        <div class="lesson-desc">Give the model a way to decide which earlier words actually matter, instead of averaging or concatenating them all equally.</div>
+      </div>
+      <div class="lesson-status">Coming soon</div>
+    </div>
+
+    <div class="lesson-card soon">
+      <div class="lesson-num">4</div>
+      <div class="lesson-body">
+        <div class="lesson-title">Training &amp; Generalization</div>
+        <div class="lesson-desc">Split facts into training and held-out sets to see whether the model actually learned a pattern, or just memorized sentences.</div>
+      </div>
+      <div class="lesson-status">Coming soon</div>
+    </div>
+
+    <div class="lesson-card soon">
+      <div class="lesson-num">5</div>
+      <div class="lesson-body">
+        <div class="lesson-title">Chatbot</div>
+        <div class="lesson-desc">Turn next-word prediction into a live, autoregressive conversation — one sampled token at a time.</div>
+      </div>
+      <div class="lesson-status">Coming soon</div>
+    </div>
+
+    <div class="lesson-card soon">
+      <div class="lesson-num">6</div>
+      <div class="lesson-body">
+        <div class="lesson-title">Judgment vs. Retrieval</div>
+        <div class="lesson-desc">Test whether the model can judge true/false claims it was never directly trained on — and see exactly where a model this small runs out of road.</div>
+      </div>
+      <div class="lesson-status">Coming soon</div>
+    </div>
+  </div>
+
+  <footer>
+    <span>micro-transformer &middot; part of pauljchang.github.io</span>
+    <span><a href="https://github.com/pauljchang" target="_blank">github.com/pauljchang</a></span>
+  </footer>
+</div>
+</body>
+</html>
