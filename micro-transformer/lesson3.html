@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lesson 3 — Attention &amp; Routing</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #14171c;
+    --panel: #1c2027;
+    --panel-2: #20242c;
+    --border: #2c313a;
+    --text: #e9e6df;
+    --muted: #8b919c;
+    --warm: #e3a857;
+    --warm-dim: #8a6a3f;
+    --cool: #4c8ca6;
+    --cool-dim: #375f6e;
+    --neutral: #363b44;
+    --bad: #c96a5a;
+    --good: #7fae6e;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 28px;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  .backlink { display: inline-block; color: var(--muted); text-decoration: none; font-size: 11.5px; margin-bottom: 14px; transition: color 0.15s; }
+  .backlink:hover { color: var(--warm); }
+
+  header { margin-bottom: 22px; }
+  .eyebrow { color: var(--warm); letter-spacing: 0.14em; font-size: 11px; text-transform: uppercase; font-weight: 600; }
+  h1 { font-size: 25px; font-weight: 700; margin: 6px 0 8px; letter-spacing: -0.01em; }
+  .lede { color: var(--muted); max-width: 780px; font-size: 13.5px; }
+  .lede b { color: var(--text); font-weight: 600; }
+  .lede + .lede { margin-top: 10px; }
+
+  .roadmap { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 16px 0 18px; padding: 10px 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; }
+  .rm-item { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+  .rm-item.active { color: var(--warm); font-weight: 600; }
+  .rm-item.done { color: var(--cool); }
+  .rm-n { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--border); font-size: 9.5px; }
+  .rm-item.active .rm-n { border-color: var(--warm); color: var(--warm); }
+  .rm-item.done .rm-n { border-color: var(--cool); color: var(--cool); }
+  .rm-arrow { color: var(--border); font-size: 11px; }
+
+  .arch { display: flex; align-items: stretch; flex-wrap: wrap; gap: 0; margin: 18px 0 8px; padding: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; }
+  .arch-box { background: var(--panel-2); border: 1px solid var(--border); border-radius: 5px; padding: 10px 12px; min-width: 96px; text-align: center; }
+  .arch-box.new { border-color: var(--warm-dim); background: #241f16; }
+  .arch-title { font-size: 12px; font-weight: 600; color: var(--text); }
+  .arch-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+  .arch-box.new .arch-sub { color: var(--warm); }
+  .arch-arrow { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 8px; font-size: 15px; color: var(--warm-dim); min-width: 76px; }
+  .arch-arrow span { font-size: 9.5px; color: var(--muted); display: block; text-align: center; margin-top: 2px; }
+
+  .curious-toggle { display: inline-block; margin-left: 6px; color: var(--cool); cursor: pointer; text-decoration: underline; text-decoration-color: var(--cool-dim); }
+  .curious-toggle:hover { color: var(--text); }
+  .curious-box { display: none; margin-top: 8px; padding: 10px 12px; border-left: 2px solid var(--cool-dim); background: var(--panel); font-size: 12px; color: var(--muted); }
+  .curious-box.show { display: block; }
+
+  .lesson-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+  .lesson-nav-link { font-size: 12.5px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+  .lesson-nav-link:hover { color: var(--warm); }
+  .lesson-nav-link.back { color: var(--warm); font-weight: 600; }
+  .caption { font-size: 12px; color: var(--muted); margin-top: 16px; max-width: 780px; }
+  .caption b { color: var(--text); }
+
+  .layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; margin-top: 24px; align-items: start; }
+  @media (max-width: 880px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
+  .panel + .panel { margin-top: 16px; }
+  .panel h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin: 0 0 12px; font-weight: 600; }
+
+  table.tok { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  table.tok td { padding: 2px 4px; border-bottom: 1px solid var(--border); }
+  table.tok td.id { color: var(--warm); text-align: right; width: 22px; }
+
+  .sentlist { font-size: 11.5px; color: var(--muted); max-height: 170px; overflow-y: auto; }
+  .sentlist div { padding: 3px 0; border-bottom: 1px solid var(--border); }
+  .sentlist div:last-child { border-bottom: none; }
+
+  .btnrow { display: flex; gap: 8px; }
+  button { font-family: inherit; background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 9px 12px; font-size: 12.5px; font-weight: 500; cursor: pointer; flex: 1; transition: border-color 0.15s, color 0.15s; }
+  button:hover { border-color: var(--warm-dim); color: var(--warm); }
+  button:active { transform: translateY(1px); }
+  button.primary { border-color: var(--warm-dim); color: var(--warm); }
+  button:disabled { opacity: 0.4; cursor: default; }
+  button:disabled:hover { border-color: var(--border); color: var(--text); }
+
+  .controls { display: flex; flex-direction: column; gap: 10px; }
+  .lr-row { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+  .lr-row input[type=range] { flex: 1; accent-color: var(--warm); }
+  .lr-val { color: var(--warm); width: 34px; text-align: right; }
+
+  .stats { display: flex; gap: 14px; margin-top: 4px; }
+  .stat { flex: 1; }
+  .stat .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat .value { font-size: 18px; font-weight: 700; color: var(--text); margin-top: 2px; }
+  .stat .value.warm { color: var(--warm); }
+  canvas#lossChart { width: 100%; height: 46px; display: block; margin-top: 8px; }
+
+  .presetpicker { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .presetpicker button { flex: none; }
+  .presetpicker button.active { border-color: var(--warm); color: var(--warm); background: #241f16; }
+
+  .sentence-view {
+    display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap;
+    padding: 22px 18px 14px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 18px;
+  }
+  .tokchip { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .tokchip .word {
+    padding: 7px 12px; border-radius: 5px; font-size: 13px; font-weight: 700;
+    border: 1px solid var(--border); background: var(--neutral); color: var(--text);
+    transition: background-color 0.35s ease, border-color 0.35s ease, transform 0.2s ease;
+  }
+  .tokchip .weight { font-size: 10px; color: var(--muted); font-weight: 600; }
+  .tokchip.querying .word { border-color: var(--cool); box-shadow: 0 0 0 1px var(--cool); }
+  .tokchip.querying .weight { color: var(--cool); }
+  .predict-arrow { font-size: 18px; color: var(--warm-dim); padding: 0 4px 8px; }
+
+  .predlist { font-size: 12.5px; max-width: 260px; }
+  .predrow { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .predrow:last-child { border-bottom: none; }
+  .predrow .w { color: var(--text); font-weight: 600; }
+  .predrow .p { color: var(--warm); }
+
+  .compare-cols { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+  @media (max-width: 780px) { .compare-cols { grid-template-columns: 1fr; } }
+
+  .qkv-note { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a href="../index.html" class="backlink">&larr; pauljchang.github.io</a>
+    <div class="eyebrow">Micro-Transformer &middot; Lesson 3 of 6</div>
+
+    <div class="roadmap">
+      <div class="rm-item done"><span class="rm-n">1</span>Embeddings</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item done"><span class="rm-n">2</span>Position</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item active"><span class="rm-n">3</span>Attention &amp; routing</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item"><span class="rm-n">4</span>Training &amp; generalization</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item"><span class="rm-n">5</span>Chatbot</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item"><span class="rm-n">6</span>Judgment vs. retrieval</div>
+    </div>
+
+    <h1>How does the model know what kind of word comes next?</h1>
+    <p class="lede">
+      Lesson 2's fix worked, but it was rigid: every position had its own fixed
+      block of weights, permanently bound to one grammatical role (slot 0 always
+      subject-shaped, slot 1 always verb-shaped). It also needed a hard maximum
+      sentence length decided in advance. Stage 2's sentences no longer all have
+      the same shape — <b>"hunter eats meat ."</b> wants an object next,
+      <b>"hunter sleeps in cave ."</b> wants a location, <b>"fire is hot ."</b>
+      wants an adjective. A fixed per-slot rule can't route between these; it
+      would need to already know which sentence shape it's in before seeing it.
+    </p>
+    <p class="lede">
+      <b>Attention</b> replaces "fixed weights per position" with "weights computed
+      from content, every time." Instead of every word contributing a fixed
+      amount, the model asks a question — <i>a query</i> — and each earlier word
+      offers an answer to that question — <i>a key</i> — and how well they match
+      determines how much that word counts. The word actually deciding what comes
+      next is usually the <b>verb</b>, not the subject, and nothing has to tell
+      the model that in advance — it has to discover it, the same way it
+      discovered embedding clusters in Lesson 1.
+    </p>
+
+    <div class="arch">
+      <div class="arch-box"><div class="arch-title">token + position</div><div class="arch-sub">16-d, per word</div></div>
+      <div class="arch-arrow">→<span>3 learned projections</span></div>
+      <div class="arch-box new"><div class="arch-title">Query, Key, Value</div><div class="arch-sub">NEW &middot; 3 × (16×16) weights</div></div>
+      <div class="arch-arrow">→<span>Q · K, scaled</span></div>
+      <div class="arch-box new"><div class="arch-title">attention scores</div><div class="arch-sub">NEW &middot; one per earlier word</div></div>
+      <div class="arch-arrow">→<span>softmax</span></div>
+      <div class="arch-box new"><div class="arch-title">attention weights</div><div class="arch-sub">NEW &middot; sum to 1</div></div>
+      <div class="arch-arrow">→<span>weighted sum of V</span></div>
+      <div class="arch-box"><div class="arch-title">context</div></div>
+      <div class="arch-arrow">→<span>linear + softmax</span></div>
+      <div class="arch-box highlight"><div class="arch-title">prediction</div></div>
+    </div>
+    <p class="caption">
+      The same <b>Wq / Wk / Wv</b> weights are applied to <i>every</i> position —
+      there's no separate weight block per slot like Lesson 2. A sentence of
+      length 2 and a sentence of length 4 use the exact same projections; only
+      the number of keys to compare against changes. That's what "no fixed
+      maximum length" actually buys you.
+      <span class="curious-toggle" id="curiousToggle">Is this the whole story on real attention? ▾</span>
+      <span class="curious-box" id="curiousBox">
+        Not quite, but it's the real mechanism at the smallest honest scale. Two
+        things production transformers add: <b>multiple heads</b> (several
+        independent Q/K/V projections running in parallel, so the model can track
+        several different kinds of relationships at once — not just "which word is
+        the verb," but tense, gender, long-range references, and more), and
+        <b>stacked layers</b> (the output of one attention layer becomes the input
+        to another, letting relationships compose). This lesson uses one head and
+        one layer — enough to see routing happen, not enough to see everything
+        attention is capable of.
+      </span>
+    </p>
+  </header>
+
+  <div class="layout">
+    <div>
+      <div class="panel">
+        <h2>Tokenizer (28 words)</h2>
+        <table class="tok" id="tokTable"></table>
+      </div>
+      <div class="panel">
+        <h2>Training sentences (28)</h2>
+        <div class="sentlist" id="sentList"></div>
+      </div>
+      <div class="panel">
+        <h2>Train</h2>
+        <div class="controls">
+          <div class="btnrow">
+            <button id="btnStep">Step +1</button>
+            <button id="btnStep10" class="primary">Train 10 steps</button>
+          </div>
+          <div class="btnrow">
+            <button id="btnReset">Re-randomize weights</button>
+          </div>
+          <div class="lr-row">
+            <span>learning rate</span>
+            <input type="range" id="lrSlider" min="0.05" max="0.6" step="0.05" value="0.3">
+            <span class="lr-val" id="lrVal">0.30</span>
+          </div>
+          <div class="stats">
+            <div class="stat">
+              <div class="label">Step</div>
+              <div class="value" id="stepCount">0</div>
+            </div>
+            <div class="stat">
+              <div class="label">Avg loss</div>
+              <div class="value warm" id="lossVal">—</div>
+            </div>
+          </div>
+          <canvas id="lossChart" width="268" height="46"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Where is the model looking?</h2>
+      <div class="presetpicker" id="presetPicker"></div>
+
+      <div class="compare-cols">
+        <div>
+          <div class="sentence-view" id="sentenceView"></div>
+          <p class="qkv-note" id="qkvNote">The blue-outlined word is the one asking "what comes next?" — its query gets compared against every word's key, including its own.</p>
+        </div>
+        <div>
+          <h2 style="margin-top:0;">Top predictions</h2>
+          <div class="predlist" id="predList"></div>
+        </div>
+      </div>
+
+      <p class="caption" id="routingCaption"></p>
+    </div>
+  </div>
+
+  <div class="lesson-nav">
+    <a href="lesson2.html" class="lesson-nav-link back">&larr; Lesson 2: Position</a>
+    <a href="../index.html" class="lesson-nav-link">All projects</a>
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------------
+// Stage 2 data, exactly as generated by the corpus pipeline.
+// ---------------------------------------------------------------------
+const VOCAB = ["<PAD>",".","?","bear","berry","cave","cold","deer","dog","drinks","eats","fire","fish","forest","has","hot","hunter","in","is","likes","meat","river","scary","sleeps","spear","water","what","wolf"];
+const TOK2ID = Object.fromEntries(VOCAB.map((w, i) => [w, i]));
+const V = VOCAB.length;
+const DIM = 16;
+const MAXCTX = 4; // longest prefix: locative sentences ("hunter sleeps in cave .") have 4 words before the period
+
+const SENTENCES = [
+  "bear drinks water .", "dog likes hunter .", "hunter has spear .", "wolf is scary .",
+  "dog drinks water .", "water is cold .", "bear sleeps in forest .", "wolf eats meat .",
+  "wolf sleeps in forest .", "dog eats meat .", "deer eats berry .", "bear eats meat .",
+  "bear sleeps in cave .", "hunter has fire .", "hunter sleeps in cave .", "bear eats fish .",
+  "hunter eats meat .", "river is cold .", "wolf drinks water .", "dog sleeps in cave .",
+  "fire is scary .", "deer sleeps in forest .", "river has water .", "hunter has dog .",
+  "deer drinks water .", "hunter likes dog .", "fire is hot .", "hunter drinks water ."
+];
+
+const EXAMPLES = [];
+for (const s of SENTENCES) {
+  const ids = s.split(" ").map(w => TOK2ID[w]);
+  for (let t = 1; t < ids.length; t++) EXAMPLES.push([ids.slice(0, t), ids[t]]);
+}
+
+const PRESETS = [
+  { label: "hunter eats ...", tokens: ["hunter", "eats"] },
+  { label: "hunter sleeps in ...", tokens: ["hunter", "sleeps", "in"] },
+  { label: "fire is ...", tokens: ["fire", "is"] },
+  { label: "hunter has ...", tokens: ["hunter", "has"] },
+  { label: "wolf drinks ...", tokens: ["wolf", "drinks"] },
+  { label: "dog likes ...", tokens: ["dog", "likes"] },
+];
+let activePreset = 0;
+
+// ---------------------------------------------------------------------
+// Single-head self-attention, hand-rolled forward + backward pass.
+// Shared Wq/Wk/Wv/Wo weights across every position -- no per-slot blocks.
+// ---------------------------------------------------------------------
+function randMat(rows, cols, scale) {
+  return Array.from({ length: rows }, () => Array.from({ length: cols }, () => (Math.random() * 2 - 1) * scale));
+}
+function zerosMat(rows, cols) { return Array.from({ length: rows }, () => new Array(cols).fill(0)); }
+function matvec(M, v) { return M.map(row => row.reduce((s, x, i) => s + x * v[i], 0)); }
+function softmax(l) {
+  const m = Math.max(...l);
+  const e = l.map(x => Math.exp(x - m));
+  const s = e.reduce((a, c) => a + c, 0);
+  return e.map(x => x / s);
+}
+
+let E, P, Wq, Wk, Wv, Wo, bo, stepCount, lossHistory;
+
+function initModel() {
+  E = randMat(V, DIM, 0.5);
+  P = randMat(MAXCTX, DIM, 0.5);
+  Wq = randMat(DIM, DIM, 0.3);
+  Wk = randMat(DIM, DIM, 0.3);
+  Wv = randMat(DIM, DIM, 0.3);
+  Wo = randMat(DIM, V, 0.3);
+  bo = new Array(V).fill(0);
+  stepCount = 0;
+  lossHistory = [];
+}
+
+function forward(ctxIds) {
+  const m = ctxIds.length;
+  const x = ctxIds.map((tid, p) => E[tid].map((v, d) => v + P[p][d]));
+  const Q = x.map(xi => matvec(Wq, xi));
+  const K = x.map(xi => matvec(Wk, xi));
+  const Vv = x.map(xi => matvec(Wv, xi));
+  const qLast = Q[m - 1];
+  const scale = 1 / Math.sqrt(DIM);
+  const scores = K.map(k => k.reduce((s, ki, i) => s + ki * qLast[i], 0) * scale);
+  const weights = softmax(scores);
+  const ctx = new Array(DIM).fill(0);
+  for (let j = 0; j < m; j++) for (let d = 0; d < DIM; d++) ctx[d] += weights[j] * Vv[j][d];
+  const logits = new Array(V).fill(0);
+  for (let k = 0; k < V; k++) { let s = bo[k]; for (let d = 0; d < DIM; d++) s += ctx[d] * Wo[d][k]; logits[k] = s; }
+  const probs = softmax(logits);
+  return { x, Q, K, Vv, qLast, weights, ctx, probs, m };
+}
+
+function trainStep(lr) {
+  const dE = zerosMat(V, DIM), dP = zerosMat(MAXCTX, DIM);
+  const dWq = zerosMat(DIM, DIM), dWk = zerosMat(DIM, DIM), dWv = zerosMat(DIM, DIM);
+  const dWo = zerosMat(DIM, V), dbo = new Array(V).fill(0);
+  let totalLoss = 0;
+
+  for (const [ctxIds, j] of EXAMPLES) {
+    const f = forward(ctxIds);
+    const { x, Q, K, Vv, qLast, weights, ctx, probs, m } = f;
+    totalLoss += -Math.log(Math.max(probs[j], 1e-9));
+
+    const dlogits = probs.slice(); dlogits[j] -= 1;
+    for (let k = 0; k < V; k++) dbo[k] += dlogits[k];
+    const dctx = new Array(DIM).fill(0);
+    for (let d = 0; d < DIM; d++) { let s = 0; for (let k = 0; k < V; k++) { dWo[d][k] += ctx[d] * dlogits[k]; s += Wo[d][k] * dlogits[k]; } dctx[d] = s; }
+
+    const dweights = new Array(m).fill(0);
+    const dVv = Array.from({ length: m }, () => new Array(DIM).fill(0));
+    for (let jx = 0; jx < m; jx++) for (let d = 0; d < DIM; d++) { dweights[jx] += dctx[d] * Vv[jx][d]; dVv[jx][d] += dctx[d] * weights[jx]; }
+
+    const dscores = new Array(m).fill(0);
+    for (let a = 0; a < m; a++) {
+      let s = 0;
+      for (let b = 0; b < m; b++) {
+        const grad = (a === b) ? weights[a] * (1 - weights[a]) : -weights[a] * weights[b];
+        s += dweights[b] * grad;
+      }
+      dscores[a] = s;
+    }
+
+    const dqLast = new Array(DIM).fill(0);
+    const dK = Array.from({ length: m }, () => new Array(DIM).fill(0));
+    const scale = 1 / Math.sqrt(DIM);
+    for (let a = 0; a < m; a++) for (let d = 0; d < DIM; d++) { dK[a][d] += dscores[a] * qLast[d] * scale; dqLast[d] += dscores[a] * K[a][d] * scale; }
+
+    const dx = Array.from({ length: m }, () => new Array(DIM).fill(0));
+    for (let r = 0; r < DIM; r++) for (let c = 0; c < DIM; c++) dWq[r][c] += dqLast[r] * x[m - 1][c];
+    for (let c = 0; c < DIM; c++) { let s = 0; for (let r = 0; r < DIM; r++) s += Wq[r][c] * dqLast[r]; dx[m - 1][c] += s; }
+    for (let a = 0; a < m; a++) {
+      for (let r = 0; r < DIM; r++) for (let c = 0; c < DIM; c++) dWk[r][c] += dK[a][r] * x[a][c];
+      for (let c = 0; c < DIM; c++) { let s = 0; for (let r = 0; r < DIM; r++) s += Wk[r][c] * dK[a][r]; dx[a][c] += s; }
+      for (let r = 0; r < DIM; r++) for (let c = 0; c < DIM; c++) dWv[r][c] += dVv[a][r] * x[a][c];
+      for (let c = 0; c < DIM; c++) { let s = 0; for (let r = 0; r < DIM; r++) s += Wv[r][c] * dVv[a][r]; dx[a][c] += s; }
+    }
+    for (let a = 0; a < m; a++) { const tid = ctxIds[a]; for (let d = 0; d < DIM; d++) { dE[tid][d] += dx[a][d]; dP[a][d] += dx[a][d]; } }
+  }
+
+  const n = EXAMPLES.length;
+  for (let i = 0; i < V; i++) for (let d = 0; d < DIM; d++) E[i][d] -= lr * (dE[i][d] / n);
+  for (let p = 0; p < MAXCTX; p++) for (let d = 0; d < DIM; d++) P[p][d] -= lr * (dP[p][d] / n);
+  for (let r = 0; r < DIM; r++) for (let c = 0; c < DIM; c++) { Wq[r][c] -= lr * (dWq[r][c] / n); Wk[r][c] -= lr * (dWk[r][c] / n); Wv[r][c] -= lr * (dWv[r][c] / n); }
+  for (let d = 0; d < DIM; d++) for (let k = 0; k < V; k++) Wo[d][k] -= lr * (dWo[d][k] / n);
+  for (let k = 0; k < V; k++) bo[k] -= lr * (dbo[k] / n);
+
+  const avgLoss = totalLoss / n;
+  lossHistory.push(avgLoss);
+  return avgLoss;
+}
+
+function predictFor(tokens) {
+  const ids = tokens.map(w => TOK2ID[w]);
+  const f = forward(ids);
+  const ranked = VOCAB.map((w, i) => [w, f.probs[i]]).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  return { weights: f.weights, ranked };
+}
+
+// ---------------------------------------------------------------------
+// Rendering
+// ---------------------------------------------------------------------
+function lerp(a, b, t) { return a + (b - a) * t; }
+function hexToRgb(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function colorForWeight(w) {
+  // w in [0,1] -> neutral to warm
+  const neutral = hexToRgb("#363b44"), warm = hexToRgb("#e3a857");
+  const c = neutral.map((v, i) => lerp(v, warm[i], Math.min(1, w * 1.6)));
+  return `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
+}
+
+function buildTokTable() {
+  document.getElementById("tokTable").innerHTML = VOCAB.map(w => `<tr><td>${w.replace("<", "&lt;").replace(">", "&gt;")}</td><td class="id">${TOK2ID[w]}</td></tr>`).join("");
+}
+function buildSentList() {
+  document.getElementById("sentList").innerHTML = SENTENCES.map(s => `<div>${s}</div>`).join("");
+}
+function buildPresetPicker() {
+  const el = document.getElementById("presetPicker");
+  el.innerHTML = "";
+  PRESETS.forEach((p, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = p.label;
+    btn.className = i === activePreset ? "active" : "";
+    btn.addEventListener("click", () => { activePreset = i; renderAttention(); buildPresetPicker(); });
+    el.appendChild(btn);
+  });
+}
+
+function renderAttention() {
+  const preset = PRESETS[activePreset];
+  const res = predictFor(preset.tokens);
+
+  const view = document.getElementById("sentenceView");
+  view.innerHTML = "";
+  preset.tokens.forEach((w, i) => {
+    const chip = document.createElement("div");
+    chip.className = "tokchip" + (i === preset.tokens.length - 1 ? " querying" : "");
+    const wordEl = document.createElement("div");
+    wordEl.className = "word";
+    wordEl.textContent = w;
+    wordEl.style.backgroundColor = colorForWeight(res.weights[i]);
+    const weightEl = document.createElement("div");
+    weightEl.className = "weight";
+    weightEl.textContent = (res.weights[i] * 100).toFixed(0) + "%";
+    chip.appendChild(wordEl);
+    chip.appendChild(weightEl);
+    view.appendChild(chip);
+  });
+  const arrow = document.createElement("div");
+  arrow.className = "predict-arrow";
+  arrow.textContent = "→ ?";
+  view.appendChild(arrow);
+
+  document.getElementById("predList").innerHTML = res.ranked.map(([w, p]) =>
+    `<div class="predrow"><span class="w">${w}</span><span class="p">${(p*100).toFixed(1)}%</span></div>`
+  ).join("");
+
+  const maxIdx = res.weights.indexOf(Math.max(...res.weights));
+  const maxWord = preset.tokens[maxIdx];
+  document.getElementById("routingCaption").innerHTML =
+    `Right now the model is putting the most weight (<b>${(res.weights[maxIdx]*100).toFixed(0)}%</b>) on <b>"${maxWord}"</b> when deciding what comes after <b>"${preset.tokens.join(" ")}"</b>. ` +
+    (maxWord !== preset.tokens[0]
+      ? `That's not the subject — it's the word that actually determines what kind of thing should follow.`
+      : `Early in training this is often close to uniform; keep stepping and watch weight shift away from the subject and onto the verb.`);
+}
+
+function drawLossChart() {
+  const canvas = document.getElementById("lossChart");
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  if (lossHistory.length < 2) return;
+  const maxL = Math.max(...lossHistory), minL = Math.min(...lossHistory);
+  const range = Math.max(maxL - minL, 0.01);
+  ctx.beginPath();
+  ctx.strokeStyle = "#e3a857";
+  ctx.lineWidth = 1.5;
+  lossHistory.forEach((v, i) => {
+    const x = (i / (lossHistory.length - 1)) * (w - 4) + 2;
+    const y = h - 4 - ((v - minL) / range) * (h - 8);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+}
+
+function updateStats(avgLoss) {
+  document.getElementById("stepCount").textContent = stepCount;
+  document.getElementById("lossVal").textContent = avgLoss === null ? "—" : avgLoss.toFixed(3);
+  drawLossChart();
+}
+
+// ---------------------------------------------------------------------
+// Controls
+// ---------------------------------------------------------------------
+let lr = 0.3;
+let training = false;
+
+function doSteps(n) {
+  if (training) return;
+  training = true;
+  setButtonsDisabled(true);
+  let done = 0;
+  function tick() {
+    const avgLoss = trainStep(lr);
+    stepCount++;
+    updateStats(avgLoss);
+    renderAttention();
+    done++;
+    if (done < n) setTimeout(tick, 110);
+    else { training = false; setButtonsDisabled(false); }
+  }
+  tick();
+}
+
+function setButtonsDisabled(v) {
+  document.getElementById("btnStep").disabled = v;
+  document.getElementById("btnStep10").disabled = v;
+  document.getElementById("btnReset").disabled = v;
+}
+
+document.getElementById("btnStep").addEventListener("click", () => doSteps(1));
+document.getElementById("btnStep10").addEventListener("click", () => doSteps(10));
+document.getElementById("btnReset").addEventListener("click", () => {
+  initModel();
+  updateStats(null);
+  renderAttention();
+});
+document.getElementById("lrSlider").addEventListener("input", (e) => {
+  lr = parseFloat(e.target.value);
+  document.getElementById("lrVal").textContent = lr.toFixed(2);
+});
+document.getElementById("curiousToggle").addEventListener("click", () => {
+  document.getElementById("curiousBox").classList.toggle("show");
+});
+
+// ---------------------------------------------------------------------
+// Boot
+// ---------------------------------------------------------------------
+buildTokTable();
+buildSentList();
+buildPresetPicker();
+initModel();
+updateStats(null);
+renderAttention();
+</script>
+</body>
+</html>

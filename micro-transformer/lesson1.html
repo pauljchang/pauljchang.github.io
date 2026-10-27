@@ -618,7 +618,7 @@ function colorForSim(t) {
 
 function buildTokTable() {
   const tbl = document.getElementById("tokTable");
-  tbl.innerHTML = VOCAB.map(w => `<tr><td>${w}</td><td class="id">${TOK2ID[w]}</td></tr>`).join("");
+  tbl.innerHTML = VOCAB.map(w => `<tr><td>${w.replace("<", "&lt;").replace(">", "&gt;")}</td><td class="id">${TOK2ID[w]}</td></tr>`).join("");
 }
 
 function buildSentList() {
