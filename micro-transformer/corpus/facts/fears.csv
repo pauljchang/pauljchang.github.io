@@ -1,0 +1,7 @@
+,hunter,wolf,deer,dog,bear,fish,fire
+hunter,,3,,,3,,-3
+wolf,,,,,,,3
+deer,3,3,,3,3,,3
+dog,-3,,,,3,,
+bear,,,,,,,3
+fish,3,,,,3,,

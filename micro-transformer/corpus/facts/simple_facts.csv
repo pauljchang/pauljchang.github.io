@@ -1,0 +1,14 @@
+relation,subject,value,stage,negation
+temporal,sun,day,4,False
+temporal,moon,not day,4,False
+drinks,hunter,water,0,False
+drinks,wolf,water,0,False
+drinks,bear,water,0,False
+drinks,deer,water,0,False
+drinks,dog,water,1,False
+likes,hunter,dog,1,False
+likes,dog,hunter,1,False
+has,hunter,spear,2,False
+has,hunter,dog,2,False
+has,hunter,fire,2,False
+has,river,water,2,False
