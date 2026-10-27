@@ -152,6 +152,8 @@
   }
 
   .od-note { font-size: 11px; color: var(--muted); line-height: 1.5; }
+  .od-note b { color: var(--text); }
+  .od-dims { font-size: 10.5px; color: var(--warm); margin: 0 0 10px; }
 
 
   .layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; margin-top: 24px; align-items: start; }
@@ -323,8 +325,8 @@
       before averaging. <b>That doesn't work</b>, and the averaging model below
       already has it: the position vectors add up to the same total whichever word
       sits where, so swapping two words still gives the same average. What works is
-      to stop averaging and keep each position in its <b>own slot</b>, side by side,
-      so the model can see which word came first.
+      to stop averaging and <b>concatenate</b>: lay the word vectors end to end in fixed
+      slots, so the model can see which word came first.
     </p>
 
     <div class="orderdiagram">
@@ -342,20 +344,42 @@
           <div class="od-tok alt">wolf<span>pos 2</span></div><div class="od-op">+</div>
           <div class="od-tok alt">?<span>pos 3</span></div><div class="od-op arrow">÷4</div>
         </div>
-        <div class="od-merge"><div class="od-result shared">one identical vector &rarr; same answer for both</div></div>
+        <div class="od-merge"><div class="od-result shared">one identical 16-number vector &rarr; same answer for both</div></div>
         <div class="od-note">Both rows add up the same eight vectors (four words, four positions), just paired differently. A sum can't remember the pairing.</div>
       </div>
       <div class="od-col">
         <div class="od-heading good">Slots: order survives</div>
         <div class="od-row">
-          <div class="od-result diffA">[ wolf | hunts | deer | ? ]</div>
+          <div class="od-result diffA">[ wolf | hunts | deer | ? | pad ]</div>
         </div>
         <div class="od-row">
-          <div class="od-result diffB">[ deer | hunts | wolf | ? ]</div>
+          <div class="od-result diffB">[ deer | hunts | wolf | ? | pad ]</div>
         </div>
-        <div class="od-note">Each position keeps its own slot, and the next layer has separate weights for each slot. Swap two words and the input really is different, so the answers can be too.</div>
+        <div class="od-dims">16 + 16 + 16 + 16 + 16 = one 80-number vector</div>
+        <div class="od-note">Slotting means <b>concatenating</b>: the five 16-number word vectors are laid end to end into one long vector, so its size is the sum of the pieces' sizes. Empty slots hold <b>&lt;PAD&gt;</b>. The next layer has a separate block of weights for each slot, so <i>wolf</i> in slot 0 and <i>wolf</i> in slot 2 get multiplied by different weights. No position vectors needed: the slot <i>is</i> the position.</div>
       </div>
     </div>
+
+    <p class="caption">
+      <span class="curious-toggle" id="mathToggle">The math, with a tiny example ▾</span>
+      <span class="curious-box" id="mathBox">
+        Use 2-number vectors: <b>wolf = (1, 0)</b>, <b>deer = (0, 1)</b>, and for the
+        averaging model, position vectors <b>P0 = (0.5, 0)</b> and <b>P1 = (0, 0.5)</b>.<br><br>
+        <b>Averaging.</b> "wolf deer" gives wolf+P0 = (1.5, 0) and deer+P1 = (0, 1.5),
+        averaging to <b>(0.75, 0.75)</b>. "deer wolf" gives deer+P0 = (0.5, 1) and
+        wolf+P1 = (1, 0.5), also averaging to <b>(0.75, 0.75)</b>. In general, the average
+        splits into ¼(sum of word vectors) + ¼(P0+P1+P2+P3), and the position part is the
+        same for every 4-word question, so it can't carry order.<br><br>
+        <b>Concatenating.</b> "wolf deer" becomes <b>[1, 0, 0, 1]</b> and "deer wolf" becomes
+        <b>[0, 1, 1, 0]</b>: two 2-number vectors make one 4-number vector, and the two
+        orders give different vectors.<br><br>
+        <b>Why that matters.</b> The output layer multiplies by a weight matrix <b>W</b>.
+        Split W into one block per slot and the result is
+        <b>W0·x0 + W1·x1 + W2·x2 + …</b>, a different matrix for each slot. Averaging
+        instead computes <b>¼W·x0 + ¼W·x1 + …</b>, the same matrix for every word, so
+        swapping words can't change the answer.
+      </span>
+    </p>
   </header>
 
   <div class="layout">
@@ -485,8 +509,10 @@ const MAXCTX = Math.max(...EXAMPLES.map(e => e[0].length)); // 5: "wolf hunts de
 // Two models, same data, same training:
 //   averaging model: word vector + position vector, then AVERAGE them all
 //                    (Lesson 1's pooling plus the "obvious fix")
-//   slot model:      word vector + position vector, kept in separate
-//                    slots and concatenated (padded with <PAD>)
+//   slot model:      plain word vectors, concatenated end to end into one
+//                    5 x 16 = 80-number vector (empty slots hold <PAD>).
+//                    No position vectors: the output layer has separate
+//                    weights for each slot, so the slot itself is the position.
 // ---------------------------------------------------------------------
 function randMat(rows, cols, scale) {
   return Array.from({ length: rows }, () => Array.from({ length: cols }, () => (Math.random() * 2 - 1) * scale));
@@ -503,7 +529,7 @@ function makeModel(slots) {
   return {
     slots, repLen,
     E: randMat(V, DIM, 0.6),
-    P: randMat(MAXCTX, DIM, 0.6),
+    P: slots ? null : randMat(MAXCTX, DIM, 0.6), // only the averaging model has position vectors
     W: randMat(repLen, V, slots ? 0.3 : 0.4),
     b: new Array(V).fill(0),
   };
@@ -521,7 +547,7 @@ function representationFor(model, ctxIds) {
   const rep = new Array(MAXCTX * DIM).fill(0);
   for (let p = 0; p < MAXCTX; p++) {
     const tid = p < ctxIds.length ? ctxIds[p] : PAD_ID;
-    for (let d = 0; d < DIM; d++) rep[p * DIM + d] = model.E[tid][d] + model.P[p][d];
+    for (let d = 0; d < DIM; d++) rep[p * DIM + d] = model.E[tid][d]; // the slot itself is the position
   }
   return rep;
 }
@@ -566,14 +592,14 @@ function trainStepFor(model, lr) {
     } else {
       for (let p = 0; p < MAXCTX; p++) {
         const tid = p < ctxIds.length ? ctxIds[p] : PAD_ID;
-        for (let d = 0; d < DIM; d++) { dE[tid][d] += drep[p * DIM + d]; dP[p][d] += drep[p * DIM + d]; }
+        for (let d = 0; d < DIM; d++) dE[tid][d] += drep[p * DIM + d];
       }
     }
   }
 
   const n = EXAMPLES.length;
   for (let i = 0; i < V; i++) for (let d = 0; d < DIM; d++) model.E[i][d] -= lr * dE[i][d] / n;
-  for (let p = 0; p < MAXCTX; p++) for (let d = 0; d < DIM; d++) model.P[p][d] -= lr * dP[p][d] / n;
+  if (!model.slots) for (let p = 0; p < MAXCTX; p++) for (let d = 0; d < DIM; d++) model.P[p][d] -= lr * dP[p][d] / n;
   for (let f = 0; f < model.repLen; f++) for (let k = 0; k < V; k++) model.W[f][k] -= lr * dW[f][k] / n;
   for (let k = 0; k < V; k++) model.b[k] -= lr * db[k] / n;
   return totalLoss / n;
@@ -690,7 +716,7 @@ function renderAsk() {
   const symmetric = pair.rows[0].answer === pair.rows[1].answer;
   document.getElementById("pairCaption").innerHTML = symmetric
     ? `Here both answers are <b>yes</b>: in this world the dog and the hunter like each other, so order doesn't change the answer. Once trained, the averaging model gets this pair right too. Averaging only fails when the relation goes one way, like <b>hunts</b>.`
-    : `The averaging model's difference is just rounding error (around 10<sup>-16</sup>): to it, these are the same question. The bars under each answer are the model's internal summary of the question. In the averaging column the two always match; in the slot column they differ.`;
+    : `The averaging model's difference is just rounding error (around 10<sup>-16</sup>): to it, these are the same question. The bars under each answer are the model's internal summary of the question: 16 numbers for averaging, 80 for slots. In the averaging column the two always match; in the slot column they differ.`;
 }
 
 function drawLossChart() {
@@ -764,6 +790,7 @@ document.getElementById("lrSlider").addEventListener("input", (e) => {
 });
 document.getElementById("btnHint").addEventListener("click", () => document.getElementById("hintBox").classList.toggle("show"));
 document.getElementById("curiousToggle").addEventListener("click", () => document.getElementById("curiousBox").classList.toggle("show"));
+document.getElementById("mathToggle").addEventListener("click", () => document.getElementById("mathBox").classList.toggle("show"));
 
 // ---------------------------------------------------------------------
 // Boot
