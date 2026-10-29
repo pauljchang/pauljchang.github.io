@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lesson 1 — Embeddings</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
@@ -158,6 +159,7 @@
     margin-top: 24px;
     align-items: start;
   }
+  .layout > * { min-width: 0; }
 
   @media (max-width: 880px) {
     .layout { grid-template-columns: 1fr; }
@@ -225,7 +227,14 @@
 
   canvas#lossChart { width: 100%; height: 60px; display: block; margin-top: 10px; }
 
-  .heatmap-wrap { display: flex; flex-direction: column; align-items: flex-start; }
+  .heatmap-wrap { display: flex; flex-direction: column; align-items: flex-start; max-width: 100%; overflow-x: auto; margin-top: 4px; }
+  .crumbs { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .crumbs .backlink { margin-bottom: 0; }
+  .crumb-sep { color: var(--border); font-size: 11.5px; }
+  .predict-box { font-size: 12.5px; color: var(--text); padding: 12px 14px; margin-bottom: 18px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; }
+  .hint-btn { flex: none; width: auto; padding: 5px 11px; margin-left: 8px; font-size: 11.5px; }
+  .controls button { white-space: nowrap; padding: 9px 6px; }
+  @media (max-width: 640px) { body { padding: 16px; } }
   .heatmap-grid { display: grid; gap: 2px; }
   .hcell {
     width: 34px; height: 34px;
@@ -255,10 +264,9 @@
   .legend-bar { width: 140px; height: 10px; border-radius: 3px;
     background: linear-gradient(90deg, var(--cool), var(--neutral), var(--warm)); }
 
-  .caption { font-size: 12px; color: var(--muted); margin-top: 16px; max-width: 640px; }
+  .caption { font-size: 12px; color: var(--muted); margin-top: 14px; max-width: 680px; }
   .caption b { color: var(--text); }
 
-  .hint-toggle { margin-top: 14px; }
   .hint-box {
     display: none;
     margin-top: 10px;
@@ -293,9 +301,12 @@
 <body>
 <div class="wrap">
   <header>
-    <a href="../index.html" class="backlink">&larr; pauljchang.github.io</a>
+    <div class="crumbs">
+      <a href="../index.html" class="backlink">pauljchang.github.io</a>
+      <span class="crumb-sep">/</span>
+      <a href="micro-transformer.html" class="backlink">Micro-Transformer</a>
+    </div>
     <div class="eyebrow">Micro-Transformer &middot; Lesson 1 of 6</div>
-    <h1>What do embeddings actually learn?</h1>
 
     <div class="roadmap">
       <div class="rm-item active"><span class="rm-n">1</span>Embeddings</div>
@@ -311,41 +322,23 @@
       <div class="rm-item"><span class="rm-n">6</span>Judgment vs. retrieval</div>
     </div>
 
+    <h1>What do embeddings actually learn?</h1>
     <p class="lede">
-      This is the first lesson in a hands-on course that builds a working language
-      model from scratch, one real concept at a time, using a tiny invented
-      "caveperson" language instead of English — a stripped-down grammar of about
-      a dozen words is small enough that you can read the <i>entire</i> training set
-      in one glance, which is exactly the point: at this scale, nothing is hidden
-      from you. Later lessons add position, attention, and a real training loop;
-      everything you learn here about a 12-word toy still describes, mechanically,
-      what happens inside a billion-parameter model — just at a size you can hold
-      in your head.
+      This is the first of six lessons that build a working language model from
+      scratch, right in your browser. Instead of English it uses a tiny invented
+      "caveperson" language: this lesson's whole training set is nine sentences,
+      short enough to read at a glance, so nothing is hidden from you. The math is
+      the same math that runs inside billion-parameter models, just small enough
+      to watch.
     </p>
     <p class="lede">
-      <b>What are we actually training?</b> Next-word prediction — the same core
-      task every GPT-style model is trained on: given the words so far, predict
-      what comes next. Concretely, this model predicts each word from the
-      <i>average</i> of every embedding before it in the sentence. That's a
-      deliberate simplification — a real transformer would <i>learn</i> which
-      earlier words matter most (that's attention, arriving in Lesson 3); here,
-      every earlier word counts equally. It's just enough machinery to make
-      embeddings do real work.
-    </p>
-    <p class="lede">
-      <b>There is only one loss function here, and it isn't "make similar words
-      similar."</b> The model is never told which words are related — it's only
-      ever graded on next-word prediction accuracy. The clustering you're about
-      to watch happen is a <i>side effect</i>, not a second goal: <b>hunter</b>,
-      <b>wolf</b>, and <b>bear</b> end up with similar vectors because they tend to
-      predict the same next words in the same proportions, and giving them similar
-      vectors is simply an efficient way for the network to solve that one
-      prediction task — it can reuse the same downstream behavior instead of
-      learning it three separate times. The vectors converging is the model
-      discovering a shortcut, not chasing a similarity target. This is sometimes
-      called the <i>distributional hypothesis</i>: a word's meaning is reflected
-      in the company it tends to keep, so a model that only ever learns to
-      predict company ends up encoding something that looks a lot like meaning.
+      <b>What are we training?</b> Next-word prediction, the same core task every
+      GPT-style model is trained on: given the words so far, predict what comes
+      next. This model predicts each word from the <i>average</i> of the vectors of
+      every word before it. That's a deliberate simplification: a real transformer
+      <i>learns</i> which earlier words matter most (that's attention, in Lesson 3).
+      Here every earlier word counts equally, which is just enough machinery to make
+      the word vectors, called <b>embeddings</b>, do real work.
     </p>
 
     <div class="arch">
@@ -367,16 +360,14 @@
       the scenes.
       <span class="curious-toggle" id="curiousToggle">Curious how those two ideas relate anyway? ▾</span>
       <span class="curious-box" id="curiousBox">
-        They're more related than they look. Classical distributional-semantics
-        methods (like GloVe) take the opposite approach: build an explicit
-        word × word co-occurrence matrix — literally vocab-size × vocab-size —
-        counting how often each pair of words appears near each other, then
-        factor that matrix directly with linear algebra (no sentences, no
-        gradient steps). It's a well-known result that this and the neural
-        training you're doing here tend to land on very similar embeddings —
-        two different routes to close to the same destination. The neural
-        route is the one that scales to modern models; the matrix route is
-        mostly of historical and theoretical interest today.
+        They're more related than they look. Classical methods like GloVe build an
+        explicit word &times; word table (vocab-size &times; vocab-size) counting how
+        often each pair of words appears near each other, then compress it with
+        linear algebra, with no sentence-by-sentence training. The two routes are
+        closely related mathematically: word2vec-style training has been shown to
+        implicitly compress a version of that same kind of table (Levy &amp; Goldberg,
+        2014). Modern language models learn embeddings the neural way, as part of
+        training the whole network.
       </span>
     </p>
     <p class="lede">
@@ -403,7 +394,8 @@
         <div class="controls">
           <div class="btnrow">
             <button id="btnStep">Step +1</button>
-            <button id="btnStep10" class="primary">Train 10 steps</button>
+            <button id="btnStep10">Train 10</button>
+            <button id="btnStep100" class="primary">Train 100</button>
           </div>
           <div class="btnrow">
             <button id="btnReset">Re-randomize embeddings</button>
@@ -429,7 +421,21 @@
     </div>
 
     <div class="panel">
-      <h2>Cosine similarity between every pair of trained vectors</h2>
+      <h2>How similar is each pair of words?</h2>
+
+      <div class="predict-box">
+        <span>Predict first: after training, which word will end up most like <b>hunter</b>? Which animal will be least like it?</span>
+        <button id="btnHint" class="hint-btn">Show answer</button>
+        <div class="hint-box" id="hintBox">
+          <b>wolf</b>. Hunter and wolf appear in exactly the same sentences (both drink
+          water and eat meat), so they end up with almost the same vector. <b>bear</b>
+          is close but less so, because it also eats fish. <b>deer</b> is the odd one
+          out: it eats berries. Click "Train 100" two or three times and check the
+          hunter row. In 18 of 20 test runs, hunter, wolf and bear were all closer to
+          each other than to deer by step 300.
+        </div>
+      </div>
+
       <div class="heatmap-wrap" id="heatmapWrap"></div>
       <div class="legend">
         <span>−1</span>
@@ -438,29 +444,36 @@
         <span style="margin-left:8px;">more different&nbsp;&nbsp;→&nbsp;&nbsp;more similar</span>
       </div>
       <div class="caption">
-        Watch the <b>hunter / wolf / bear</b> block in the top-left — they all show up
-        with <b>"eats meat"</b> and <b>"drinks water"</b> in the training data. <b>deer</b> only
-        partly overlaps (it drinks water too, but eats berry instead of meat), so expect
-        it to drift less far into that cluster. The <b class="pad-note">&lt;PAD&gt;</b> row/column
-        never appears in any training sentence — no matter how long you train, it stays
-        essentially random. That's not a bug: a token with zero context never gets a
-        training signal.
+        Each square compares two words' vectors using <b>cosine similarity</b>: how
+        closely the two vectors point in the same direction. +1 means the same
+        direction, 0 means unrelated, −1 means opposite. On a computer, hover over a
+        square to see its number.
       </div>
-      <div class="hint-toggle">
-        <button id="btnHint" style="flex:none; width:auto; padding:7px 12px;">Show what to expect</button>
-        <div class="hint-box" id="hintBox">
-          Prediction: <b>hunter, wolf, bear</b> converge into one visibly warmer block.
-          <b>deer</b> sits nearby but noticeably less similar to that block. <b>meat, fish,
-          berry, water</b> may also drift toward each other a little — they all have to
-          predict "." as the next token, which is a shared signal too, just a different
-          kind (what comes <i>after</i> them, not what they follow).
-        </div>
+      <div class="caption">
+        <b>Why do they cluster?</b> Training has exactly one goal, predicting the next
+        word; nothing ever tells the model which words are related. The clustering is
+        a side effect. Because the model averages every word so far, a sentence's
+        subject is still part of the input when it predicts the food at the end.
+        Hunter, wolf and bear lead to the same food (meat), so training nudges their
+        vectors the same way; deer leads to berry, so it gets nudged somewhere else.
+        Giving words that behave alike similar vectors is simply an efficient way to
+        predict well. The food and drink words cluster too, because each one is always
+        followed by the same thing: ".". This is the <i>distributional hypothesis</i>:
+        you can know a word by the company it keeps.
+      </div>
+      <div class="caption">
+        Two rows never change: <b class="pad-note">&lt;PAD&gt;</b> and <b>"."</b>.
+        &lt;PAD&gt; isn't used in any sentence, and "." only ever comes last, so it's
+        never part of the input for predicting another word. A vector only changes
+        when it helps predict something, so these two stay exactly at their random
+        starting values no matter how long you train. Their squares can still shift
+        a little, because the words they're compared with keep moving.
       </div>
     </div>
   </div>
 
   <div class="lesson-nav">
-    <a href="../index.html" class="lesson-nav-link back">&larr; All projects</a>
+    <a href="micro-transformer.html" class="lesson-nav-link">All lessons</a>
     <a href="lesson2.html" class="lesson-nav-link next">Lesson 2: Position &rarr;</a>
   </div>
 </div>
@@ -716,7 +729,7 @@ function doSteps(n, cb) {
     updateStats(avgLoss);
     done++;
     if (done < n) {
-      setTimeout(tick, 90);
+      setTimeout(tick, 15);
     } else {
       training = false;
       setButtonsDisabled(false);
@@ -729,11 +742,13 @@ function doSteps(n, cb) {
 function setButtonsDisabled(v) {
   document.getElementById("btnStep").disabled = v;
   document.getElementById("btnStep10").disabled = v;
+  document.getElementById("btnStep100").disabled = v;
   document.getElementById("btnReset").disabled = v;
 }
 
 document.getElementById("btnStep").addEventListener("click", () => doSteps(1));
 document.getElementById("btnStep10").addEventListener("click", () => doSteps(10));
+document.getElementById("btnStep100").addEventListener("click", () => doSteps(100));
 document.getElementById("btnReset").addEventListener("click", () => {
   initModel();
   updateHeatmap();
