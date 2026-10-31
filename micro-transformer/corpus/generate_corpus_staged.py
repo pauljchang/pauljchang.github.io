@@ -95,7 +95,7 @@ SEMANTIC_GROUPS = {
     "elements": ["fire", "water", "sun", "moon"],
     "places": ["forest", "cave", "river"],
     "positive_states": ["brave"],
-    "negative_states": ["scared", "scary", "cold", "hungry"],
+    "negative_states": ["cold", "hungry"],
 }
 
 
