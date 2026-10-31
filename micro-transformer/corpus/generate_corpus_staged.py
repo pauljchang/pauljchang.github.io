@@ -119,7 +119,7 @@ def build_stage(n: int):
                 # "not" statements only from stage 3; before that a negated
                 # fact appears only as a "no" answer to a yes/no question.
                 if n >= 3:
-                    statements.append(toks(s, "not", v, o, "."))
+                    statements.append(toks(s, v, "not", o, "."))  # "not" goes right after the verb
                 continue
             stmt = toks(s, v, o, ".")
             statements.append(stmt)

@@ -28,7 +28,7 @@ Matrix cells:
 |-------|---------|
 | blank | no fact either way (never asked about) |
 | `N`   | true, introduced at stage N |
-| `-N`  | false, introduced at stage N (answered "no"; stated with "not" from stage 3) |
+| `-N`  | false, introduced at stage N (answered "no"; from stage 3 also stated with "not" right after the verb: `deer hunts not wolf .`, `dog is not scary .`) |
 
 Each stage includes everything from earlier stages. Stage 1, for example,
 adds yes/no questions: `wolf hunts deer ?` is yes and `deer hunts wolf ?` is
