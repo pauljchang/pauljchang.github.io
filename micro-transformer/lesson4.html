@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 4 — Training &amp; Generalization</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #14171c;
+    --panel: #1c2027;
+    --panel-2: #20242c;
+    --border: #2c313a;
+    --text: #e9e6df;
+    --muted: #8b919c;
+    --warm: #e3a857;
+    --warm-dim: #8a6a3f;
+    --cool: #4c8ca6;
+    --cool-dim: #375f6e;
+    --neutral: #363b44;
+    --bad: #c96a5a;
+    --good: #7fae6e;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 28px;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  .crumbs { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .backlink { color: var(--muted); text-decoration: none; font-size: 11.5px; transition: color 0.15s; }
+  .backlink:hover { color: var(--warm); }
+  .crumb-sep { color: var(--border); font-size: 11.5px; }
+
+  header { margin-bottom: 22px; }
+  .eyebrow { color: var(--warm); letter-spacing: 0.14em; font-size: 11px; text-transform: uppercase; font-weight: 600; }
+  h1 { font-size: 25px; font-weight: 700; margin: 6px 0 8px; letter-spacing: -0.01em; }
+  .lede { color: var(--muted); max-width: 780px; font-size: 13.5px; }
+  .lede b { color: var(--text); font-weight: 600; }
+  .lede + .lede { margin-top: 10px; }
+
+  .roadmap { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 16px 0 18px; padding: 10px 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; }
+  .rm-item { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+  .rm-item.active { color: var(--warm); font-weight: 600; }
+  .rm-item.done { color: var(--cool); }
+  .rm-n { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--border); font-size: 9.5px; }
+  .rm-item.active .rm-n { border-color: var(--warm); color: var(--warm); }
+  .rm-item.done .rm-n { border-color: var(--cool); color: var(--cool); }
+  .rm-arrow { color: var(--border); font-size: 11px; }
+
+  .losstable { border-collapse: collapse; font-size: 12px; margin: 14px 0 4px; }
+  .losstable th, .losstable td { padding: 5px 14px 5px 0; text-align: left; border-bottom: 1px solid var(--border); }
+  .losstable th { color: var(--muted); font-weight: 600; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .losstable td.n { color: var(--warm); font-weight: 700; }
+
+  .caption { font-size: 12px; color: var(--muted); margin-top: 12px; max-width: 780px; }
+  .caption b { color: var(--text); }
+  .curious-toggle { display: inline-block; color: var(--cool); cursor: pointer; text-decoration: underline; text-decoration-color: var(--cool-dim); }
+  .curious-toggle:hover { color: var(--text); }
+  .curious-box { display: none; margin-top: 8px; padding: 10px 12px; border-left: 2px solid var(--cool-dim); background: var(--panel); font-size: 12px; color: var(--muted); }
+  .curious-box.show { display: block; }
+  .curious-box b { color: var(--text); }
+
+  .layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; margin-top: 24px; align-items: start; }
+  .layout > * { min-width: 0; }
+  @media (max-width: 880px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
+  .panel + .panel { margin-top: 16px; }
+  .panel h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin: 0 0 12px; font-weight: 600; }
+  .panel h3 { font-size: 13.5px; margin: 0 0 6px; }
+  .section + .section { margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--border); }
+
+  .sentlist { font-size: 11.5px; color: var(--muted); max-height: 200px; overflow-y: auto; }
+  .sentlist div { padding: 3px 0; border-bottom: 1px solid var(--border); }
+  .sentlist div:last-child { border-bottom: none; }
+  .sentlist .qa { color: var(--warm); }
+  .sentlist.held div { color: var(--text); }
+
+  .btnrow { display: flex; gap: 8px; }
+  button { font-family: inherit; background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 9px 12px; font-size: 12.5px; font-weight: 500; cursor: pointer; flex: 1; transition: border-color 0.15s, color 0.15s; }
+  .controls button { white-space: nowrap; padding: 9px 6px; }
+  button:hover { border-color: var(--warm-dim); color: var(--warm); }
+  button:active { transform: translateY(1px); }
+  button.primary { border-color: var(--warm-dim); color: var(--warm); }
+  button:disabled { opacity: 0.4; cursor: default; }
+  button:disabled:hover { border-color: var(--border); color: var(--text); }
+
+  .controls { display: flex; flex-direction: column; gap: 10px; }
+  .lr-row { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+  .lr-row input[type=range] { flex: 1; accent-color: var(--warm); }
+  .lr-val { color: var(--warm); width: 34px; text-align: right; }
+  .stats { display: flex; gap: 14px; margin-top: 4px; }
+  .stat { flex: 1; }
+  .stat .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat .value { font-size: 18px; font-weight: 700; color: var(--text); margin-top: 2px; }
+  .stat .value.warm { color: var(--warm); }
+  .stat .value.cool { color: var(--cool); }
+  .status { font-size: 11px; color: var(--muted); min-height: 16px; }
+
+  .chartwrap { position: relative; }
+  canvas#lossChart { width: 100%; height: 190px; display: block; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; }
+  .legend { display: flex; gap: 18px; font-size: 11.5px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+  .sw { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+
+  .predict-box { font-size: 12.5px; color: var(--text); padding: 12px 14px; margin: 12px 0 14px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; }
+  .hint-btn { flex: none; width: auto; padding: 5px 11px; margin-left: 8px; font-size: 11.5px; }
+  .hint-box { display: none; margin-top: 10px; font-size: 12px; color: var(--muted); border-left: 2px solid var(--warm-dim); padding-left: 10px; }
+  .hint-box.show { display: block; }
+  .hint-box b { color: var(--warm); }
+
+  table.res { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.res th { text-align: left; color: var(--muted); font-weight: 600; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--border); }
+  table.res td { padding: 7px 8px 7px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.res td.q { font-weight: 700; white-space: nowrap; }
+  table.res .kind { font-size: 10.5px; color: var(--muted); }
+  table.res .rank { font-weight: 700; }
+  table.res .ok { color: var(--good); font-weight: 700; }
+  table.res .bad { color: var(--bad); font-weight: 700; }
+  table.res .mid { color: var(--warm); font-weight: 700; }
+  table.res .sub { color: var(--muted); font-size: 11px; }
+  .tablewrap { overflow-x: auto; }
+  .ynbar { height: 6px; width: 110px; background: #4a3a2a; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+  .ynyes { height: 100%; background: #b9b4a9; }
+
+  .lesson-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--border); }
+  .lesson-nav-link { font-size: 12.5px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+  .lesson-nav-link:hover { color: var(--warm); }
+  .lesson-nav-link.back { color: var(--warm); font-weight: 600; }
+  .lesson-nav-link.soon { opacity: 0.6; }
+  @media (max-width: 640px) { body { padding: 16px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="crumbs">
+      <a href="../index.html" class="backlink">pauljchang.github.io</a>
+      <span class="crumb-sep">/</span>
+      <a href="micro-transformer.html" class="backlink">Micro-Transformer</a>
+    </div>
+    <div class="eyebrow">Micro-Transformer &middot; Lesson 4 of 6</div>
+
+    <div class="roadmap">
+      <div class="rm-item done"><span class="rm-n">1</span>Embeddings</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item done"><span class="rm-n">2</span>Position</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item done"><span class="rm-n">3</span>Attention &amp; routing</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item active"><span class="rm-n">4</span>Training &amp; generalization</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item"><span class="rm-n">5</span>Chatbot</div>
+      <div class="rm-arrow">→</div>
+      <div class="rm-item"><span class="rm-n">6</span>Judgment vs. retrieval</div>
+    </div>
+
+    <h1>Did it learn, or just memorize?</h1>
+    <p class="lede">
+      Every lesson so far has trained a model and checked it on the same sentences it
+      trained on. That proves very little: a model that memorized every sentence would
+      pass. The real test is something it has <b>never seen</b>. So this lesson hides a
+      few facts before training starts, trains on everything else, and then asks about
+      the hidden ones.
+    </p>
+    <p class="lede">
+      First, what "training" measures. After each word the model gives every possible
+      next word a probability. The <b>loss</b> is how surprised it was by the word that
+      actually came next: <b>−log(probability it gave the right word)</b>. Each training
+      step nudges every weight a little in the direction that lowers the average loss
+      over all the training sentences. That's <b>gradient descent</b>, and it's the
+      whole of training.
+    </p>
+    <table class="losstable">
+      <tr><th>Probability given to the right word</th><th>Loss</th><th></th></tr>
+      <tr><td>100%</td><td class="n">0</td><td>not surprised at all</td></tr>
+      <tr><td>50%</td><td class="n">0.69</td><td>a coin flip</td></tr>
+      <tr><td>10%</td><td class="n">2.3</td><td>quite surprised</td></tr>
+      <tr><td>1%</td><td class="n">4.6</td><td>very surprised</td></tr>
+    </table>
+    <p class="caption">
+      Same model as Lesson 3 (one attention head), now with more facts, including
+      false ones stated with "not": <b>deer hunts not wolf .</b>
+      <span class="curious-toggle" id="curiousToggle">Why can't loss reach zero here? ▾</span>
+      <span class="curious-box" id="curiousBox">
+        Because some sentences genuinely have more than one right ending. "hunter eats"
+        is followed by meat, fish, deer and berry in the training data, so the best any
+        model can do is split its guess four ways, and the loss on that word can't go
+        below about 1.4. Real language is full of this kind of ambiguity, which is why
+        real models never reach zero loss either.
+      </span>
+    </p>
+  </header>
+
+  <div class="layout">
+    <div>
+      <div class="panel">
+        <h2>Train</h2>
+        <div class="controls">
+          <div class="btnrow">
+            <button id="btnStep10">Train 10</button>
+            <button id="btnStep250" class="primary">Train 250</button>
+          </div>
+          <div class="btnrow">
+            <button id="btnReset">Re-randomize weights</button>
+          </div>
+          <div class="lr-row">
+            <span>learning rate</span>
+            <input type="range" id="lrSlider" min="0.05" max="1" step="0.05" value="0.6">
+            <span class="lr-val" id="lrVal">0.60</span>
+          </div>
+          <div class="stats">
+            <div class="stat">
+              <div class="label">Step</div>
+              <div class="value" id="stepCount">0</div>
+            </div>
+            <div class="stat">
+              <div class="label">Training loss</div>
+              <div class="value warm" id="lossTrain">—</div>
+            </div>
+            <div class="stat">
+              <div class="label">Hidden-fact loss</div>
+              <div class="value cool" id="lossHeld">—</div>
+            </div>
+          </div>
+          <div class="status" id="status">Each step uses every training sentence, so 250 steps take several seconds.</div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2 id="heldHeading">Hidden (never trained on)</h2>
+        <div class="sentlist held" id="heldList"></div>
+      </div>
+      <div class="panel">
+        <h2 id="dataHeading">Training data</h2>
+        <div class="sentlist" id="sentList"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section">
+        <h2>1 &middot; Two loss curves</h2>
+        <div class="chartwrap"><canvas id="lossChart" width="820" height="190"></canvas></div>
+        <div class="legend">
+          <span><span class="sw" style="background:#e3a857"></span>training sentences</span>
+          <span><span class="sw" style="background:#4c8ca6"></span>hidden facts (never trained on)</span>
+        </div>
+        <div class="predict-box">
+          <span>Predict first: training loss will go down, since that's what training does. What will the hidden-fact loss do if you keep training to 1,000 steps or more?</span>
+          <button id="btnHint1" class="hint-btn">Show answer</button>
+          <div class="hint-box" id="hintBox1">
+            It drops fast at first, then after about 250 steps it starts creeping back
+            <b>up</b> while training loss keeps falling. In all 10 runs we tried, it was
+            higher at step 1,000 than at step 250. From then on the model is getting better at its training sentences by memorizing
+            their specifics, and getting more confidently wrong about what it hasn't seen.
+            This is <b>overfitting</b>. Real labs track a held-out loss like this one and
+            stop training, or add more data, when it starts climbing.
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>2 &middot; Can it guess a hidden fact?</h2>
+        <p class="caption" style="margin-top:0">
+          For each hidden fact, we take every noun and adjective the model never saw
+          after those words in training, and ask where the hidden answer ranks among
+          them. Rank #1 means it's the model's top guess for something new.
+        </p>
+        <div class="predict-box">
+          <span>Predict first: which of these six can the model guess, and why those?</span>
+          <button id="btnHint2" class="hint-btn">Show answer</button>
+          <div class="hint-box" id="hintBox2">
+            The four <b>pattern</b> facts. Bear acts like wolf, hunter and dog, which are
+            all hungry; dog acts like the other brave predators; deer fears every other
+            predator. They ranked in the top 3 of about 25 new words in every run we
+            tried. The two <b>one-offs</b> have no pattern to borrow from: nothing else
+            here has a spear or lives in the river. Spear sometimes sneaks into the top few
+            anyway, just because it's one of the few nouns that ever follows a verb, but
+            river lands near the bottom every time. Learning a
+            pattern from similar examples is what <b>generalization</b> means.
+          </div>
+        </div>
+        <div class="tablewrap"><table class="res" id="factTable"></table></div>
+      </div>
+
+      <div class="section">
+        <h2>3 &middot; Does "not" carry over?</h2>
+        <p class="caption" style="margin-top:0">
+          These six questions were hidden, but their answer was in the training data in
+          another form. The model trained on <b>deer is not brave .</b> Does it answer
+          <b>deer is brave ?</b> with no?
+        </p>
+        <div class="predict-box">
+          <span>Predict first: will the model use the "not" sentences it trained on to answer these?</span>
+          <button id="btnHint3" class="hint-btn">Show answer</button>
+          <div class="hint-box" id="hintBox3">
+            Mostly <b>no</b>. In our tests it answered roughly 7 in 10 of the "no" questions
+            wrongly with yes, and it did about as badly in a test where it never saw the
+            "not" sentences at all. To the model, "deer is not brave ." and "deer is brave
+            ? no ." are unrelated word sequences, and for questions it hasn't seen it falls
+            back on <b>yes</b>, the most common answer. The two "yes" rows look right, but
+            only because it says yes to almost everything new.
+          </div>
+        </div>
+        <div class="tablewrap"><table class="res" id="qTable"></table></div>
+        <p class="caption">
+          Large models show a version of this too, called the <b>reversal curse</b>: a
+          model trained on "A is B" often can't answer "B is A" (Berglund et al., 2023).
+          Knowledge stored in one wording doesn't automatically carry over to another.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="lesson-nav">
+    <a href="lesson3.html" class="lesson-nav-link back">&larr; Lesson 3: Attention &amp; Routing</a>
+    <a href="micro-transformer.html" class="lesson-nav-link">All lessons</a>
+    <span class="lesson-nav-link soon">Lesson 5: Chatbot (coming soon)</span>
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------------
+// Stage 3 data, exactly as generated by the corpus pipeline
+// (statements + yes/no questions; the "what" questions wait for Lesson 5).
+// ---------------------------------------------------------------------
+const VOCAB = ["<PAD>", ".", "?", "bear", "berry", "brave", "cave", "cold", "deer", "dog", "drinks", "eats", "fears", "fire", "fish", "forest", "has", "hot", "hungry", "hunter", "hunts", "in", "is", "likes", "lives", "meat", "no", "not", "river", "sleeps", "spear", "water", "wolf", "yes"];
+const TOK2ID = Object.fromEntries(VOCAB.map((w, i) => [w, i]));
+const V = VOCAB.length;
+const DIM = 16;
+
+const ALL_STATEMENTS = [
+  "bear drinks water .", "bear eats berry .", "bear eats deer .", "bear eats fish .", "bear eats meat .",
+  "bear fears fire .", "bear fears not deer .", "bear fears not fish .", "bear hunts deer .", "bear hunts fish .",
+  "bear is brave .", "bear is hungry .", "bear lives in cave .", "bear lives in forest .", "bear sleeps in cave .",
+  "bear sleeps in forest .", "deer drinks water .", "deer eats berry .", "deer eats not fish .", "deer eats not meat .",
+  "deer fears bear .", "deer fears dog .", "deer fears fire .", "deer fears hunter .", "deer fears spear .",
+  "deer fears wolf .", "deer hunts not bear .", "deer hunts not dog .", "deer hunts not hunter .", "deer hunts not wolf .",
+  "deer is not brave .", "deer is not hungry .", "deer lives in forest .", "deer sleeps in forest .", "dog drinks water .",
+  "dog eats deer .", "dog eats fish .", "dog eats meat .", "dog fears bear .", "dog fears not hunter .",
+  "dog hunts deer .", "dog is brave .", "dog is hungry .", "dog likes hunter .", "dog lives in cave .",
+  "dog sleeps in cave .", "fire is hot .", "fire is not cold .", "fish fears bear .", "fish fears hunter .",
+  "fish hunts not deer .", "fish hunts not hunter .", "fish is cold .", "fish is not brave .", "fish lives in river .",
+  "hunter drinks water .", "hunter eats berry .", "hunter eats deer .", "hunter eats fish .", "hunter eats meat .",
+  "hunter fears bear .", "hunter fears not deer .", "hunter fears not dog .", "hunter fears not fire .", "hunter fears wolf .",
+  "hunter has dog .", "hunter has fire .", "hunter has spear .", "hunter hunts deer .", "hunter hunts fish .",
+  "hunter is brave .", "hunter is hungry .", "hunter likes dog .", "hunter lives in cave .", "hunter sleeps in cave .",
+  "river has water .", "river is cold .", "river is not hot .", "water is cold .", "water is not hot .",
+  "wolf drinks water .", "wolf eats deer .", "wolf eats meat .", "wolf fears fire .", "wolf fears not deer .",
+  "wolf hunts deer .", "wolf is brave .", "wolf is hungry .", "wolf lives in forest .", "wolf sleeps in forest ."
+];
+const ALL_QUESTIONS = [
+  ["bear drinks water ?", "yes ."], ["bear eats berry ?", "yes ."], ["bear eats deer ?", "yes ."],
+  ["bear eats fish ?", "yes ."], ["bear eats meat ?", "yes ."], ["bear fears deer ?", "no ."],
+  ["bear fears fire ?", "yes ."], ["bear fears fish ?", "no ."], ["bear hunts deer ?", "yes ."],
+  ["bear hunts fish ?", "yes ."], ["bear is brave ?", "yes ."], ["bear is hungry ?", "yes ."],
+  ["deer drinks water ?", "yes ."], ["deer eats berry ?", "yes ."], ["deer eats fish ?", "no ."],
+  ["deer eats meat ?", "no ."], ["deer fears bear ?", "yes ."], ["deer fears dog ?", "yes ."],
+  ["deer fears fire ?", "yes ."], ["deer fears hunter ?", "yes ."], ["deer fears spear ?", "yes ."],
+  ["deer fears wolf ?", "yes ."], ["deer hunts bear ?", "no ."], ["deer hunts dog ?", "no ."],
+  ["deer hunts hunter ?", "no ."], ["deer hunts wolf ?", "no ."], ["deer is brave ?", "no ."],
+  ["deer is hungry ?", "no ."], ["dog drinks water ?", "yes ."], ["dog eats deer ?", "yes ."],
+  ["dog eats fish ?", "yes ."], ["dog eats meat ?", "yes ."], ["dog fears bear ?", "yes ."],
+  ["dog fears hunter ?", "no ."], ["dog hunts deer ?", "yes ."], ["dog is brave ?", "yes ."],
+  ["dog is hungry ?", "yes ."], ["dog likes hunter ?", "yes ."], ["fire is cold ?", "no ."],
+  ["fire is hot ?", "yes ."], ["fish fears bear ?", "yes ."], ["fish fears hunter ?", "yes ."],
+  ["fish hunts deer ?", "no ."], ["fish hunts hunter ?", "no ."], ["fish is brave ?", "no ."],
+  ["fish is cold ?", "yes ."], ["hunter drinks water ?", "yes ."], ["hunter eats berry ?", "yes ."],
+  ["hunter eats deer ?", "yes ."], ["hunter eats fish ?", "yes ."], ["hunter eats meat ?", "yes ."],
+  ["hunter fears bear ?", "yes ."], ["hunter fears deer ?", "no ."], ["hunter fears dog ?", "no ."],
+  ["hunter fears fire ?", "no ."], ["hunter fears wolf ?", "yes ."], ["hunter has dog ?", "yes ."],
+  ["hunter has fire ?", "yes ."], ["hunter has spear ?", "yes ."], ["hunter hunts deer ?", "yes ."],
+  ["hunter hunts fish ?", "yes ."], ["hunter is brave ?", "yes ."], ["hunter is hungry ?", "yes ."],
+  ["hunter likes dog ?", "yes ."], ["river has water ?", "yes ."], ["river is cold ?", "yes ."],
+  ["river is hot ?", "no ."], ["water is cold ?", "yes ."], ["water is hot ?", "no ."],
+  ["wolf drinks water ?", "yes ."], ["wolf eats deer ?", "yes ."], ["wolf eats meat ?", "yes ."],
+  ["wolf fears deer ?", "no ."], ["wolf fears fire ?", "yes ."], ["wolf hunts deer ?", "yes ."],
+  ["wolf is brave ?", "yes ."], ["wolf is hungry ?", "yes ."]
+];
+// Held out: never trained on. Six whole facts (statement and question),
+// plus six questions whose statement IS in the training data.
+const HIDDEN_FACTS = [
+  { prefix: "bear is", answer: "hungry", kind: "pattern" },
+  { prefix: "dog is", answer: "brave", kind: "pattern" },
+  { prefix: "wolf eats", answer: "deer", kind: "pattern" },
+  { prefix: "deer fears", answer: "wolf", kind: "pattern" },
+  { prefix: "hunter has", answer: "spear", kind: "one-off" },
+  { prefix: "fish lives in", answer: "river", kind: "one-off" },
+];
+const HIDDEN_QUESTIONS = ["bear fears deer ?", "deer hunts dog ?", "deer is brave ?", "water is hot ?", "deer fears spear ?", "hunter eats berry ?"];
+
+const HIDE_S = HIDDEN_FACTS.map(f => f.prefix + " " + f.answer + " .");
+const HIDE_Q = HIDDEN_FACTS.map(f => f.prefix + " " + f.answer + " ?").concat(HIDDEN_QUESTIONS);
+const STATEMENTS = ALL_STATEMENTS.filter(s => !HIDE_S.includes(s));
+const QUESTIONS = ALL_QUESTIONS.filter(([q]) => !HIDE_Q.includes(q));
+const HELD = ALL_STATEMENTS.filter(s => HIDE_S.includes(s))
+  .concat(ALL_QUESTIONS.filter(([q]) => HIDE_Q.includes(q)).map(([q, a]) => q + " " + a));
+const SEQUENCES = STATEMENTS.concat(QUESTIONS.map(([q, a]) => q + " " + a));
+
+const EXAMPLES = [];
+for (const s of SEQUENCES) {
+  const ids = s.split(" ").map(w => TOK2ID[w]);
+  for (let t = 1; t < ids.length; t++) EXAMPLES.push([ids.slice(0, t), ids[t]]);
+}
+const HELD_EXAMPLES = [];
+for (const s of HELD) {
+  const ids = s.split(" ").map(w => TOK2ID[w]);
+  for (let t = 1; t < ids.length; t++) HELD_EXAMPLES.push([ids.slice(0, t), ids[t]]);
+}
+const MAXCTX = Math.max(...EXAMPLES.concat(HELD_EXAMPLES).map(e => e[0].length));
+
+// ---------------------------------------------------------------------
+// One attention head. The last word asks the question (query); every word
+// so far, itself included, offers a key and a value. With residual on,
+// the attention result is ADDED to the current word's own vector, the
+// way real transformers do it, so looking elsewhere never erases where
+// the model is standing.
+// ---------------------------------------------------------------------
+function randMat(rows, cols, scale) {
+  return Array.from({ length: rows }, () => Array.from({ length: cols }, () => (Math.random() * 2 - 1) * scale));
+}
+function zeros(rows, cols) { return Array.from({ length: rows }, () => new Array(cols).fill(0)); }
+function matvec(M, v) { return M.map(row => row.reduce((s, x, i) => s + x * v[i], 0)); }
+function softmax(l) {
+  const m = Math.max(...l);
+  const e = l.map(x => Math.exp(x - m));
+  const s = e.reduce((a, c) => a + c, 0);
+  return e.map(x => x / s);
+}
+
+function makeModel(residual) {
+  return {
+    residual,
+    E: randMat(V, DIM, 0.5), P: randMat(MAXCTX, DIM, 0.5),
+    Wq: randMat(DIM, DIM, 0.3), Wk: randMat(DIM, DIM, 0.3), Wv: randMat(DIM, DIM, 0.3),
+    Wo: randMat(DIM, V, 0.3), bo: new Array(V).fill(0),
+  };
+}
+
+function forward(M, ctxIds) {
+  const m = ctxIds.length;
+  const x = ctxIds.map((tid, p) => M.E[tid].map((v, d) => v + M.P[p][d]));
+  const K = x.map(xi => matvec(M.Wk, xi));
+  const Vv = x.map(xi => matvec(M.Wv, xi));
+  const q = matvec(M.Wq, x[m - 1]);
+  const scale = 1 / Math.sqrt(DIM);
+  const weights = softmax(K.map(k => k.reduce((s, ki, i) => s + ki * q[i], 0) * scale));
+  const h = M.residual ? x[m - 1].slice() : new Array(DIM).fill(0);
+  for (let j = 0; j < m; j++) for (let d = 0; d < DIM; d++) h[d] += weights[j] * Vv[j][d];
+  const logits = M.bo.slice();
+  for (let k = 0; k < V; k++) for (let d = 0; d < DIM; d++) logits[k] += h[d] * M.Wo[d][k];
+  return { x, K, Vv, q, weights, h, probs: softmax(logits), m };
+}
+
+function trainStep(M, lr) {
+  const dE = zeros(V, DIM), dP = zeros(MAXCTX, DIM);
+  const dWq = zeros(DIM, DIM), dWk = zeros(DIM, DIM), dWv = zeros(DIM, DIM);
+  const dWo = zeros(DIM, V), dbo = new Array(V).fill(0);
+  const scale = 1 / Math.sqrt(DIM);
+  let totalLoss = 0;
+
+  for (const [ctxIds, target] of EXAMPLES) {
+    const { x, K, Vv, q, weights, h, probs, m } = forward(M, ctxIds);
+    totalLoss -= Math.log(Math.max(probs[target], 1e-9));
+
+    const dlogits = probs.slice(); dlogits[target] -= 1;
+    const dh = new Array(DIM).fill(0);
+    for (let k = 0; k < V; k++) {
+      dbo[k] += dlogits[k];
+      for (let d = 0; d < DIM; d++) { dWo[d][k] += h[d] * dlogits[k]; dh[d] += M.Wo[d][k] * dlogits[k]; }
+    }
+
+    const dx = zeros(m, DIM);
+    if (M.residual) for (let d = 0; d < DIM; d++) dx[m - 1][d] += dh[d];
+
+    const dw = new Array(m).fill(0), dVv = zeros(m, DIM);
+    for (let j = 0; j < m; j++) for (let d = 0; d < DIM; d++) { dw[j] += dh[d] * Vv[j][d]; dVv[j][d] = dh[d] * weights[j]; }
+    const dot = weights.reduce((s, w, j) => s + w * dw[j], 0);
+    const dscore = weights.map((w, j) => w * (dw[j] - dot));
+
+    const dq = new Array(DIM).fill(0);
+    for (let j = 0; j < m; j++) {
+      const dK = q.map(qi => dscore[j] * qi * scale);
+      for (let d = 0; d < DIM; d++) dq[d] += dscore[j] * K[j][d] * scale;
+      for (let r = 0; r < DIM; r++) for (let c = 0; c < DIM; c++) {
+        dWk[r][c] += dK[r] * x[j][c]; dWv[r][c] += dVv[j][r] * x[j][c];
+        dx[j][c] += M.Wk[r][c] * dK[r] + M.Wv[r][c] * dVv[j][r];
+      }
+    }
+    for (let r = 0; r < DIM; r++) for (let c = 0; c < DIM; c++) {
+      dWq[r][c] += dq[r] * x[m - 1][c]; dx[m - 1][c] += M.Wq[r][c] * dq[r];
+    }
+    for (let j = 0; j < m; j++) for (let d = 0; d < DIM; d++) { dE[ctxIds[j]][d] += dx[j][d]; dP[j][d] += dx[j][d]; }
+  }
+
+  const n = EXAMPLES.length, s = lr / n;
+  const upd = (A, G) => { for (let i = 0; i < A.length; i++) for (let j = 0; j < A[i].length; j++) A[i][j] -= s * G[i][j]; };
+  upd(M.E, dE); upd(M.P, dP); upd(M.Wq, dWq); upd(M.Wk, dWk); upd(M.Wv, dWv); upd(M.Wo, dWo);
+  for (let k = 0; k < V; k++) M.bo[k] -= s * dbo[k];
+  return totalLoss / n;
+}
+
+function lossOn(M, examples) {
+  let L = 0;
+  for (const [ctxIds, target] of examples) L -= Math.log(Math.max(forward(M, ctxIds).probs[target], 1e-9));
+  return L / examples.length;
+}
+
+function predictFor(M, tokens) {
+  const f = forward(M, tokens.map(w => TOK2ID[w]));
+  return { weights: f.weights, probs: f.probs, ranked: VOCAB.map((w, i) => [w, f.probs[i]]).sort((a, b) => b[1] - a[1]) };
+}
+
+
+// ---------------------------------------------------------------------
+// What the model saw after each prefix in training (for "new word" ranks).
+// Only content words count as guesses: grammar words aren't facts.
+// ---------------------------------------------------------------------
+const SEEN = {};
+for (const [ctx, t] of EXAMPLES) {
+  const key = ctx.map(i => VOCAB[i]).join(" ");
+  (SEEN[key] = SEEN[key] || new Set()).add(VOCAB[t]);
+}
+const NOT_A_GUESS = new Set(["<PAD>", ".", "?", "not", "in", "is", "yes", "no"]);
+const ANSWER = Object.fromEntries(ALL_QUESTIONS.map(([q, a]) => [q, a.split(" ")[0]]));
+// The training sentence that states each hidden question's fact.
+function statedAs(q) {
+  const w = q.replace(" ?", "").split(" ");
+  const verb = w[1], rest = w.slice(2);
+  const pos = w.join(" ") + " .";
+  const neg = [w[0], verb, "not", ...rest].join(" ") + " .";
+  return STATEMENTS.includes(pos) ? pos : STATEMENTS.includes(neg) ? neg : "(not stated)";
+}
+
+let model, stepCount, histTrain, histHeld;
+function initModel() {
+  model = makeModel(true);
+  stepCount = 0;
+  histTrain = [];
+  histHeld = [];
+}
+
+// ---------------------------------------------------------------------
+// Rendering
+// ---------------------------------------------------------------------
+const esc = w => w.replace("<", "&lt;").replace(">", "&gt;");
+
+function buildLists() {
+  document.getElementById("dataHeading").textContent =
+    `Training data (${STATEMENTS.length} statements, ${QUESTIONS.length} questions)`;
+  document.getElementById("sentList").innerHTML =
+    STATEMENTS.map(s => `<div>${s}</div>`).join("") +
+    QUESTIONS.map(([q, a]) => `<div>${q} <span class="qa">${a}</span></div>`).join("");
+  document.getElementById("heldHeading").textContent = `Hidden: never trained on (${HELD.length})`;
+  document.getElementById("heldList").innerHTML = HELD.map(s => {
+    const i = s.indexOf("?");
+    return i < 0 ? `<div>${s}</div>` : `<div>${s.slice(0, i + 1)} <span class="qa">${s.slice(i + 2)}</span></div>`;
+  }).join("");
+}
+
+function renderFacts() {
+  let html = `<tr><th>Hidden fact</th><th>Rank among new words</th><th>Top new guesses</th></tr>`;
+  for (const f of HIDDEN_FACTS) {
+    const seen = SEEN[f.prefix] || new Set();
+    const ranked = predictFor(model, f.prefix.split(" ")).ranked.filter(([w]) => !seen.has(w) && !NOT_A_GUESS.has(w));
+    const r = ranked.findIndex(([w]) => w === f.answer) + 1;
+    const cls = r === 1 ? "ok" : r <= 3 ? "mid" : "bad";
+    const guesses = ranked.slice(0, 3).map(([w, p]) => `${esc(w)} ${(p * 100).toFixed(0)}%`).join(", ");
+    const seenTxt = seen.size ? `trained: ${[...seen].join(", ")}` : "never seen this start";
+    html += `<tr>
+      <td class="q">${f.prefix} <u>${f.answer}</u><div class="kind">${f.kind === "pattern" ? "fits a pattern" : "one-off"}</div></td>
+      <td><span class="rank ${cls}">#${r}</span><div class="sub">${seenTxt}</div></td>
+      <td class="sub">${guesses}</td></tr>`;
+  }
+  document.getElementById("factTable").innerHTML = html;
+}
+
+function renderQuestions() {
+  let html = `<tr><th>Hidden question</th><th>In training as</th><th>Model says</th></tr>`;
+  for (const q of HIDDEN_QUESTIONS) {
+    const probs = predictFor(model, q.split(" ")).probs;
+    const py = probs[TOK2ID.yes], pn = probs[TOK2ID.no];
+    const share = py / (py + pn);
+    const says = share >= 0.5 ? "yes" : "no";
+    const ok = says === ANSWER[q];
+    html += `<tr>
+      <td class="q">${q}<div class="kind">correct: ${ANSWER[q]}</div></td>
+      <td class="sub">${statedAs(q)}</td>
+      <td><span class="${ok ? "ok" : "bad"}">${ok ? "✓" : "✗"} ${says}</span>
+        <div class="ynbar"><div class="ynyes" style="width:${(share * 100).toFixed(0)}%"></div></div>
+        <div class="sub">yes ${(share * 100).toFixed(0)}% / no ${((1 - share) * 100).toFixed(0)}%</div></td></tr>`;
+  }
+  document.getElementById("qTable").innerHTML = html;
+}
+
+function drawLossChart() {
+  const canvas = document.getElementById("lossChart");
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.clientWidth, cssH = canvas.clientHeight;
+  if (canvas.width !== Math.round(cssW * dpr)) { canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssH * dpr); }
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cssW, cssH);
+  const padL = 34, padB = 20, padT = 10, padR = 10;
+  const w = cssW - padL - padR, h = cssH - padT - padB;
+  // Zoom in: ignore the first 50 steps (the big initial drop) when scaling.
+  const SKIP = 5;
+  const n = histTrain.length;
+  const visible = histTrain.slice(SKIP).concat(histHeld.slice(SKIP));
+  const top = visible.length ? Math.ceil((Math.max(...visible) + 0.1) * 2) / 2 : 4;
+  const bottom = visible.length ? Math.max(0, Math.floor((Math.min(...visible) - 0.1) * 2) / 2) : 0;
+  const yOf = v => padT + h - ((Math.min(v, top) - bottom) / (top - bottom)) * h;
+  ctx.font = "10px JetBrains Mono, monospace";
+  ctx.fillStyle = "#8b919c";
+  ctx.strokeStyle = "#2c313a";
+  ctx.lineWidth = 1;
+  for (let v = bottom; v <= top + 1e-9; v += 0.5) {
+    const y = yOf(v);
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + w, y); ctx.stroke();
+    ctx.fillText(v.toFixed(1), 4, y + 3);
+  }
+  ctx.fillText("0", padL, padT + h + 15);
+  ctx.fillText(`step ${n ? (n - 1) * LOG_EVERY : 0}`, padL + w - 70, padT + h + 15);
+  if (n < 2) return;
+  const xOf = i => padL + (i / (n - 1)) * w;
+  function line(hist, color) {
+    ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2;
+    hist.forEach((v, i) => { if (i === 0) ctx.moveTo(xOf(i), yOf(v)); else ctx.lineTo(xOf(i), yOf(v)); });
+    ctx.stroke();
+  }
+  line(histTrain, "#e3a857");
+  line(histHeld, "#4c8ca6");
+  // Mark the hidden curve's lowest point once it has clearly turned back up.
+  if (n > SKIP + 2) {
+    let iMin = SKIP;
+    for (let i = SKIP; i < n; i++) if (histHeld[i] < histHeld[iMin]) iMin = i;
+    if (histHeld[n - 1] > histHeld[iMin] + 0.03) {
+      const x = xOf(iMin), y = yOf(histHeld[iMin]);
+      ctx.fillStyle = "#4c8ca6";
+      ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#e9e6df";
+      const label = `lowest at step ${iMin * LOG_EVERY}: overfitting starts`;
+      ctx.fillText(label, Math.min(x + 8, padL + w - ctx.measureText(label).width), y + 16);
+    }
+  }
+  ctx.fillStyle = "#8b919c";
+  const note = "first 50 steps are off the top of the scale";
+  ctx.fillText(note, padL + w - ctx.measureText(note).width - 4, padT + 10);
+}
+
+const LOG_EVERY = 10;
+function logLosses() {
+  histTrain.push(lossOn(model, EXAMPLES));
+  histHeld.push(lossOn(model, HELD_EXAMPLES));
+}
+
+function renderAll() {
+  document.getElementById("stepCount").textContent = stepCount;
+  const t = histTrain[histTrain.length - 1], hd = histHeld[histHeld.length - 1];
+  document.getElementById("lossTrain").textContent = t === undefined ? "—" : t.toFixed(2);
+  document.getElementById("lossHeld").textContent = hd === undefined ? "—" : hd.toFixed(2);
+  drawLossChart();
+  renderFacts();
+  renderQuestions();
+}
+
+// ---------------------------------------------------------------------
+// Controls
+// ---------------------------------------------------------------------
+let lr = 0.6;
+let training = false;
+
+function doSteps(n) {
+  if (training) return;
+  training = true;
+  setButtonsDisabled(true);
+  let done = 0;
+  function chunk() {
+    const end = Math.min(n, done + 5);
+    for (; done < end; done++) {
+      trainStep(model, lr);
+      stepCount++;
+      if (stepCount % LOG_EVERY === 0) logLosses();
+    }
+    document.getElementById("status").textContent = `Training… ${done} / ${n}`;
+    if (done % 25 === 0 || done === n) renderAll();
+    if (done < n) setTimeout(chunk, 0);
+    else {
+      training = false;
+      setButtonsDisabled(false);
+      document.getElementById("status").textContent = "Each step uses every training sentence, so 250 steps take several seconds.";
+    }
+  }
+  chunk();
+}
+
+function setButtonsDisabled(v) {
+  ["btnStep10", "btnStep250", "btnReset"].forEach(id => document.getElementById(id).disabled = v);
+}
+
+document.getElementById("btnStep10").addEventListener("click", () => doSteps(10));
+document.getElementById("btnStep250").addEventListener("click", () => doSteps(250));
+document.getElementById("btnReset").addEventListener("click", () => { initModel(); logLosses(); renderAll(); });
+document.getElementById("lrSlider").addEventListener("input", (e) => {
+  lr = parseFloat(e.target.value);
+  document.getElementById("lrVal").textContent = lr.toFixed(2);
+});
+for (const k of ["1", "2", "3"])
+  document.getElementById("btnHint" + k).addEventListener("click", () => document.getElementById("hintBox" + k).classList.toggle("show"));
+document.getElementById("curiousToggle").addEventListener("click", () => document.getElementById("curiousBox").classList.toggle("show"));
+window.addEventListener("resize", drawLossChart);
+
+// ---------------------------------------------------------------------
+// Boot
+// ---------------------------------------------------------------------
+buildLists();
+initModel();
+logLosses();
+renderAll();
+</script>
+</body>
+</html>
