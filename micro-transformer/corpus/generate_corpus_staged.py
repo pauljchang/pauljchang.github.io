@@ -22,10 +22,10 @@ Stage map
 4  Chatbot              - adds temporal shape ("when"), full prompt+response
                           pairs ready for teacher forcing + autoregressive
                           generation.
-5  Judgment vs retrieval- currently the same data as stage 4 (yes/no moved to
-                          stage 1). Lesson 6 will test judgment on claims held
-                          out of training; yes/no answers are always built
-                          ONLY from committed facts/negations (closed-world).
+5  Reasoning            - currently the same data as stage 4 (yes/no moved to
+                          stage 1). Lesson 6 will add worked reasoning steps;
+                          yes/no answers are always built ONLY from committed
+                          facts/negations (closed-world).
 
 Run:  python generate_corpus_staged.py            (builds all stages)
       python generate_corpus_staged.py --stage 2  (builds through stage 2 only)
